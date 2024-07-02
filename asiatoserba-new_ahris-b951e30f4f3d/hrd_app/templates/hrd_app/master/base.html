@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- Meta -->
+    <meta name="description" content="Asia Human Resources Information System.">
+    <meta name="author" content="Gatot Prakoso">
+
+    <title>AHRIS - Asia Human Resources Information System</title>
+
+    <!-- vendor css -->
+    <link href="{% static 'lib/font-awesome/css/font-awesome.css'%}" rel="stylesheet">
+    <link href="{% static 'lib/Ionicons/css/ionicons.css'%}" rel="stylesheet">
+    <link href="{% static 'lib/perfect-scrollbar/css/perfect-scrollbar.css'%}" rel="stylesheet">
+    <link href="{% static 'lib/jquery-switchbutton/jquery.switchButton.css'%}" rel="stylesheet">
+    <link href="{% static 'lib/datatables/jquery.dataTables.css'%}" rel="stylesheet">
+    <link href="{% static 'lib/datatables/buttons.dataTables.min.css'%}" rel="stylesheet">
+    <link href="{% static 'lib/select2/css/select2.min.css'%}" rel="stylesheet">
+    <link href="{% static 'lib/jquery.steps/jquery.steps.css'%}" rel="stylesheet">
+
+    <!-- Bracket CSS -->
+    <link rel="stylesheet" href="{% static 'css/bracket.css'%}">  
+
+    <!-- Mulit Date Picker -->
+    <link rel="stylesheet" href="{% static 'css/multidate.css'%}">   
+
+    <!-- Disable faveicon -->
+    <link rel="shortcut icon" href="#" />
+
+  </head>
+
+  <body class="collapsed-menu with-subleft">
+
+    <!-- For select 2 container in the modal for 100 width -->
+    <style>
+        .select2-container {
+            width: 100% !important;
+            padding: 0;
+            text-align: left;
+            color: black;
+        }
+
+        .select2-container--focus {
+            border: 1px solid #55a6f8!important;
+        }
+
+        #loader {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.763) url("{% static 'img/siput.gif'%}") no-repeat center center;
+            z-index: 10000;
+        }
+
+        .hitam{
+            color: black;
+            font-size: 13px;
+        }
+        
+        .merah{
+            color: red;
+            font-size: 13px;
+        }
+
+        hr.hitam {
+            border-top: 1px solid black;
+        }
+
+    </style>  
+
+    <!-- Nav Menu -->
+    {% include 'hrd_app/master/nav.html' %}    
+
+    <!-- Header -->
+    {% include 'hrd_app/master/header.html' %}    
+    
+    <div class="br-mainpanel">
+
+        &nbsp;
+
+        <!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+            Mohon maaf, proses ambil data dan proses absensi untuk sementara tidak dapat diproses. Terima Kasih. - IT -
+        </marquee></div> -->
+
+        {% block breadcrumb %}       
+
+        {% endblock breadcrumb %}
+        
+        <!-- footer -->
+        {% include 'hrd_app/master/footer.html' %}    
+
+    </div><!-- br-mainpanel -->    
+
+    <!-- Javascript -->
+    {% include 'hrd_app/master/js.html' %}
+
+
+    <!-- HRD AJAX -->
+    {% block hrd_ajax %}
+
+    {% endblock hrd_ajax %}
+    
+  </body>
+</html>

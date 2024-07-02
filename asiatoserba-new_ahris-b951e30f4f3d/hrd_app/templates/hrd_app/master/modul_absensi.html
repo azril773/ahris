@@ -1,0 +1,51 @@
+ 
+{% if modul_aktif == 'Absensi' %}
+    <a href="{% url 'absensi' dsid %}"><button class="btn btn-danger mg-b-6">Absensi</button></a>    
+    <a href="{% url 'ijin' dsid %}"><button class="btn btn-info mg-b-6">Ijin</button></a>
+    <a href="{% url 'geser_off' dsid %}"><button class="btn btn-info mg-b-6">Geser OFF</button></a>
+    <a href="{% url 'opg' dsid %}"><button class="btn btn-info mg-b-6">OPG</button></a>
+    <a href="{% url 'cuti' dsid %}"><button class="btn btn-info mg-b-6">Cuti</button></a>
+    <a href="{% url 'lembur' sil %}"><button class="btn btn-info mg-b-6">Lembur & Kompen/PJK</button></a>
+     
+{% elif modul_aktif == 'Ijin' %}
+    <a href="{% url 'absensi' dsid %}"><button class="btn btn-info mg-b-6">Absensi</button></a>    
+    <a href="{% url 'ijin' dsid %}"><button class="btn btn-danger mg-b-6">Ijin</button></a>
+    <a href="{% url 'geser_off' dsid %}"><button class="btn btn-info mg-b-6">Geser OFF</button></a>
+    <a href="{% url 'opg' dsid %}"><button class="btn btn-info mg-b-6">OPG</button></a>
+    <a href="{% url 'cuti' dsid %}"><button class="btn btn-info mg-b-6">Cuti</button></a>
+    <a href="{% url 'lembur' sil %}"><button class="btn btn-info mg-b-6">Lembur & Kompen/PJK</button></a>
+    
+{% elif modul_aktif == 'Geser OFF'%}
+    <a href="{% url 'absensi' dsid %}"><button class="btn btn-info mg-b-6">Absensi</button></a>    
+    <a href="{% url 'ijin' dsid %}"><button class="btn btn-info mg-b-6">Ijin</button></a>
+    <a href="{% url 'geser_off' dsid %}"><button class="btn btn-danger mg-b-6">Geser OFF</button></a>
+    <a href="{% url 'opg' dsid %}"><button class="btn btn-info mg-b-6">OPG</button></a>
+    <a href="{% url 'cuti' dsid %}"><button class="btn btn-info mg-b-6">Cuti</button></a>
+    <a href="{% url 'lembur' sil %}"><button class="btn btn-info mg-b-6">Lembur & Kompen/PJK</button></a>
+    
+{% elif modul_aktif == 'OPG'%}
+    <a href="{% url 'absensi' dsid %}"><button class="btn btn-info mg-b-6">Absensi</button></a>    
+    <a href="{% url 'ijin' dsid %}"><button class="btn btn-info mg-b-6">Ijin</button></a>
+    <a href="{% url 'geser_off' dsid %}"><button class="btn btn-info mg-b-6">Geser OFF</button></a>
+    <a href="{% url 'opg' dsid %}"><button class="btn btn-danger mg-b-6">OPG</button></a>
+    <a href="{% url 'cuti' dsid %}"><button class="btn btn-info mg-b-6">Cuti</button></a>
+    <a href="{% url 'lembur' sil %}"><button class="btn btn-info mg-b-6">Lembur & Kompen/PJK</button></a>
+    
+{% elif modul_aktif == 'Cuti'%}
+    <a href="{% url 'absensi' dsid %}"><button class="btn btn-info mg-b-6">Absensi</button></a>    
+    <a href="{% url 'ijin' dsid %}"><button class="btn btn-info mg-b-6">Ijin</button></a>
+    <a href="{% url 'geser_off' dsid %}"><button class="btn btn-info mg-b-6">Geser OFF</button></a>
+    <a href="{% url 'opg' dsid %}"><button class="btn btn-info mg-b-6">OPG</button></a>
+    <a href="{% url 'cuti' dsid %}"><button class="btn btn-danger mg-b-6">Cuti</button></a>
+    <a href="{% url 'lembur' sil %}"><button class="btn btn-info mg-b-6">Lembur & Kompen/PJK</button></a>
+    
+{% elif modul_aktif == 'Lembur'%}
+    <a href="{% url 'absensi' dsid %}"><button class="btn btn-info mg-b-6">Absensi</button></a>    
+    <a href="{% url 'ijin' dsid %}"><button class="btn btn-info mg-b-6">Ijin</button></a>
+    <a href="{% url 'geser_off' dsid %}"><button class="btn btn-info mg-b-6">Geser OFF</button></a>
+    <a href="{% url 'opg' dsid %}"><button class="btn btn-info mg-b-6">OPG</button></a>
+    <a href="{% url 'cuti' dsid %}"><button class="btn btn-info mg-b-6">Cuti</button></a>
+    <a href="{% url 'lembur' sil %}"><button class="btn btn-danger mg-b-6">Lembur & Kompen/PJK</button></a> 
+    
+    
+{% endif %}    

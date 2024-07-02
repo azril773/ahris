@@ -1,0 +1,92 @@
+ 
+{% if modul_aktif == 'Admin Panel' %}
+    <a href="{% url 'admin:index' %}"><button class="btn btn-info mg-b-6">Admin Panel</button></a>    
+    <a href="{% url 'status_pegawai' %}"><button class="btn btn-info mg-b-6">Status Pegawai</button></a>
+    <a href="{% url 'divisi' %}"><button class="btn btn-info mg-b-6">Divisi</button></a>
+    <a href="{% url 'counter' %}"><button class="btn btn-info mg-b-6">Counter</button></a>
+    <a href="{% url 'libur_nasional' %}"><button class="btn btn-info mg-b-6">Libur Nasional</button></a>
+    <a href="{% url 'jam_kerja' %}"><button class="btn btn-info mg-b-6">Jam Kerja</button></a>
+    <a href="{% url 'jenis_ijin' %}"><button class="btn btn-info mg-b-6">Jenis Ijin</button></a>
+    <a href="{% url 'status_pegawai_lembur' %}"><button class="btn btn-info mg-b-6">Status Pegawai Lembur</button></a>
+
+{% elif modul_aktif == 'Status Pegawai' %}
+    <a href="{% url 'admin:index' %}"><button class="btn btn-info mg-b-6">Admin Panel</button></a>    
+    <a href="{% url 'status_pegawai' %}"><button class="btn btn-danger mg-b-6">Status Pegawai</button></a>
+    <a href="{% url 'divisi' %}"><button class="btn btn-info mg-b-6">Divisi</button></a>
+    <a href="{% url 'counter' %}"><button class="btn btn-info mg-b-6">Counter</button></a>
+    <a href="{% url 'libur_nasional' %}"><button class="btn btn-info mg-b-6">Libur Nasional</button></a>
+    <a href="{% url 'jam_kerja' %}"><button class="btn btn-info mg-b-6">Jam Kerja</button></a>
+    <a href="{% url 'jenis_ijin' %}"><button class="btn btn-info mg-b-6">Jenis Ijin</button></a>
+    <a href="{% url 'status_pegawai_lembur' %}"><button class="btn btn-info mg-b-6">Status Pegawai Lembur</button></a>
+
+{% elif modul_aktif == 'Divisi' %}
+    <a href="{% url 'admin:index' %}"><button class="btn btn-info mg-b-6">Admin Panel</button></a>    
+    <a href="{% url 'status_pegawai' %}"><button class="btn btn-info mg-b-6">Status Pegawai</button></a>
+    <a href="{% url 'divisi' %}"><button class="btn btn-danger mg-b-6">Divisi</button></a>
+    <a href="{% url 'counter' %}"><button class="btn btn-info mg-b-6">Counter</button></a>
+    <a href="{% url 'libur_nasional' %}"><button class="btn btn-info mg-b-6">Libur Nasional</button></a>
+    <a href="{% url 'jam_kerja' %}"><button class="btn btn-info mg-b-6">Jam Kerja</button></a>
+    <a href="{% url 'jenis_ijin' %}"><button class="btn btn-info mg-b-6">Jenis Ijin</button></a>
+    <a href="{% url 'status_pegawai_lembur' %}"><button class="btn btn-info mg-b-6">Status Pegawai Lembur</button></a>    
+
+{% elif modul_aktif == 'Counter' %}
+    <a href="{% url 'admin:index' %}"><button class="btn btn-info mg-b-6">Admin Panel</button></a>    
+    <a href="{% url 'status_pegawai' %}"><button class="btn btn-info mg-b-6">Status Pegawai</button></a>
+    <a href="{% url 'divisi' %}"><button class="btn btn-info mg-b-6">Divisi</button></a>
+    <a href="{% url 'counter' %}"><button class="btn btn-danger mg-b-6">Counter</button></a>
+    <a href="{% url 'libur_nasional' %}"><button class="btn btn-info mg-b-6">Libur Nasional</button></a>
+    <a href="{% url 'jam_kerja' %}"><button class="btn btn-info mg-b-6">Jam Kerja</button></a>
+    <a href="{% url 'jenis_ijin' %}"><button class="btn btn-info mg-b-6">Jenis Ijin</button></a>
+    <a href="{% url 'status_pegawai_lembur' %}"><button class="btn btn-info mg-b-6">Status Pegawai Lembur</button></a>
+
+{% elif modul_aktif == 'Libur Nasional' %}
+    <a href="{% url 'admin:index' %}"><button class="btn btn-info mg-b-6">Admin Panel</button></a>    
+    <a href="{% url 'status_pegawai' %}"><button class="btn btn-info mg-b-6">Status Pegawai</button></a>
+    <a href="{% url 'divisi' %}"><button class="btn btn-info mg-b-6">Divisi</button></a>
+    <a href="{% url 'counter' %}"><button class="btn btn-info mg-b-6">Counter</button></a>
+    <a href="{% url 'libur_nasional' %}"><button class="btn btn-danger mg-b-6">Libur Nasional</button></a>
+    <a href="{% url 'jam_kerja' %}"><button class="btn btn-info mg-b-6">Jam Kerja</button></a>
+    <a href="{% url 'jenis_ijin' %}"><button class="btn btn-info mg-b-6">Jenis Ijin</button></a>
+    <a href="{% url 'status_pegawai_lembur' %}"><button class="btn btn-info mg-b-6">Status Pegawai Lembur</button></a>
+
+{% elif modul_aktif == 'Kelompok Kerja' %}
+    <a href="{% url 'admin:index' %}"><button class="btn btn-info mg-b-6">Admin Panel</button></a>    
+    <a href="{% url 'status_pegawai' %}"><button class="btn btn-info mg-b-6">Status Pegawai</button></a>
+    <a href="{% url 'divisi' %}"><button class="btn btn-info mg-b-6">Divisi</button></a>
+    <a href="{% url 'counter' %}"><button class="btn btn-info mg-b-6">Counter</button></a>
+    <a href="{% url 'libur_nasional' %}"><button class="btn btn-info mg-b-6">Libur Nasional</button></a>
+    <a href="{% url 'kelompok_kerja' %}"><button class="btn btn-danger mg-b-6">Kelompok Kerja</button></a>
+    <a href="{% url 'jam_kerja' %}"><button class="btn btn-info mg-b-6">Jam Kerja</button></a>
+    <a href="{% url 'jenis_ijin' %}"><button class="btn btn-info mg-b-6">Jenis Ijin</button></a>
+    <a href="{% url 'status_pegawai_lembur' %}"><button class="btn btn-info mg-b-6">Status Pegawai Lembur</button></a>
+
+{% elif modul_aktif == 'Jam Kerja' %}
+    <a href="{% url 'admin:index' %}"><button class="btn btn-info mg-b-6">Admin Panel</button></a>    
+    <a href="{% url 'status_pegawai' %}"><button class="btn btn-info mg-b-6">Status Pegawai</button></a>
+    <a href="{% url 'divisi' %}"><button class="btn btn-info mg-b-6">Divisi</button></a>
+    <a href="{% url 'counter' %}"><button class="btn btn-info mg-b-6">Counter</button></a>
+    <a href="{% url 'libur_nasional' %}"><button class="btn btn-info mg-b-6">Libur Nasional</button></a>
+    <a href="{% url 'jam_kerja' %}"><button class="btn btn-danger mg-b-6">Jam Kerja</button></a>
+    <a href="{% url 'jenis_ijin' %}"><button class="btn btn-info mg-b-6">Jenis Ijin</button></a>
+    <a href="{% url 'status_pegawai_lembur' %}"><button class="btn btn-info mg-b-6">Status Pegawai Lembur</button></a>
+
+{% elif modul_aktif == 'Jenis Ijin' %}
+    <a href="{% url 'admin:index' %}"><button class="btn btn-info mg-b-6">Admin Panel</button></a>    
+    <a href="{% url 'status_pegawai' %}"><button class="btn btn-info mg-b-6">Status Pegawai</button></a>
+    <a href="{% url 'divisi' %}"><button class="btn btn-info mg-b-6">Divisi</button></a>
+    <a href="{% url 'counter' %}"><button class="btn btn-info mg-b-6">Counter</button></a>
+    <a href="{% url 'libur_nasional' %}"><button class="btn btn-info mg-b-6">Libur Nasional</button></a>
+    <a href="{% url 'jam_kerja' %}"><button class="btn btn-info mg-b-6">Jam Kerja</button></a>
+    <a href="{% url 'jenis_ijin' %}"><button class="btn btn-danger mg-b-6">Jenis Ijin</button></a>
+    <a href="{% url 'status_pegawai_lembur' %}"><button class="btn btn-info mg-b-6">Status Pegawai Lembur</button></a>    
+
+{% elif modul_aktif == 'Status Pegawai Lembur' %}
+    <a href="{% url 'admin:index' %}"><button class="btn btn-info mg-b-6">Admin Panel</button></a>    
+    <a href="{% url 'status_pegawai' %}"><button class="btn btn-info mg-b-6">Status Pegawai</button></a>
+    <a href="{% url 'divisi' %}"><button class="btn btn-info mg-b-6">Divisi</button></a>
+    <a href="{% url 'counter' %}"><button class="btn btn-info mg-b-6">Counter</button></a>
+    <a href="{% url 'libur_nasional' %}"><button class="btn btn-info mg-b-6">Libur Nasional</button></a>
+    <a href="{% url 'jam_kerja' %}"><button class="btn btn-info mg-b-6">Jam Kerja</button></a>
+    <a href="{% url 'jenis_ijin' %}"><button class="btn btn-info mg-b-6">Jenis Ijin</button></a>
+    <a href="{% url 'status_pegawai_lembur' %}"><button class="btn btn-danger mg-b-6">Status Pegawai Lembur</button></a>    
+{% endif %}    

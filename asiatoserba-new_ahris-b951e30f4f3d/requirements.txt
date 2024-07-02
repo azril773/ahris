@@ -1,0 +1,8 @@
+Django==3.2
+django-import-export==2.5.0
+django-mathfilters==1.0.0
+mysqlclient==2.0.3
+pyzk==0.9
+reportlab==3.6.1
+pandas==2.2.1
+xhtml2pdf==0.2.5

@@ -1,0 +1,742 @@
+{% load static %}
+
+<script src="{% static 'lib/jquery/jquery.js'%}"></script>
+<script src="{% static 'lib/popper.js/popper.min.js'%}"></script>
+<script src="{% static 'lib/bootstrap/bootstrap.js'%}"></script>
+<script src="{% static 'lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js'%}"></script>
+<script src="{% static 'lib/moment/moment.js'%}"></script>
+<script src="{% static 'lib/jquery-ui/jquery-ui.js'%}"></script>
+<script src="{% static 'lib/jquery-switchbutton/jquery.switchButton.js'%}"></script>
+<script src="{% static 'lib/peity/jquery.peity.js'%}"></script> 
+<script src="{% static 'lib/highlightjs/highlight.pack.js'%}"></script>  
+<script src="{% static 'lib/jquery.steps/jquery.steps.js'%}"></script>
+
+<script src="{% static 'lib/select2/js/select2.min.js'%}"></script>
+<script src="{% static 'lib/datatables/jquery.dataTables.js'%}"></script>
+<script src="{% static 'lib/datatables-responsive/dataTables.responsive.js'%}"></script>
+
+<script src="{% static 'lib/datatables/dataTables.buttons.min.js'%}"></script>
+<script src="{% static 'lib/datatables/buttons.print.min.js'%}"></script>
+<script src="{% static 'lib/datatables/buttons.colVis.min.js'%}"></script>
+<script src="{% static 'lib/datatables/buttons.html5.min.js'%}"></script>
+<script src="{% static 'lib/datatables/vfs_fonts.js'%}"></script>
+<script src="{% static 'lib/datatables/pdfmake.min.js'%}"></script>
+<script src="{% static 'lib/datatables/jszip.min.js'%}"></script>
+
+<script src="{% static 'js/date-eu.js'%}"></script>
+
+<script src="{% static 'lib/jquery.maskedinput/jquery.maskedinput.js'%}"></script>
+
+<script src="{% static 'js/bracket.js'%}"></script> 
+
+<script src="{% static 'js/datatable.fixedcolumn.min.js'%}"></script> 
+
+<script src="{% static 'js/multidate.js'%}"></script>
+
+<!-- ============================================================= -->   
+
+<!-- Datatables -->
+<!-- <script>
+    $(document).ready(function() {
+        $('#absensi').DataTable({
+            "responsive" : false,
+            "paging" : true,
+            "pageLength" : 100,
+            "ordering" : false,
+            "scrollCollapse" : true,
+            "scrollX": true,
+            "scrollY": 400,
+            "searching" : true,
+            "columnDefs" : [{"targets":0, "type":"date-eu"}],
+            "bInfo": true,
+            "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            }, 
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'print',
+                    exportOptions: {
+                        columns: ':visible'
+                    }
+                },
+                'colvis','excel'
+            ],         
+        });
+
+        $('#divisitable').DataTable({
+            "responsive" : false,
+            "paging" : false,
+            "pageLength" : 100,
+            "ordering" : false,
+            "scrollCollapse" : true,
+            "scrollX": true,
+            "scrollY": 400,
+            "searching" : true,
+            "bInfo": true,
+            "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            },          
+        });
+
+        $('#mesin').DataTable({
+            "responsive" : false,
+            "paging" : true,
+            "pageLength" : 100,
+            "ordering" : false,
+            "scrollCollapse" : true,
+            "scrollX": true,
+            "scrollY": 400,
+            "searching" : true,
+            "order": [[ 0, "asc" ]],
+            "bInfo": true,
+            "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            },          
+        });
+
+        $('#pegawai').DataTable({
+            "responsive" : false,
+            "paging" : false,
+            "ordering" : false,
+            "scrollCollapse" : true,
+            "scrollX": true,
+            "scrollY": 400,
+            "order": [[ 0, "asc" ]],
+            "bInfo": true,
+            "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            },
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    extend: 'print',
+                    exportOptions: {
+                        columns: ':visible'
+                    }
+                },
+                'colvis','excel'
+            ],           
+        });
+
+        $('#opg').DataTable({
+            "responsive" : false,
+            "paging" : true,
+            "pageLength" : 100,
+            "ordering" : true,
+            "scrollCollapse" : true,
+            "scrollX": true,
+            "scrollY": 400,
+            "searching" : true,
+            "order": [[ 0, "asc" ]],
+            "bInfo": true,
+            "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            },          
+        });
+
+        $('#statustable').DataTable({
+            "responsive" : false,
+            "paging" : true,
+            "pageLength" : 100,
+            "ordering" : true,
+            "scrollCollapse" : true,
+            "scrollX": true,
+            "scrollY": 400,
+            "searching" : true,
+            "order": [[ 0, "asc" ]],
+            "bInfo": true,
+            "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            },          
+        });
+
+        $('#kelompok').DataTable({
+            "responsive" : false,
+            "paging" : true,
+            "pageLength" : 100,
+            "ordering" : false,
+            "scrollCollapse" : true,
+            "scrollX": true,
+            "scrollY": 400,
+            "searching" : true,
+            "order": [[ 0, "asc" ]],
+            "bInfo": true,
+            "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            },          
+        });
+
+        $('#rekapk').DataTable({
+            "responsive" : false,
+            "ordering" : false,
+            "scrollCollapse" : true,
+            "scrollY": 400,
+            "order": [[ 0, "asc" ]],
+            "bInfo": true,
+            "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            },          
+        });
+
+        $('#lembur').DataTable({
+            "responsive" : false,
+            "paging" : false,
+            "pageLength" : 100,
+            "ordering" : false,
+            "scrollCollapse" : true,
+            "scrollX": true,
+            "scrollY": 400,
+            "searching" : true,
+            "columnDefs" : [{"targets":0, "type":"date-eu"}],
+            "bInfo": true,
+            "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            }, 
+            
+                    
+        });
+
+    });
+</script> -->
+
+
+<!-- Datepicker -->
+<script>      
+
+    $(document).ready(function() {        
+
+    $('.tgl1').datepicker({
+            showOtherMonths: true,
+            selectOtherMonths: true,
+            dateFormat: 'dd-mm-yy',
+            dayNamesMin: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+            monthNames: [ "Januari","Pebruari","Maret","April","Mei","Juni",
+        "Juli","Agustus","September","Oktober","November","Desember" ]
+    }); 
+        
+    $('.tgl2').datepicker({
+        showOtherMonths: true,
+        selectOtherMonths: true,
+        dateFormat: 'dd-mm-yy',
+        dayNamesMin: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+        monthNames: [ "Januari","Pebruari","Maret","April","Mei","Juni",
+        "Juli","Agustus","September","Oktober","November","Desember" ]
+    });
+
+    $('.multi').multiDatesPicker({
+        dateFormat: 'dd-mm-yy',
+        dayNamesMin: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+        monthNames: [ "Januari","Pebruari","Maret","April","Mei","Juni",
+        "Juli","Agustus","September","Oktober","November","Desember" ]
+    });
+
+    $('.tgl3').datepicker({
+            showOtherMonths: true,
+            selectOtherMonths: true,
+            dateFormat: 'dd-mm-yy',
+            dayNamesMin: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+            monthNames: [ "Januari","Pebruari","Maret","April","Mei","Juni",
+        "Juli","Agustus","September","Oktober","November","Desember" ]
+    }); 
+
+    $('.tgl4').datepicker({
+            showOtherMonths: true,
+            selectOtherMonths: true,
+            dateFormat: 'dd-mm-yy',
+            dayNamesMin: ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"],
+            monthNames: [ "Januari","Pebruari","Maret","April","Mei","Juni",
+        "Juli","Agustus","September","Oktober","November","Desember" ]
+    }); 
+    });
+</script>
+
+
+<!-- Autofocus on Modal-->
+<!-- <script>
+    $('#tambah_status').on('shown.bs.modal', function () {
+        $('#status').focus();
+    });
+
+    $('#tambah_divisi').on('shown.bs.modal', function () {
+        $('#divisi').focus();
+    });
+
+    $('#tambah_mesin').on('shown.bs.modal', function () {
+        $('#nama_mesin').focus();
+    });
+
+    $('#tambah_pegawai').on('shown.bs.modal', function () {
+        $('#nama').focus();
+    });
+
+    $('#edit_cuti').on('shown.bs.modal', function () {
+        $('#cutiid').focus();
+    });
+</script> -->
+
+
+<!-- Modals -->
+<!-- <script>
+    /* Mesin */
+    $('#edit_mesin').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');
+    var nama_mesin = $(e.relatedTarget).data('nama-mesin');
+    var ip = $(e.relatedTarget).data('ip');        
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    $(e.currentTarget).find('input[name="nama_mesin"]').val(nama_mesin);
+    $(e.currentTarget).find('input[name="ip_address"]').val(ip);
+    //$(e.currentTarget).find('#mask').mask("99.99.99.99"); 
+    });
+
+    $('#hapus_mesin').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');          
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    });
+
+    /* Status Pegawai */
+    $('#edit_status').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var ids = $(e.relatedTarget).data('ids'); 
+    var status = $(e.relatedTarget).data('status');         
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id_status"]').val(ids);
+    $(e.currentTarget).find('input[name="status"]').val(status);
+    });
+
+    $('#hapus_status').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');          
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    });
+
+    /* Divisi */
+    $('#edit_divisi').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var idd = $(e.relatedTarget).data('idd'); 
+    var divisi = $(e.relatedTarget).data('divisi');         
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id_divisi"]').val(idd);
+    $(e.currentTarget).find('input[name="divisi"]').val(divisi);
+    });
+
+    $('#hapus_divisi').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');          
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    });
+    
+    /* Hapus Jam Kerja */
+    $('#hapus_jam').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');          
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    });
+
+    /* Kelompok */
+    $('#edit_kelompok').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var idk = $(e.relatedTarget).data('idk'); 
+    var kelompok = $(e.relatedTarget).data('kelompok');         
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="idk"]').val(idk);
+    $(e.currentTarget).find('input[name="kelompok"]').val(kelompok);
+    });
+
+    /* OPG */
+    $('#hapus_opg').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');    
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    });
+
+    $('#edit_opg').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');    
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    });
+
+    /* Cuti */
+    $('#edit_cuti').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');
+    var cuti = $(e.relatedTarget).data('cuti');    
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    $(e.currentTarget).find('input[name="cuti"]').val(cuti);
+    });
+    
+    /* Daftar Ijin */
+    $('#edit_ijin').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');
+    var ijin = $(e.relatedTarget).data('ijin');    
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    $(e.currentTarget).find('input[name="ijin"]').val(ijin);
+    });
+
+    /* Libur Nasional */
+    $('#edit_libur').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');
+    var tgl = $(e.relatedTarget).data('tgl');
+    var libur = $(e.relatedTarget).data('libur');    
+    var ik = $(e.relatedTarget).data('ik'); 
+    var istaff = $(e.relatedTarget).data('istaff'); 
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    $(e.currentTarget).find('input[name="tgl"]').val(tgl);
+    $(e.currentTarget).find('input[name="libur"]').val(libur);
+    $(e.currentTarget).find('input[name="ik"]').val(ik);
+    $(e.currentTarget).find('input[name="is"]').val(istaff);
+    });
+
+    /* Rekap */
+    $('#ubah_keterangan').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');
+    var ket = $(e.relatedTarget).data('ket'); 
+    var tahun = $(e.relatedTarget).data('tahun');  
+    var periode = $(e.relatedTarget).data('periode');  
+    var divisi = $(e.relatedTarget).data('div');
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    $(e.currentTarget).find('input[name="ket"]').val(ket);
+    $(e.currentTarget).find('input[name="tahun2"]').val(tahun);
+    $(e.currentTarget).find('input[name="periode2"]').val(periode);
+    $(e.currentTarget).find('input[name="divisi2"]').val(divisi);
+
+    });
+
+    /* Rekap Karyawan */
+    $('#ubah_keterangan_karyawan').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');
+    var ket = $(e.relatedTarget).data('ket'); 
+    var tahun = $(e.relatedTarget).data('tahun');  
+    var periode = $(e.relatedTarget).data('periode');  
+    var divisi1 = $(e.relatedTarget).data('div1');
+    var divisi2 = $(e.relatedTarget).data('div2');
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    $(e.currentTarget).find('input[name="ket"]').val(ket);
+    $(e.currentTarget).find('input[name="tahun2"]').val(tahun);
+    $(e.currentTarget).find('input[name="periode2"]').val(periode);
+    $(e.currentTarget).find('input[name="divisi2"]').val(divisi1);
+    $(e.currentTarget).find('input[name="divisi3"]').val(divisi2);
+
+    });
+
+    /* Rekap Staff Hotel */
+    $('#ubah_keterangan_hotel').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');
+    var ket = $(e.relatedTarget).data('ket'); 
+    var tahun = $(e.relatedTarget).data('tahun');  
+    var periode = $(e.relatedTarget).data('periode');  
+    var divisi = $(e.relatedTarget).data('div');
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    $(e.currentTarget).find('input[name="ket"]').val(ket);
+    $(e.currentTarget).find('input[name="tahun2"]').val(tahun);
+    $(e.currentTarget).find('input[name="periode2"]').val(periode);
+    $(e.currentTarget).find('input[name="divisi2"]').val(divisi);
+
+    });
+
+    /* Rekap Karyawan Hotel */
+    $('#ubah_keterangan_karyawan_hotel').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');
+    var ket = $(e.relatedTarget).data('ket'); 
+    var tahun = $(e.relatedTarget).data('tahun');  
+    var periode = $(e.relatedTarget).data('periode');  
+    var divisi1 = $(e.relatedTarget).data('div1');
+    var divisi2 = $(e.relatedTarget).data('div2');
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="id"]').val(id);
+    $(e.currentTarget).find('input[name="ket"]').val(ket);
+    $(e.currentTarget).find('input[name="tahun2"]').val(tahun);
+    $(e.currentTarget).find('input[name="periode2"]').val(periode);
+    $(e.currentTarget).find('input[name="divisi2"]').val(divisi1);
+    $(e.currentTarget).find('input[name="divisi3"]').val(divisi2);
+
+    });
+
+    /* Ubah Absen */
+    $('#edit_absen').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var idabsen = $(e.relatedTarget).data('idabsen');
+    var userid = $(e.relatedTarget).data('userid');
+    var sid = $(e.relatedTarget).data('sid');  
+    var jam = $(e.relatedTarget).data('jam');  
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="idabsen"]').val(idabsen);
+    $(e.currentTarget).find('input[name="userid"]').val(userid);
+    $(e.currentTarget).find('input[name="sid"]').val(sid);
+    $(e.currentTarget).find('input[name="jam"]').val(jam);
+    });
+        
+    /* Lembur */
+    $('#edit_lembur').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');         
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="idlembur"]').val(id);
+    });
+
+    /* Kompensasi */
+    $('#kompensasi').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var id = $(e.relatedTarget).data('id');    
+    var periode = $(e.relatedTarget).data('periode');     
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="pid"]').val(id);
+    $(e.currentTarget).find('input[name="periode"]').val(periode);
+    });
+
+    /* Lembur Bayar */
+    $('#lemburbayar').on('show.bs.modal', function(e) {
+    //get data-id attribute of the clicked element
+    var idr = $(e.relatedTarget).data('idr'); 
+    var pid = $(e.relatedTarget).data('pid');    
+    var periode = $(e.relatedTarget).data('periode');  
+    var tahun = $(e.relatedTarget).data('tahun');     
+
+    //populate the textbox
+    $(e.currentTarget).find('input[name="idr"]').val(idr);
+    $(e.currentTarget).find('input[name="pid"]').val(pid);
+    $(e.currentTarget).find('input[name="periode"]').val(periode);
+    $(e.currentTarget).find('input[name="tahun"]').val(tahun);
+    });
+
+    /* edit produk */
+    $('#editproduk').on('show.bs.modal', function(e) {
+        //get data-id attribute of the clicked element
+        var id = $(e.relatedTarget).data('id'); 
+        var produk = $(e.relatedTarget).data('produk');      
+
+        //populate the textbox
+        $(e.currentTarget).find('input[name="idp"]').val(id);
+        $(e.currentTarget).find('input[name="produk"]').val(produk);
+        
+    });
+
+    /* edit spg spb */
+    $('#editspg_spb').on('show.bs.modal', function(e) {
+        //get data-id attribute of the clicked element
+        var id = $(e.relatedTarget).data('id'); 
+        var nama = $(e.relatedTarget).data('nama');     
+
+        //populate the textbox
+        $(e.currentTarget).find('input[name="ids"]').val(id);
+        $(e.currentTarget).find('input[name="spg_spb"]').val(nama);   
+
+    });
+
+    /* level user */
+    $('#level_user').on('show.bs.modal', function(e) {
+        //get data-id attribute of the clicked element
+        var id = $(e.relatedTarget).data('id');         
+        var jenis = $(e.relatedTarget).data('jenis');         
+
+        //populate the textbox
+        $(e.currentTarget).find('input[name="idu"]').val(id);  
+        $(e.currentTarget).find('input[name="jenis"]').val(jenis);  
+
+    });
+
+    /* edit counter */
+    $('#edit_counter').on('show.bs.modal', function(e) {
+        //get data-id attribute of the clicked element
+        var id = $(e.relatedTarget).data('id');             
+
+        //populate the textbox
+        $(e.currentTarget).find('input[name="idc"]').val(id);   
+
+    });
+
+</script> -->
+
+
+<!-- Mask -->
+<!-- <script>
+    $('#masuk').mask('99:99');
+    $('#pulang').mask('99:99');
+    $('#keluar').mask('99:99');
+    $('#kembali').mask('99:99');
+    $('#masuk2').mask('99:99');
+    $('#pulang2').mask('99:99');
+
+    $('#tgl1_id').mask('99-99-9999');
+    $('#tgl2_id').mask('99-99-9999');
+    $('#tgl3_id').mask('99-99-9999');
+    $('#tgl4_id').mask('99-99-9999');
+
+    $('.masuk').mask('99.99');
+    $('.pulang').mask('99.99');
+    $('.keluar').mask('99.99');
+    $('.kembali').mask('99.99');
+    $('.masuk2').mask('99:99');
+    $('.pulang2').mask('99:99');
+
+</script> -->
+
+
+<!-- Select 2 on Modal -->
+<!-- <script>
+    $(function(){
+    'use strict'
+
+        $('#mesin_id').select2({
+                dropdownParent: $('#pilih_mesin'),
+        });
+
+        $('#keterangan_id').select2({
+                dropdownParent: $('#keterangan'),             
+        });
+
+        $('#pegawai_id').select2({
+                dropdownParent: $('#tambah_opg'),             
+        });
+
+        $('#status_id').select2({
+                dropdownParent: $('#tambah_mesin'),             
+        });
+
+        $('#status_edit_id').select2({
+                dropdownParent: $('#edit_mesin'),             
+        });
+
+        $('#absen_id').select2({
+                dropdownParent: $('#edit_absen'),             
+        });
+
+        $('#pegawai_id2').select2({
+                dropdownParent: $('#tambah_lembur'),
+        });
+
+        $('#jadwal_id').select2({
+                dropdownParent: $('#tambah_lembur'),
+        });
+
+        $('#tambah_absen_id').select2({
+                dropdownParent: $('#tambah_absen'),             
+        });
+        
+        $('#jam_id').select2({
+                dropdownParent: $('#tambah_lembur'),             
+        });
+
+        $('#jam2_id').select2({
+                dropdownParent: $('#edit_lembur'),             
+        });
+
+        $('#posisi_id').select2({
+                dropdownParent: $('#kompensasi'),             
+        });
+
+        $('#istirahat_id').select2({
+            dropdownParent: $('#kompensasi'),             
+        });
+
+        $('#id_counter').select2({
+            dropdownParent: $('#tambahspg_spb'),      
+        });
+
+        $('#id_counter2').select2({
+            dropdownParent: $('#editspg_spb'),      
+        });
+
+        $('#id_produk').select2({
+            dropdownParent: $('#tambahspg_spb'),           
+        });
+
+        $('#id_produk2').select2({
+            dropdownParent: $('#editspg_spb'),           
+        });
+
+        $('#jenis_lembur').select2({
+            dropdownParent: $('#tambah_lembur'),           
+        });
+
+        $('#ist_id').select2({
+            dropdownParent: $('#tambah_lembur'),           
+        });
+
+        $('#ist2_id').select2({
+            dropdownParent: $('#tambah_lembur'),           
+        });
+
+        $('#posisilembur_id').select2({
+            dropdownParent: $('#tambah_lembur'),           
+        });
+
+        $('#username').select2({
+            dropdownParent: $('#tambah_akses'),           
+        });
+
+        $('#daftardivisi').select2({
+            dropdownParent: $('#tambah_akses'),           
+        });
+
+        $('#leveluser').select2({
+            dropdownParent: $('#level_user'),           
+        });
+
+        $('#sid').select2({
+            dropdownParent: $('#level_user'),           
+        });
+
+        $('#statustarik').select2({
+            dropdownParent: $('#status_tarik'),           
+        });
+
+        $('#daftardivisi_hapus').select2({
+            dropdownParent: $('#hapus_div'),           
+        });
+
+    });  
+
+    
+    
+</script> -->

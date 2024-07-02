@@ -1,0 +1,299 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        <!-- Pesan Error -->
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Absensi -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Data Absensi : {{dari}} s/d {{sampai}}</h6>
+    
+        <!-- Info absensi -->        
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">   
+                            
+            <!-- Button Proses Data -->
+            <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-primary mg-b-6">Proses Data Absensi</button>
+
+            <!-- Button Cari Data Absen -->
+            <button data-target="#pilih_tgl_cari" data-toggle="modal" class="btn btn-warning mg-b-6">Cari Data Absensi</button>  &nbsp; &nbsp; &nbsp;
+
+            <!-- Button lainnya -->
+            {% include 'hrd_app/master/modul_absensi.html' %} 
+
+            </div>          
+        </div>
+
+        <br>        
+
+        <div class="d-flex align-items-center justify-content-start">
+            <div class="col-md-12 pd-x-0">  
+                {% if sid == 0 %}
+                    <a href="{% url 'cabsen_s' dr sp 0 %}" class="btn btn-info mg-b-8">Semua Divisi</a> &nbsp; 
+                        
+                    {% for s in status %}   
+                        <a href="{% url 'cabsen_s' dr sp s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp;  
+                    {% endfor %}
+
+                {% else %}
+                    <a href="{% url 'cabsen_s' dr sp 0 %}" class="btn btn-outline-info mg-b-8">Semua Divisi</a> &nbsp; 
+                    
+                    {% for s in status %}   
+                        {% if s.id == sid %}
+                            <a href="{% url 'cabsen_s' dr sp s.id%}" class="btn btn-info mg-b-8">{{s.status}}</a> &nbsp;   
+                        {% else %}
+                            <a href="{% url 'cabsen_s' dr sp s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp; 
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                
+
+            </div>            
+        </div>
+
+        <br>
+
+        <div id="loader"></div>            
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table id="tabelku" class="table display responsive" style="width:100%">
+            <thead>
+                <tr>
+                <th nowrap>Tanggal</th>
+                <th>Hari</th>
+                <th>Nama</th>
+                <th>Nik</th>
+                <th>Userid</th>
+                <th>Divisi</th>
+                <th>Masuk</th>
+                <th>Keluar</th>
+                <th>Kembali</th>
+                <th>Pulang</th>
+                <th>T.Jam</th>
+                <th nowrap>Keterangan</th>
+                <th>Action</th>
+                </tr>
+            </thead>
+            </table>
+        </div>
+
+        <!-- Modal proses -->
+        <div id="pilih_tgl_proses" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Proses Data Absensi</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form action="{% url 'pbs' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Dari Tanggal-(tgl-bln-tahun):</label>
+                                {% if akses == 'root' %}
+                                <input type="text" name="tgl1" id="tgl1" class="form-control tgl1" placeholder="Dari Tanggal">
+                                {% else %}
+                                <input type="text" name="tgl1" id="tgl1" class="form-control tgl1" placeholder="Dari Tanggal" disabled>
+                                {% endif %}
+                            </div>
+                        </div>
+        
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Sampai Tanggal-(tgl-bln-tahun):</label>
+                                {% if akses == 'root' %}
+                                <input type="text" name="tgl2" id="tgl2" class="form-control tgl1" placeholder="Dari Tanggal">
+                                {% else %}
+                                <input type="text" name="tgl2" id="tgl2" class="form-control tgl1" placeholder="Dari Tanggal" disabled>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Proses Data</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <!-- Modal cari -->
+        <div id="pilih_tgl_cari" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Cari Data Absensi</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form action="{% url 'cabsen' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Dari Tanggal-(tgl-bln-tahun):</label>
+                                <input type="text" name="ctgl1" id="ctgl1" class="form-control tgl1" placeholder="Dari Tanggal" required>
+                            </div>
+                        </div>
+        
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Sampai Tanggal-(tgl-bln-tahun):</label>
+                                <input type="text" name="ctgl2" id="ctgl2" class="form-control tgl1" placeholder="Dari Tanggal" required>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+    </div>
+
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>
+    /* tabel */
+    sid = "{{sid}}"
+    dr = "{{dr}}"
+    sp = "{{sp}}"
+
+    var table = $('#tabelku').DataTable({
+        "ajax": "{% url 'absensi_json' dr sp sid %}",
+
+        columns: [
+
+            { data: 'tgl' },
+            { data: 'hari' },
+            { data: 'nama' },
+            { data: 'nik' },
+            { data: 'userid' },
+            { data: 'bagian' },
+            { data: 'masuk' },
+            { data: 'keluar' },
+            { data: 'kembali' },
+            { data: 'pulang' },
+            { data: 'tj' },
+            { data: 'ket' },
+            { 
+                data: null,
+                "render": function(data, type, row, meta){    
+                    data = '<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-bs-toggle="modal" data-bs-target="#ubahPotongan" data-id="'+row.id+'">Edit</button>';
+                    return data;
+                } 
+            },
+            
+        ],   
+
+        "rowCallback": function (row, data) {
+            if(data.sln == 1){
+                $('td', row).eq(0).addClass('merah');
+            } else{
+                $('td', row).eq(0).addClass('hitam');
+            }
+            $('td', row).eq(1).addClass('hitam');
+            $('td', row).eq(2).addClass('hitam');
+            $('td', row).eq(3).addClass('hitam');
+            $('td', row).eq(4).addClass('hitam');
+            $('td', row).eq(5).addClass('hitam');
+            $('td', row).eq(6).addClass('hitam');
+            $('td', row).eq(7).addClass('hitam');
+            $('td', row).eq(8).addClass('hitam');
+            $('td', row).eq(9).addClass('hitam');
+            $('td', row).eq(10).addClass('hitam');
+            $('td', row).eq(11).addClass('hitam');
+        },
+
+        destroy: true,
+        ordering: false,
+        paging: false,
+        scrollX: '100%',
+        scrollY: 300,
+        processing: true,
+
+        "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            loadingRecords: '&nbsp;',
+            processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+            emptyTable: "&nbsp;",
+
+            paginate: {
+                previous: '<i class="cs-chevron-left"></i>',
+                next: '<i class="cs-chevron-right"></i>',
+            },
+        },
+
+    });   
+   
+    $("#submit_button").on("click", function() {
+        var $this = $(this);
+        $this.attr('disabled', true);
+    });
+
+</script>    
+
+
+{% endblock hrd_ajax %}

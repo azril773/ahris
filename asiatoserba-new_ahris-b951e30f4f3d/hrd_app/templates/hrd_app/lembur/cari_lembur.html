@@ -1,0 +1,867 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        
+        <!-- alert berhasil -->
+        <div class="alert alert-info alert-dismissible" role="alert" id="berhasil" style="display: none;">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <span id="pesan_berhasil"></span>
+        </div>
+    
+        <!-- alert gagal-->
+        <div class="alert alert-danger alert-dismissible" role="alert" id="alert" style="display: none;">
+            <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <span id="pesan_gagal"></span>
+        </div>
+
+        <!-- Absensi -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Hasil Pencarian Data Lembur</h6>
+    
+        <!-- Info absensi -->        
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">
+                            
+            <!-- Button Registrasi Lembur -->
+            <button data-target="#tambahLembur" data-toggle="modal" class="btn btn-primary mg-b-6">Registrasi</button>
+
+            <!-- Button Lembur yang belum di proses -->
+            <a href="{% url 'lembur_bproses' sid %}"><button class="btn btn-success mg-b-6">Belum Proses</button></a>
+
+            <!-- Button Cari Data Lembur -->
+            <button data-target="#cariLembur" data-toggle="modal" class="btn btn-warning mg-b-6">Cari Data</button> &nbsp; &nbsp; &nbsp;
+
+            {% include 'hrd_app/master/modul_absensi.html' %} 
+
+            </div>          
+        </div>
+
+        <br>        
+
+        <!-- Divisi -->
+        <div class="d-flex align-items-center justify-content-start">
+            <div class="col-md-12 pd-x-0">  
+                {% if sid == 0 %}
+                    <a href="{% url 'lembur' 0 %}" class="btn btn-info mg-b-8">Semua Divisi</a> &nbsp; 
+                    
+                    {% for s in status %}  
+                        <a href="{% url 'lembur' s.id %}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp; 
+                    {% endfor %}
+                {% else %}
+                    <a href="{% url 'lembur' 0 %}" class="btn btn-outline-info mg-b-8">Semua Divisi</a> &nbsp; 
+                    
+                    {% for s in status %}  
+                        {% if s.id == s.id %}
+                            <a href="{% url 'lembur' s.id %}" class="btn btn-info mg-b-8">{{s.status}}</a> &nbsp;
+                        {% else %}     
+                            <a href="{% url 'lembur' s.id %}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp;
+                        {% endif %}    
+                    {% endfor %}
+                {% endif %}
+
+            </div>            
+        </div>
+
+        <br>
+
+        <div id="loader"></div>            
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table id="tabelku" class="table display responsive" style="width:100%">
+            <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Nik</th>
+                  <th>Userid</th>
+                  <th>Divisi</th>
+                  <th>Lembur</th>
+                  <th>Kompen / PJK</th>
+                  <th>Bayar</th>
+                  <th>Sisa</th>
+                  <th>Action</th>
+                </tr>
+            </thead>
+            </table>
+        </div>
+
+        <!-- Modal -->
+        <div id="tambahLembur" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Registrasi Lembur</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form action="{% url 'tlembur' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-8">
+                
+                                <div class="col-lg-6">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Tanggal:</label>
+                                        <input type="text" name="tgl" id="tgl" class="form-control tgl1" placeholder="Tanggal Lembur" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-6">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Pegawai:</label>
+                                        <select name="pegawai" id="pegawai" class="form-control select2-show-search" data-placeholder='Pilih' required=required>
+                                            <option label="Pilih Pegawai"></option>
+                                            {% for p in pegawai %}
+                                            <option value="{{p.idp}}">{{p.nama}}/{{p.nik}} - {{p.userid}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Lembur Awal (Jam):</label>
+                                        <input type="number" name="awal" id="awal" min="0" step="0.1" class="form-control" placeholder="Lembur Awal (Jam)" required>
+                                    </div>
+                                </div>                                
+
+                                <div class="col-lg-3">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Lembur Akhir (Jam):</label>
+                                        <input type="number" name="akhir" id="akhir" min="0" step="0.01" class="form-control" placeholder="Lembur Akhir (Jam)" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Lama Istirahat 1 (Jam):</label>
+                                        <input type="number" name="ist_1" id="ist_1" min="0" step="0.01" class="form-control" placeholder="Istirahat 1 (Jam)" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Lama Istirahat 2 (Jam):</label>
+                                        <input type="number" name="ist_2" id="ist_2" min="0" step="0.1" class="form-control" placeholder="Istirahat 2 (Jam)" required>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" class="form-control" name="sid" id="sid_id" value="{{sid}}">
+
+                                <div class="modal-footer">
+                                    <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
+                                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                                </div>        
+                            </div>                        
+                        </div>            
+                    </form>            
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="batalLembur" class="modal fade" style="z-index: 9999;">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Konfirmasi Pembatalan Lembur</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form id="batalForm">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-8">
+                
+                                <div class="col-lg-12">
+                                    <div class="form-group mg-b-10-force">
+                                        <p class="hitam">Apakah Anda Yakin ?</p>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="batal_id" id="batal_id" class="form-control">
+
+                                <div class="modal-footer">
+                                    <button type="submit" id="submit_button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Ya Batalkan</button>
+                                    <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Tutup Form</button>
+                                </div>        
+                            </div>                        
+                        </div>            
+                    </form>
+            
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="cariLembur" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Cari Data Lembur</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form action="{% url 'clembur' %}" method="post">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                        <div class="row mg-b-25">
+            
+                            <div class="col-lg-6">
+                                <div class="form-group mg-b-10-force">
+                                    <label class="form-control-label tx-inverse">Periode:</label>
+                                    <select name="periode" id="periode" class="form-control select2-show-search" data-placeholder='Pilih Periode' required=required>
+                                        <option label="Pilih Periode"></option>
+                                        <option value="1">Januari</option>
+                                        <option value="2">Pebruari</option>
+                                        <option value="3">Maret</option>
+                                        <option value="4">April</option>
+                                        <option value="5">Mei</option>
+                                        <option value="6">Juni</option>
+                                        <option value="7">Juli</option>
+                                        <option value="8">Agustus</option>
+                                        <option value="9">September</option>
+                                        <option value="10">Oktober</option>
+                                        <option value="11">November</option>
+                                        <option value="12">Desember</option>
+                                    </select>
+                                </div>
+                            </div>
+            
+                            <div class="col-lg-6">
+                                <div class="form-group mg-b-10-force">
+                                    <label class="form-control-label tx-inverse">Tahun:</label>
+                                    <input type="text" name="tahun" id="tahun_id" class="form-control" placeholder="Tahun" required>
+                                </div>
+                            </div>
+
+                            <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+            
+                            <div class="modal-footer">
+                                <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
+                                <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                            </div>              
+            
+                        </div>
+                        </div>            
+                    </form>              
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="detailLembur" class="modal fade">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-20">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Data Lembur <br> <span id="namanya"></span> &nbsp; - &nbsp;(Periode : {{nama_bulan}} {{thn}})</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <div class="modal-body">
+                        <table id="tabelku2" class="table display responsive">
+                            <thead>
+                                <tr>
+                                  <th nowrap>Tanggal</th>
+                                  <th nowrap>Lembur</th>
+                                  <th nowrap>Add By</th>
+                                  <th>Add Time</th>
+                                  <th nowrap>Edit By</th>
+                                  <th>Edit Time</th>
+                                  <th nowrap>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="detailKompen" class="modal fade">
+            <div class="modal-dialog modal-lg modal-dialog-scrollable" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-20">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Data Kompen <br> <span id="namanya_kompen"></span> &nbsp; - &nbsp;(Periode : {{nama_bulan}} {{thn}})</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <div class="modal-body">
+                        <table id="tabelku3" class="table display responsive">
+                            <thead>
+                                <tr>
+                                  <th nowrap>Tanggal</th>
+                                  <th nowrap>Kompen / PJK</th>
+                                  <th>Jenis</th>
+                                  <th nowrap>Add By</th>
+                                  <th>Add Time</th>
+                                  <th nowrap>Edit By</th>
+                                  <th>Edit Time</th>
+                                  <th nowrap>Action</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="tambahKompen" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Ambil Kompen / PJK</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form id="tkompenForm">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-8">  
+                                
+                                <div class="col-lg-4">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Tanggal Kompen / PJK:</label>
+                                        <input type="text" name="tgl_kompen" id="tgl_kompen" class="form-control tgl1" placeholder="Tanggal Kompen" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Kompen / PJK (Jam):</label>
+                                        <input type="number" name="kompen" id="kompen" min="0" step="0.1" class="form-control" placeholder="Jam" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-4">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Jenis Kompen:</label>
+                                        <select name="jkompen" id="jkompen" class="form-control select2-show-search" data-placeholder='Pilih' required=required>
+                                            <option label="Pilih Periode"></option>
+                                            <option value="awal">Awal</option>
+                                            <option value="akhir">Akhir</option>
+                                            <option value="all">1 Hari</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" class="form-control" name="idp_kompen" id="idp_kompen">
+
+                                <div class="modal-footer">
+                                    <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
+                                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                                </div>        
+                            </div>                        
+                        </div>            
+                    </form>            
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="batalKompen" class="modal fade" style="z-index: 9999;">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Konfirmasi Pembatalan Kompen / PJK</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form id="batalkompenForm">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-8">
+                
+                                <div class="col-lg-12">
+                                    <div class="form-group mg-b-10-force">
+                                        <p class="hitam">Apakah Anda Yakin ?</p>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="batal_id_kompen" id="batal_id_kompen" class="form-control">
+
+                                <div class="modal-footer">
+                                    <button type="submit" id="submit_button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Ya Batalkan</button>
+                                    <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Tutup Form</button>
+                                </div>        
+                            </div>                        
+                        </div>            
+                    </form>
+            
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="bayarLembur" class="modal fade">
+            <div class="modal-dialog modal-sm" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Pembayaran Lembur</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form id="bayarlemburForm">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-8">
+                
+                                <div class="col-lg-12">
+                                    <div class="form-group mg-b-10-force">
+                                        <input type="number" min="0" step="0.01" name="blembur" id="blembur_id" class="form-control" required>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="id_rekap" id="id_rekap" class="form-control">
+
+                                <div class="modal-footer">
+                                    <button type="submit" id="submit_button" class="btn btn-primary tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
+                                    <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Tutup Form</button>
+                                </div>        
+                            </div>                        
+                        </div>            
+                    </form>            
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+    </div>
+
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>    
+    /* tabel */
+    dr = "{{dr}}"
+    sp = "{{sp}}"
+    prd = "{{prd}}"
+    thn = "{{thn}}"
+    sid = "{{sid}}"
+
+    var table = $('#tabelku').DataTable({
+        "ajax": "{% url 'lembur_json' sid prd thn %}",
+
+        columns: [
+
+            { data: 'nama' },
+            { data: 'nik' },
+            { data: 'userid' },
+            { data: 'divisi' },
+            { 
+                data: null,
+                "render": function(data, type, row, meta){    
+                    data = '<a href="" data-target="#detailLembur" data-toggle="modal" data-idp='+row.idp+' data-nama='+row.nama+' data-prd='+row.prd+' data-thn='+row.thn+'>'+row.lembur+'</a';
+                    return data;
+                } 
+            },
+            { 
+                data: null,
+                "render": function(data, type, row, meta){    
+                    data = '<a href="" data-target="#detailKompen" data-toggle="modal" data-idp='+row.idp+' data-nama='+row.nama+' data-prd='+row.prd+' data-thn='+row.thn+'>'+row.kompen+'</a';
+                    return data;
+                } 
+            },
+            { 
+                data: null,
+                "render": function(data, type, row, meta){    
+                    data = '<a href="" data-target="#bayarLembur" data-toggle="modal" data-id='+row.id+'>'+row.bayar+'</a';
+                    return data;
+                } 
+            },
+            { data: 'sisa' },
+            { 
+                data: null,
+                "render": function(data, type, row, meta){    
+                    if (row.sisa == 0){
+                        data = ''
+                    } else{
+                        data = '<button data-target="#tambahKompen" data-toggle="modal" class="btn btn-sm btn-primary mb-1 tx-12" data-idp='+row.idp+'>Ambil Kompen / PJK</button>';
+                    }
+                    
+                    return data;
+                } 
+            },
+        ],   
+
+        "rowCallback": function (row, data) {
+            $('td', row).eq(0).addClass('hitam');
+            $('td', row).eq(1).addClass('hitam');
+            $('td', row).eq(2).addClass('hitam');
+            $('td', row).eq(3).addClass('hitam');
+            $('td', row).eq(4).addClass('hitam');
+            $('td', row).eq(5).addClass('hitam');
+            $('td', row).eq(6).addClass('hitam');
+            $('td', row).eq(7).addClass('hitam');
+        },
+
+        destroy: true,
+        ordering: false,
+        paging: false,
+        scrollX: '100%',
+        scrollY: 300,
+        processing: true,
+
+        "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            loadingRecords: '&nbsp;',
+            processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+            emptyTable: "&nbsp;",
+
+            paginate: {
+                previous: '<i class="cs-chevron-left"></i>',
+                next: '<i class="cs-chevron-right"></i>',
+            },
+        },
+
+    });         
+    
+    /* Tambah kompen */
+    tkompenForm.addEventListener('submit', e => {
+        e.preventDefault()
+
+        const tgl_kompen = document.getElementById('tgl_kompen')
+        const idp_kompen = document.getElementById('idp_kompen')
+        const kompen = document.getElementById('kompen')
+        const jkompen = document.getElementById('jkompen')
+        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'tkompen' %}",
+            data: {
+                'csrfmiddlewaretoken': csrf[0].value,
+                'tgl_kompen':tgl_kompen.value,
+                'idp': idp_kompen.value,
+                'kompen':kompen.value,
+                'jkompen':jkompen.value
+            },
+            success: function (response) {
+                                
+                if (response.status == 'ok') { 
+                    console.log(response.status)       
+                } else if(response.status == 'lebih kompen'){
+                    alert('Kompen/PJK yang diambil lebih besar daripada sisa lembur, proses dibatalkan')
+                }
+                table.ajax.reload(null, false);
+
+                $('#tambahKompen').modal('hide');
+                $("#tkompenForm")[0].reset();
+                $('#jkompen').val('').trigger("change");
+                      
+            },
+            error: function (error) {
+                alert('Terjadi kesalahan sistem, hubungi IT.')
+            }
+        });
+
+    });
+    
+    /* Batalkan Lembur */
+    batalForm.addEventListener('submit', e => {
+        e.preventDefault()
+
+        const id_batal = document.getElementById('batal_id')
+        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'blembur' %}",
+            data: {
+                'csrfmiddlewaretoken': csrf[0].value,
+                'id': id_batal.value,
+            },
+            success: function (response) {             
+
+                if (response.status == 'ok') { 
+                    console.log(response.status)       
+                } else if(response.status == 'batalkan kompen'){
+                    alert('Jumlah lembur yang akan dibatalkan lebih besar dari sisa lembur, batalkan kompen atau kurangi bayar lembur terlebih dahulu agar total lembur lebih besar atau sama dengan sisa lembur.')
+                }
+
+                table.ajax.reload(null, false);
+
+                $('#batalLembur').modal('hide');
+                $("#batalForm")[0].reset();
+                
+                $('#detailLembur').modal('hide');
+                      
+            },
+            error: function (error) {
+                alert('Terjadi kesalahan sistem, hubungi IT.')
+            }
+        });
+
+    });
+
+    /* Batalkan Kompen */
+    batalkompenForm.addEventListener('submit', e => {
+        e.preventDefault()
+
+        const id_batal_kompen = document.getElementById('batal_id_kompen')
+        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'bkompen' %}",
+            data: {
+                'csrfmiddlewaretoken': csrf[0].value,
+                'id': id_batal_kompen.value,
+            },
+            success: function (response) {             
+
+                if (response.status == 'ok') { 
+                    console.log(response.status)       
+                }
+
+                table.ajax.reload(null, false);
+
+                $('#batalKompen').modal('hide');
+                $("#batalkompenForm")[0].reset();
+                
+                $('#detailKompen').modal('hide');
+                      
+            },
+            error: function (error) {
+                alert('Terjadi kesalahan sistem, hubungi IT.')
+            }
+        });
+
+    });
+
+    /* Bayar Lembur */
+    bayarlemburForm.addEventListener('submit', e => {
+        e.preventDefault()
+
+        const id_rekap = document.getElementById('id_rekap')
+        const blembur = document.getElementById('blembur_id')
+        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'bayar_lembur' %}",
+            data: {
+                'csrfmiddlewaretoken': csrf[0].value,
+                'idr': id_rekap.value,
+                'blembur': blembur.value,
+            },
+            success: function (response) {             
+
+                if (response.status == 'ok') { 
+                    console.log(response.status)       
+                } else if (response.status == 'lebih bayar'){
+                    alert('Lembur yang dibayarkan lebih besar dari sisa lembur yang ada, proses dibatalkan')
+                }
+
+                table.ajax.reload(null, false);
+
+                $('#bayarLembur').modal('hide');
+                $("#bayarlemburForm")[0].reset();
+                
+                      
+            },
+            error: function (error) {
+                alert('Terjadi kesalahan sistem, hubungi IT.')
+            }
+        });
+
+    });
+
+</script>
+
+<!-- Modal Script -->
+<script>
+
+    $('#batalLembur').on('show.bs.modal', function (e) {
+        
+        var id_batal = $(e.relatedTarget).data('id_batal');
+        
+        //populate the textbox
+        $(e.currentTarget).find('input[name="batal_id"]').val(id_batal);
+        
+    });
+
+    $('#detailLembur').on('show.bs.modal', function (e) {
+      
+        var didp = $(e.relatedTarget).data('idp');
+        var dprd = $(e.relatedTarget).data('prd');
+        var dthn = $(e.relatedTarget).data('thn');
+        var dnama = $(e.relatedTarget).data('nama');
+
+        document.getElementById('namanya').innerHTML = dnama;
+
+        var table2 = $('#tabelku2').DataTable({
+            
+            "ajax": "dlembur_json/"+didp+"/"+dprd+"/"+dthn,
+
+            columns: [
+
+                { data: 'tgl' },
+                { data: 'lembur' },
+                { data: 'addby' },
+                { data: 'addtime' },
+                { data: 'editby' },
+                { data: 'edittime' },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){    
+                        data = '<button data-target="#batalLembur" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-id_batal='+row.id+'>Batalkan</button>';
+                        return data;
+                    } 
+                },
+            
+            ],
+
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+            },
+
+            destroy: true,
+            ordering: false,
+            paging: false,
+            processing: true,
+            searching: false,
+            info: false,
+        });
+            
+    });
+
+    $('#detailKompen').on('show.bs.modal', function (e) {
+      
+        var didp = $(e.relatedTarget).data('idp');
+        var dprd = $(e.relatedTarget).data('prd');
+        var dthn = $(e.relatedTarget).data('thn');
+        var dnama = $(e.relatedTarget).data('nama');
+
+        document.getElementById('namanya_kompen').innerHTML = dnama;
+
+        var table3 = $('#tabelku3').DataTable({
+            
+            "ajax": "dkompen_json/"+didp+"/"+dprd+"/"+dthn,
+
+            columns: [
+
+                { data: 'tgl' },
+                { data: 'kompen' },
+                { data: 'jenis' },
+                { data: 'addby' },
+                { data: 'addtime' },
+                { data: 'editby' },
+                { data: 'edittime' },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){    
+                        data = '<button data-target="#batalKompen" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-id_batal_kompen='+row.id+'>Batalkan</button>';
+                        return data;
+                    } 
+                },
+            
+            ],
+
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+                $('td', row).eq(6).addClass('hitam');
+            },
+
+            destroy: true,
+            ordering: false,
+            paging: false,
+            processing: true,
+            searching: false,
+            info: false,
+        });
+            
+    });
+
+    $('#tambahKompen').on('show.bs.modal', function (e) {
+      
+      var idp = $(e.relatedTarget).data('idp');
+      
+      //populate the textbox
+      $(e.currentTarget).find('input[name="idp_kompen"]').val(idp);
+      
+    });
+  
+    $('#batalKompen').on('show.bs.modal', function (e) {
+        
+        var id_batal_kompen = $(e.relatedTarget).data('id_batal_kompen');
+        
+        //populate the textbox
+        $(e.currentTarget).find('input[name="batal_id_kompen"]').val(id_batal_kompen);
+        
+    });
+    
+    $('#bayarLembur').on('show.bs.modal', function (e) {
+        
+        var id_rekap = $(e.relatedTarget).data('id');
+        
+        //populate the textbox
+        $(e.currentTarget).find('input[name="id_rekap"]').val(id_rekap);
+        
+    });
+
+    document.getElementById("awal").defaultValue = 0;
+    document.getElementById("akhir").defaultValue = 0;
+    document.getElementById("ist_1").defaultValue = 0;
+    document.getElementById("ist_2").defaultValue = 0;
+    document.getElementById("blembur_id").defaultValue = 0;
+
+</script>
+
+<!-- Select2 -->
+<script>
+    $(function(){
+    'use strict'        
+
+        $('#pegawai').select2({
+            dropdownParent: $('#tambahLembur'),
+        });
+
+        $('#periode').select2({
+            dropdownParent: $('#cariLembur'),
+        });
+
+        $('#jkompen').select2({
+            dropdownParent: $('#tambahKompen'),
+        });
+    });
+</script>
+
+{% endblock hrd_ajax %}

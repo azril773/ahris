@@ -1,0 +1,251 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        <!-- Pesan Error -->
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Absensi -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Detail Pegawai - Promosi / Demosi</h6>
+    
+        <!-- Info absensi -->        
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">   
+                            
+            <!-- Button Registrasi -->
+            <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-primary mg-b-6">Registrasi</button>
+
+            <!-- Button Pegawai Aktif -->
+            <a href="{% url 'pegawai' sid %}"><button class="btn btn-success mg-b-6">Pegawai Aktif</button></a>
+
+            <!-- Button Pegawai Non Aktif -->
+            <a href="{% url 'non_aktif' sid %}"><button class="btn btn-danger mg-b-6">Pegawai Non Aktif</button></a> &nbsp; &nbsp; &nbsp; 
+
+            <a href="{% url 'general_data' idp %}" class="btn btn-outline-info mg-b-8">General Data</a>  
+            <a href="{% url 'dapri' idp %}" class="btn btn-outline-info mg-b-8">Data Pribadi</a>
+            <a href="{% url 'pkerja' idp %}" class="btn btn-outline-info mg-b-8">Pengalaman Kerja & Pendidikan</a> 
+            <a href="{% url 'prodemo' idp %}" class="btn btn-info mg-b-8">Promosi / Demosi</a>  
+            <a href="{% url 'sangsi' idp %}" class="btn btn-outline-info mg-b-8">Sangsi</a> 
+
+            </div>          
+        </div>
+
+        <br>   
+
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="form-layout form-layout-2">
+                    <div class="row no-gutters">
+                        
+                        <!-- Promosi -->
+                        <div class="col-md-12 mg-t--1 mg-md-t-0">
+                            <div class="form-group mg-md-l--1">
+                              <label class="form-control-label tx-gray-800">Promosi:</label>
+                                <table class="table">
+                                    <tr>
+                                        <th><span class="tx-inverse tx-13">Tanggal</span></th>
+                                        <th><span class="tx-inverse tx-13">Jabatan Sebelum</span></th>
+                                        <th><span class="tx-inverse tx-13">Jabatan Saat Ini</span></th>
+
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>  
+                </div>      
+            </div> 
+            
+            <div class="col-lg-6">
+                <div class="form-layout form-layout-2">
+                    <div class="row no-gutters">
+
+                        <!-- Demosi -->
+                        <div class="col-md-12 mg-t--1 mg-md-t-0">
+                            <div class="form-group mg-md-l--1">
+                              <label class="form-control-label tx-gray-800">Demosi:</label>
+                                <table class="table">
+                                    <tr>
+                                        <th><span class="tx-inverse tx-13">Tanggal</span></th>
+                                        <th><span class="tx-inverse tx-13">Jabatan Sebelum</span></th>
+                                        <th><span class="tx-inverse tx-13">Jabatan Saat Ini</span></th>
+
+                                    </tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>  
+                </div>      
+            </div>
+        </div>
+    </div>
+
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>
+    $(document).ready(function() {
+
+        var table = $('#tabelku').DataTable({
+
+            "ajax": "{% url 'pegawai_json' sid %}",
+
+            columns: [
+
+                { data: 'nama' },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){    
+                        if(row.gender == 'Laki-Laki'){
+                            data = 'L'
+                        } else (
+                            data = 'P'
+                        )
+                        return data;
+                    } 
+                },     
+                { data: 'nik' },
+                { data: 'userid' },
+                { data: 'divisi' },  
+                { data: 'jabatan' },
+                { data: 'libur' },
+                { data: 'kkerja' },
+                { data: 'payroll' },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){    
+                        data = '<button data-target="#tambahKompen" data-toggle="modal" class="btn btn-sm btn-warning mb-1 tx-12" data-idp='+row.idp+'>Edit</button> &nbsp; <button data-target="#detailPegawai" data-toggle="modal" class="btn btn-sm btn-primary mb-1 tx-12" data-idp='+row.idp+'>Lebih Detail</button> &nbsp; <button data-target="#tambahKompen" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-idp='+row.idp+'>Non Aktifkan</button>';
+                        
+                        return data;
+                    } 
+                },
+            ],
+
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');  
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');                
+                $('td', row).eq(5).addClass('hitam');                
+                $('td', row).eq(6).addClass('hitam');              
+                $('td', row).eq(7).addClass('hitam');              
+            },
+
+            destroy: true,
+            ordering: false,
+            paging: false,
+            scrollX: '100%',
+            scrollY: 300,
+            processing: true,
+
+            "language": {
+                searchPlaceholder: 'Cari...',
+                sSearch: '',
+                loadingRecords: '&nbsp;',
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+                emptyTable: "&nbsp;",
+
+                paginate: {
+                    previous: '<i class="cs-chevron-left"></i>',
+                    next: '<i class="cs-chevron-right"></i>',
+                },
+            },
+
+        }); 
+
+    });
+
+</script>   
+ 
+<!-- Modal Script -->
+<script>
+
+    $('#detailPegawai').on('show.bs.modal', function (e) {
+      
+        var didp = $(e.relatedTarget).data('idp');
+        var dprd = $(e.relatedTarget).data('prd');
+        var dthn = $(e.relatedTarget).data('thn');
+        var dnama = $(e.relatedTarget).data('nama');
+
+        document.getElementById('namanya').innerHTML = dnama;
+
+        var table2 = $('#tabelku2').DataTable({
+            
+            "ajax": "../dlembur_json/"+didp+"/"+dprd+"/"+dthn,
+
+            columns: [
+
+                { data: 'tgl' },
+                { data: 'lembur' },
+                { data: 'addby' },
+                { data: 'addtime' },
+                { data: 'editby' },
+                { data: 'edittime' },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){    
+                        data = '<button data-target="#batalLembur" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-id_batal='+row.id+'>Batalkan</button>';
+                        return data;
+                    } 
+                },
+            
+            ],
+
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+            },
+
+            destroy: true,
+            ordering: false,
+            paging: false,
+            processing: true,
+            searching: false,
+            info: false,
+        });
+            
+    });
+
+</script>
+
+
+{% endblock hrd_ajax %}

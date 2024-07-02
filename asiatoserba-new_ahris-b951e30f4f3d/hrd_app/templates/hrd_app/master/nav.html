@@ -1,0 +1,48 @@
+<!-- Navigation -->
+
+<div class="br-logo"><a href="">AHRIS - PLAZA TASIK</a></div>
+    
+    <div class="br-sideleft overflow-y-auto">
+        <label class="sidebar-label pd-x-15 mg-t-20">Asia PLAZA TASIK</label>
+        <div class="br-sideleft-menu">  
+        
+        
+        <!-- Nav Akses untuk root -->
+        <a href="{% url 'beranda' %}" class="br-menu-link">
+            <div class="br-menu-item">
+            <i class="menu-item-icon icon ion-ios-home tx-20"></i>
+            <span class="menu-item-label">Beranda</span>
+            </div>
+        </a>
+
+        <a href="{% url 'pegawai' dsid %}" class="br-menu-link">
+            <div class="br-menu-item">
+            <i class="menu-item-icon icon ion-ios-people tx-20"></i>
+            <span class="menu-item-label">Pegawai</span>
+            </div>
+        </a>
+        
+        <a href="{% url 'absensi' dsid %}" class="br-menu-link">
+            <div class="br-menu-item">
+            <i class="menu-item-icon icon ion-ios-clock tx-20"></i>
+            <span class="menu-item-label">Data Absensi</span>
+            </div>
+        </a>
+
+        <a href="{% url 'pengaturan' %}" class="br-menu-link">
+            <div class="br-menu-item">
+            <i class="menu-item-icon icon ion-ios-gear tx-20"></i>
+            <span class="menu-item-label">Pengaturan</span>
+            </div>
+        </a>
+        
+        <a href="{% url 'logout' %}" class="br-menu-link">
+            <div class="br-menu-item">
+            <i class="menu-item-icon icon ion-log-out tx-20"></i>
+            <span class="menu-item-label">Logout</span>
+            </div>
+        </a>
+        
+        </div>
+        <br>
+    </div>
