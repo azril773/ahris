@@ -219,6 +219,7 @@ class pribadi_db(models.Model):
     alamat = models.TextField(null=True)
     phone = models.CharField(max_length=20, null=True)
     email = models.CharField(max_length=50, null=True)
+    kota_lahir = models.CharField(max_length=200,null=True)
     tgl_lahir = models.DateField(null=True)
     tinggi_badan = models.FloatField(default=0)
     berat_badan = models.FloatField(default=0)
@@ -267,11 +268,11 @@ class kontak_lain_db(models.Model):
         
 class pengalaman_db(models.Model):
     pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE)
-    perusahaan = models.CharField(max_length=50, null=True)
-    kota = models.CharField(max_length=50, null=True)
-    dari_tahun = models.IntegerField(null=True)
-    sampai_tahun = models.IntegerField(null=True)
-    jabatan = models.CharField(max_length=50, null=True)    
+    perusahaan = models.CharField(max_length=50, null=False)
+    kota = models.CharField(max_length=50, null=False)
+    dari_tahun = models.DateField(null=False)
+    sampai_tahun = models.DateField(null=False)
+    jabatan = models.CharField(max_length=50, null=False)    
 
     def __int__(self):
         return self.pegawai
@@ -281,12 +282,20 @@ class pengalaman_db(models.Model):
         verbose_name_plural = 'Pengalaman Kerja'
         
         
+
+class kota_kabupaten_db(models.Model):
+    nama_koka = models.CharField(max_length=150,null=True)
+
+
+
+pendidikan_choices = (("KULIAH","KULIAH"),("SMK/SMA","SMK/SMA"),("SMP","SMP"))
 class pendidikan_db(models.Model):
     pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE)
-    nama = models.CharField(max_length=100, null=True)
-    kota = models.CharField(max_length=50, null=True)
-    dari_tahun = models.IntegerField(null=True)
-    sampai_tahun = models.IntegerField(null=True)
+    pendidikan = models.CharField(max_length=100,choices=pendidikan_choices,null=False)
+    nama = models.CharField(max_length=100, null=False)
+    kota = models.ForeignKey(kota_kabupaten_db,on_delete=models.CASCADE, null=False)
+    dari_tahun = models.DateField(null=False)
+    sampai_tahun = models.DateField(null=False)
     jurusan = models.CharField(max_length=50, null=True)    
     gelar = models.CharField(max_length=50, null=True)    
 
@@ -296,8 +305,8 @@ class pendidikan_db(models.Model):
     class Meta:
         verbose_name = 'Pendidikan'
         verbose_name_plural = 'Pendidikan'    
-        
-        
+
+
 pilihan_status = (("Promosi", "Promosi"),("Demosi", "Demosi"))
 
 class promosi_demosi_db(models.Model):

@@ -122,7 +122,7 @@ class rupiah_lembur(ImportExportModelAdmin):
     
 @admin.register(keluarga_db)
 class keluarga(ImportExportModelAdmin):
-    list_display = ('pegawai','hubungan','nama','tgl_lahir','gender','gol_darah')
+    list_display = ("pegawai","nama","hubungan",'gender')
     
     
 @admin.register(status_pegawai_lembur_db)
@@ -143,7 +143,26 @@ class data_raw(ImportExportModelAdmin):
 @admin.register(data_trans_db)
 class data_trans(ImportExportModelAdmin):
     list_display = ('userid','jam_absen','punch')                       
-                
+
+@admin.register(pribadi_db)
+class data_pribadi(ImportExportModelAdmin):
+    list_display = ('pegawai','alamat','kota_lahir','tgl_lahir')
+
+@admin.register(kontak_lain_db)
+class kontak_lain(ImportExportModelAdmin):
+    list_display =  ("pegawai","hubungan",'nama')
+
+@admin.register(pendidikan_db)
+class pendidikan(ImportExportModelAdmin):
+    list_display = ("pegawai","nama","kota","dari_tahun","sampai_tahun","jurusan","gelar")
+
+@admin.register(pengalaman_db)
+class pengalaman_db(ImportExportModelAdmin):
+    list_display = ("pegawai","perusahaan","kota","dari_tahun","sampai_tahun","jabatan")
+
+@admin.register(kota_kabupaten_db)
+class kota_kabupaten(ImportExportModelAdmin):
+    list_display = ("nama_koka",)
     
 admin.site.site_header = "AHRIS"
 admin.site.site_title = "AHRIS"

@@ -10,7 +10,7 @@ from datetime import date, datetime, timedelta
 from django.template.loader import get_template
 from django.contrib import messages
 from json import dumps
-
+import requests
 # SUPPORT
 from openpyxl.styles import Alignment, Font
 from collections import namedtuple
@@ -29,7 +29,7 @@ import codecs
 
 # MODEL / DATABASE
 from .models import *
-
+from django.core.serializers import serialize # Create your views here.
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Functions
@@ -344,7 +344,7 @@ def pegawai(request,sid):
         dsid = dakses.sid_id     
         
         status = status_pegawai_db.objects.all().order_by('id')       
-                
+        # status = serialize("json",status)
         data = {
             'akses' : akses,
             'dsid': dsid,
@@ -407,9 +407,66 @@ def edit_pegawai(request,idp):
         kontak_lain = kontak_lain_db.objects.filter(pegawai_id=int(idp))
         pengalaman = pengalaman_db.objects.filter(pegawai_id=int(idp))
         pendidikan = pendidikan_db.objects.filter(pegawai_id=int(idp))
-        
+        pribadi = pribadi_db.objects.get(pegawai_id=pg.pk)
         today = date.today()
+        krg = []
+        kln = []
+        pgl = []
+        pdk = []
+
+        for k in keluarga:
+            obj = {
+                "hubungan":k.hubungan,
+                "nama":k.nama,
+                "tgl_lahir":k.tgl_lahir.strftime("%Y-%m-%d"),
+                "gender":k.gender,
+                "gol_darah":k.gol_darah
+            }
+            krg.append(obj)
+
         
+        for kl in kontak_lain:
+            obj = {
+                "hubungan":kl.hubungan,
+                "nama":kl.nama,
+                "gender":kl.gender,
+                "phone":kl.phone
+            }
+            kln.append(obj)
+        
+        for pd in pendidikan:
+            obj = {
+                "pendidikan":pd.pendidikan,
+                "id":1,
+                "nama":pd.nama,
+                "kota":pd.kota,
+                "dari_tahun":pd.dari_tahun.strftime("%Y-%m-%d"),
+                "sampai_tahun":pd.sampai_tahun.strftime("%Y-%m-%d"),
+                "jurusan":pd.jurusan,
+                "gelar":pd.gelar
+            }
+            pdk.append(obj)
+
+        for pn in pengalaman:
+            obj = {
+                "perusahaan":pn.perusahaan,
+                "kota":pn.kota,
+                "dari_tahun":pn.dari_tahun.strftime("%Y-%m-%d"),
+                "sampai_tahun":pn.sampai_tahun.strftime("%Y-%m-%d"),
+                "jabatan":pn.jabatan
+            }
+            pgl.append(obj)
+        # rsl = requests.get("https://www.emsifa.com/api-wilayah-indonesia/api/provinces.json")
+        # for r in rsl.json():
+        #     resultk = requests.get('https://www.emsifa.com/api-wilayah-indonesia/api/regencies/'+r["id"]+'.json')
+        #     for rk in resultk.json():
+        #         kota_kabupaten_db(nama_kota_kabupaten=rk['name']).save()
+        # kota_kabupaten = kota_kabupaten_db.objects.values("nama_kota_kabupaten")
+        kota_kabupaten = kota_kabupaten_db.objects.all()
+        # for k in kota_kabupaten:
+        #     kota_kabupaten_db(nama_kota_kabupaten=k["nama_kota_kabupaten"]).save()
+        data = serialize("json",kota_kabupaten)
+
         data = {
             'akses' : akses,
             'dsid': dsid,
@@ -421,13 +478,19 @@ def edit_pegawai(request,idp):
             'hr':hr,
             'pg':pg,
             'today':datetime.strftime(today,'%d-%m-%Y'),
-            'keluarga':keluarga,
-            'kontak_lain':kontak_lain,
-            'pengalaman':pengalaman,
-            'pendidikan':pendidikan,
+            'keluarga':krg,
+            'kontak_lain':kln,
+            'pengalaman':pgl,
+            'pendidikan':pdk,
+            'pribadi':pribadi,
             'idp':int(idp),
-            'modul_aktif' : 'Pegawai'
+            'kota_kabupaten':json.loads(data),
+            'modul_aktif' : 'Pegawai',
+            'payroll':["Lainnya","HRD","Owner"],
+            'goldarah':['O','A','B','AB'],
+            'agama':['Islam','Katholik','Kristen','Hindu','Buddha','Konghucu'] 
         }
+        print(data["pengalaman"])
         
         return render(request,'hrd_app/pegawai/edit.html', data)
         
@@ -436,15 +499,163 @@ def edit_pegawai(request,idp):
         return redirect('beranda')
 
 
+
 @login_required
-def tambah_keluarga(request, idp):
-    nama_user = request.user.username
-    
-    hubungan = request.POST.get('dhubungan_keluarga')
-    dnama = request.POST.get('dnama_keluarga')
-    tgl_lahir = request.POST.get('dtgl_lahir_keluarga')
-    gender = request.POST.get('dgender_keluarga')
-    gol_darah = request.POST.get('dgol_darah')
+def tpegawai(r):
+    iduser = r.user.id
+
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+        dsid = dakses.sid_id
+
+        counter = counter_db.objects.all().order_by('counter')
+        divisi = divisi_db.objects.all().order_by('divisi')
+        jabatan = jabatan_db.objects.all().order_by('jabatan')
+        kk = kelompok_kerja_db.objects.all().order_by('kelompok')
+        hr = hari_db.objects.all()
+
+
+        
+        data = {
+            'akses' : akses,
+            'dsid': dsid,
+            "counter":counter,
+            "divisi":divisi,
+            "jabatan":jabatan,
+            "kk":kk,
+            "hr":hr
+        }
+    return render(r,"hrd_app/pegawai/tambah.html",data)
+
+@login_required
+def tambah_pegawai(r):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        user = akses_db.objects.get(pk=r.user.id)
+        sid = user.sid_id
+        nama = r.POST.get("nama")
+        gender = r.POST.get("gender")
+        tgl_masuk = r.POST.get("tgl_masuk")
+        nik = r.POST.get("nik")
+        userid = r.POST.get("userid")
+        div = r.POST.get("div")
+        counter = r.POST.get("counter")
+        jabatan = r.POST.get("jabatan")
+        kk = r.POST.get("kk")
+        hr = r.POST.get("hr")
+        ca = r.POST.get("ca")
+        rek = r.POST.get("rek")
+        payroll = r.POST.get("payroll")
+        nks = r.POST.get("nks")
+        ntk = r.POST.get("ntk")
+        pks = r.POST.get("pks")
+        ptk = r.POST.get("ptk")
+
+
+        # Data Pribadi
+        alamat = r.POST.get("alamat")
+        phone = r.POST.get("phone")
+        email = r.POST.get("email")
+        kota_lahir = r.POST.get("kota_lahir")
+        tgl_lahir = r.POST.get("tgl_lahir")
+        tinggi = r.POST.get("tinggi")
+        berat = r.POST.get("berat")
+        goldarah = r.POST.get("goldarah")
+        agama = r.POST.get("agama")
+
+
+        keluarga = r.POST.get("keluarga")
+        pihak = r.POST.get("pihak")
+        keluarga = json.loads(keluarga)
+        pihak = json.loads(pihak)
+        status_pegawai = status_pegawai_db.objects.get(status="Staff")
+
+        if pegawai_db.objects.filter(nama=nama,gender=gender).exists():
+            status = "duplikat"
+        else:
+            pegawai = pegawai_db(
+                nama=nama,
+                gender=gender,
+                userid=userid,
+                status=status_pegawai,
+                nik=nik,
+                divisi_id=div,
+                jabatan_id=jabatan,
+                no_rekening=rek,
+                no_bpjs_ks=nks,
+                no_bpjs_tk=ntk,
+                payroll_by=payroll,
+                ks_premi=pks,
+                tk_premi=ptk,
+                aktif=1,
+                tgl_masuk=datetime.strptime(str(tgl_masuk),'%d-%m-%Y').strftime("%Y-%m-%d"),
+                tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
+                hari_off_id=hr,
+                kelompok_kerja_id=kk,
+                sisa_cuti=12,
+                counter_id=counter,
+                add_by=r.user.username,
+                edit_by=r.user.username
+
+                # status
+            )            
+            pegawai.save()
+
+
+            # Tambah Pihak Lain
+            pgw = pegawai_db.objects.get(userid=userid)
+            for p in pihak:
+                tkl = kontak_lain_db(
+                pegawai_id=int(pgw.pk),
+                hubungan = p['hubungan'],
+                nama = p['nama'],
+                gender = p['gender'],
+                phone = p['phone']
+                )
+                tkl.save()
+            
+
+            # Tambah Keluarga
+            for k in keluarga:
+                tkeluarga = keluarga_db(
+                    pegawai_id=int(pgw.pk),
+                    hubungan = k['hubungan'],
+                    nama = k["nama_keluarga"],
+                    tgl_lahir = datetime.strptime(k['tgl_lahir_keluarga'],'%d-%m-%Y'),
+                    gender = k['gender'],
+                    gol_darah = k['goldarah']
+                )
+                tkeluarga.save()
+
+            # Tambah Data Pribadi
+            pribadi = pribadi_db(
+                pegawai_id=int(pgw.pk),
+                alamat=alamat,
+                phone=phone,
+                email=email,
+                kota_lahir=kota_lahir,
+                tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
+                tinggi_badan=tinggi,
+                berat_badan=berat,
+                gol_darah=goldarah,
+                agama=agama
+            )
+            print(alamat)
+            pribadi.save()
+            status = "ok"
+            print(sid)
+        return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
+
+
+@login_required
+def tambah_keluarga(r, idp):
+    nama_user = r.user.username
+    print(r.POST)
+    hubungan = r.POST.get('dhubungan_keluarga')
+    dnama = r.POST.get('dnama_keluarga')
+    tgl_lahir = r.POST.get('dtgl_lahir_keluarga')
+    gender = r.POST.get('dgender_keluarga')
+    gol_darah = r.POST.get('dgol_darah')
     
     if keluarga_db.objects.filter(hubungan=hubungan, nama=dnama, pegawai_id=int(idp)).exists():
         status = 'duplikat'
@@ -678,7 +889,7 @@ def aktif_nonaktif(request):
 @login_required
 def pegawai_json(request, sid):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         if int(sid) == 0:
@@ -688,7 +899,10 @@ def pegawai_json(request, sid):
                     tmasuk = None
                 else:
                     tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y')   
-                                           
+                if p.counter:
+                    counter = p.counter.counter
+                else:
+                    counter = None     
                 pg = {
                     'idp':p.id,
                     'nama':p.nama,
@@ -696,7 +910,7 @@ def pegawai_json(request, sid):
                     'nik':p.nik,
                     'userid':p.userid,
                     'divisi':p.divisi.divisi,
-                    'counter':p.counter,
+                    'counter':counter,
                     'jabatan':p.jabatan.jabatan,
                     'tgl_masuk':tmasuk,
                     'nbpjs_ks':p.no_bpjs_ks,
@@ -717,7 +931,11 @@ def pegawai_json(request, sid):
                     tmasuk = None
                 else:
                     tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y') 
-                            
+                
+                if p.counter:
+                    counter = p.counter.counter
+                else:
+                    counter = None
                 pg = {
                     'idp':p.id,
                     'nama':p.nama,
@@ -725,7 +943,7 @@ def pegawai_json(request, sid):
                     'nik':p.nik,
                     'userid':p.userid,
                     'divisi':p.divisi.divisi,
-                    'counter':p.counter,
+                    'counter':counter,
                     'jabatan':p.jabatan.jabatan,
                     'tgl_masuk':tmasuk,
                     'nbpjs_ks':p.no_bpjs_ks,
@@ -746,7 +964,7 @@ def pegawai_json(request, sid):
 @login_required
 def non_aktif_json(request, sid):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         if int(sid) == 0:
@@ -814,7 +1032,7 @@ def non_aktif_json(request, sid):
 @login_required
 def detail_pegawai_json(request, idp):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
          
@@ -872,6 +1090,7 @@ def absensi(request,sid):
         
         status = status_pegawai_db.objects.all().order_by('id')
         
+        ###
         sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__status = 'Karyawan Supermarket')
                 
         data = {
@@ -974,7 +1193,7 @@ def cari_absensi_sid(request,dr, sp, sid):
 
 @login_required
 def absensi_json(request, dr, sp, sid):
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         
@@ -1282,6 +1501,7 @@ def pabsen(request):
             absensi = conn.get_attendance()
 
             for a in absensi:
+                print(a)
                 if dari <= a.timestamp <= sampai:   
                     if a.user_id in luserid:              
                         data = {
@@ -3228,7 +3448,7 @@ def cari_ijin_sid(request, dr, sp, sid):
 @login_required
 def ijin_json(request, dr, sp, sid):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         
@@ -3546,7 +3766,7 @@ def cari_geser_off_sid(request, dr, sp, sid):
 @login_required
 def geseroff_json(request, dr, sp, sid):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         
@@ -3987,7 +4207,7 @@ def cari_opg_sid(request, dr, sp, sid):
 @login_required
 def opg_json(request, dr, sp, sid):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         
@@ -4361,7 +4581,7 @@ def cari_cuti(request):
 @login_required
 def cuti_json(request, dr, sp, sid):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         
@@ -4403,7 +4623,7 @@ def cuti_json(request, dr, sp, sid):
 @login_required
 def dcuti_json(request, idp):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         
@@ -5983,7 +6203,7 @@ def bayar_lembur(request):
 @login_required
 def rekap_lembur_json(request, sid, prd, thn):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
                 
@@ -6035,7 +6255,7 @@ def rekap_lembur_json(request, sid, prd, thn):
 @login_required
 def lembur_belum_proses_json(request, sid):
         
-    if request.is_ajax(): 
+    if request.headers["X-Requested-With"] == "XMLHttpRequest": 
         
         data = []
         
@@ -6082,7 +6302,7 @@ def lembur_belum_proses_json(request, sid):
 @login_required
 def lembur_json(request, idp, prd, thn):
         
-    if request.is_ajax(): 
+    if request.headers["X-Requested-With"] == "XMLHttpRequest": 
         
         data = []
         
@@ -6408,7 +6628,7 @@ def batal_kompen(request):
 @login_required
 def kompen_json(request, idp, prd, thn):
         
-    if request.is_ajax(): 
+    if request.headers["X-Requested-With"] == "XMLHttpRequest": 
         
         data = []
         
@@ -6483,7 +6703,7 @@ def status_pegawai(request):
 @login_required
 def status_pegawai_json(request):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
                 
@@ -6501,7 +6721,7 @@ def status_pegawai_json(request):
 @login_required
 def tambah_status_pegawai(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         dstatus = request.POST.get('status')
         
@@ -6521,7 +6741,7 @@ def tambah_status_pegawai(request):
 @login_required
 def edit_status_pegawai(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         eid = request.POST.get('eid')
         dstatus = request.POST.get('estatus')
@@ -6541,7 +6761,7 @@ def edit_status_pegawai(request):
 @login_required
 def hapus_status_pegawai(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         nama_user = request.user.username
         
@@ -6592,7 +6812,7 @@ def divisi(request):
 @login_required
 def divisi_json(request):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
                 
@@ -6610,7 +6830,7 @@ def divisi_json(request):
 @login_required
 def tambah_divisi(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         ddiv = request.POST.get('divisi')
         
@@ -6630,7 +6850,7 @@ def tambah_divisi(request):
 @login_required
 def edit_divisi(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         eid = request.POST.get('eid')
         ddiv = request.POST.get('edivisi')
@@ -6650,7 +6870,7 @@ def edit_divisi(request):
 @login_required
 def hapus_divisi(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         nama_user = request.user.username
         
@@ -6701,7 +6921,7 @@ def counter(request):
 @login_required
 def counter_json(request):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
                 
@@ -6719,7 +6939,7 @@ def counter_json(request):
 @login_required
 def tambah_counter(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         dcounter = request.POST.get('counter')
         
@@ -6739,7 +6959,7 @@ def tambah_counter(request):
 @login_required
 def edit_counter(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         eid = request.POST.get('eid')
         dcounter = request.POST.get('ecounter')
@@ -6759,7 +6979,7 @@ def edit_counter(request):
 @login_required
 def hapus_counter(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         nama_user = request.user.username
         
@@ -6810,7 +7030,7 @@ def libur_nasional(request):
 @login_required
 def libur_nasional_json(request):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
                 
@@ -6833,7 +7053,7 @@ def libur_nasional_json(request):
 @login_required
 def tambah_libur_nasional(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         dtgl = request.POST.get('tgl')
         libur = request.POST.get('libur')
@@ -6860,7 +7080,7 @@ def tambah_libur_nasional(request):
 @login_required
 def edit_libur_nasional(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         eid = request.POST.get('eid')
         dtgl = request.POST.get('etgl')
@@ -6887,7 +7107,7 @@ def edit_libur_nasional(request):
 @login_required
 def hapus_libur_nasional(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         nama_user = request.user.username
         
@@ -6938,7 +7158,7 @@ def jam_kerja(request):
 @login_required
 def tambah_kk_json(request):
         
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         tkk = request.POST.get('tkk')
         
@@ -6968,7 +7188,7 @@ def tambah_kk_json(request):
 @login_required
 # def jam_kerja_json(request):
         
-#     if request.is_ajax():
+#     if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
 #         data = []
                 
@@ -6992,7 +7212,7 @@ def tambah_kk_json(request):
 @login_required
 def tambah_jam_kerja(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         dtgl = request.POST.get('tgl')
         libur = request.POST.get('libur')
@@ -7019,7 +7239,7 @@ def tambah_jam_kerja(request):
 @login_required
 def edit_jam_kerja(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         eid = request.POST.get('eid')
         dtgl = request.POST.get('etgl')
@@ -7046,7 +7266,7 @@ def edit_jam_kerja(request):
 @login_required
 def hapus_jam_kerja(request):
     
-    if request.is_ajax():
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         nama_user = request.user.username
         

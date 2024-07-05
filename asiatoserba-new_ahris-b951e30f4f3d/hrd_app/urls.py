@@ -15,6 +15,8 @@ urlpatterns = [
     
     path('pegawai/<int:sid>', views.pegawai, name='pegawai'),
     path('epegawai/<int:idp>', views.edit_pegawai, name='epegawai'),
+    path('tpegawai/', views.tpegawai, name='tpegawai'),
+    path('tambah_pegawai/', views.tambah_pegawai, name='tambah_pegawai'),
     path('non_aktif/<int:sid>', views.pegawai_non_aktif, name='non_aktif'),
     
     path('tkeluarga/<int:idp>', views.tambah_keluarga, name='tkeluarga'),
