@@ -136,4 +136,5 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 
-settings.py
+hrd/settings.py
+../env/
