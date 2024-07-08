@@ -1,3 +1,7 @@
+## SIMALIS Atk
+
+<img align="center" src="https://static.vecteezy.com/system/resources/previews/024/029/499/original/school-item-pencil-with-transparent-background-free-png.png" width="250" height="200">
+
 For ubuntu environment only
 
 1.  install this libs first ()
