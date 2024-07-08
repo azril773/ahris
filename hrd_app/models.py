@@ -165,6 +165,7 @@ class rp_lembur_db(models.Model):
         verbose_name_plural = 'Rupiah Lembur'
           
         
+
 pilihan_pengelola = (("Owner", "Owner"),("HRD", "HRD"), ("Lainnya", "Lainnya"))         
           
         
@@ -195,6 +196,7 @@ class pegawai_db(models.Model):
     hari_off2 = models.ForeignKey(hari_db, on_delete=models.CASCADE, related_name='hari_off2',null=True, blank=True)
     kelompok_kerja = models.ForeignKey(kelompok_kerja_db, on_delete=models.CASCADE, null=True, blank=True)
     sisa_cuti = models.IntegerField(null=True)
+    cuti_awal = models.IntegerField(null=True)
     shift = models.CharField(max_length=100, null=True, blank=True)
     counter = models.ForeignKey(counter_db, on_delete=models.CASCADE, null=True, blank=True)
     
@@ -264,12 +266,22 @@ class kontak_lain_db(models.Model):
     class Meta:
         verbose_name = 'Orang yg dapat dihubungi'
         verbose_name_plural = 'Orang yg dapat dihubungi'
+
+class kota_kabupaten_db(models.Model):
+    id_provinsi = models.IntegerField(null=True)
+    nama_koka = models.CharField(max_length=150,null=True)
+
+    def __str__(self):
+        return self.nama_koka
+
+    def __int__(self):
+        return self.nama_koka
         
         
 class pengalaman_db(models.Model):
     pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE)
     perusahaan = models.CharField(max_length=50, null=False)
-    kota = models.CharField(max_length=50, null=False)
+    kota = models.ForeignKey(kota_kabupaten_db,on_delete=models.CASCADE, null=False)
     dari_tahun = models.DateField(null=False)
     sampai_tahun = models.DateField(null=False)
     jabatan = models.CharField(max_length=50, null=False)    
@@ -282,9 +294,6 @@ class pengalaman_db(models.Model):
         verbose_name_plural = 'Pengalaman Kerja'
         
         
-
-class kota_kabupaten_db(models.Model):
-    nama_koka = models.CharField(max_length=150,null=True)
 
 
 
@@ -310,10 +319,11 @@ class pendidikan_db(models.Model):
 pilihan_status = (("Promosi", "Promosi"),("Demosi", "Demosi"))
 
 class promosi_demosi_db(models.Model):
+    tgl = models.DateField(null=True)
     pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE)
     status = models.CharField(max_length=100, choices=pilihan_status, null=True)
-    jabatan_sebelum = models.CharField(max_length=50, null=True)
-    jabatan_sekarang = models.CharField(max_length=50, null=True)    
+    jabatan_sebelum = models.ForeignKey(jabatan_db,related_name="jabatan_sebelum", on_delete=models.CASCADE,null=True)
+    jabatan_sekarang = models.ForeignKey(jabatan_db,related_name="jabatan_setelah",on_delete=models.CASCADE, null=True)    
 
     def __int__(self):
         return self.pegawai
@@ -328,6 +338,7 @@ pilihan_sangsi = (("SP1", "SP1"),("SP2", "SP2"),("SP3", "SP3"))
 class sangsi_db(models.Model):
     pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE)
     tgl_berlaku = models.DateField(null=True)
+    tgl_berakhir = models.DateField(null=True)
     status_sangsi = models.CharField(max_length=50, choices=pilihan_sangsi, null=True)
     deskripsi_pelanggaran = models.TextField(null=True)
 
@@ -335,8 +346,8 @@ class sangsi_db(models.Model):
         return self.pegawai
 
     class Meta:
-        verbose_name = 'Promsi / Demosi'
-        verbose_name_plural = 'Promsi / Demosi'                                 
+        verbose_name = 'Sangsi'
+        verbose_name_plural = 'Sangsi'                                 
 
 
 pilihan_hari = (("Semua Hari", "Semua Hari"), ("Senin", "Senin"), ("Selasa", "Selasa"), ("Rabu", "Rabu"), ("Kamis", "Kamis"), ("Jumat", "Jumat"), ("Sabtu", "Sabtu"), ("Minggu", "Minggu"))
@@ -508,7 +519,7 @@ class opg_db(models.Model):
     edit_date = models.DateTimeField(auto_now=True, null=True)
     
     def __str__(self):
-        return self.pegawai
+        return self.pegawai__nama
 
     class Meta:
         verbose_name = 'OPG'
@@ -527,7 +538,7 @@ class cuti_db(models.Model):
     edit_date = models.DateTimeField(auto_now=True, null=True)
     
     def __str__(self):
-        return self.pegawai
+        return self.pegawai.nama
 
     class Meta:
         verbose_name = 'Cuti'

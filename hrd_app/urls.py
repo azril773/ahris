@@ -15,8 +15,10 @@ urlpatterns = [
     
     path('pegawai/<int:sid>', views.pegawai, name='pegawai'),
     path('epegawai/<int:idp>', views.edit_pegawai, name='epegawai'),
+    path('edit_pegawai/<int:idp>', views.epegawai, name='edit_pegawai'),
     path('tpegawai/', views.tpegawai, name='tpegawai'),
     path('tambah_pegawai/', views.tambah_pegawai, name='tambah_pegawai'),
+    path("getPegawai/<int:idp>",views.getPegawai,name="getPegawai"),
     path('non_aktif/<int:sid>', views.pegawai_non_aktif, name='non_aktif'),
     
     path('tkeluarga/<int:idp>', views.tambah_keluarga, name='tkeluarga'),
@@ -28,7 +30,12 @@ urlpatterns = [
     path('dapri/<int:idp>', views.data_pribadi, name='dapri'),
     path('pkerja/<int:idp>', views.pendidikan_kerja, name='pkerja'),
     path('prodemo/<int:idp>', views.promosi_demosi, name='prodemo'),
+    path('tambah_prodemo/',views.tambah_prodemo,name="tambah_prodemo"),
+    path("promodemo_json/<int:idp>",views.promodemo_json,name="promodemo_json"),
     path('sangsi/<int:idp>', views.sangsi, name='sangsi'),
+    path('get_sangsi_pegawai/<int:idp>', views.get_sangsi_pegawai, name='get_sangsi_pegawai'),
+    path('sangsi_json/<int:idp>', views.sangsi_json, name='sangsi_json'),
+    path('tambah_sangsi/<int:idp>', views.tambah_sangsi, name='tambah_sangsi'),
     
     path('pegawai_json/<int:sid>', views.pegawai_json, name='pegawai_json'),
     path('non_aktif_json/<int:sid>', views.non_aktif_json, name='non_aktif_json'),

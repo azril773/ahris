@@ -281,6 +281,7 @@
 
                                 <div class="col-lg-3">
                                     <div class="form-group">
+                                      <input type="hidden" name="id" value="{{id}}" id="id">
                                     <label class="form-control-label tx-inverse">Tgl Lahir: <span class="tx-danger">*</span></label>
                                     <input type="text" name="tgl_lahir" id="tgl_lahir" class="form-control tgl2" value="{{pribadi.tgl_lahir}}" placeholder="tgl-bln-tahun" required>
                                     </div>
@@ -296,7 +297,7 @@
                                 <div class="col-lg-3">
                                     <div class="form-group">
                                     <label class="form-control-label tx-inverse">Berat Badan:</label>
-                                    <input class="form-control" type="text" name="berat" value="{{pribadi.berat_badan}}" id="berat">
+                                    <input class="form-control" type="number" name="berat" value="{{pribadi.berat_badan}}" id="berat">
                                     </div>
                                 </div>
 
@@ -529,59 +530,57 @@
     </div>
 
 </div><!-- br-pagebody -->
-<div class="modal fade w-full" id="tambahPendidikan" tabindex="-1" role="dialog" aria-labelledby="tambahPendidikanModalTitle" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+<div class="modal fade" id="tambahPendidikan" tabindex="-1" aria-labelledby="tambahPendidikanLabel" aria-hidden="true">
+  <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="tambahPendidikanModalTitle">Tambah Pendidikan</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
+        <h5 class="modal-title" id="tambahPendidikanLabel">Tambah Pendidikan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-          <div class="flex gap-3 mb-3">
-            <div class="w-1/2">
-              <select name="pendidikanModal" id="pendidikanModal">
-                <option value="">Pilih Pendidikan</option>
-                <option value="SMP">SMP</option>
-                <option value="SMK/SMA">SMK</option>
-                <option value="KULIAH">Kuliah</option>
-              </select>
-            </div>
-            <div class="w-1/2">
-              <input type="text" class="form-control" name="namaModal" placeholder="Nama Sekolah" id="namaModal">
-            </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <select name="pendidikanModalPendidikan" id="pendidikanModalPendidikan">
+              <option value="">Pilih Pendidikan</option>
+              <option value="SMP">SMP</option>
+              <option value="SMK/SMA">SMK</option>
+              <option value="KULIAH">Kuliah</option>
+            </select>
           </div>
-          <div class="flex gap-3 mb-3">
-            <div class="w-1/2">
-              <select name="kotaModal" id="kotaModal">
-                <option value="">Pilih Kota/Kabupaten</option>
-                {% for k in kota_kabupaten %}
-                <option value="{{k.pk}}">{{k.fields.nama_kota_kabupaten}}</option>
-                {% endfor %}
-              </select>
-            </div>
-            <div class="w-1/2">
-              <input type="text" class="form-control tgl2" name="dari_tahun" placeholder="Dari Tahun" id="dari_tahun">
-            </div>
-          </div>
-          <div class="flex gap-3 mb-3">
-            <div class="w-1/2">
-              <input type="text" class="form-control tgl2" name="sampai_tahun" placeholder="Sampai Tahun" id="sampai_tahun">
-            </div>
-            <div class="w-1/2">
-              <input type="text" class="form-control" name="jurusan" placeholder="Jurusan" id="jurusan">
-            </div>
-          </div>
-          <div class="flex gap-3 mb-3">
-            <div class="w-full">
-              <input type="text" class="form-control" name="gelar" placeholder="Gelar" id="gelar">
-            </div>
+          <div class="w-1/2">
+            <input type="text" class="form-control" name="namaModalPendidikan" placeholder="Nama Sekolah" id="namaModalPendidikan">
           </div>
         </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <select name="kotaModalPendidikan" id="kotaModalPendidikan">
+              <option value="">Pilih Kota/Kabupaten</option>
+              {% for k in kota_kabupaten %}
+              <option value="{{k.pk}}">{{k.nama_koka}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="w-1/2">
+            <input type="text" class="form-control tgl2" name="dari_tahun" placeholder="Dari Tahun" id="dari_tahunModalPendidikan">
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <input type="text" class="form-control tgl2" name="sampai_tahun" placeholder="Sampai Tahun" id="sampai_tahunModalPendidikan">
+          </div>
+          <div class="w-1/2">
+            <input type="text" class="form-control" name="jurusan" placeholder="Jurusan" id="jurusanModalPendidikan">
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-full">
+            <input type="text" class="form-control" name="gelar" placeholder="Gelar" id="gelarModalPendidikan">
+          </div>
+        </div>
+      </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="buttonTambahPendidikan">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" id="buttonTambahPendidikan">Tambah</button>
       </div>
     </div>
   </div>
@@ -591,17 +590,42 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="tambahPengalamanModelTitle">Modal title</h5>
+        <h5 class="modal-title" id="tambahPengalamanModelTitle">Tambah Pengalaman</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       <div class="modal-body">
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Saepe quibusdam dolorum, at eveniet laboriosam eaque aut dicta, quasi harum enim delectus praesentium non illum iure excepturi! Ipsam, labore amet autem assumenda non, dignissimos reiciendis quam soluta eos quas quis et! Atque aperiam commodi id. Aspernatur vitae debitis facilis accusamus perspiciatis nam fugit? Illo placeat doloremque quidem! Fugiat necessitatibus, vero porro commodi incidunt, repellendus unde obcaecati at repellat mollitia iusto nobis eius autem libero rem culpa modi recusandae quisquam consequatur voluptatem odio beatae? Excepturi illum asperiores repellendus, aliquid nobis quo saepe ipsum corrupti placeat. Dolore consectetur rerum reprehenderit reiciendis quos magni?\
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <input type="text" class="form-control" name="perusahaan" placeholder="Perusahaan" id="perusahaan">
+          </div>
+          <div class="w-1/2">
+            <select name="kotaModalPengalaman" id="kotaModalPengalaman">
+              <option value="">Pilih Kota/Kabupaten</option>
+              {% for k in kota_kabupaten %}
+              <option value="{{k.pk}}">{{k.nama_koka}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <input type="text" class="form-control tgl2" name="dari" placeholder="Dari" id="dariModalPengalaman">
+          </div>
+          <div class="w-1/2">
+            <input type="text" class="form-control tgl2" name="sampai" placeholder="Sampai" id="sampaiModalPengalaman">
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-full">
+            <input type="text" class="form-control" name="jabatan" placeholder="jabatan" id="jabatanModalPengalaman">
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Save changes</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" id="buttonTambahPengalaman">Tambah</button>
       </div>
     </div>
   </div>
@@ -610,27 +634,36 @@
 
 {% block hrd_ajax %}
 
-
 <script>
-  {% comment %} $('#wizard1').steps({
+  $('#wizard1').steps({
     headerTag: 'h3',
     bodyTag: 'section',
     autoFocus: true,
     onFinished:finished
-  }); {% endcomment %}
-  console.log("{{kota_kabupaten}}")
-  $("#kotaModal").selectize()
-$("#pendidikanModal").selectize()
+  });
+//  <------------------------------------------------------------------>
+// Selectize
+const kotaModalPendidikan = $("#kotaModalPendidikan").selectize()
+const pendidikanSelectize = $("#pendidikanModalPendidikan").selectize()
+const kotaModalPengalaman = $("#kotaModalPengalaman").selectize()
+
+//  <------------------------------------------------------------------>
+
+
+
 const keluarga = JSON.parse('{{keluarga}}'.replace(/&#x27;/gi,`"`))
 const pihak = JSON.parse('{{kontak_lain}}'.replace(/&#x27;/gi,`"`))
 const pendidikan = JSON.parse("{{pendidikan}}".replace(/&#x27;/gi,'"'))
 const pengalaman = JSON.parse("{{pengalaman}}".replace(/&#x27;/gi,'"'))
 
-
 localStorage.setItem("data_keluarga",JSON.stringify(keluarga))
 localStorage.setItem("data_pihak",JSON.stringify(pihak))
 localStorage.setItem("data_pendidikan",JSON.stringify(pendidikan))
 localStorage.setItem("data_pengalaman",JSON.stringify(pengalaman))
+console.log(localStorage.getItem("data_pengalaman"))
+const tambahPendidikanModal = $("#tambahPendidikan")
+const tambahPengalamanModal = $("#tambahPengalaman")
+
 
 $("#keluarga").html("")
 $("#pihak").html("")
@@ -639,7 +672,12 @@ tambahKl(keluarga)
 tambahPh(pihak)
 tambahPgl(pengalaman)
 tambahPdk(pendidikan)
+// <------------------------------------------------------------------->
 
+
+
+// <------------------------------------------------------------------->
+// Hapus
   $("#keluarga").on("click",'.hapusKeluarga',function(e){
     const id = $(e.target).attr("data-id")
     console.log(id)
@@ -659,35 +697,94 @@ tambahPdk(pendidikan)
     tambahPh(json)
   })
 
-  $("#buttonTambahPendidikan").on("click",function(e){
-    const pendidikan = $("#pendidikanModal").val()
-    const nama = $("#namaModal").val()
-    const kota = $("#kotaModal").val()
-    const dari_tahun = $("#dari_tahun").val()
-    const sampai_tahun = $("#sampai_tahun").val()
-    const jurusan = $("#jurusan").val()
-    const gelar = $("#gelar").val()
+  $("#pendidikan").on("click",".hapusPendidikan",function(e){
+    const id = $(e.target).attr("data-id")
     const json = JSON.parse(localStorage.getItem("data_pendidikan"))
-    const regex = new RegExp(`${pendidikan}`,"gi")
-    json.forEach(e => {
-      if(regex.test(e.pendidikan)){
-        return
-      }
-    })
+    json.splice(id,1)
+    localStorage.setItem("data_pendidikan",JSON.stringify(json))
+    tambahPdk(json)
+  })
 
+  $("#pengalaman").on("click",".hapusPengalaman",function(e){
+    const id = $(e.target).attr("data-id")
+    const json = JSON.parse(localStorage.getItem("data_pengalaman"))
+    json.splice(id,1)
+    localStorage.setItem("data_pengalaman",JSON.stringify(json))
+    tambahPgl(json)
+  })
+// <------------------------------------------------------------------->
+
+
+// <------------------------------------------------------------------->
+// Tambah
+  $("#buttonTambahPendidikan").on("click",function(e){
+    const pendidikan = $("#pendidikanModalPendidikan").val()
+    const nama = $("#namaModalPendidikan").val()
+    const kota = $("#kotaModalPendidikan").val()
+    const nama_koka = $("#kotaModalPendidikan").find(":selected").text()
+    const dari_tahun = moment($("#dari_tahunModalPendidikan").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
+    const sampai_tahun = moment($("#sampai_tahunModalPendidikan").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
+    const jurusan = $("#jurusanModalPendidikan").val()
+    const gelar = $("#gelarModalPendidikan").val()
+    const json = JSON.parse(localStorage.getItem("data_pendidikan"))
+    if(pendidikan == "" || nama == "" || kota == "" || dari_tahun  == "" || sampai_tahun == "") return false
+    const check = json.filter(e => e.pendidikan == pendidikan)
+    if(check.length > 0) return false
+
+    console.log(jurusan)
     const obj = {
-      nama,pendidikan,kota,dari_tahun,sampai_tahun,jurusan,gelar,id:0
+      nama,pendidikan,kota,nama_koka,dari_tahun,sampai_tahun,jurusan:jurusan ? jurusan : "-",gelar:gelar ? gelar : "-",id:0
     }
 
     json.push(obj)
-    console.log(json)
+    localStorage.setItem("data_pendidikan",JSON.stringify(json))
+    tambahPdk(json)
+    tambahPendidikanModal.modal("hide")
+    $("#pendidikanModalPendidikan").val("")
+    $("#namaModalPendidikan").val("")
+    $("#kotaModalPendidikan").val("")
+    pendidikanSelectize[0].selectize.clear()
+    kotaModalPendidikan[0].selectize.clear()
+    $("#dari_tahunModalPendidikan").val("")
+    $("#sampai_tahunModalPendidikan").val("")
+    $("#jurusanModalPendidikan").val("")
+    $("#gelarModalPendidikan").val("")
+  })
+
+  $("#buttonTambahPengalaman").on("click",function(e){
+    const perusahaan = $("#perusahaan").val()
+    const kota = $("#kotaModalPengalaman").val()
+    const nama_koka = $("#kotaModalPengalaman").find(":selected").text()
+    console.log(nama_koka,"sd")
+    const dari_tahun = moment($("#dariModalPengalaman").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
+    const sampai_tahun = moment($("#sampaiModalPengalaman").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
+    const jabatan = $("#jabatanModalPengalaman").val()
+    const json = JSON.parse(localStorage.getItem("data_pengalaman"))
+    if(pendidikan == "" || nama == "" || kota == "" || dari_tahun  == "" || sampai_tahun == "") return false
+    const check = json.filter(e => e.pendidikan == pendidikan)
+    if(check.length > 0) return false
+
+    const obj = {
+      perusahaan,kota,nama_koka,dari_tahun,sampai_tahun,jabatan:jabatan ? jabatan : "-",id:0
+    }
+    console.log("ok")
+    json.push(obj)
+    localStorage.setItem("data_pengalaman",JSON.stringify(json))
+    tambahPgl(json)
+    tambahPengalamanModal.modal("hide")
+    $("#perushaan").val("")
+    $("#kotaModalPengalaman").val("")
+    kotaModalPengalaman[0].selectize.clear()
+    $("#dariModalPengalaman").val("")
+    $("#sampaiModalPengalaman").val("")
+    $("#jabatanModalPengalaman").val("")
 
   })
 
   $("#tambahKeluarga").click(function(e){
     const hubungan = $("#thubungan_keluarga").val()
     const nama = $("#tnama_keluarga").val()
-    const tgl_lahir = $("#ttgl_lahir_keluarga").val()
+    const tgl_lahir = moment($("#ttgl_lahir_keluarga").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
     const gender = $("#tgender_keluarga").val()
     const gol_darah = $("#tgoldarah_keluarga").val()
     const obj = {
@@ -739,7 +836,10 @@ tambahPdk(pendidikan)
     tambahPh(lokal)
 
   })
+// <------------------------------------------------------------------->
 
+
+// <------------------------------------------------------------------->
 
   function tambahKl(keluarga){
     console.log(keluarga)
@@ -762,7 +862,7 @@ tambahPdk(pendidikan)
     
     <div class="col-lg-2">
         <div class="form-group">
-        <input type="text" name="tgl_lahir_keluarga" id="tgl_lahir_keluarga" disabled value="${e.tgl_lahir}" class="form-control tgl4" placeholder="Tgl Lahir">
+        <input type="text" name="tgl_lahir_keluarga" id="tgl_lahir_keluarga" disabled value="${moment(e.tgl_lahir,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl4" placeholder="Tgl Lahir">
         </div>
     </div> 
     
@@ -832,6 +932,7 @@ pihak.forEach(e => {
 
   function tambahPgl(pengalaman){
     let i = 0
+    $("#pengalaman").html("")
     pengalaman.forEach(e => {
       $("#pengalaman").append(`
       <div class="row mg-b-10">
@@ -842,18 +943,18 @@ pihak.forEach(e => {
                         </div>
                             <div class="col-lg-3">
                                 <div class="form-group">
-                                  <input type="text" name="kota" id="kota" value="${e.kota}" class="form-control" placeholder="Kota">
+                                  <input type="text" name="kota" id="kota" value="${e.nama_koka}" class="form-control" placeholder="Kota">
                                 </div>
                             </div>
                             <div class="col-lg-2">
                                 <div class="form-group">
-                                  <input type="text" name="dtahun" id="dtahun_pgl" value="${e.dari_tahun}" class="form-control tgl2" placeholder="Dari Tahun">
+                                  <input type="text" name="dtahun" id="dtahun_pgl" value="${moment(e.dari_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Dari Tahun">
                                 </div>
                             </div> 
 
                             <div class="col-lg-2">
                               <div class="form-group">
-                                <input type="text" name="stahun" id="stahun_pgl" value="${e.sampai_tahun}" class="form-control tgl2" placeholder="Sampai Tahun">
+                                <input type="text" name="stahun" id="stahun_pgl" value="${moment(e.sampai_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Sampai Tahun">
                               </div>
                             </div> 
 
@@ -876,7 +977,9 @@ pihak.forEach(e => {
 
   function tambahPdk(pendidikan){
     let i = 0
+    $("#pendidikan").html("")
     pendidikan.forEach(e => {
+      console.log(e)
       $("#pendidikan").append(`
         <div class="row mg-b-10">
                           <div class="col-lg-3">
@@ -892,19 +995,19 @@ pihak.forEach(e => {
 
                             <div class="col-lg-2">
                                 <div class="form-group">
-                                  <input type="text" name="kota" id="kota_lembaga" value="${e.kota}" class="form-control" placeholder="Kota">   
+                                  <input type="text" name="kota" id="kota_lembaga" value="${e.nama_koka}" class="form-control" placeholder="Kota">   
                                 </div>
                             </div>
 
                             <div class="col-lg-2">
                                 <div class="form-group">
-                                  <input type="text" name="dtahun" id="dtahun_lembaga" value="${e.dari_tahun}" class="form-control tgl2" placeholder="Dari Tahun">
+                                  <input type="text" name="dtahun" id="dtahun_lembaga" value="${moment(e.dari_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Dari Tahun">
                                 </div>
                             </div> 
 
                             <div class="col-lg-2">
                               <div class="form-group">
-                                <input type="text" name="stahun" id="stahun_lembaga" value="${e.sampai_tahun}" class="form-control tgl2" placeholder="Sampai Tahun">
+                                <input type="text" name="stahun" id="stahun_lembaga" value="${moment(e.sampai_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Sampai Tahun">
                               </div>
                             </div> 
 
@@ -926,46 +1029,62 @@ pihak.forEach(e => {
                             </div>
                         </div>
       `)
+      i++
     })
   }
 
+
+// <------------------------------------------------------------------->
+
   
     function finished(e){
+      const token = document.querySelector("[name=csrfmiddlewaretoken]").value
       const nama = $("#nama").val()
-    const gender = $("#gender").val()
-    const tgl_masuk = $("#tgl_masuk").val()
-    const nik = $("#nik").val()
-    const userid = $("#userid").val()
-    const div = $("#div").val()
-    const counter = $("#counter").val()
-    const jabatan = $("#jabatan").val()
-    const kk = $("#kk").val()
-    const hr = $("#hr").val()
-    const ca = $("#ca").val()
-    const rek = $("#rek").val()
-    const payroll = $("#payroll").val()
-    const nks = $("#nks").val()
-    const ntk = $("#ntk").val()
-    const pks = $("#pks").val()
-    const ptk = $("#ptk").val()
+      const gender = $("#gender").val()
+      const tgl_masuk = moment($("#tgl_masuk").val(),"DD-MM-YYYY").format("YYYY-MM-DD")
+      const nik = $("#nik").val()
+      const userid = $("#userid").val()
+      const div = $("#div").val()
+      const counter = $("#counter").val()
+      const jabatan = $("#jabatan").val()
+      const kk = $("#kk").val()
+      const hr = $("#hr").val()
+      const ca = $("#ca").val()
+      const rek = $("#rek").val()
+      const payroll = $("#payroll").val()
+      const nks = $("#nks").val()
+      const ntk = $("#ntk").val()
+      const pks = $("#pks").val()
+      const ptk = $("#ptk").val()
+      const id = $("#id").val()
+      // Data Pribadi
+      const alamat = $("#alamat").val()
+      const phone = $("#phone").val()
+      const email = $("#email").val()
+      const kota_lahir = $("#kota_lahir").val()
+      const tgl_lahir = moment($("#tgl_lahir").val(),"DD-MM-YYYY").format("YYYY-MM-DD")
+      const tinggi = $("#tinggi").val() ? $("#tinggi").val().split(",").join(".") : 0 
+      const berat = $("#berat").val() ? $("#berat").val().split(",").join(".") : 0
+      const goldarah = $("#goldarah").val()
+      const agama = $("#agama").val()
 
-    // Data Pribadi
-    const alamat = $("#alamat").val()
-    const phone = $("#phone").val()
-    const email = $("#email").val()
-    const kota_lahir = $("#kota_lahir").val()
-    const tgl_lahir = $("#tgl_lahir").val()
-    const tinggi = $("#tinggi").val()
-    const berat = $("#berat").val()
-    const goldarah = $("#goldarah").val()
-    const agama = $("#agama").val()
+      // Keluarga & Pihak
+      const keluarga = localStorage.getItem("data_keluarga")
+      const pihak = localStorage.getItem("data_pihak")
+      const pengalaman = localStorage.getItem("data_pengalaman")
+      const pendidikan = localStorage.getItem("data_pendidikan")
 
-    // Keluarga & Pihak
-    const keluarga = localStorage.getItem("data_keluarga")
-    const pihak = localStorage.getItem("data_pihak")
-    console.log(nama,gender,tgl_masuk,nik,userid,div,counter,jabatan,kk,hr,ca,rek,payroll,nks,ntk,pks,ptk,"General")
-    console.log(alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah,agama,"Data pribadi")
-    console.log(keluarga,pihak,"keluarga")
+      $.ajax({
+        url:`{% url "edit_pegawai" id %}`,
+        method:"post",
+        data:{nama,gender,tgl_masuk,nik,userid,div,counter,jabatan,kk,hr,ca,rek,payroll,nks,ntk,pks,ptk,keluarga,pihak,pengalaman,pendidikan,alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah,agama,id},
+        headers:{"X-CSRFToken":token},
+        success:(e) => {
+          console.log(e)
+          window.location = "{% url 'pegawai' sid %}"
+          console.log('sd')
+        }
+      })
     }
 
 </script>

@@ -164,6 +164,16 @@ class pengalaman_db(ImportExportModelAdmin):
 class kota_kabupaten(ImportExportModelAdmin):
     list_display = ("nama_koka",)
     
+@admin.register(cuti_db)
+class cuti_db(ImportExportModelAdmin):
+    list_display = ("pegawai","tgl_cuti")
+@admin.register(promosi_demosi_db)
+class promo_demo(ImportExportModelAdmin):
+    list_display = ("pegawai","tgl","status")
+
+@admin.register(sangsi_db)
+class sangsi(ImportExportModelAdmin):
+    list_display = ("pegawai","tgl_berlaku","tgl_berakhir")
 admin.site.site_header = "AHRIS"
 admin.site.site_title = "AHRIS"
 admin.site.site_url = "/hrd/pengaturan"    

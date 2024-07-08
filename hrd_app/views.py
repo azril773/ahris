@@ -418,7 +418,7 @@ def edit_pegawai(request,idp):
             obj = {
                 "hubungan":k.hubungan,
                 "nama":k.nama,
-                "tgl_lahir":k.tgl_lahir.strftime("%Y-%m-%d"),
+                "tgl_lahir":k.tgl_lahir.strftime("%d-%m-%Y"),
                 "gender":k.gender,
                 "gol_darah":k.gol_darah
             }
@@ -439,20 +439,23 @@ def edit_pegawai(request,idp):
                 "pendidikan":pd.pendidikan,
                 "id":1,
                 "nama":pd.nama,
-                "kota":pd.kota,
-                "dari_tahun":pd.dari_tahun.strftime("%Y-%m-%d"),
-                "sampai_tahun":pd.sampai_tahun.strftime("%Y-%m-%d"),
+                "kota":pd.kota_id,
+                "nama_koka":pd.kota.nama_koka,
+                "dari_tahun":pd.dari_tahun.strftime("%d-%m-%Y"),
+                "sampai_tahun":pd.sampai_tahun.strftime("%d-%m-%Y"),
                 "jurusan":pd.jurusan,
                 "gelar":pd.gelar
             }
             pdk.append(obj)
 
         for pn in pengalaman:
+            print(pn.kota_id)
             obj = {
                 "perusahaan":pn.perusahaan,
-                "kota":pn.kota,
-                "dari_tahun":pn.dari_tahun.strftime("%Y-%m-%d"),
-                "sampai_tahun":pn.sampai_tahun.strftime("%Y-%m-%d"),
+                "kota":pn.kota_id,
+                "nama_koka":pn.kota.nama_koka,
+                "dari_tahun":pn.dari_tahun.strftime("%d-%m-%Y"),
+                "sampai_tahun":pn.sampai_tahun.strftime("%d-%m-%Y"),
                 "jabatan":pn.jabatan
             }
             pgl.append(obj)
@@ -465,10 +468,14 @@ def edit_pegawai(request,idp):
         kota_kabupaten = kota_kabupaten_db.objects.all()
         # for k in kota_kabupaten:
         #     kota_kabupaten_db(nama_kota_kabupaten=k["nama_kota_kabupaten"]).save()
+        pg.tgl_masuk = pg.tgl_masuk.strftime("%d-%m-%Y")
         data = serialize("json",kota_kabupaten)
-
+        pribadi.tgl_lahir = pribadi.tgl_lahir.strftime("%d-%m-%Y")
+        pribadi.tinggi_badan = ".".join(str(pribadi.tinggi_badan).split(","))
+        pribadi.berat_badan = ".".join(str(pribadi.berat_badan).split(","))
         data = {
             'akses' : akses,
+            'id':idp,
             'dsid': dsid,
             'sid': pg.status_id,
             'counter': counter,
@@ -484,7 +491,7 @@ def edit_pegawai(request,idp):
             'pendidikan':pdk,
             'pribadi':pribadi,
             'idp':int(idp),
-            'kota_kabupaten':json.loads(data),
+            'kota_kabupaten':kota_kabupaten,
             'modul_aktif' : 'Pegawai',
             'payroll':["Lainnya","HRD","Owner"],
             'goldarah':['O','A','B','AB'],
@@ -498,7 +505,160 @@ def edit_pegawai(request,idp):
         messages.info(request, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
+@login_required
+def epegawai(r,idp):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        user = akses_db.objects.get(pk=r.user.id)
+        sid = user.sid_id
+        nama = r.POST.get("nama")
+        id = r.POST.get("id")
+        gender = r.POST.get("gender")
+        tgl_masuk = r.POST.get("tgl_masuk")
+        nik = r.POST.get("nik")
+        userid = r.POST.get("userid")
+        div = r.POST.get("div")
+        counter = r.POST.get("counter")
+        jabatan = r.POST.get("jabatan")
+        kk = r.POST.get("kk")
+        hr = r.POST.get("hr")
+        ca = r.POST.get("ca")
+        rek = r.POST.get("rek")
+        payroll = r.POST.get("payroll")
+        nks = r.POST.get("nks")
+        ntk = r.POST.get("ntk")
+        pks = r.POST.get("pks")
+        ptk = r.POST.get("ptk")
 
+
+        # Data Pribadi
+        alamat = r.POST.get("alamat")
+        phone = r.POST.get("phone")
+        email = r.POST.get("email")
+        kota_lahir = r.POST.get("kota_lahir")
+        tgl_lahir = r.POST.get("tgl_lahir")
+        tinggi = r.POST.get("tinggi")
+        berat = r.POST.get("berat")
+        goldarah = r.POST.get("goldarah")
+        agama = r.POST.get("agama")
+
+
+        keluarga = r.POST.get("keluarga")
+        pihak = r.POST.get("pihak")
+        pengalaman = r.POST.get("pengalaman")
+        pendidikan = r.POST.get("pendidikan")
+        keluarga = json.loads(keluarga)
+        pihak = json.loads(pihak)
+        pengalaman = json.loads(pengalaman)
+        pendidikan = json.loads(pendidikan)
+        status_pegawai = status_pegawai_db.objects.get(status="Staff")
+
+        if pegawai_db.objects.filter(~Q(pk=int(idp)),userid=userid).exists():
+            status = "duplikat"
+        else:
+            pegawai = pegawai_db.objects.filter(userid=userid).update(
+                nama=nama,
+                gender=gender,
+                userid=userid,
+                status=status_pegawai,
+                nik=nik,
+                divisi_id=div,
+                jabatan_id=jabatan,
+                no_rekening=rek,
+                no_bpjs_ks=nks,
+                no_bpjs_tk=ntk,
+                payroll_by=payroll,
+                ks_premi=pks,
+                tk_premi=ptk,
+                aktif=1,
+                tgl_masuk=tgl_masuk,
+                tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
+                hari_off_id=hr,
+                kelompok_kerja_id=kk,
+                sisa_cuti=12,
+                counter_id=counter,
+                add_by=r.user.username,
+                edit_by=r.user.username
+
+                # status
+            )            
+
+            
+
+            # Pengalaman
+            pengalaman_db.objects.filter(pegawai__userid=int(userid)).delete()
+            for pgl in pengalaman:
+                print(pgl)
+                pengalaman_db(
+                    pegawai_id=int(idp),
+                    perusahaan=pgl['perusahaan'],
+                    kota_id=pgl['kota'],
+                    dari_tahun=datetime.strptime(pgl['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                    sampai_tahun=datetime.strptime(pgl['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                    jabatan=pgl['jabatan']
+                ).save()
+
+
+            # Pendidikan
+            pendidikan_db.objects.filter(pegawai__userid=int(userid)).delete()
+            for pdk in pendidikan:
+                pendidikan_db(
+                    pegawai_id=int(idp),
+                    pendidikan=pdk['pendidikan'],
+                    nama=pdk['nama'],
+                    kota_id=pdk['kota'],
+                    dari_tahun=datetime.strptime(pdk['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                    sampai_tahun=datetime.strptime(pdk['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                    jurusan=pdk['jurusan'],
+                    gelar=pdk['gelar']
+                ).save()
+
+
+            # Tambah Pihak Lain
+            pgw = pegawai_db.objects.get(userid=userid)
+            kontak_lain_db.objects.filter(pegawai__userid=int(userid)).delete()
+            for p in pihak:
+                kontak_lain_db(
+                pegawai_id=int(pgw.pk),
+                hubungan = p['hubungan'],
+                nama = p['nama'],
+                gender = p['gender'],
+                phone = p['phone']
+                ).save()
+            
+
+            # Tambah Keluarga
+            keluarga_db.objects.filter(pegawai__userid=int(userid)).delete()
+            for k in keluarga:
+                print(k)
+                keluarga_db(
+                    pegawai_id=int(pgw.pk),
+                    hubungan = k['hubungan'],
+                    nama = k["nama"],
+                    tgl_lahir = datetime.strptime(k['tgl_lahir'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                    gender = k['gender'],
+                    gol_darah = k['gol_darah']
+                ).save()
+
+            # Tambah Data Pribadi
+            pribadi = pribadi_db.objects.get(pegawai_id=id)
+            if not pribadi:
+                return False
+            else:
+                print(tinggi)
+                pribadi_db.objects.filter(pegawai_id=id).update(
+                    pegawai_id=int(pgw.pk),
+                    alamat=alamat,
+                    phone=phone,
+                    email=email,
+                    kota_lahir=kota_lahir,
+                    tgl_lahir=tgl_lahir,
+                    tinggi_badan=tinggi,
+                    berat_badan=berat,
+                    gol_darah=goldarah,
+                    agama=agama
+                )
+            status= 'OK'
+        return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
 
 @login_required
 def tpegawai(r):
@@ -515,7 +675,7 @@ def tpegawai(r):
         kk = kelompok_kerja_db.objects.all().order_by('kelompok')
         hr = hari_db.objects.all()
 
-
+        kota_kabupaten = kota_kabupaten_db.objects.all()
         
         data = {
             'akses' : akses,
@@ -523,6 +683,7 @@ def tpegawai(r):
             "counter":counter,
             "divisi":divisi,
             "jabatan":jabatan,
+            "kota_kabupaten":kota_kabupaten,
             "kk":kk,
             "hr":hr
         }
@@ -566,11 +727,33 @@ def tambah_pegawai(r):
 
         keluarga = r.POST.get("keluarga")
         pihak = r.POST.get("pihak")
-        keluarga = json.loads(keluarga)
-        pihak = json.loads(pihak)
+        pengalaman = r.POST.get("pengalaman")
+        pendidikan = r.POST.get("pendidikan")
+        if keluarga:
+            keluarga = json.loads(keluarga)
+        else:
+            keluarga = []
+        
+
+        if pihak:
+            pihak = json.loads(pihak)
+        else:
+            pihak = []
+
+
+        if pengalaman:
+            pengalaman = json.loads(pengalaman)
+        else:
+            pengalaman = []
+        
+
+        if pendidikan:
+            pendidikan = json.loads(pendidikan)
+        else:
+            pendidikan = []
         status_pegawai = status_pegawai_db.objects.get(status="Staff")
 
-        if pegawai_db.objects.filter(nama=nama,gender=gender).exists():
+        if pegawai_db.objects.filter(userid=userid).exists():
             status = "duplikat"
         else:
             pegawai = pegawai_db(
@@ -641,6 +824,27 @@ def tambah_pegawai(r):
                 agama=agama
             )
             print(alamat)
+            for pgl in pengalaman:
+                pengalaman_db(
+                    pegawai_id=int(pgw.pk),
+                    perusahaan=pgl['perusahaan'],
+                    kota_id=pgl['kota'],
+                    dari_tahun=datetime.strptime(pgl['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                    sampai_tahun=datetime.strptime(pgl['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                    jabatan=pgl['jabatan']
+                ).save()
+            
+            for pdk in pendidikan:
+                pendidikan_db(
+                    pegawai_id=int(pgw.pk),
+                    pendidikan=pdk['pendidikan'],
+                    nama=pdk['nama'],
+                    kota_id=pdk['kota'],
+                    dari_tahun=datetime.strptime(pdk['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                    sampai_tahun=datetime.strptime(pdk['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                    jurusan=pdk['jurusan'],
+                    gelar=pdk['gelar']
+                ).save()
             pribadi.save()
             status = "ok"
             print(sid)
@@ -648,7 +852,16 @@ def tambah_pegawai(r):
 
 
 @login_required
+def getPegawai(r,idp):
+    result = serialize("json",[pegawai_db.objects.get(pk=int(idp))])
+    result = json.loads(result)
+    print(result[0])
+    return JsonResponse({"data":result[0]},status=200,safe=False)
+
+
+@login_required
 def tambah_keluarga(r, idp):
+
     nama_user = r.user.username
     print(r.POST)
     hubungan = r.POST.get('dhubungan_keluarga')
@@ -763,6 +976,9 @@ def data_pribadi(request,idp):
         dsid = dakses.sid_id   
         
         pg =pegawai_db.objects.get(id=int(idp))
+        pribadi = pribadi_db.objects.get(pegawai_id=pg.pk)
+        kontak_lain = kontak_lain_db.objects.filter(pegawai_id=pg.pk)
+        keluarga = keluarga_db.objects.filter(pegawai_id=pg.pk)
         sid = pg.status_id          
                 
         data = {
@@ -770,6 +986,9 @@ def data_pribadi(request,idp):
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
+            "pribadi":pribadi,
+            "keluarga":keluarga,
+            "kontak_lain":kontak_lain,
             'modul_aktif' : 'Pegawai'
         }
         
@@ -792,14 +1011,23 @@ def pendidikan_kerja(request,idp):
         
         pg =pegawai_db.objects.get(id=int(idp))
         sid = pg.status_id          
-                
+        pendidikan = pendidikan_db.objects.filter(pegawai_id=pg.pk)
+        pdk = []
+        for p in pendidikan:
+            obj = p
+            obj.kota = p.kota
+            pdk.append(obj)
+        print(pendidikan[0].dari_tahun)
+        pengalaman = pengalaman_db.objects.filter(pegawai_id=pg.pk)
         data = {
             'akses' : akses,
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
+            'pengalaman':pengalaman,
+            'pendidikan':pendidikan,
             'modul_aktif' : 'Pegawai'
-        }
+    }
         
         return render(request,'hrd_app/pegawai/pendidikan_pkerja.html', data)
         
@@ -818,14 +1046,19 @@ def promosi_demosi(request,idp):
            
         dsid = dakses.sid_id   
         
-        pg =pegawai_db.objects.get(id=int(idp))
+        pg =pegawai_db.objects.select_related("jabatan").get(id=int(idp))
         sid = pg.status_id          
-                
+        jabatan = jabatan_db.objects.all()
+        print(jabatan)
+        print(pg.jabatan_id)
         data = {
             'akses' : akses,
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
+            'jabatan_sebelum':pg.jabatan_id,
+            'jabatan':jabatan,
+            'pegawai':pegawai,
             'modul_aktif' : 'Pegawai'
         }
         
@@ -834,6 +1067,65 @@ def promosi_demosi(request,idp):
     else:    
         messages.info(request, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
+
+
+
+@login_required
+def tambah_prodemo(r):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        res = {"status":""}
+        tgl = datetime.strptime(r.POST.get("tgl"),"%d-%m-%Y").strftime("%Y-%m-%d")
+        status = r.POST.get("status")
+        jabatan_seb = r.POST.get("jabatan_seb")
+        jabatan_sek = r.POST.get("jabatan_sek")
+        print(r.POST)
+        idp = r.POST.get("id")
+
+        if jabatan_seb ==  jabatan_sek:
+            res["status"] = "Jabatan sama"
+            return JsonResponse(res,status=400,safe=False)
+        
+        
+        if status == "0":
+            status = "Demosi"
+        else:
+            status = "Promosi"
+        
+        pgw = pegawai_db.objects.get(pk=int(idp))
+        if not pgw:
+            res['status'] = 'Pegawai tidak ada'
+            return JsonResponse(res,status=400,safe=False)
+        
+
+        promosi_demosi_db(tgl=tgl,pegawai_id=int(idp),status=status,jabatan_sebelum_id=int(pgw.jabatan_id),jabatan_sekarang_id=int(jabatan_sek)).save()
+        pg = pegawai_db.objects.get(pk=int(idp))
+        pg.jabatan_id=int(jabatan_sek)
+        pg.save()
+        res["status"] = "Success"
+        return JsonResponse(res,status=201,safe=False)
+
+        
+
+def promodemo_json(r,idp):
+    
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        status = r.POST.get("status")
+        print(r.POST)
+        if status == "0":
+            result = promosi_demosi_db.objects.filter(pegawai_id=int(idp),status="demosi")
+        else:
+            result = promosi_demosi_db.objects.filter(pegawai_id=int(idp),status="promosi")
+        
+        rslt = []
+        for r in result:
+            obj = {
+                "tgl":r.tgl,
+                "jabatan_sebelum":r.jabatan_sebelum.jabatan,
+                "jabatan_sekarang":r.jabatan_sekarang.jabatan
+            }
+
+            rslt.append(obj)
+        return JsonResponse({'data':rslt},status=200,safe=False)
 
 
 @login_required
@@ -863,6 +1155,58 @@ def sangsi(request,idp):
         messages.info(request, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
+@login_required
+def get_sangsi_pegawai(r,idp):
+    sangsi = sangsi_db.objects.filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now()).last()
+    if not sangsi:
+        sangsi = {}
+    else:
+        sangsi = serialize("json",[sangsi])
+        sangsi = json.loads(sangsi)[0]
+    return JsonResponse({"data":sangsi},status=200,safe=False)
+
+@login_required
+def sangsi_json(r,idp):
+    sangsi = sangsi_db.objects.filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now())
+    result = []
+    for s in sangsi:
+        obj = {
+            "tgl_berlaku":s.tgl_berlaku,
+            "tgl_berakhir":s.tgl_berakhir,
+            "status":s.status_sangsi,
+            "deskripsi":s.deskripsi_pelanggaran
+        }
+        result.append(obj)
+    return JsonResponse({"data":result})
+
+@login_required
+def tambah_sangsi(r,idp):
+
+    # cek dari xmlhttprequest
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        tgl_berlaku = r.POST.get("tgl_berlaku")
+        tgl_berakhir = r.POST.get("tgl_berakhir")
+        status = r.POST.get("status")
+        deskripsi = r.POST.get("deskripsi")
+
+        # if status != "SP1" or status != "SP2" or status != "SP3":
+        #      return JsonResponse({"status":"XIXIIX"},safe=False,status=400)
+        # cek jika sp tersebut masih ada
+        if sangsi_db.objects.filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now(),status_sangsi="SP3").exists():
+            return JsonResponse({"status":"Kudunya dipecat ga si!"},safe=False,status=400)
+        print(tgl_berakhir)
+        if sangsi_db.objects.filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now(),status_sangsi=status).exists():
+            return JsonResponse({"status":"Sangsi "+ status+" Sudah ada!"},safe=False,status=400)
+
+    
+        sangsi_db(
+            pegawai_id=int(idp),
+            tgl_berlaku=tgl_berlaku,
+            tgl_berakhir=tgl_berakhir,
+            status_sangsi=status,
+            deskripsi_pelanggaran=deskripsi
+        ).save()
+        return JsonResponse({'status':"success create sangsi"},status=201,safe=False)
 
 
 @login_required
@@ -1091,7 +1435,7 @@ def absensi(request,sid):
         status = status_pegawai_db.objects.all().order_by('id')
         
         ###
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__status = 'Karyawan Supermarket')
+        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
                 
         data = {
             'akses' : akses,
@@ -3269,7 +3613,7 @@ def ijin(request, sid):
         
         status = status_pegawai_db.objects.all().order_by('id')
         
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__status = 'Karyawan Supermarket')
+        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
 
         pegawai = []
             
@@ -3592,7 +3936,7 @@ def geser_off(request, sid):
         
         status = status_pegawai_db.objects.all().order_by('id')
         
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__status = 'Karyawan Supermarket')
+        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
 
         pegawai = []
             
@@ -4033,7 +4377,7 @@ def opg(request, sid):
         
         status = status_pegawai_db.objects.all().order_by('id')
         
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__status = 'Karyawan Supermarket')
+        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
 
         pegawai = []
             
@@ -4158,7 +4502,7 @@ def cari_opg_sid(request, dr, sp, sid):
         
         status = status_pegawai_db.objects.all().order_by('id')
         
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__status = 'Karyawan Supermarket')
+        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
 
         pegawai = []
             
@@ -4454,7 +4798,7 @@ def cuti(request, sid):
         
         status = status_pegawai_db.objects.all().order_by('id')
         
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__status = 'Karyawan Supermarket')
+        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
 
         pegawai = []
             
@@ -4514,7 +4858,7 @@ def detail_cuti(request, sid, idp):
         
         pg = pegawai_db.objects.get(id=int(idp))
         
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__status = 'Karyawan Supermarket')
+        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
         
         ac = awal_cuti_db.objects.last()
         tac = ac.tgl       
@@ -4557,7 +4901,7 @@ def cari_cuti(request):
         pg = pegawai_db.objects.get(id=int(idp))
         sid = pg.status_id      
         
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__status = 'Karyawan Supermarket')
+        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = dsid)
         
         data = {
             'akses' : akses,
@@ -4895,7 +5239,7 @@ def lembur(request, sid):
         sp = datetime.strftime(sampai,'%d-%m-%Y')                 
         
         lstatus = []
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__status = 'Karyawan Supermarket')
+        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai__id = sid)
         for s in sid_lembur:
             ds = {
                 'id':s.status_pegawai_id,

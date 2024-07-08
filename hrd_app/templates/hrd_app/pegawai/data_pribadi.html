@@ -73,21 +73,21 @@
                         <div class="col-md-6 mg-t--1 mg-md-t-0">
                             <div class="form-group mg-md-l--1">
                               <label class="form-control-label tx-gray-800">Alamat:</label>
-                              <span class="tx-inverse tx-13">Perum. Gunung, Jl. Perkutut, No.10 A, Cirebon</span>
+                              <span class="tx-inverse tx-13">{{pribadi.alamat}}</span>
                             </div>
                         </div>
     
                         <div class="col-md-3 mg-t--1 mg-md-t-0">
                             <div class="form-group mg-md-l--1">
                                 <label class="form-control-label tx-gray-800">HP / Telp:</label>
-                                <span class="tx-inverse tx-13">081245365455</span>
+                                <span class="tx-inverse tx-13">{{pribadi.phone}}</span>
                             </div>
                         </div>
 
                         <div class="col-md-3 mg-t--1 mg-md-t-0">
                             <div class="form-group mg-md-l--1">
                                 <label class="form-control-label tx-gray-800">Email:</label>
-                                <span class="tx-inverse tx-13">tri@musketir.com</span>
+                                <span class="tx-inverse tx-13">{{pribadi.email}}</span>
                             </div>
                         </div>
 
@@ -95,28 +95,28 @@
                         <div class="col-md-3 mg-t--1 mg-md-t-0">
                             <div class="form-group mg-md-l--1">
                             <label class="form-control-label tx-gray-800">Tgl Lahir:</label>
-                            <span class="tx-inverse tx-13">5 Juni 1935</span>
+                            <span class="tx-inverse tx-13">{{pribadi.tgl_lahir}}</span>
                             </div>
                         </div>
 
                         <div class="col-md-3 mg-t--1 mg-md-t-0">
                             <div class="form-group mg-md-l--1">
                             <label class="form-control-label tx-gray-800">Tinggi / Berat Badan:</label>
-                            <span class="tx-inverse tx-13">180 Cm / 80 Kg</span>
+                            <span class="tx-inverse tx-13">{{pribadi.tinggi_badan}} Cm / {{pribadi.berat_badan}} Kg</span>
                             </div>
                         </div>
     
                         <div class="col-md-3 mg-t--1 mg-md-t-0">
                             <div class="form-group mg-md-l--1">
                             <label class="form-control-label tx-gray-800">Gol Darah:</label>
-                            <span class="tx-inverse tx-13">O</span>
+                            <span class="tx-inverse tx-13">{{pribadi.gol_darah}}</span>
                             </div>
                         </div>
     
                         <div class="col-md-3 mg-t--1 mg-md-t-0">
                             <div class="form-group mg-md-l--1">
                             <label class="form-control-label tx-gray-800">Agama:</label>
-                            <span class="tx-inverse tx-13">Muslim</span>
+                            <span class="tx-inverse tx-13">{{pribadi.agama}}</span>
                             </div>
                         </div>
 
@@ -131,12 +131,14 @@
                                         <th><span class="tx-inverse tx-13">Gender</span></th>
                                         <th><span class="tx-inverse tx-13">HP / Telp</span></th>
                                     </tr>
+                                    {% for kl in kontak_lain %}
                                     <tr>
-                                        <td><span class="tx-inverse tx-13">Saudara Sepupu</span></td>
-                                        <td><span class="tx-inverse tx-13">Toni</span></td>
-                                        <td><span class="tx-inverse tx-13">L</span></td>
-                                        <td><span class="tx-inverse tx-13">0897421331</span></td>
+                                        <td><span class="tx-inverse tx-13">{{kl.hubungan}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{kl.nama}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{kl.gender}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{kl.phone}}</span></td>
                                     </tr>    
+                                        {% endfor %}
                                 </table>
                             </div>
                         </div>
@@ -158,34 +160,15 @@
                                         <th><span class="tx-inverse tx-13">Gender</span></th>
                                         <th><span class="tx-inverse tx-13">Gol Darah</span></th>
                                     </tr>
+                                    {% for kl in keluarga %}
                                     <tr>
-                                        <td><span class="tx-inverse tx-13">Ayah</span></td>
-                                        <td><span class="tx-inverse tx-13">Bapaknya Tri</span></td>
-                                        <td><span class="tx-inverse tx-13">10 Januari 1780</span></td>
-                                        <td><span class="tx-inverse tx-13">L</span></td>
-                                        <td><span class="tx-inverse tx-13">A</span></td>
+                                        <td><span class="tx-inverse tx-13">{{kl.hubungan}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{kl.nama}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{kl.tgl_lahir}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{kl.gender}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{kl.gol_darah}}</span></td>
                                     </tr>
-                                    <tr>
-                                        <td><span class="tx-inverse tx-13">Ibu</span></td>
-                                        <td><span class="tx-inverse tx-13">Ibunya Tri</span></td>
-                                        <td><span class="tx-inverse tx-13">23 Maret 1781</span></td>
-                                        <td><span class="tx-inverse tx-13">P</span></td>
-                                        <td><span class="tx-inverse tx-13">B</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="tx-inverse tx-13">Istri</span></td>
-                                        <td><span class="tx-inverse tx-13">Mamahnya Lala</span></td>
-                                        <td><span class="tx-inverse tx-13">19 April 1989</span></td>
-                                        <td><span class="tx-inverse tx-13">P</span></td>
-                                        <td><span class="tx-inverse tx-13">O</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td><span class="tx-inverse tx-13">Anak</span></td>
-                                        <td><span class="tx-inverse tx-13">Lala</span></td>
-                                        <td><span class="tx-inverse tx-13">18 Juni 2015</span></td>
-                                        <td><span class="tx-inverse tx-13">P</span></td>
-                                        <td><span class="tx-inverse tx-13">O</span></td>
-                                    </tr>
+                                    {% endfor %}
                                 </table>
                             </div>
                         </div> 

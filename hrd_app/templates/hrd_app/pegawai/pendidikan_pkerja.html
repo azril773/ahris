@@ -81,12 +81,14 @@
                                         <th><span class="tx-inverse tx-13">Jabatan</span></th>
 
                                     </tr>
+                                    {% for pgl in pengalaman %}
                                     <tr>
-                                        <td><span class="tx-inverse tx-13">PT. Cemerlang Abadi</span></td>
-                                        <td><span class="tx-inverse tx-13">Bandung</span></td>
-                                        <td><span class="tx-inverse tx-13">2005 - 2019</span></td>
-                                        <td><span class="tx-inverse tx-13">Staff IT</span></td>
+                                        <td><span class="tx-inverse tx-13">{{pgl.perusahaan}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{pgl.kota}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{pgl.dari_tahun}} - {{pgl.sampai_tahun}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{pgl.jabatan}}</span></td>
                                     </tr>    
+                                    {% endfor %}
                                 </table>
                             </div>
                         </div>
@@ -104,20 +106,24 @@
                               <label class="form-control-label tx-gray-800">Pendidikan Terakhir:</label>
                                 <table class="table">
                                     <tr>
-                                        <th><span class="tx-inverse tx-13">Nama Univ / SMA / SMP / SD</span></th>
+                                        <th><span class="tx-inverse tx-13">Pendidikan</span></th>
+                                        <th><span class="tx-inverse tx-13">Nama</span></th>
                                         <th><span class="tx-inverse tx-13">Kota</span></th>
                                         <th><span class="tx-inverse tx-13">Tahun</span></th>
                                         <th><span class="tx-inverse tx-13">Jurusan</span></th>
                                         <th><span class="tx-inverse tx-13">Gelar</span></th>
 
                                     </tr>
+                                    {% for pdk in pendidikan %}
                                     <tr>
-                                        <td><span class="tx-inverse tx-13">Universitas Padahal IKIP</span></td>
-                                        <td><span class="tx-inverse tx-13">Bandung</span></td>
-                                        <td><span class="tx-inverse tx-13">2005 - 2019</span></td>
-                                        <td><span class="tx-inverse tx-13">Keguruan</span></td>
-                                        <td><span class="tx-inverse tx-13">Dr. MBA, PHD, Prof</span></td>
+                                        <td><span class="tx-inverse tx-13">{{pdk.pendidikan}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{pdk.nama}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{pdk.kota}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{pdk.dari_tahun}} - {{pdk.sampai_tahun}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{pdk.jurusan}}</span></td>
+                                        <td><span class="tx-inverse tx-13">{{pdk.gelar}}</span></td>
                                     </tr>    
+                                    {% endfor %}
                                 </table>
                             </div>
                         </div>
