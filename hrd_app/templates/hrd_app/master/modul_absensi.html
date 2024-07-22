@@ -8,12 +8,16 @@
     <a href="{% url 'lembur' sil %}"><button class="btn btn-info mg-b-6">Lembur & Kompen/PJK</button></a>
      
 {% elif modul_aktif == 'Ijin' %}
+    {% if dsid > 0 %}
     <a href="{% url 'absensi' dsid %}"><button class="btn btn-info mg-b-6">Absensi</button></a>    
     <a href="{% url 'ijin' dsid %}"><button class="btn btn-danger mg-b-6">Ijin</button></a>
     <a href="{% url 'geser_off' dsid %}"><button class="btn btn-info mg-b-6">Geser OFF</button></a>
     <a href="{% url 'opg' dsid %}"><button class="btn btn-info mg-b-6">OPG</button></a>
     <a href="{% url 'cuti' dsid %}"><button class="btn btn-info mg-b-6">Cuti</button></a>
+    {% endif %}
+    {% if sil > 0 %}
     <a href="{% url 'lembur' sil %}"><button class="btn btn-info mg-b-6">Lembur & Kompen/PJK</button></a>
+    {% endif %}
     
 {% elif modul_aktif == 'Geser OFF'%}
     <a href="{% url 'absensi' dsid %}"><button class="btn btn-info mg-b-6">Absensi</button></a>    

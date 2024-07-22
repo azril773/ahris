@@ -8,14 +8,13 @@ from django.db.models import Q, Avg, Max, Min, Sum, Count, F
 from django.http import HttpResponse, JsonResponse
 from datetime import date, datetime, timedelta
 from django.template.loader import get_template
-from django.contrib import messages
+from django.contrib import messages 
 from json import dumps
 import requests
 # SUPPORT
 from openpyxl.styles import Alignment, Font
 from collections import namedtuple
 from openpyxl import Workbook
-from xhtml2pdf import pisa
 import math
 import json
 import time
@@ -1727,16 +1726,13 @@ def pabsen(request):
         dr = datetime.strftime(dari, "%d-%m-%Y")
         sp = datetime.strftime(sampai, "%d-%m-%Y")
     else:
-        tminus1 = date.today() - timedelta (days=1)
-        
+        tminus1 = date.today() + timedelta(days=-1)
+        print(tminus1,"dari")
         dari = datetime.strptime(f'{tminus1} 00:00:00', "%Y-%m-%d %H:%M:%S")
         sampai = datetime.strptime(f'{date.today()} 23:59:59', "%Y-%m-%d %H:%M:%S")    
-        
         dr = datetime.strftime(dari, "%d-%m-%Y")
         sp = datetime.strftime(sampai, "%d-%m-%Y")
-    
     rangetgl = pd.date_range(dari.date(), sampai.date()).tolist()
-    
     pegawai = [] 
     luserid = []  
     
@@ -1779,8 +1775,8 @@ def pabsen(request):
             pegawai.append(data)        
             luserid.append(p.userid)
         else:
-            if int(sid) == p.status_id: 
-                
+            if int(sid) == int(p.status_id): 
+                print('sd')
                 if p.jabatan_id is None:
                     jabatan = None
                 else:
@@ -1814,7 +1810,7 @@ def pabsen(request):
                     'counter' : counter
                 }
                 pegawai.append(data)        
-                luserid.append(p.userid)       
+                luserid.append(p.userid)
             else:
                 pass
         
@@ -1829,12 +1825,12 @@ def pabsen(request):
                 tabsen.save()
     
     dmesin = []
+    print(rangetgl)
     
     # ambil data mesin simpan di att dan dmesin array
-    for m in mesin_db.objects.filter(status='Aktif'):
+    for m in mesin_db.objects.filter(status='Active'):
         
         ip = m.ipaddress
-        
         conn = None
         zk = ZK(ip, port=4370, timeout=65)
         try:
@@ -1843,14 +1839,12 @@ def pabsen(request):
 
             # Data absensi
             absensi = conn.get_attendance()
-
             for a in absensi:
-                print(a)
                 if dari <= a.timestamp <= sampai:   
                     if a.user_id in luserid:              
                         data = {
                             "userid": a.user_id,
-                            "jam_absen": a.timestamp,
+                            "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
                             "punch": a.punch,
                             "mesin": m.nama
                         }
@@ -1867,10 +1861,40 @@ def pabsen(request):
         finally:
             if conn:
                 conn.disconnect()
-    
     # reordering (ascending)
+    dmesin.append({
+        "userid":"107319",
+        "jam_absen":"2024-07-18 08:02:43",
+        "punch":0,
+        "mesin":"FS"
+    })
     att = sorted(dmesin, key=lambda i: i['jam_absen'])
-    
+    print(att)
+    requests.post("http://localhost:3002",json={"dmesin":att,"dari":str(dari),"sampai":str(sampai),"pegawai":pegawai,"luserid":luserid})
+    att = [{
+        "userid": "107319",
+        "jam_absen": "2024-07-17 20:01:57",
+        "punch": 0,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "107319",
+        "jam_absen": "2024-07-18 09:01:57",
+        "punch": 1,
+        "mesin": "Staff"
+    }, 
+    {
+        "userid": "107319",
+        "jam_absen": "2024-07-17 23:01:57",
+        "punch": 2,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "107319",
+        "jam_absen": "2024-07-18 02:03:17",
+        "punch": 3,
+        "mesin": "Staff"
+    }]
     ddr = []
         
     # ambil data raw simpan di ddr
@@ -1918,1676 +1942,634 @@ def pabsen(request):
                     tambah_data_raw.save()
                 else:
                     pass 
-                    
-                # Versi Cirebon
-                for r in rangetgl:
                 
-                    tplus = r + timedelta(days=1)
-                    
-                    if a['jam_absen'].date() == r.date():
-                        ab = absensi_db.objects.select_related('pegawai').get(tgl_absen=r.date(), pegawai__userid=a['userid'])
-                                            
-                        # masuk
-                        if a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == ab.tgl_absen and a['punch'] == 0 and int(a['jam_absen'].hour) > 4 and int(a['jam_absen'].hour) < 18:
-                            if ab.masuk is None:
-                                ab.masuk = a['jam_absen'].time()
-                                ab.save()
-                                
-                                fdtmasuk = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                data_dtmasuk = {
-                                    'userid':a['userid'],
-                                    'jam_absen':fdtmasuk,
-                                    'punch':a['punch'],
-                                    'mesin':a['mesin'],
-                                    'ket':'Masuk'
-                                }
-                                if not dt:
-                                    dt.append(data_dtmasuk)
-                                else:
-                                    if data_dtmasuk not in dt:
-                                        dt.append(data_dtmasuk)
-                                    else:
-                                        pass        
-                            else:
-                                pass
+                # jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
+                # # Versi Cirebon
+                # for r in rangetgl:
+                #     ab = absensi_db.objects.select_related('pegawai').get(tgl_absen=r.date(), pegawai__userid=a['userid'])
+                #     tplus = r + timedelta(days=1)
+                #     if jam_absen.date() == r.date():
                         
-                        # masuk malam
-                        elif a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == ab.tgl_absen and a['punch'] == 0 and int(a['jam_absen'].hour) > 18:      
-                            if ab.masuk is None:
-                                if ab.pulang is not None:
-                                    if int(ab.pulang.hour) > 9:
-                                        try:
-                                            ab2 = absensi_db.objects.select_related('pegawai').get(tgl_absen=tplus, pegawai__userid=a['userid'])
-                                            if ab2.masuk is None:
-                                                ab2.masuk = a['jam_absen'].time()
-                                                ab2.save()   
-                                                
-                                                fdtmasuk_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                                data_dtmasuk_m = {
-                                                    'userid':a['userid'],
-                                                    'jam_absen':fdtmasuk_m,
-                                                    'punch':a['punch'],
-                                                    'mesin':a['mesin'],
-                                                    'ket':'Masuk Malam'
-                                                }
-                                                if not dt:
-                                                    dt.append(data_dtmasuk_m)
-                                                else:
-                                                    if data_dtmasuk_m not in dt:
-                                                        dt.append(data_dtmasuk_m)
-                                                    else:
-                                                        pass
-                                            else:
-                                                pass 
-                                        except absensi_db.DoesNotExist:
-                                            tabsen = absensi_db(
-                                                tgl_absen = tplus,
-                                                pegawai_id = ab.pegawai_id,
-                                                masuk = a['jam_absen'].time() 
-                                            )                               
-                                            tabsen.save() 
-                                            
-                                            fdtmasuk_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                            data_dtmasuk_m = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtmasuk_m,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Masuk Malam'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtmasuk_m)
-                                            else:
-                                                if data_dtmasuk_m not in dt:
-                                                    dt.append(data_dtmasuk_m)
-                                                else:
-                                                    pass   
-                                    else:
-                                        ab.masuk = a['jam_absen'].time()
-                                        ab.save() 
-                                        
-                                        fdtmasuk_m = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtmasuk_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtmasuk_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Masuk Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtmasuk_m)
-                                        else:
-                                            if data_dtmasuk_m not in dt:
-                                                dt.append(data_dtmasuk_m)
-                                            else:
-                                                pass 
-                                else:
-                                    ab.masuk = a['jam_absen'].time()
-                                    ab.save() 
-                                    
-                                    fdtmasuk_m = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                    data_dtmasuk_m = {
-                                        'userid':a['userid'],
-                                        'jam_absen':fdtmasuk_m,
-                                        'punch':a['punch'],
-                                        'mesin':a['mesin'],
-                                        'ket':'Masuk Malam'
-                                    }
-                                    if not dt:
-                                        dt.append(data_dtmasuk_m)
-                                    else:
-                                        if data_dtmasuk_m not in dt:
-                                            dt.append(data_dtmasuk_m)
-                                        else:
-                                            pass
-                                    
-                            else:
-                                if int(ab.masuk.hour) > 18:
-                                    pass
-                                else:
-                                    try:
-                                        ab2 = absensi_db.objects.select_related('pegawai').get(tgl_absen=tplus, pegawai__userid=a['userid'])
-                                        if ab2.masuk is not None:
-                                            pass
-                                        else:
-                                            ab2.masuk = a['jam_absen'].time()
-                                            ab2.save()
-                                            
-                                            fdtmasuk_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                            data_dtmasuk_m = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtmasuk_m,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Masuk Malam'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtmasuk_m)
-                                            else:
-                                                if data_dtmasuk_m not in dt:
-                                                    dt.append(data_dtmasuk_m)
-                                                else:
-                                                    pass
-                                                
-                                    except absensi_db.DoesNotExist:
-                                        tabsen = absensi_db(
-                                            tgl_absen = tplus,
-                                            pegawai_id = ab.pegawai_id,
-                                            masuk = a['jam_absen'].time() 
-                                        )                               
-                                        tabsen.save()
-                                        
-                                        fdtmasuk_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                        data_dtmasuk_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtmasuk_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Masuk Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtmasuk_m)
-                                        else:
-                                            if data_dtmasuk_m not in dt:
-                                                dt.append(data_dtmasuk_m)
-                                            else:
-                                                pass
-                                
-                        # istirahat
-                        elif a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == ab.tgl_absen and a['punch'] == 2 and int(a['jam_absen'].hour) > 8 and int(a['jam_absen'].hour) < 21:
-                            if ab.masuk is not None:
-                                if int(ab.masuk.hour) < 18:
-                                    ab.istirahat = a['jam_absen'].time()
-                                    ab.save()
-                                    
-                                    fdtist = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                    data_dtist = {
-                                        'userid':a['userid'],
-                                        'jam_absen':fdtist,
-                                        'punch':a['punch'],
-                                        'mesin':a['mesin'],
-                                        'ket':'Istirahat'
-                                    }
-                                    if not dt:
-                                        dt.append(data_dtist)
-                                    else:
-                                        if data_dtist not in dt:
-                                            dt.append(data_dtist)
-                                        else:
-                                            pass
-                                else:
-                                    pass
-                            else:
-                                if ab.pulang is not None:
-                                    if int(ab.pulang.hour) > 9:
-                                        ab.istirahat = a['jam_absen'].time()
-                                        ab.save() 
-                                        
-                                        fdtist = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtist = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtist,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Istirahat'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtist)
-                                        else:
-                                            if data_dtist not in dt:
-                                                dt.append(data_dtist)
-                                            else:
-                                                pass
-                                    else:
-                                        pass    
-                                else:
-                                    ab.istirahat = a['jam_absen'].time()
-                                    ab.save()  
-                                    
-                                    fdtist = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                    data_dtist = {
-                                        'userid':a['userid'],
-                                        'jam_absen':fdtist,
-                                        'punch':a['punch'],
-                                        'mesin':a['mesin'],
-                                        'ket':'Istirahat'
-                                    }
-                                    if not dt:
-                                        dt.append(data_dtist)
-                                    else:
-                                        if data_dtist not in dt:
-                                            dt.append(data_dtist)
-                                        else:
-                                            pass                 
-                        
-                        # istirahat malam
-                        elif a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == ab.tgl_absen and a['punch'] == 2 and int(a['jam_absen'].hour) > 21:
-                            if ab.masuk is not None:
-                                if int(ab.masuk.hour) > 18:
-                                    ab.istirahat = a['jam_absen'].time()
-                                    ab.save()
-                                    
-                                    fdtist_m = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                    data_dtist_m = {
-                                        'userid':a['userid'],
-                                        'jam_absen':fdtist_m,
-                                        'punch':a['punch'],
-                                        'mesin':a['mesin'],
-                                        'ket':'Istirahat Malam'
-                                    }
-                                    if not dt:
-                                        dt.append(data_dtist_m)
-                                    else:
-                                        if data_dtist_m not in dt:
-                                            dt.append(data_dtist_m)
-                                        else:
-                                            pass
-                                else:
-                                    pass
-                            else:
-                                if ab.pulang is not None:
-                                    if int(ab.pulang.hour) < 9:
-                                        ab.istirahat = a['jam_absen'].time()
-                                        ab.save() 
-                                        
-                                        fdtist_m = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtist_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtist_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Istirahat Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtist_m)
-                                        else:
-                                            if data_dtist_m not in dt:
-                                                dt.append(data_dtist_m)
-                                            else:
-                                                pass
-                                    else:
-                                        pass    
-                                else:
-                                    ab.istirahat = a['jam_absen'].time()
-                                    ab.save()   
-                                    
-                                    fdtist_m = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                    data_dtist_m = {
-                                        'userid':a['userid'],
-                                        'jam_absen':fdtist_m,
-                                        'punch':a['punch'],
-                                        'mesin':a['mesin'],
-                                        'ket':'Istirahat Malam'
-                                    }
-                                    if not dt:
-                                        dt.append(data_dtist_m)
-                                    else:
-                                        if data_dtist_m not in dt:
-                                            dt.append(data_dtist_m)
-                                        else:
-                                            pass                
-                                
-                        # istirahat 2
-                        elif a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == ab.tgl_absen and a['punch'] == 4 and int(a['jam_absen'].hour) > 8 and int(a['jam_absen'].hour) < 21:
-                            if ab.masuk is not None:
-                                if int(ab.masuk.hour) < 18:
-                                    ab.istirahat2 = a['jam_absen'].time()
-                                    ab.save()
-                                    
-                                    fdtist_2 = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                    data_dtist_2 = {
-                                        'userid':a['userid'],
-                                        'jam_absen':fdtist_2,
-                                        'punch':a['punch'],
-                                        'mesin':a['mesin'],
-                                        'ket':'Istirahat_2'
-                                    }
-                                    if not dt:
-                                        dt.append(data_dtist_2)
-                                    else:
-                                        if data_dtist_2 not in dt:
-                                            dt.append(data_dtist_2)
-                                        else:
-                                            pass
-                                else:
-                                    pass
-                            else:
-                                if ab.pulang is not None:
-                                    if int(ab.pulang.hour) > 9:
-                                        ab.istirahat2 = a['jam_absen'].time()
-                                        ab.save() 
-                                        
-                                        fdtist_2 = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtist_2 = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtist_2,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Istirahat_2'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtist_2)
-                                        else:
-                                            if data_dtist_2 not in dt:
-                                                dt.append(data_dtist_2)
-                                            else:
-                                                pass
-                                    else:
-                                        pass    
-                                else:
-                                    ab.istirahat2 = a['jam_absen'].time()
-                                    ab.save()   
-                                    
-                                    fdtist_2 = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                    data_dtist_2 = {
-                                        'userid':a['userid'],
-                                        'jam_absen':fdtist_2,
-                                        'punch':a['punch'],
-                                        'mesin':a['mesin'],
-                                        'ket':'Istirahat_2'
-                                    }
-                                    if not dt:
-                                        dt.append(data_dtist_2)
-                                    else:
-                                        if data_dtist_2 not in dt:
-                                            dt.append(data_dtist_2)
-                                        else:
-                                            pass           
-                            
-                        # kembali
-                        elif a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == ab.tgl_absen and a['punch'] == 3 and int(a['jam_absen'].hour) > 8 and int(a['jam_absen'].hour) < 21:
-                            if ab.masuk is not None:
-                                if int(ab.masuk.hour) < 18:
-                                    if ab.kembali is None:
-                                        ab.kembali = a['jam_absen'].time()
-                                        ab.save()
-                                        
-                                        fdtkmb = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtkmb = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtkmb,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Kembali Istirahat'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtkmb)
-                                        else:
-                                            if data_dtkmb not in dt:
-                                                dt.append(data_dtkmb)
-                                            else:
-                                                pass
-                                    else:
-                                        pass    
-                                else:
-                                    pass
-                            else:
-                                if ab.pulang is not None:
-                                    if int(ab.pulang.hour) > 9:
-                                        if ab.kembali is None:
-                                            ab.kembali = a['jam_absen'].time()
-                                            ab.save()
-                                            
-                                            fdtkmb = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                            data_dtkmb = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtkmb,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Kembali Istirahat'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtkmb)
-                                            else:
-                                                if data_dtkmb not in dt:
-                                                    dt.append(data_dtkmb)
-                                                else:
-                                                    pass
-                                        else:
-                                            pass     
-                                    else:
-                                        pass    
-                                else:
-                                    if ab.kembali is None:
-                                        ab.kembali = a['jam_absen'].time()
-                                        ab.save()  
-                                        
-                                        fdtkmb = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtkmb = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtkmb,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Kembali Istirahat'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtkmb)
-                                        else:
-                                            if data_dtkmb not in dt:
-                                                dt.append(data_dtkmb)
-                                            else:
-                                                pass
-                                    else:
-                                        pass    
-                        
-                        # kembali malam
-                        elif a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == ab.tgl_absen and a['punch'] == 3 and int(a['jam_absen'].hour) > 21:
-                            if ab.masuk is not None:
-                                if int(ab.masuk.hour) > 18:
-                                    if ab.kembali is None:
-                                        ab.kembali = a['jam_absen'].time()
-                                        ab.save()
-                                        
-                                        fdtkmb_m = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtkmb_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtkmb_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Kembali Istirahat Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtkmb_m)
-                                        else:
-                                            if data_dtkmb_m not in dt:
-                                                dt.append(data_dtkmb_m)
-                                            else:
-                                                pass
-                                    else:
-                                        pass    
-                                else:
-                                    pass
-                            else:
-                                if ab.pulang is not None:
-                                    if int(ab.pulang.hour) < 9:
-                                        if ab.kembali is None:
-                                            ab.kembali = a['jam_absen'].time()
-                                            ab.save()
-                                            
-                                            fdtkmb_m = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                            data_dtkmb_m = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtkmb_m,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Kembali Istirahat Malam'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtkmb_m)
-                                            else:
-                                                if data_dtkmb_m not in dt:
-                                                    dt.append(data_dtkmb_m)
-                                                else:
-                                                    pass
-                                        else:
-                                            pass     
-                                    else:
-                                        pass    
-                                else:
-                                    if ab.kembali is None:
-                                        ab.kembali = a['jam_absen'].time()
-                                        ab.save()  
-                                        
-                                        fdtkmb_m = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtkmb_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtkmb_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Kembali Istirahat Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtkmb_m)
-                                        else:
-                                            if data_dtkmb_m not in dt:
-                                                dt.append(data_dtkmb_m)
-                                            else:
-                                                pass
-                                    else:
-                                        pass    
-                                                    
-                        # kembali 2
-                        elif a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == ab.tgl_absen and a['punch'] == 5 and int(a['jam_absen'].hour) > 8 and int(a['jam_absen'].hour) < 21:
-                            if ab.masuk is not None:
-                                if int(ab.masuk.hour) < 18:
-                                    if ab.kembali2 is None:
-                                        ab.kembali2 = a['jam_absen'].time()
-                                        ab.save()
-                                        
-                                        fdtkmb_2 = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtkmb_2 = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtkmb_2,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Kembali Istirahat_2'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtkmb_2)
-                                        else:
-                                            if data_dtkmb_2 not in dt:
-                                                dt.append(data_dtkmb_2)
-                                            else:
-                                                pass
-                                    else:
-                                        pass    
-                                else:
-                                    pass
-                            else:
-                                if ab.pulang is not None:
-                                    if int(ab.pulang.hour) > 9:
-                                        if ab.kembali2 is None:
-                                            ab.kembali2 = a['jam_absen'].time()
-                                            ab.save()
-                                            
-                                            fdtkmb_2 = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                            data_dtkmb_2 = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtkmb_2,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Kembali Istirahat_2'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtkmb_2)
-                                            else:
-                                                if data_dtkmb_2 not in dt:
-                                                    dt.append(data_dtkmb_2)
-                                                else:
-                                                    pass
-                                        else:
-                                            pass     
-                                    else:
-                                        pass    
-                                else:
-                                    if ab.kembali2 is None:
-                                        ab.kembali2 = a['jam_absen'].time()
-                                        ab.save()  
-                                        
-                                        fdtkmb_2 = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtkmb_2 = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtkmb_2,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Kembali Istirahat_2'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtkmb_2)
-                                        else:
-                                            if data_dtkmb_2 not in dt:
-                                                dt.append(data_dtkmb_2)
-                                            else:
-                                                pass
-                                    else:
-                                        pass  
-                            
-                        # pulang
-                        elif a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == ab.tgl_absen and a['punch'] == 1 and int(a['jam_absen'].hour) > 8:
-                            if ab.masuk is not None:
-                                if int(ab.masuk.hour) < 18:
-                                    ab.pulang = a['jam_absen'].time()
-                                    ab.save()
-                                    
-                                    fdtplng = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                    data_dtplng = {
-                                        'userid':a['userid'],
-                                        'jam_absen':fdtplng,
-                                        'punch':a['punch'],
-                                        'mesin':a['mesin'],
-                                        'ket':'Pulang'
-                                    }
-                                    if not dt:
-                                        dt.append(data_dtplng)
-                                    else:
-                                        if data_dtplng not in dt:
-                                            dt.append(data_dtplng)
-                                        else:
-                                            pass
-                                else:
-                                    pass
-                            else:
-                                if ab.pulang is not None:
-                                    if int(ab.pulang.hour) > 9:
-                                        ab.pulang = a['jam_absen'].time()
-                                        ab.save() 
-                                        
-                                        fdtplng = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                        data_dtplng = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtplng,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Pulang'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtplng)
-                                        else:
-                                            if data_dtplng not in dt:
-                                                dt.append(data_dtplng)
-                                            else:
-                                                pass
-                                    else:
-                                        pass    
-                                else:
-                                    ab.pulang = a['jam_absen'].time()
-                                    ab.save()  
-                                    
-                                    fdtplng = f"{ab.tgl_absen} {a['jam_absen'].time()}"
-                                    data_dtplng = {
-                                        'userid':a['userid'],
-                                        'jam_absen':fdtplng,
-                                        'punch':a['punch'],
-                                        'mesin':a['mesin'],
-                                        'ket':'Pulang'
-                                    }
-                                    if not dt:
-                                        dt.append(data_dtplng)
-                                    else:
-                                        if data_dtplng not in dt:
-                                            dt.append(data_dtplng)
-                                        else:
-                                            pass
-                                                
-                    else:
-                        ab = absensi_db.objects.select_related('pegawai').get(tgl_absen=r.date(), pegawai__userid=a['userid'])               
-                        
-                        tplus = r + timedelta(days=1)
-                        
-                        if a['jam_absen'].date() == tplus:
-                            
-                            # istirahat malam
-                            if a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == tplus and a['punch'] == 2 and int(a['jam_absen'].hour) < 9:
-                                if ab.masuk is not None:
-                                    if int(ab.masuk.hour) > 18:
-                                        ab.istirahat = a['jam_absen'].time()
-                                        ab.save()
-                                        
-                                        fdtist_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                        data_dtist_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtist_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Istirahat Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtist_m)
-                                        else:
-                                            if data_dtist_m not in dt:
-                                                dt.append(data_dtist_m)
-                                            else:
-                                                pass
-                                    else:
-                                        pass
-                                else:
-                                    if ab.pulang is not None:
-                                        if int(ab.pulang.hour) < 9:
-                                            ab.istirahat = a['jam_absen'].time()
-                                            ab.save()
-                                            
-                                            fdtist_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                            data_dtist_m = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtist_m,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Istirahat Malam'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtist_m)
-                                            else:
-                                                if data_dtist_m not in dt:
-                                                    dt.append(data_dtist_m)
-                                                else:
-                                                    pass
-                                        else:
-                                            pass
-                                    else:
-                                        ab.istirahat = a['jam_absen'].time()
-                                        ab.save()   
-                                        
-                                        fdtist_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                        data_dtist_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtist_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Istirahat Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtist_m)
-                                        else:
-                                            if data_dtist_m not in dt:
-                                                dt.append(data_dtist_m)
-                                            else:
-                                                pass
-                            
-                            # kembali malam
-                            elif a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == tplus and a['punch'] == 3 and int(a['jam_absen'].hour) < 9:                            
-                                if ab.masuk is None:
-                                    if ab.pulang is None:
-                                        ab.kembali = a['jam_absen'].time()
-                                        ab.save()
-                                        
-                                        fdtkmb_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                        data_dtkmb_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtkmb_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Kembali Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtkmb_m)
-                                        else:
-                                            if data_dtkmb_m not in dt:
-                                                dt.append(data_dtkmb_m)
-                                            else:
-                                                pass
-                                    else:
-                                        if int(ab.pulang.hour) < 9:
-                                            ab.kembali = a['jam_absen'].time()
-                                            ab.save()
-                                            
-                                            fdtkmb_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                            data_dtkmb_m = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtkmb_m,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Kembali Malam'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtkmb_m)
-                                            else:
-                                                if data_dtkmb_m not in dt:
-                                                    dt.append(data_dtkmb_m)
-                                                else:
-                                                    pass
-                                        else:
-                                            if int(ab.pulang.hour) > 9:
-                                                try:
-                                                    ab2 = absensi_db.objects.select_related('pegawai').get(tgl_absen=tplus, pegawai__userid=a['userid'])
-                                                    ab2.kembali = a['jam_absen'].time()
-                                                    ab2.save()
-                                                    
-                                                    fdtkmb_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                                    data_dtkmb_m = {
-                                                        'userid':a['userid'],
-                                                        'jam_absen':fdtkmb_m,
-                                                        'punch':a['punch'],
-                                                        'mesin':a['mesin'],
-                                                        'ket':'Kembali Malam'
-                                                    }
-                                                    if not dt:
-                                                        dt.append(data_dtkmb_m)
-                                                    else:
-                                                        if data_dtkmb_m not in dt:
-                                                            dt.append(data_dtkmb_m)
-                                                        else:
-                                                            pass
-                                                        
-                                                except absensi_db.DoesNotExist:
-                                                    tabsen = absensi_db(
-                                                        tgl_absen = tplus,
-                                                        pegawai_id = ab.pegawai_id,
-                                                        kembali = a['jam_absen'].time() 
-                                                    )                               
-                                                    tabsen.save()
-                                                    
-                                                    fdtkmb_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                                    data_dtkmb_m = {
-                                                        'userid':a['userid'],
-                                                        'jam_absen':fdtkmb_m,
-                                                        'punch':a['punch'],
-                                                        'mesin':a['mesin'],
-                                                        'ket':'Kembali Malam'
-                                                    }
-                                                    if not dt:
-                                                        dt.append(data_dtkmb_m)
-                                                    else:
-                                                        if data_dtkmb_m not in dt:
-                                                            dt.append(data_dtkmb_m)
-                                                        else:
-                                                            pass
-                                else:
-                                    if int(ab.masuk.hour) > 18:
-                                        ab.kembali = a['jam_absen'].time()
-                                        ab.save() 
-                                        
-                                        fdtkmb_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                        data_dtkmb_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtkmb_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Kembali Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtkmb_m)
-                                        else:
-                                            if data_dtkmb_m not in dt:
-                                                dt.append(data_dtkmb_m)
-                                            else:
-                                                pass         
-                                    else:
-                                        try:
-                                            ab2 = absensi_db.objects.select_related('pegawai').get(tgl_absen=tplus, pegawai__userid=a['userid'])
-                                            ab2.kembali = a['jam_absen'].time()
-                                            ab2.save()
-                                            
-                                            fdtkmb_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                            data_dtkmb_m = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtkmb_m,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Kembali Malam'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtkmb_m)
-                                            else:
-                                                if data_dtkmb_m not in dt:
-                                                    dt.append(data_dtkmb_m)
-                                                else:
-                                                    pass
-                                                
-                                        except absensi_db.DoesNotExist:
-                                            tabsen = absensi_db(
-                                                tgl_absen = tplus,
-                                                pegawai_id = ab.pegawai_id,
-                                                kembali = a['jam_absen'].time() 
-                                            )                               
-                                            tabsen.save()
-                                            
-                                            fdtkmb_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                            data_dtkmb_m = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtkmb_m,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Kembali Malam'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtkmb_m)
-                                            else:
-                                                if data_dtkmb_m not in dt:
-                                                    dt.append(data_dtkmb_m)
-                                                else:
-                                                    pass
-                    
-                            # pulang malam
-                            elif a['userid'] == ab.pegawai.userid and a['jam_absen'].date() == tplus and a['punch'] == 1 and int(a['jam_absen'].hour) < 9:
-                                
-                                if ab.masuk is None:
-                                    if ab.pulang is None:
-                                        ab.pulang = a['jam_absen'].time()
-                                        ab.save()
-                                        
-                                        fdtplng_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                        data_dtplng_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtplng_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Pulang Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtplng_m)
-                                        else:
-                                            if data_dtplng_m not in dt:
-                                                dt.append(data_dtplng_m)
-                                            else:
-                                                pass
-                                    else:
-                                        if int(ab.pulang.hour) < 9:
-                                            ab.pulang = a['jam_absen'].time()
-                                            ab.save()
-                                            
-                                            fdtplng_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                            data_dtplng_m = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtplng_m,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Pulang Malam'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtplng_m)
-                                            else:
-                                                if data_dtplng_m not in dt:
-                                                    dt.append(data_dtplng_m)
-                                                else:
-                                                    pass
-                                        else:
-                                            if int(ab.pulang.hour) > 9:
-                                                try:
-                                                    ab2 = absensi_db.objects.select_related('pegawai').get(tgl_absen=tplus, pegawai__userid=a['userid'])
-                                                    ab2.pulang = a['jam_absen'].time()
-                                                    ab2.save()
-                                                    
-                                                    fdtplng_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                                    data_dtplng_m = {
-                                                        'userid':a['userid'],
-                                                        'jam_absen':fdtplng_m,
-                                                        'punch':a['punch'],
-                                                        'mesin':a['mesin'],
-                                                        'ket':'Pulang Malam'
-                                                    }
-                                                    if not dt:
-                                                        dt.append(data_dtplng_m)
-                                                    else:
-                                                        if data_dtplng_m not in dt:
-                                                            dt.append(data_dtplng_m)
-                                                        else:
-                                                            pass
-                                                        
-                                                except absensi_db.DoesNotExist:
-                                                    tabsen = absensi_db(
-                                                        tgl_absen = tplus,
-                                                        pegawai_id = ab.pegawai_id,
-                                                        pulang = a['jam_absen'].time() 
-                                                    )                               
-                                                    tabsen.save()
-                                                    
-                                                    fdtplng_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                                    data_dtplng_m = {
-                                                        'userid':a['userid'],
-                                                        'jam_absen':fdtplng_m,
-                                                        'punch':a['punch'],
-                                                        'mesin':a['mesin'],
-                                                        'ket':'Pulang Malam'
-                                                    }
-                                                    if not dt:
-                                                        dt.append(data_dtplng_m)
-                                                    else:
-                                                        if data_dtplng_m not in dt:
-                                                            dt.append(data_dtplng_m)
-                                                        else:
-                                                            pass
-                                else:
-                                    if int(ab.masuk.hour) > 18:
-                                        ab.pulang = a['jam_absen'].time()
-                                        ab.save()   
-                                        
-                                        fdtplng_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                        data_dtplng_m = {
-                                            'userid':a['userid'],
-                                            'jam_absen':fdtplng_m,
-                                            'punch':a['punch'],
-                                            'mesin':a['mesin'],
-                                            'ket':'Pulang Malam'
-                                        }
-                                        if not dt:
-                                            dt.append(data_dtplng_m)
-                                        else:
-                                            if data_dtplng_m not in dt:
-                                                dt.append(data_dtplng_m)
-                                            else:
-                                                pass       
-                                    else:
-                                        try:
-                                            ab2 = absensi_db.objects.select_related('pegawai').get(tgl_absen=tplus, pegawai__userid=a['userid'])
-                                            ab2.pulang = a['jam_absen'].time()
-                                            ab2.save()
-                                            
-                                            fdtplng_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                            data_dtplng_m = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtplng_m,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Pulang Malam'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtplng_m)
-                                            else:
-                                                if data_dtplng_m not in dt:
-                                                    dt.append(data_dtplng_m)
-                                                else:
-                                                    pass
-                                                
-                                        except absensi_db.DoesNotExist:
-                                            tabsen = absensi_db(
-                                                tgl_absen = tplus,
-                                                pegawai_id = ab.pegawai_id,
-                                                pulang = a['jam_absen'].time() 
-                                            )                               
-                                            tabsen.save()
-                                            
-                                            fdtplng_m = f"{tplus.date()} {a['jam_absen'].time()}"
-                                            data_dtplng_m = {
-                                                'userid':a['userid'],
-                                                'jam_absen':fdtplng_m,
-                                                'punch':a['punch'],
-                                                'mesin':a['mesin'],
-                                                'ket':'Pulang Malam'
-                                            }
-                                            if not dt:
-                                                dt.append(data_dtplng_m)
-                                            else:
-                                                if data_dtplng_m not in dt:
-                                                    dt.append(data_dtplng_m)
-                                                else:
-                                                    pass
+                #         if jam_absen.date() == ab.tgl_absen and a["userid"] == ab.pegawai.userid and a["punch"] == 0 and jam_absen.time() > 4  and jam_absen.time() < 18:
+            #             else:
+            #                 pass
+            #         else:
+            #             pass  
+            #     else:
+            #         pass
+            # else:
+            #     pass                
             
-                        else:
-                            pass      
-                      
-            else:
-                pass                
-            
-    # simpan data trans
-    for b in dt:
-        if b not in ddt:                
-            tambah_data_trans = data_trans_db(
-                userid = b['userid'],
-                jam_absen = b['jam_absen'],
-                punch = b['punch'],
-                mesin = b['mesin'],
-                keterangan = b['ket']             
-            )                
-            tambah_data_trans.save()
-        else:
-            pass 
+    # # simpan data trans
+    # for b in dt:
+    #     if b not in ddt:                
+    #         tambah_data_trans = data_trans_db(
+    #             userid = b['userid'],
+    #             jam_absen = b['jam_absen'],
+    #             punch = b['punch'],
+    #             mesin = b['mesin'],
+    #             keterangan = b['ket']             
+    #         )                
+    #         tambah_data_trans.save()
+    #     else:
+    #         pass 
     
-    ijin = []  
-    libur = []
-    cuti = []
-    geser = []
-    opg = []
-    dl = []
-    dl_idp = []
+    # ijin = []  
+    # libur = []
+    # cuti = []
+    # geser = []
+    # opg = []
+    # dl = []
+    # dl_idp = []
     
-    lsopg = []
+    # lsopg = []
     
-    # list status pegawai yang dapat opg
-    for s in list_status_opg_db.objects.all():
-        lsopg.append(s.status_id)
+    # # list status pegawai yang dapat opg
+    # for s in list_status_opg_db.objects.all():
+    #     lsopg.append(s.status_id)
     
-    # data ijin
-    for i in ijin_db.objects.select_related('ijin','pegawai').filter(tgl_ijin__range=(dari.date(),sampai.date())):
-        data = {
-            "ijin" : i.ijin.ijin,
-            "tgl_ijin" : i.tgl_ijin,
-            "idp" : i.pegawai_id,
-            "keterangan" : i.keterangan
-        }
-        ijin.append(data)
+    # # data ijin
+    # for i in ijin_db.objects.select_related('ijin','pegawai').filter(tgl_ijin__range=(dari.date(),sampai.date())):
+    #     data = {
+    #         "ijin" : i.ijin.ijin,
+    #         "tgl_ijin" : i.tgl_ijin,
+    #         "idp" : i.pegawai_id,
+    #         "keterangan" : i.keterangan
+    #     }
+    #     ijin.append(data)
     
-    # data libur nasional
-    for l in libur_nasional_db.objects.filter(tgl_libur__range=(dari.date(),sampai.date())):
-        data = {
-            'libur' : l.libur,
-            'tgl_libur' : l.tgl_libur,
-            'insentif_karyawan' : l.insentif_karyawan,
-            'insentif_staff' : l.insentif_staff
-        }    
-        libur.append(data)  
+    # # data libur nasional
+    # for l in libur_nasional_db.objects.filter(tgl_libur__range=(dari.date(),sampai.date())):
+    #     data = {
+    #         'libur' : l.libur,
+    #         'tgl_libur' : l.tgl_libur,
+    #         'insentif_karyawan' : l.insentif_karyawan,
+    #         'insentif_staff' : l.insentif_staff
+    #     }    
+    #     libur.append(data)  
         
-    # data cuti
-    for c in cuti_db.objects.select_related('pegawai').filter(tgl_cuti__range=(dari.date(),sampai.date())):
-        data = {
-            'id': c.id,
-            'idp' : c.pegawai_id,
-            'tgl_cuti' : c.tgl_cuti,
-            'keterangan' : c.keterangan
-        }                
-        cuti.append(data)
+    # # data cuti
+    # for c in cuti_db.objects.select_related('pegawai').filter(tgl_cuti__range=(dari.date(),sampai.date())):
+    #     data = {
+    #         'id': c.id,
+    #         'idp' : c.pegawai_id,
+    #         'tgl_cuti' : c.tgl_cuti,
+    #         'keterangan' : c.keterangan
+    #     }                
+    #     cuti.append(data)
         
-    # data geser off
-    for g in geseroff_db.objects.select_related('pegawai').filter(ke_tgl__range=(dari.date(),sampai.date())):
-        data = {
-            'id' : g.id,
-            'idp' : g.pegawai_id, 
-            'dari_tgl' : g.dari_tgl,
-            'ke_tgl' : g.ke_tgl,
-            'keterangan' : g.keterangan
-        } 
-        geser.append(data)
+    # # data geser off
+    # for g in geseroff_db.objects.select_related('pegawai').filter(ke_tgl__range=(dari.date(),sampai.date())):
+    #     data = {
+    #         'id' : g.id,
+    #         'idp' : g.pegawai_id, 
+    #         'dari_tgl' : g.dari_tgl,
+    #         'ke_tgl' : g.ke_tgl,
+    #         'keterangan' : g.keterangan
+    #     } 
+    #     geser.append(data)
         
-    # data opg
-    for o in opg_db.objects.select_related('pegawai').filter(diambil_tgl__range=(dari.date(),sampai.date()), status=0):
-        data = {
-            'id':o.id,
-            'idp': o.pegawai_id,
-            'opg_tgl':o.opg_tgl,
-            'diambil_tgl':o.diambil_tgl,
-            'keterangan':o.keterangan
-        }
-        opg.append(data)
+    # # data opg
+    # for o in opg_db.objects.select_related('pegawai').filter(diambil_tgl__range=(dari.date(),sampai.date()), status=0):
+    #     data = {
+    #         'id':o.id,
+    #         'idp': o.pegawai_id,
+    #         'opg_tgl':o.opg_tgl,
+    #         'diambil_tgl':o.diambil_tgl,
+    #         'keterangan':o.keterangan
+    #     }
+    #     opg.append(data)
     
-    # data dinas luar
-    for n in dinas_luar_db.objects.select_related('pegawai').filter(tgl_dinas__range=(dari.date(),sampai.date())):
-        data = {
-            'idp': n.pegawai_id,
-            'tgl_dinas':n.tgl_dinas,
-            'keterangan':n.keterangan
-        }
-        dl.append(data)
-        dl_idp.append(n.pegawai_id)
+    # # data dinas luar
+    # for n in dinas_luar_db.objects.select_related('pegawai').filter(tgl_dinas__range=(dari.date(),sampai.date())):
+    #     data = {
+    #         'idp': n.pegawai_id,
+    #         'tgl_dinas':n.tgl_dinas,
+    #         'keterangan':n.keterangan
+    #     }
+    #     dl.append(data)
+    #     dl_idp.append(n.pegawai_id)
         
-    # data absensi
-    for a in absensi_db.objects.select_related('pegawai').filter(tgl_absen__range=(dari.date(),sampai.date())):
+    # # data absensi
+    # for a in absensi_db.objects.select_related('pegawai').filter(tgl_absen__range=(dari.date(),sampai.date())):
         
-        day = a.tgl_absen.strftime("%A")
-        nh = nama_hari(day)        
+    #     day = a.tgl_absen.strftime("%A")
+    #     nh = nama_hari(day)        
         
-        for p in pegawai:
-            if a.pegawai_id == p['idp']:
-                ab = absensi_db.objects.select_related('pegawai').get(id=a.id)               
+    #     for p in pegawai:
+    #         if a.pegawai_id == p['idp']:
+    #             ab = absensi_db.objects.select_related('pegawai').get(id=a.id)               
                 
-                """ Rules OPG (staff & karyawan) & Insentif (hanya untuk karyawan) :
+    #             """ Rules OPG (staff & karyawan) & Insentif (hanya untuk karyawan) :
                 
-                Staff :
-                --> jika ada libur nasional dan jatuh di hari biasa (senin - sabtu), maka staff yang memiliki off reguler bertepatan
-                dengan libur nasional tersebut akan mendapat opg = 2 jika masuk (off pengganti reguler dan off pengganti tgl merah), 
-                jika tidak masuk mendapat opg = 1 (off pengganti reguler)
+    #             Staff :
+    #             --> jika ada libur nasional dan jatuh di hari biasa (senin - sabtu), maka staff yang memiliki off reguler bertepatan
+    #             dengan libur nasional tersebut akan mendapat opg = 2 jika masuk (off pengganti reguler dan off pengganti tgl merah), 
+    #             jika tidak masuk mendapat opg = 1 (off pengganti reguler)
                 
-                --> jika ada libur nasional dan jatuh di hari minggu, maka staff yang memiliki off reguler bertepatan dengan libur
-                nasional tersebut jika masuk mendapat opg = 1 (off pengganti reguler)
+    #             --> jika ada libur nasional dan jatuh di hari minggu, maka staff yang memiliki off reguler bertepatan dengan libur
+    #             nasional tersebut jika masuk mendapat opg = 1 (off pengganti reguler)
                 
-                --> jika tidak ada libur nasional, maka staff yang masuk di hari off regulernya maka mendapat opg = 1 (off pengganti 
-                reguler)
+    #             --> jika tidak ada libur nasional, maka staff yang masuk di hari off regulernya maka mendapat opg = 1 (off pengganti 
+    #             reguler)
                 
-                Karyawan + SPG dibayar oleh Asia:
-                --> jika ada libur nasional (senin - minggu), maka Karyawan yang memiliki off reguler bertepatan
-                dengan libur nasional tersebut akan mendapat opg = 1 jika masuk (off pengganti reguler) dan insentif = 1
+    #             Karyawan + SPG dibayar oleh Asia:
+    #             --> jika ada libur nasional (senin - minggu), maka Karyawan yang memiliki off reguler bertepatan
+    #             dengan libur nasional tersebut akan mendapat opg = 1 jika masuk (off pengganti reguler) dan insentif = 1
                                 
-                --> jika tidak ada libur nasional, maka Karyawan yang masuk di hari off regulernya maka mendapat opg = 1 (off pengganti 
-                reguler)
+    #             --> jika tidak ada libur nasional, maka Karyawan yang masuk di hari off regulernya maka mendapat opg = 1 (off pengganti 
+    #             reguler)
                 
-                """     
+    #             """     
                 
-                # OFF & OFF Pengganti Reguler
-                # jika tidak ada absen masuk dan pulang
-                if ab.masuk is None and ab.pulang is None:
+    #             # OFF & OFF Pengganti Reguler
+    #             # jika tidak ada absen masuk dan pulang
+    #             if ab.masuk is None and ab.pulang is None:
                                         
-                    # jika dinas luar
-                    if ab.pegawai_id in dl_idp:
+    #                 # jika dinas luar
+    #                 if ab.pegawai_id in dl_idp:
                         
-                        # jika off
-                        if p['hari_off'] == nh:
-                            if p['status_id'] in lsopg:
-                                if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
-                                    pass
-                                else:
-                                    if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
-                                        pass
-                                    else:
-                                        tambah_opg = opg_db(
-                                            pegawai_id = ab.pegawai_id,
-                                            opg_tgl = ab.tgl_absen,   
-                                            keterangan = 'OFF Pengganti Reguler',                         
-                                            add_by = 'Program',
-                                        )    
-                                        tambah_opg.save()
-                            else:
-                                pass
-                        else:
-                            if p['hari_off'] == 'On Off':
-                                ab.keterangan_absensi = 'OFF'
-                                ab.save()
-                            else:
-                                pass
+    #                     # jika off
+    #                     if p['hari_off'] == nh:
+    #                         if p['status_id'] in lsopg:
+    #                             if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+    #                                 pass
+    #                             else:
+    #                                 if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+    #                                     pass
+    #                                 else:
+    #                                     tambah_opg = opg_db(
+    #                                         pegawai_id = ab.pegawai_id,
+    #                                         opg_tgl = ab.tgl_absen,   
+    #                                         keterangan = 'OFF Pengganti Reguler',                         
+    #                                         add_by = 'Program',
+    #                                     )    
+    #                                     tambah_opg.save()
+    #                         else:
+    #                             pass
+    #                     else:
+    #                         if p['hari_off'] == 'On Off':
+    #                             ab.keterangan_absensi = 'OFF'
+    #                             ab.save()
+    #                         else:
+    #                             pass
                             
-                        if p['hari_off2'] == nh:
-                            if p['status_id'] in lsopg:
-                                if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
-                                    pass
-                                else:
-                                    if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
-                                        pass
-                                    else:
-                                        tambah_opg = opg_db(
-                                            pegawai_id = ab.pegawai_id,
-                                            opg_tgl = ab.tgl_absen,   
-                                            keterangan = 'OFF Pengganti Reguler',                         
-                                            add_by = 'Program',
-                                        )    
-                                        tambah_opg.save()
-                            else:
-                                pass
-                        else:
-                            pass    
-                    else:
-                        # jika off
-                        if p['hari_off'] == nh:
-                            ab.keterangan_absensi = 'OFF'
-                            ab.save()
-                        elif p['hari_off'] == 'On Off':
-                            ab.keterangan_absensi = 'OFF'
-                            ab.save()    
+    #                     if p['hari_off2'] == nh:
+    #                         if p['status_id'] in lsopg:
+    #                             if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+    #                                 pass
+    #                             else:
+    #                                 if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+    #                                     pass
+    #                                 else:
+    #                                     tambah_opg = opg_db(
+    #                                         pegawai_id = ab.pegawai_id,
+    #                                         opg_tgl = ab.tgl_absen,   
+    #                                         keterangan = 'OFF Pengganti Reguler',                         
+    #                                         add_by = 'Program',
+    #                                     )    
+    #                                     tambah_opg.save()
+    #                         else:
+    #                             pass
+    #                     else:
+    #                         pass    
+    #                 else:
+    #                     # jika off
+    #                     if p['hari_off'] == nh:
+    #                         ab.keterangan_absensi = 'OFF'
+    #                         ab.save()
+    #                     elif p['hari_off'] == 'On Off':
+    #                         ab.keterangan_absensi = 'OFF'
+    #                         ab.save()    
                                     
-                        if p['hari_off2'] == nh:
-                            ab.keterangan_absensi = 'OFF'
-                            ab.save() 
-                        else:
-                            pass           
+    #                     if p['hari_off2'] == nh:
+    #                         ab.keterangan_absensi = 'OFF'
+    #                         ab.save() 
+    #                     else:
+    #                         pass           
                                             
-                else:
-                    # jika off
-                    if p['hari_off'] == nh:
-                        if p['status_id'] in lsopg:
-                            if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
-                                pass
-                            else:
-                                if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
-                                    pass
-                                else:
-                                    tambah_opg = opg_db(
-                                        pegawai_id = ab.pegawai_id,
-                                        opg_tgl = ab.tgl_absen,   
-                                        keterangan = 'OFF Pengganti Reguler',                         
-                                        add_by = 'Program',
-                                    )    
-                                    tambah_opg.save()
-                        else:
-                            pass
-                    else:
-                        pass
+    #             else:
+    #                 # jika off
+    #                 if p['hari_off'] == nh:
+    #                     if p['status_id'] in lsopg:
+    #                         if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+    #                             pass
+    #                         else:
+    #                             if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+    #                                 pass
+    #                             else:
+    #                                 tambah_opg = opg_db(
+    #                                     pegawai_id = ab.pegawai_id,
+    #                                     opg_tgl = ab.tgl_absen,   
+    #                                     keterangan = 'OFF Pengganti Reguler',                         
+    #                                     add_by = 'Program',
+    #                                 )    
+    #                                 tambah_opg.save()
+    #                     else:
+    #                         pass
+    #                 else:
+    #                     pass
                     
-                    if p['hari_off2'] == nh:
-                        if p['status_id'] in lsopg:
-                            if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
-                                pass
-                            else:
-                                if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
-                                    pass
-                                else:
-                                    tambah_opg = opg_db(
-                                        pegawai_id = ab.pegawai_id,
-                                        opg_tgl = ab.tgl_absen,   
-                                        keterangan = 'OFF Pengganti Reguler',                         
-                                        add_by = 'Program',
-                                    )    
-                                    tambah_opg.save()
-                        else:
-                            pass
-                    else:
-                        pass
+    #                 if p['hari_off2'] == nh:
+    #                     if p['status_id'] in lsopg:
+    #                         if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+    #                             pass
+    #                         else:
+    #                             if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+    #                                 pass
+    #                             else:
+    #                                 tambah_opg = opg_db(
+    #                                     pegawai_id = ab.pegawai_id,
+    #                                     opg_tgl = ab.tgl_absen,   
+    #                                     keterangan = 'OFF Pengganti Reguler',                         
+    #                                     add_by = 'Program',
+    #                                 )    
+    #                                 tambah_opg.save()
+    #                     else:
+    #                         pass
+    #                 else:
+    #                     pass
                             
-                # libur nasional
-                for l in libur:
-                    if l['tgl_libur'] == ab.tgl_absen:                            
-                        ab.libur_nasional = l['libur']
-                        ab.save()
+    #             # libur nasional
+    #             for l in libur:
+    #                 if l['tgl_libur'] == ab.tgl_absen:                            
+    #                     ab.libur_nasional = l['libur']
+    #                     ab.save()
                         
-                        # Hari Minggu
-                        if nh == 'Minggu':
-                            if p['status_id'] in lsopg:
+    #                     # Hari Minggu
+    #                     if nh == 'Minggu':
+    #                         if p['status_id'] in lsopg:
                                 
-                                # Staff
-                                if p['status'] == 'Staff':
-                                    if p['hari_off'] == nh:
-                                        if ab.masuk is not None and ab.pulang is not None:
-                                            if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
-                                                pass
-                                            else:
-                                                if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
-                                                    pass
-                                                else:
-                                                    tambah_opg = opg_db(
-                                                        pegawai_id = ab.pegawai_id,
-                                                        opg_tgl = ab.tgl_absen,   
-                                                        keterangan = 'OFF Pengganti Reguler',                         
-                                                        add_by = 'Program',
-                                                    )    
-                                                    tambah_opg.save()
-                                        else:
-                                            pass    
-                                    else:
-                                        pass
+    #                             # Staff
+    #                             if p['status'] == 'Staff':
+    #                                 if p['hari_off'] == nh:
+    #                                     if ab.masuk is not None and ab.pulang is not None:
+    #                                         if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+    #                                             pass
+    #                                         else:
+    #                                             if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+    #                                                 pass
+    #                                             else:
+    #                                                 tambah_opg = opg_db(
+    #                                                     pegawai_id = ab.pegawai_id,
+    #                                                     opg_tgl = ab.tgl_absen,   
+    #                                                     keterangan = 'OFF Pengganti Reguler',                         
+    #                                                     add_by = 'Program',
+    #                                                 )    
+    #                                                 tambah_opg.save()
+    #                                     else:
+    #                                         pass    
+    #                                 else:
+    #                                     pass
                                 
-                                # Karyawan
-                                else:
-                                    if p['hari_off'] == nh:
-                                        if ab.masuk is not None and ab.pulang is not None:
-                                            if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
-                                                pass
-                                            else:
-                                                if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
-                                                    pass
-                                                else:
-                                                    tambah_opg = opg_db(
-                                                        pegawai_id = ab.pegawai_id,
-                                                        opg_tgl = ab.tgl_absen,   
-                                                        keterangan = 'OFF Pengganti Reguler',                         
-                                                        add_by = 'Program',
-                                                    )    
-                                                    tambah_opg.save()
+    #                             # Karyawan
+    #                             else:
+    #                                 if p['hari_off'] == nh:
+    #                                     if ab.masuk is not None and ab.pulang is not None:
+    #                                         if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+    #                                             pass
+    #                                         else:
+    #                                             if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+    #                                                 pass
+    #                                             else:
+    #                                                 tambah_opg = opg_db(
+    #                                                     pegawai_id = ab.pegawai_id,
+    #                                                     opg_tgl = ab.tgl_absen,   
+    #                                                     keterangan = 'OFF Pengganti Reguler',                         
+    #                                                     add_by = 'Program',
+    #                                                 )    
+    #                                                 tambah_opg.save()
                                                     
-                                                    ab.insentif = l['insentif_karyawan']
-                                                    ab.save()
-                                        else:
-                                            pass    
-                                    else:
-                                        pass                                
-                            else:
-                                pass 
+    #                                                 ab.insentif = l['insentif_karyawan']
+    #                                                 ab.save()
+    #                                     else:
+    #                                         pass    
+    #                                 else:
+    #                                     pass                                
+    #                         else:
+    #                             pass 
                         
-                        # Bukan Hari Minggu
-                        else:
-                            if p['status_id'] in lsopg:
+    #                     # Bukan Hari Minggu
+    #                     else:
+    #                         if p['status_id'] in lsopg:
                                                                 
-                                # Staff
-                                if p['status'] == 'Staff':
-                                    if p['hari_off'] == nh:
-                                        if ab.masuk is not None and ab.pulang is not None:
-                                            if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
-                                                pass
-                                            else:
-                                                if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
-                                                    pass
-                                                else:
-                                                    tambah_opg = opg_db(
-                                                        pegawai_id = ab.pegawai_id,
-                                                        opg_tgl = ab.tgl_absen,   
-                                                        keterangan = 'OFF Pengganti Reguler',                         
-                                                        add_by = 'Program',
-                                                    )    
-                                                    tambah_opg.save()
+    #                             # Staff
+    #                             if p['status'] == 'Staff':
+    #                                 if p['hari_off'] == nh:
+    #                                     if ab.masuk is not None and ab.pulang is not None:
+    #                                         if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+    #                                             pass
+    #                                         else:
+    #                                             if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+    #                                                 pass
+    #                                             else:
+    #                                                 tambah_opg = opg_db(
+    #                                                     pegawai_id = ab.pegawai_id,
+    #                                                     opg_tgl = ab.tgl_absen,   
+    #                                                     keterangan = 'OFF Pengganti Reguler',                         
+    #                                                     add_by = 'Program',
+    #                                                 )    
+    #                                                 tambah_opg.save()
                                                     
-                                                if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Tgl Merah').exists():
-                                                    pass
-                                                else:    
-                                                    tambah_opg2 = opg_db(
-                                                        pegawai_id = ab.pegawai_id,
-                                                        opg_tgl = ab.tgl_absen,   
-                                                        keterangan = 'OFF Pengganti Tgl Merah',                         
-                                                        add_by = 'Program',
-                                                    )    
-                                                    tambah_opg2.save()
-                                        else:
-                                            if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Tgl Merah').exists():
-                                                pass
-                                            else:    
-                                                tambah_opg2 = opg_db(
-                                                    pegawai_id = ab.pegawai_id,
-                                                    opg_tgl = ab.tgl_absen,   
-                                                    keterangan = 'OFF Pengganti Tgl Merah',                         
-                                                    add_by = 'Program',
-                                                )    
-                                                tambah_opg2.save()    
-                                    else:
-                                        pass
+    #                                             if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Tgl Merah').exists():
+    #                                                 pass
+    #                                             else:    
+    #                                                 tambah_opg2 = opg_db(
+    #                                                     pegawai_id = ab.pegawai_id,
+    #                                                     opg_tgl = ab.tgl_absen,   
+    #                                                     keterangan = 'OFF Pengganti Tgl Merah',                         
+    #                                                     add_by = 'Program',
+    #                                                 )    
+    #                                                 tambah_opg2.save()
+    #                                     else:
+    #                                         if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Tgl Merah').exists():
+    #                                             pass
+    #                                         else:    
+    #                                             tambah_opg2 = opg_db(
+    #                                                 pegawai_id = ab.pegawai_id,
+    #                                                 opg_tgl = ab.tgl_absen,   
+    #                                                 keterangan = 'OFF Pengganti Tgl Merah',                         
+    #                                                 add_by = 'Program',
+    #                                             )    
+    #                                             tambah_opg2.save()    
+    #                                 else:
+    #                                     pass
                                 
-                                # Karyawan
-                                else:
-                                    if p['hari_off'] == nh:
-                                        if ab.masuk is not None and ab.pulang is not None:
-                                            if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
-                                                pass
-                                            else:
-                                                if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
-                                                    pass
-                                                else:
-                                                    tambah_opg = opg_db(
-                                                        pegawai_id = ab.pegawai_id,
-                                                        opg_tgl = ab.tgl_absen,   
-                                                        keterangan = 'OFF Pengganti Reguler',                         
-                                                        add_by = 'Program',
-                                                    )    
-                                                    tambah_opg.save()
+    #                             # Karyawan
+    #                             else:
+    #                                 if p['hari_off'] == nh:
+    #                                     if ab.masuk is not None and ab.pulang is not None:
+    #                                         if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+    #                                             pass
+    #                                         else:
+    #                                             if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+    #                                                 pass
+    #                                             else:
+    #                                                 tambah_opg = opg_db(
+    #                                                     pegawai_id = ab.pegawai_id,
+    #                                                     opg_tgl = ab.tgl_absen,   
+    #                                                     keterangan = 'OFF Pengganti Reguler',                         
+    #                                                     add_by = 'Program',
+    #                                                 )    
+    #                                                 tambah_opg.save()
                                                     
-                                                    ab.insentif = l['insentif_karyawan']
-                                                    ab.save()
-                                        else:
-                                            pass    
-                                    else:
-                                        pass                                
-                            else:
-                                pass                                                                    
-                    else:
-                        pass    
+    #                                                 ab.insentif = l['insentif_karyawan']
+    #                                                 ab.save()
+    #                                     else:
+    #                                         pass    
+    #                                 else:
+    #                                     pass                                
+    #                         else:
+    #                             pass                                                                    
+    #                 else:
+    #                     pass    
                             
-                # ijin
-                for i in ijin:
-                    if a.pegawai_id == i['idp']:
-                        if i['tgl_ijin'] == ab.tgl_absen:
-                            ij = i['ijin']
-                            ket = i['keterangan']
-                            ab.keterangan_ijin = f'{ij}-({ket})'
-                            ab.save()
-                        else:
-                            pass
-                    else:
-                        pass                                 
+    #             # ijin
+    #             for i in ijin:
+    #                 if a.pegawai_id == i['idp']:
+    #                     if i['tgl_ijin'] == ab.tgl_absen:
+    #                         ij = i['ijin']
+    #                         ket = i['keterangan']
+    #                         ab.keterangan_ijin = f'{ij}-({ket})'
+    #                         ab.save()
+    #                     else:
+    #                         pass
+    #                 else:
+    #                     pass                                 
                 
-                # cuti
-                for c in cuti:
-                    if a.pegawai_id == c['idp']:
-                        if c['tgl_cuti'] == ab.tgl_absen:
-                            if ab.masuk is None and ab.pulang is None:
-                                ab.keterangan_absensi = c['keterangan']
-                                ab.save()
-                            else:
-                                dmsk = f'{ab.tgl_absen} {ab.masuk}'
-                                dplg = f'{ab.tgl_absen} {ab.pulang}'
+    #             # cuti
+    #             for c in cuti:
+    #                 if a.pegawai_id == c['idp']:
+    #                     if c['tgl_cuti'] == ab.tgl_absen:
+    #                         if ab.masuk is None and ab.pulang is None:
+    #                             ab.keterangan_absensi = c['keterangan']
+    #                             ab.save()
+    #                         else:
+    #                             dmsk = f'{ab.tgl_absen} {ab.masuk}'
+    #                             dplg = f'{ab.tgl_absen} {ab.pulang}'
                                 
-                                msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
-                                plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+    #                             msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+    #                             plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
                                 
-                                dselisih = plg - msk
-                                djam_selisih = f'{ab.tgl_absen} {dselisih}'
-                                selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S') 
+    #                             dselisih = plg - msk
+    #                             djam_selisih = f'{ab.tgl_absen} {dselisih}'
+    #                             selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S') 
                                 
-                                if int(selisih.hour) <= 4:
-                                    ab.keterangan_absensi = c['keterangan']
-                                    ab.save()
-                                else:
-                                    cuti_db.objects.get(id=int(c['id'])).delete()
-                                    pg = pegawai_db.objects.get(pegawai_id=ab.pegawai_id)
-                                    sc = pg.sisa_cuti
+    #                             if int(selisih.hour) <= 4:
+    #                                 ab.keterangan_absensi = c['keterangan']
+    #                                 ab.save()
+    #                             else:
+    #                                 cuti_db.objects.get(id=int(c['id'])).delete()
+    #                                 pg = pegawai_db.objects.get(pegawai_id=ab.pegawai_id)
+    #                                 sc = pg.sisa_cuti
                                     
-                                    pg.sisa_cuti = sc + 1
-                                    pg.save()          
-                        else:
-                            pass
-                    else:
-                        pass        
+    #                                 pg.sisa_cuti = sc + 1
+    #                                 pg.save()          
+    #                     else:
+    #                         pass
+    #                 else:
+    #                     pass        
                     
-                # geser off
-                for g in geser:
-                    if a.pegawai_id == g['idp']:
-                        if g['ke_tgl'] == ab.tgl_absen:
-                            if ab.masuk is None and ab.pulang is None:
-                                drt = datetime.strftime(g['dari_tgl'], '%d-%m-%Y')
-                                ab.keterangan_absensi = f'Geser OFF-({drt})' 
-                                ab.save()
-                            else:
-                                geseroff_db.objects.get(id=int(g['id'])).delete()    
-                        else:
-                            pass
+    #             # geser off
+    #             for g in geser:
+    #                 if a.pegawai_id == g['idp']:
+    #                     if g['ke_tgl'] == ab.tgl_absen:
+    #                         if ab.masuk is None and ab.pulang is None:
+    #                             drt = datetime.strftime(g['dari_tgl'], '%d-%m-%Y')
+    #                             ab.keterangan_absensi = f'Geser OFF-({drt})' 
+    #                             ab.save()
+    #                         else:
+    #                             geseroff_db.objects.get(id=int(g['id'])).delete()    
+    #                     else:
+    #                         pass
                 
-                # opg
-                for o in opg:
-                    if a.pegawai_id == o['idp']:
-                        if o['diambil_tgl'] == ab.tgl_absen:
+    #             # opg
+    #             for o in opg:
+    #                 if a.pegawai_id == o['idp']:
+    #                     if o['diambil_tgl'] == ab.tgl_absen:
                             
-                            opg = opg_db.objects.get(id=o['id'])
+    #                         opg = opg_db.objects.get(id=o['id'])
                             
-                            if ab.masuk is None and ab.pulang is None:
-                                topg = datetime.strftime(o['diambil_tgl'], '%d-%m-%Y')
-                                ab.keterangan_absensi = f'OPG-({topg})'
-                                ab.save()                                
+    #                         if ab.masuk is None and ab.pulang is None:
+    #                             topg = datetime.strftime(o['diambil_tgl'], '%d-%m-%Y')
+    #                             ab.keterangan_absensi = f'OPG-({topg})'
+    #                             ab.save()                                
                                 
-                                opg.status = 1
-                                opg.edit_by ='Program'
-                                opg.save()
-                            else:
-                                opg.diambil_tgl = None
-                                opg.edit_by = 'Program'
-                                opg.save()
+    #                             opg.status = 1
+    #                             opg.edit_by ='Program'
+    #                             opg.save()
+    #                         else:
+    #                             opg.diambil_tgl = None
+    #                             opg.edit_by = 'Program'
+    #                             opg.save()
                                     
-                        else:
-                            pass
-                    else:
-                        pass        
+    #                     else:
+    #                         pass
+    #                 else:
+    #                     pass        
                 
-                # dinas luar   
-                for n in dl:
-                    if a.pegawai_id == n['idp']:
-                        if n['tgl_dinas'] == ab.tgl_absen:
-                            ket = n['keterangan']
-                            ab.keterangan_absensi = f'Dinas Luar-({ket})'
-                            ab.save()
-                        else:
-                            pass    
-                    else:
-                        pass    
+    #             # dinas luar   
+    #             for n in dl:
+    #                 if a.pegawai_id == n['idp']:
+    #                     if n['tgl_dinas'] == ab.tgl_absen:
+    #                         ket = n['keterangan']
+    #                         ab.keterangan_absensi = f'Dinas Luar-({ket})'
+    #                         ab.save()
+    #                     else:
+    #                         pass    
+    #                 else:
+    #                     pass    
                                         
-                # total jam kerja         
-                if ab.masuk is not None and ab.pulang is not None:
-                    if ab.pulang > ab.masuk:
+    #             # total jam kerja         
+    #             if ab.masuk is not None and ab.pulang is not None:
+    #                 if ab.pulang > ab.masuk:
                         
-                        dmsk = f'{ab.tgl_absen} {ab.masuk}'
-                        dplg = f'{ab.tgl_absen} {ab.pulang}'
+    #                     dmsk = f'{ab.tgl_absen} {ab.masuk}'
+    #                     dplg = f'{ab.tgl_absen} {ab.pulang}'
                         
-                        msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
-                        plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+    #                     msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+    #                     plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
                         
-                        dselisih = plg - msk
-                        djam_selisih = f'{ab.tgl_absen} {dselisih}'
-                        selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
+    #                     dselisih = plg - msk
+    #                     djam_selisih = f'{ab.tgl_absen} {dselisih}'
+    #                     selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
                         
-                        if int(selisih.hour) <= 4:
-                            tjk = 0
-                        else:
-                            detik = selisih.second / 3600
-                            menit = selisih.minute / 60
-                            hour = selisih.hour
+    #                     if int(selisih.hour) <= 4:
+    #                         tjk = 0
+    #                     else:
+    #                         detik = selisih.second / 3600
+    #                         menit = selisih.minute / 60
+    #                         hour = selisih.hour
                             
-                            jam = int(hour) + float(menit) + float(detik)
+    #                         jam = int(hour) + float(menit) + float(detik)
                             
-                            tjk = jam                   
-                    else: 
+    #                         tjk = jam                   
+    #                 else: 
                         
-                        tplus = ab.tgl_absen + timedelta(days=1)             
+    #                     tplus = ab.tgl_absen + timedelta(days=1)             
                         
-                        dmsk = f'{ab.tgl_absen} {ab.masuk}'
-                        dplg = f'{tplus} {ab.pulang}'
+    #                     dmsk = f'{ab.tgl_absen} {ab.masuk}'
+    #                     dplg = f'{tplus} {ab.pulang}'
                         
-                        msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
-                        plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+    #                     msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+    #                     plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
                         
-                        dselisih = plg - msk
-                        djam_selisih = f'{ab.tgl_absen} {dselisih}'
-                        selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
+    #                     dselisih = plg - msk
+    #                     djam_selisih = f'{ab.tgl_absen} {dselisih}'
+    #                     selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
                         
-                        if int(selisih.hour) <= 4:
-                            tjk = 0
-                        else:
-                            detik = selisih.second / 3600
-                            menit = selisih.minute / 60
-                            hour = selisih.hour
+    #                     if int(selisih.hour) <= 4:
+    #                         tjk = 0
+    #                     else:
+    #                         detik = selisih.second / 3600
+    #                         menit = selisih.minute / 60
+    #                         hour = selisih.hour
                             
-                            jam = int(hour) + float(menit) + float(detik)
+    #                         jam = int(hour) + float(menit) + float(detik)
                             
-                            tjk = jam                
-                else:
-                    tjk = 0
+    #                         tjk = jam                
+    #             else:
+    #                 tjk = 0
                     
-                # total jam istirahat
-                if ab.istirahat is not None and ab.kembali is not None:
-                    if ab.kembali > ab.istirahat:
+    #             # total jam istirahat
+    #             if ab.istirahat is not None and ab.kembali is not None:
+    #                 if ab.kembali > ab.istirahat:
                         
-                        dist = f'{ab.tgl_absen} {ab.istirahat}'
-                        dkmb = f'{ab.tgl_absen} {ab.kembali}'
+    #                     dist = f'{ab.tgl_absen} {ab.istirahat}'
+    #                     dkmb = f'{ab.tgl_absen} {ab.kembali}'
                         
-                        ist = datetime.strptime(dist, '%Y-%m-%d %H:%M:%S')
-                        kmb = datetime.strptime(dkmb, '%Y-%m-%d %H:%M:%S')
+    #                     ist = datetime.strptime(dist, '%Y-%m-%d %H:%M:%S')
+    #                     kmb = datetime.strptime(dkmb, '%Y-%m-%d %H:%M:%S')
                         
-                        dselisih_i = kmb - ist
-                        djam_selisih_i = f'{ab.tgl_absen} {dselisih_i}'
-                        selisih_i = datetime.strptime(djam_selisih_i, '%Y-%m-%d %H:%M:%S')
+    #                     dselisih_i = kmb - ist
+    #                     djam_selisih_i = f'{ab.tgl_absen} {dselisih_i}'
+    #                     selisih_i = datetime.strptime(djam_selisih_i, '%Y-%m-%d %H:%M:%S')
                             
-                        detik_i = selisih_i.second / 3600
-                        menit_i = selisih_i.minute / 60
-                        hour_i = selisih_i.hour
+    #                     detik_i = selisih_i.second / 3600
+    #                     menit_i = selisih_i.minute / 60
+    #                     hour_i = selisih_i.hour
                         
-                        jam_i = int(hour_i) + float(menit_i) + float(detik_i)
+    #                     jam_i = int(hour_i) + float(menit_i) + float(detik_i)
                         
-                        tji = jam_i                   
-                    else:
+    #                     tji = jam_i                   
+    #                 else:
                         
-                        tplus = ab.tgl_absen + timedelta(days=1)
+    #                     tplus = ab.tgl_absen + timedelta(days=1)
                         
-                        dist = f'{ab.tgl_absen} {ab.istirahat}'
-                        dkmb = f'{tplus} {ab.kembali}'
+    #                     dist = f'{ab.tgl_absen} {ab.istirahat}'
+    #                     dkmb = f'{tplus} {ab.kembali}'
                         
-                        ist = datetime.strptime(dist, '%Y-%m-%d %H:%M:%S')
-                        kmb = datetime.strptime(dkmb, '%Y-%m-%d %H:%M:%S')
+    #                     ist = datetime.strptime(dist, '%Y-%m-%d %H:%M:%S')
+    #                     kmb = datetime.strptime(dkmb, '%Y-%m-%d %H:%M:%S')
                         
-                        dselisih_i = kmb - ist
-                        djam_selisih_i = f'{ab.tgl_absen} {dselisih_i}'
-                        selisih_i = datetime.strptime(djam_selisih_i, '%Y-%m-%d %H:%M:%S')
+    #                     dselisih_i = kmb - ist
+    #                     djam_selisih_i = f'{ab.tgl_absen} {dselisih_i}'
+    #                     selisih_i = datetime.strptime(djam_selisih_i, '%Y-%m-%d %H:%M:%S')
                             
-                        detik_i = selisih_i.second / 3600
-                        menit_i = selisih_i.minute / 60
-                        hour_i = selisih_i.hour
+    #                     detik_i = selisih_i.second / 3600
+    #                     menit_i = selisih_i.minute / 60
+    #                     hour_i = selisih_i.hour
                         
-                        jam_i = int(hour_i) + float(menit_i) + float(detik_i)
+    #                     jam_i = int(hour_i) + float(menit_i) + float(detik_i)
                         
-                        tji = jam_i                      
-                else:
-                    tji = 0        
+    #                     tji = jam_i                      
+    #             else:
+    #                 tji = 0        
                 
-                # total jam istirahat2
-                if ab.istirahat2 is not None and ab.kembali2 is not None:
-                    if ab.kembali2 > ab.istirahat2:
+    #             # total jam istirahat2
+    #             if ab.istirahat2 is not None and ab.kembali2 is not None:
+    #                 if ab.kembali2 > ab.istirahat2:
                         
-                        dist2 = f'{ab.tgl_absen} {ab.istirahat2}'
-                        dkmb2 = f'{ab.tgl_absen} {ab.kembali2}'
+    #                     dist2 = f'{ab.tgl_absen} {ab.istirahat2}'
+    #                     dkmb2 = f'{ab.tgl_absen} {ab.kembali2}'
                         
-                        ist2 = datetime.strptime(dist2, '%Y-%m-%d %H:%M:%S')
-                        kmb2 = datetime.strptime(dkmb2, '%Y-%m-%d %H:%M:%S')
+    #                     ist2 = datetime.strptime(dist2, '%Y-%m-%d %H:%M:%S')
+    #                     kmb2 = datetime.strptime(dkmb2, '%Y-%m-%d %H:%M:%S')
                         
-                        dselisih_i2 = kmb2 - ist2
-                        djam_selisih_i2 = f'{ab.tgl_absen} {dselisih_i2}'
-                        selisih_i2 = datetime.strptime(djam_selisih_i2, '%Y-%m-%d %H:%M:%S')
+    #                     dselisih_i2 = kmb2 - ist2
+    #                     djam_selisih_i2 = f'{ab.tgl_absen} {dselisih_i2}'
+    #                     selisih_i2 = datetime.strptime(djam_selisih_i2, '%Y-%m-%d %H:%M:%S')
                             
-                        detik_i2 = selisih_i2.second / 3600
-                        menit_i2 = selisih_i2.minute / 60
-                        hour_i2 = selisih_i2.hour
+    #                     detik_i2 = selisih_i2.second / 3600
+    #                     menit_i2 = selisih_i2.minute / 60
+    #                     hour_i2 = selisih_i2.hour
                         
-                        jam_i2 = int(hour_i2) + float(menit_i2) + float(detik_i2)
+    #                     jam_i2 = int(hour_i2) + float(menit_i2) + float(detik_i2)
                         
-                        tji2 = jam_i2                   
-                    else:
+    #                     tji2 = jam_i2                   
+    #                 else:
                         
-                        tplus = ab.tgl_absen + timedelta(days=1)
+    #                     tplus = ab.tgl_absen + timedelta(days=1)
                         
-                        dist2 = f'{ab.tgl_absen} {ab.istirahat2}'
-                        dkmb2 = f'{tplus} {ab.kembali2}'
+    #                     dist2 = f'{ab.tgl_absen} {ab.istirahat2}'
+    #                     dkmb2 = f'{tplus} {ab.kembali2}'
                         
-                        ist2 = datetime.strptime(dist2, '%Y-%m-%d %H:%M:%S')
-                        kmb2 = datetime.strptime(dkmb2, '%Y-%m-%d %H:%M:%S')
+    #                     ist2 = datetime.strptime(dist2, '%Y-%m-%d %H:%M:%S')
+    #                     kmb2 = datetime.strptime(dkmb2, '%Y-%m-%d %H:%M:%S')
                         
-                        dselisih_i2 = kmb2 - ist2
-                        djam_selisih_i2 = f'{ab.tgl_absen} {dselisih_i2}'
-                        selisih_i2 = datetime.strptime(djam_selisih_i2, '%Y-%m-%d %H:%M:%S')
+    #                     dselisih_i2 = kmb2 - ist2
+    #                     djam_selisih_i2 = f'{ab.tgl_absen} {dselisih_i2}'
+    #                     selisih_i2 = datetime.strptime(djam_selisih_i2, '%Y-%m-%d %H:%M:%S')
                             
-                        detik_i2 = selisih_i2.second / 3600
-                        menit_i2 = selisih_i2.minute / 60
-                        hour_i2 = selisih_i2.hour
+    #                     detik_i2 = selisih_i2.second / 3600
+    #                     menit_i2 = selisih_i2.minute / 60
+    #                     hour_i2 = selisih_i2.hour
                         
-                        jam_i2 = int(hour_i2) + float(menit_i2) + float(detik_i2)
+    #                     jam_i2 = int(hour_i2) + float(menit_i2) + float(detik_i2)
                         
-                        tji2 = jam_i2
-                else:
-                    tji2 = 0    
+    #                     tji2 = jam_i2
+    #             else:
+    #                 tji2 = 0    
                     
-                ab.total_jam_kerja = tjk
-                ab.total_jam_istirahat = tji
-                ab.total_jam_istirahat2 = tji2
-                ab.save()
+    #             ab.total_jam_kerja = tjk
+    #             ab.total_jam_istirahat = tji
+    #             ab.total_jam_istirahat2 = tji2
+    #             ab.save()
                     
-            else:
-                pass            
-                
-    return redirect ('cabsen_s',dr=dr, sp=sp, sid=int(sid))   
+    #         else:
+    #             pass            
+    return JsonResponse({"ok":"ok"})
+    # return redirect ('cabsen_s',dr=dr, sp=sp, sid=int(sid))   
 
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3613,8 +2595,18 @@ def ijin(request, sid):
         
         status = status_pegawai_db.objects.all().order_by('id')
         
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+        try:
+            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = serialize("json",[sid_lembur])
+            sid_lembur = json.loads(sid_lembur)[0]
 
+        except:
+            print("Sdd")
+            sid_lembur = {
+                "pk":0
+            }
+
+        # print(sid_lembur.id)
         pegawai = []
             
         for p in pegawai_db.objects.filter(aktif=1):
@@ -3626,8 +2618,7 @@ def ijin(request, sid):
                     'userid':p.userid
                 }    
                 pegawai.append(data)
-            else:
-                if int(sid) == p.status_id:     
+            elif int(sid) == p.status_id:     
                     data = {
                         'idp':p.id,
                         'nama':p.nama,
@@ -3635,8 +2626,8 @@ def ijin(request, sid):
                         'userid':p.userid
                     }    
                     pegawai.append(data)
-                else:
-                    pass    
+            else:
+                pass    
         
         ijin = jenis_ijin_db.objects.order_by('jenis_ijin')
                         
@@ -3647,7 +2638,7 @@ def ijin(request, sid):
             'pegawai' : pegawai,
             'dsid' : dsid,
             'sid' : sid,
-            'sil': sid_lembur.id,
+            'sil': sid_lembur["pk"],
             'ijin' : ijin,
             'dari' : dari,
             'sampai' : sampai,
@@ -3799,8 +2790,8 @@ def ijin_json(request, dr, sp, sid):
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
         
-        if int(sid) == 0:
-            for i in ijin_db.objects.select_related('pegawai','ijin').filter(tgl_ijin__range=(dari,sampai)):
+        for i in ijin_db.objects.select_related('pegawai','ijin').filter(tgl_ijin__range=(dari,sampai)):
+            if int(sid) == 0:
                 
                 tijin = i.tgl_ijin.strftime("%A")
                 hari = nama_hari(tijin) 
@@ -3819,9 +2810,7 @@ def ijin_json(request, dr, sp, sid):
                     'ket':i.keterangan
                 }
                 data.append(ijin)
-        else:
-            for i in ijin_db.objects.select_related('pegawai','ijin').filter(tgl_ijin__range=(dari,sampai), pegawai__status_id=int(sid)):
-                
+            elif int(sid) == i.pegawai_id:
                 tijin = i.tgl_ijin.strftime("%A")
                 hari = nama_hari(tijin) 
                 
@@ -3839,7 +2828,9 @@ def ijin_json(request, dr, sp, sid):
                     'ket':i.keterangan
                 }
                 data.append(ijin)
-            
+            else:
+                pass
+                
                                 
         return JsonResponse({"data": data})
 
@@ -3896,8 +2887,10 @@ def batal_ijin(request):
     idp = ij.pegawai_id
     nama_pegawai = ij.pegawai.nama
     jenis_ijin = ij.ijin.jenis_ijin
-    
-    ab = absensi_db.objects.get(pegawai_id=int(idp), tgl_absen=tgl)
+    try:
+        ab = absensi_db.objects.get(pegawai_id=int(idp), tgl_absen=tgl)
+    except:
+        pass
     ab.keterangan_ijin = None
     ab.save()
     
@@ -7485,7 +6478,7 @@ def jam_kerja(request):
         dsid = dakses.sid_id
         
         kk = kelompok_kerja_db.objects.all().order_by('kelompok')
-        
+        print(kk)
         data = {       
             'dsid': dsid,
             'kk': kk,
@@ -7528,83 +6521,139 @@ def tambah_kk_json(request):
                                 
         return JsonResponse({"status": status, "data":data})
 
-
 @login_required
-# def jam_kerja_json(request):
+def edit_kk_json(request):
         
-#     if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
-#         data = []
-                
-#         for i in jamkerja_db.objects.all().order_by('kk_id__kelompok'):            
-            
-#             jk = {
-#                 'id': i.id,
-#                 'kk': i.kk,
-#                 'masuk': masuk,
-#                 'ist': ist,
-#                 'k_ist': k_ist,
-#                 'ist2': ist2,
-#                 'k_ist2': k_ist2,
-#                 'pulang': pulang,
-#             }
-#             data.append(jk)
+        ekk = request.POST.get('ekk')
+        new_kk = request.POST.get('new_kk')
+        try:
+            if kelompok_kerja_db.objects.filter(~Q(pk=int(ekk)),kelompok=new_kk).exists():
+                return JsonResponse({"status": "duplikat"})
+            print(ekk)
+            kelompok_kerja_db.objects.filter(pk=int(ekk)).update(kelompok=new_kk)
+            return JsonResponse({"status": "ok"})
+        except: 
+            return JsonResponse({"status": "gagal update",})
                                 
-#         return JsonResponse({"data": data})
+        
 
 
 @login_required
-def tambah_jam_kerja(request):
-    
+def jam_kerja_json(request):
     if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        dtgl = request.POST.get('tgl')
-        libur = request.POST.get('libur')
-        dinsentif = request.POST.get('insentif')
+        data = []
+                
+        for i in jamkerja_db.objects.all().order_by('kk_id__kelompok'):            
+            
+            jk = {
+                'id': i.id,
+                'kk': i.kk_id,
+                'kk_nama':i.kk.kelompok,
+                'masuk': i.jam_masuk,
+                'ist': i.jam_istirahat,
+                'k_ist': i.jam_kembali_istirahat,
+                'ist2': i.jam_istirahat2,
+                'k_ist2': i.jam_kembali_istirahat2,
+                'pulang': i.jam_pulang,
+                'hari':i.hari
+            }
+            data.append(jk)
+        print(data)
+        return JsonResponse({"data": data})
+
+
+@login_required
+def tambah_jam_kerja(r):
+    
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        kk = r.POST.get("kk")
+        jam_masuk = r.POST.get("jam_masuk")
+        jam_istirahat = r.POST.get("jam_istirahat")
+        jam_kistirahat = r.POST.get("jam_kistirahat")
+        jam_istirahat2 = r.POST.get("jam_istirahat2")
+        jam_kistirahat2 = r.POST.get("jam_kistirahat2")
+        jam_pulang = r.POST.get("jam_pulang")
+        hari = r.POST.getlist("hari[]")
+
+
+        # try:
+        #     # index = hari.index("Semua Hari")
+        #     for 
+        #     hari = [hari[index]]
+        # except:
+        #     hari = hari
+
+        for h in hari:
+            if h.lower() == 'semua hari':
+                hari = ["Semua Hari"]
+                break
+                
+
+
+        if len(hari) >= 7:
+            hari = ["Semua Hari"]
+
+
+
+        if jamkerja_db.objects.filter(kk_id=int(kk),jam_masuk=jam_masuk,jam_pulang=jam_pulang,hari=hari).exists() or jamkerja_db.objects.filter(kk_id=int(kk),hari="semua hari"):
+            status = "gagal tambah"
+        else:
+            for h in hari:
+                if jamkerja_db.objects.filter(kk_id=int(kk),hari=h).exists():
+                    continue
+                
+                if h.lower() == 'semua hari':
+                    if jamkerja_db.objects.filter(~Q(hari='semua hari'),kk_id=int(kk)).exists():
+                        break
+
+                jamkerja_db(
+                    kk_id=kk,
+                    jam_masuk=jam_masuk,
+                    jam_pulang=jam_pulang,
+                    jam_istirahat=jam_istirahat,
+                    jam_kembali_istirahat=jam_kistirahat,
+                    jam_istirahat2=jam_istirahat2,
+                    jam_kembali_istirahat2=jam_kistirahat2,
+                    hari=h
+                ).save()
+            status = "ok"
+        return JsonResponse({"status": status})
+
+
+@login_required
+def edit_jam_kerja(r):
+    
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        tgl = datetime.strptime(dtgl, '%d-%m-%Y').date()
-        insentif = dinsentif.replace('.', '')
-        
-        if libur_nasional_db.objects.filter(tgl_libur = tgl).exists():
-            status = 'duplikat'
-        else:    
-            ln = libur_nasional_db(
-                tgl_libur = tgl,
-                libur = libur,
-                insentif_karyawan = insentif,
+        eid = r.POST.get('id')
+        jam_masuk = r.POST.get("jam_masuk")
+        jam_pulang = r.POST.get("jam_pulang")
+        jam_istirahat = r.POST.get("jam_istirahat")
+        jam_istirahat2 = r.POST.get("jam_istirahat2")
+        jam_kistirahat = r.POST.get("jam_kistirahat")
+        jam_kistirahat2 = r.POST.get("jam_kistirahat2")
+        kk = r.POST.get("kk")
+        hari = r.POST.get("hari")
+        try:
+            get = jamkerja_db.objects.get(pk=int(eid))
+            jamkerja_db.objects.filter(id=int(eid)).update(
+                jam_masuk=jam_masuk,
+                jam_pulang=jam_pulang,
+                jam_istirahat=jam_istirahat,
+                jam_kembali_istirahat=jam_kistirahat,
+                jam_istirahat2=jam_istirahat2,
+                jam_kembali_istirahat2=jam_kistirahat2,
+                hari=hari,
+                kk_id=int(kk)
             )
-            ln.save()
-            
-            status = 'ok'
-        
-        return JsonResponse({"status": status})
-
-
-@login_required
-def edit_jam_kerja(request):
-    
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
-        
-        eid = request.POST.get('eid')
-        dtgl = request.POST.get('etgl')
-        libur = request.POST.get('elibur')
-        dinsentif = request.POST.get('einsentif')
-        
-        tgl = datetime.strptime(dtgl, '%d-%m-%Y').date()
-        insentif = dinsentif.replace('.', '')
-        
-        if libur_nasional_db.objects.filter(tgl_libur = tgl, libur = libur, insentif_karyawan = insentif).exists():
-            status = 'duplikat'
-        else:    
-            ln = libur_nasional_db.objects.get(id=int(eid))
-            ln.tgl_libur = tgl
-            ln.libur = libur
-            ln.insentif_karyawan = insentif
-            ln.save()
-            
-            status = 'ok'
-        
-        return JsonResponse({"status": status})
+            print(r.POST)
+            status = "Ok"
+            return JsonResponse({"status": status})
+        except:
+            return JsonResponse({"status": "gagal update"})
 
 
 @login_required
@@ -7615,12 +6664,15 @@ def hapus_jam_kerja(request):
         nama_user = request.user.username
         
         hid = request.POST.get('hid')
-              
-        ln = libur_nasional_db.objects.get(id=int(hid))            
         
+        try:
+            ln = jamkerja_db.objects.get(id=int(hid))           
+        except:
+            return JsonResponse({'status':'gagal hapus'})
+
         thapus = histori_hapus_db(
             delete_by = nama_user,
-            delete_item = f'hapus libur nasional : {ln.libur}'
+            delete_item = f'hapus jam kerja : {ln.kk.kelompok}'
         )
         thapus.save()
         
@@ -7654,19 +6706,76 @@ def jenis_ijin(request):
         messages.info(request, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
+@login_required
+def jenis_ijin_json(r):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        jenis_ijin = jenis_ijin_db.objects.all()
+        
+        data = []
+
+        for j in jenis_ijin:
+            obj = {
+                "pk":j.pk,
+                "jenis_ijin":j.jenis_ijin
+            }
+            data.append(obj)
+        return JsonResponse({"data":data},safe=False,status=200)
+
+@login_required
+def tjenis_ijin(r):
+    jenis_ijin = r.POST.get("jenis_ijin")
+
+    if jenis_ijin_db.objects.filter(jenis_ijin=jenis_ijin).exists():
+        status="duplikat"
+    else:
+        jenis_ijin_db(
+            jenis_ijin=jenis_ijin
+        ).save()
+        status = "ok"
+    return JsonResponse({"status":status},safe=False,status=200)
+
+@login_required
+def ejenis_ijin(r):
+    jenis_ijin = r.POST.get("jenis_ijin")
+    id = r.POST.get("id") 
+    if jenis_ijin_db.objects.filter(~Q(id=int(id)),jenis_ijin=jenis_ijin).exists():
+        status = "duplikat"
+    else:
+        jenis_ijin_db.objects.filter(id=int(id)).update(jenis_ijin=jenis_ijin)
+        status = "ok"
+    return JsonResponse({"status":status},safe=False,status=200)
+
+@login_required
+def hjenis_ijin(r):
+    id = r.POST.get("id")
+    jenis_ijin = r.POST.get("jenis_ijin")
+    nama_user = r.user.username
+    try:
+        jenis_ijin_db.objects.get(pk=int(id)).delete()
+        thapus = histori_hapus_db(
+                delete_by = nama_user,
+                delete_item = f'hapus jenis ijin : {jenis_ijin}'
+        )
+        thapus.save()
+        status = 'Ok'
+    except:
+        status = "gagal menghapus" 
+    return JsonResponse({"status":status},safe=False,status=200)
+
 
 @login_required
 def status_pegawai_lembur(request):
     iduser = request.user.id
         
     if akses_db.objects.filter(user_id=iduser).exists():
-        
+        status_pegawai = status_pegawai_db.objects.all()
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
         data = {       
             'dsid': dsid,
+            "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai Lembur'     
         }
         
@@ -7677,3 +6786,55 @@ def status_pegawai_lembur(request):
         return redirect('beranda')
 
     
+@login_required
+def tstatus_pegawai_lembur(r):
+    status = r.POST.get("status")
+    
+    if status_pegawai_lembur_db.objects.filter(status_pegawai_id=status).exists():
+        return JsonResponse({'status':'duplikat'},safe=False,status=400)
+    else:
+        print(status)
+        status_pegawai_lembur_db(status_pegawai_id=int(status)).save()
+        return JsonResponse({'status':'berhasil'},safe=False,status=201)
+
+@login_required
+def status_pegawai_lembur_json(r):
+    result = status_pegawai_lembur_db.objects.all()
+    data = []
+    for r in result:
+        obj = {
+            'status_pegawai':r.status_pegawai.status,
+            'pk':r.pk,
+            "status_id":r.status_pegawai_id
+        }
+        data.append(obj)
+    
+    return JsonResponse({"data":data},status=200,safe=False)
+
+@login_required
+def estatus_pegawai_lembur(r):
+    status = r.POST.get("status")
+    id = r.POST.get('id')
+
+    try:
+        get = status_pegawai_lembur_db.objects.get(pk=int(id))
+        status_pegawai_lembur_db.objects.filter(pk=int(id)).update(status_pegawai_id=int(status))
+        return JsonResponse({'status':'ok'},safe=False,status=200)
+    except:
+        return JsonResponse({"status":"gagal update"},safe=False,status=400)
+
+@login_required
+def hstatus_pegawai_lembur(r):
+    id = r.POST.get('id')
+    nama_user = r.user.username
+    try:
+        get = status_pegawai_lembur_db.objects.get(pk=int(id))
+        histori_hapus_db(
+            delete_by = nama_user,
+            delete_item = f'hapus status pegawai lembur : {get.status_pegawai.status}'
+        )
+        status_pegawai_lembur_db.objects.get(pk=int(id)).delete()
+        return JsonResponse({'status':'ok'},safe=False,status=200)
+    except:
+        return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
+

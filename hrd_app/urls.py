@@ -150,10 +150,35 @@ urlpatterns = [
     path('hlibur_nasional', views.hapus_libur_nasional, name='hlibur_nasional'),
     
     path('jam_kerja', views.jam_kerja, name='jam_kerja'),
-    # path('jam_kerja_json', views.jam_kerja_json, name='jam_kerja_json'),
+    path('jam_kerja_json', views.jam_kerja_json, name='jam_kerja_json'),
+    path('edit_jkerja', views.edit_jam_kerja, name='edit_jkerja'),
+    path('hapus_jkerja', views.hapus_jam_kerja, name='hapus_jkerja'),
+    path('tjamkerja', views.tambah_jam_kerja, name='tjamkerja'),
     path('tkk_json', views.tambah_kk_json, name='tkk_json'),
+    path('ekk_json', views.edit_kk_json, name='ekk_json'),
     
     path('jenis_ijin', views.jenis_ijin, name='jenis_ijin'),
+    path('tjenis_ijin', views.tjenis_ijin, name='tjenis_ijin'),
+    path('ejenis_ijin', views.ejenis_ijin, name='ejenis_ijin'),
+    path('hjenis_ijin', views.hjenis_ijin, name='hjenis_ijin'),
+    path('jenis_ijin_json', views.jenis_ijin_json, name='jenis_ijin_json'),
+
+
+
     path('status_pegawai_lembur', views.status_pegawai_lembur, name='status_pegawai_lembur'),
+    path('estatus_pegawai_lembur', views.estatus_pegawai_lembur, name='espgl'),
+    path('tstatus_pegawai_lembur', views.tstatus_pegawai_lembur, name='tspgl'),
+    path('hstatus_pegawai_lembur', views.hstatus_pegawai_lembur, name='hspgl'),
+    path('status_pegawai_lembur_json', views.status_pegawai_lembur_json, name='spgljson'),
+
+
     
+    path('status_pegawai_lembur_json', views.status_pegawai_lembur_json, name='spgljson'),
+    path('status_pegawai_lembur_json', views.status_pegawai_lembur_json, name='spgljson'),
+    path('status_pegawai_lembur_json', views.status_pegawai_lembur_json, name='spgljson'),
+    path('status_pegawai_lembur_json', views.status_pegawai_lembur_json, name='spgljson'),
+    path('status_pegawai_lembur_json', views.status_pegawai_lembur_json, name='spgljson'),
+
+
+
     ]

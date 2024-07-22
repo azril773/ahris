@@ -480,7 +480,7 @@ class ijin_db(models.Model):
     edit_date = models.DateTimeField(auto_now=True, null=True)
     
     def __str__(self):
-        return self.pegawai
+        return self.pegawai.nama
 
     class Meta:
         verbose_name = 'Ijin Pegawai'
@@ -607,7 +607,7 @@ class absensi_db(models.Model):
     edit_date = models.DateTimeField(auto_now=True, null=True)
     
     def __str__(self):
-        return self.pegawai
+        return self.pegawai.nama
 
     class Meta:
         verbose_name = 'Absensi'

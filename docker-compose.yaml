@@ -1,0 +1,41 @@
+version: "3.8"
+
+services:
+  hrd_app:
+    container_name: hrd_app
+    build: .
+    image: azril/docker
+    restart: unless-stopped
+    depends_on:
+      - mysql
+    ports:
+      - 3000:8000
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      DB_NAME: root
+      DB_PASS: 123
+      DB_HOST: mysql
+      DB_PORT: 3306
+    # volumes:
+    #   - type: volume 
+    #     source: 
+    networks:
+      - ahris
+  
+  mysql:
+    container_name: mysql
+    image: mysql:latest
+    ports:
+      - 3307:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: "123"
+      MYSQL_DATABASE: hrd
+    networks:
+      - ahris
+    
+networks:
+  ahris:
+    driver: bridge
+
+
+# 192.168.144.3'

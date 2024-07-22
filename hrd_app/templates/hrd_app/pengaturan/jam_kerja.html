@@ -127,11 +127,56 @@
                                 
                                 <label class="form-control-label tx-inverse">Kelompok Kerja: &nbsp; <a href="#!" data-toggle="modal" data-target="#tambahKK"><i class='fa fa-plus-circle'></i></a> &nbsp; <a href="#!" data-toggle="modal" data-target="#editKK"><i class='fa fa-pencil'></i></a></label>
 
-                                <select name="kk" id="kk" class="form-control select2-show-search" data-placeholder='Pilih' required=required>
+                                <select name="kk" id="kk" data-placeholder='Pilih' required=required>
                                     <option label="Pilih Kelompok Kerja"></option>
                                     {% for k in kk %}
                                     <option value="{{k.id}}">{{k.kelompok}}</option>
                                     {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Masuk:</label>
+                                <input type="time" name="jam_masuk" id="jam_masuk" value="00:00" class="form-control easyui-timespinner">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Pulang:</label>
+                                <input type="time" name="jam_pulang" id="jam_pulang" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Istirahat:</label>
+                                <input type="time" name="jam_istirahat" id="jam_istirahat" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat:</label>
+                                <input type="time" name="jam_kistirahat" id="jam_kistirahat" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Istirahat2:</label>
+                                <input type="time" name="jam_istirahat2" id="jam_istirahat2" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat2:</label>
+                                <input type="time" name="jam_kistirahat2" id="jam_kistirahat2" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Hari:</label>
+
+                                <select name="hari" id="hari" class="shadow-sm" data-placeholder='Pilih' required=required>
+                                    <option value="">slds</option>
                                 </select>
                             </div>
                         </div>
@@ -158,7 +203,7 @@
                 </button>          
                 </div>
                 
-                <form id="tambahkkForm" method="post">
+                <form id="editkkForm" method="post">
                     {% csrf_token %}
                     <div class="form-layout form-layout-1">
                     <div class="row mg-b-25">
@@ -211,31 +256,75 @@
         
                         <div class="col-lg-12">
                             <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Tanggal:</label>
-                                <input type="text" name="tgl2" id="tgl2" class="form-control tgl2">
+                                
+                                <label class="form-control-label tx-inverse">Kelompok Kerja:</label>
+
+                                <select name="ejkk" id="ejkk" data-placeholder='Pilih' required=required>
+                                    <option label="Pilih Kelompok Kerja"></option>
+                                    {% for k in kk %}
+                                    <option value="{{k.id}}">{{k.kelompok}}</option>
+                                    {% endfor %}
+                                </select>
                             </div>
                         </div>
-
-                        <div class="col-lg-12">
+                        <div class="col-lg-6">
                             <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Libur Nasional:</label>
-                                <input type="text" name="elibur" id="elibur" class="form-control">
+                                <label class="form-control-label tx-inverse">Jam Masuk:</label>
+                                <input type="time" name="ejam_masuk" id="ejam_masuk" class="form-control">
                             </div>
                         </div>
-
-                        <div class="col-lg-12">
+                        <div class="col-lg-6">
                             <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Insentif:</label>
-                                <input id="einsentifMask" name="einsentif" type="text" class="form-control">
+                                <label class="form-control-label tx-inverse">Jam Pulang:</label>
+                                <input type="time" name="ejam_pulang" id="ejam_pulang" class="form-control">
                             </div>
                         </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Istirahat:</label>
+                                <input type="time" name="ejam_istirahat" id="ejam_istirahat" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat:</label>
+                                <input type="time" name="ejam_kistirahat" id="ejam_kistirahat" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Istirahat2:</label>
+                                <input type="time" name="ejam_istirahat2" id="ejam_istirahat2" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat2:</label>
+                                <input type="time" name="ejam_kistirahat2" id="ejam_kistirahat2" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Hari:</label>
 
-                        <input id="edit_id" name="edit_id" type="hidden" class="form-control">
-        
+                                <select name="ejhari" id="ejhari" data-placeholder='Pilih' required=required>
+                                    <option label="" value="">Pilih Hari</option>
+                                    <option label="Senin" value="Senin">Senin</option>
+                                    <option label="Selasa" value="Selasa">Selasa</option>
+                                    <option label="Rabu" value="Rabu">Rabu</option>
+                                    <option label="Kamis" value="Kamis">Kamis</option>
+                                    <option label="Jumat" value="Jumat">Jumat</option>
+                                    <option label="Sabtu" value="Sabtu">Sabtu</option>
+                                    <option label="Minggu" value="Minggu">Minggu</option>
+                                    <option label="Semua Hari" value="Semua Hari">Semua Hari</option>
+                                </select>
+                            </div>
+                        </div>
+                        <input type="hidden" name="edit_id" id="edit_id">
                         <div class="modal-footer">
-                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
                         <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
-                        </div>              
+                        </div>            
         
                     </div>
                     </div>            
@@ -275,7 +364,8 @@
             </div>
             </div><!-- modal-dialog -->
         </div>
-
+        <label for="">sdskd</label>
+        <input type="text" id="coba">
     </div>
 
 </div><!-- br-pagebody -->
@@ -284,16 +374,48 @@
 
 {% block hrd_ajax %}
 
+<!-- Select2 -->
 <script>
+    $("[type='time']").flatpickr({
+        enableTime:true,
+        noCalendar:true,
+        dateFormat:"H:i",
+        time_24hr:true
+    });
+        const kkSelect = $('#kk').selectize();
+        const hariSelect = $('#hari').selectize({
+            maxItems: null,
+            valueField: 'hari',
+            labelField: 'hari',
+            searchField: 'hari',
+            options: [
+              {hari:'Senin'},
+              {hari:'Selasa'},
+              {hari:'Rabu'},
+              {hari:'Kamis'},
+              {hari:'Jumat'},
+              {hari:'Sabtu'},
+              {hari:'Minggu'},
+              {hari:'Semua Hari'}
+            ],
+            create: false
+        });
+
+        $('#ekk').selectize();
+
+        const ejkkSelect = $('#ejkk').selectize();
+
+        const ehariSelect = $('#ejhari').selectize();
+
     $(document).ready(function() {
-    
+        const token = document.querySelector('[name=csrfmiddlewaretoken]').value
         /* tabel */
         var table = $('#tabelku').DataTable({
             "ajax": "{% url 'jam_kerja_json' %}",
 
             columns: [
 
-                { data: 'kk' },
+                { data: 'kk_nama' },
                 { data: 'masuk' },
                 { data: 'ist' },
                 { data: 'k_ist' },
@@ -303,7 +425,7 @@
                 { 
                     data: null,
                     "render": function(data, type, row, meta){    
-                        data = '<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-target="#edit" data-toggle="modal" data-eid='+row.id+' >Edit</button> &nbsp; <button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-toggle="modal" data-hid='+row.id+'>Hapus</button>';
+                        data = `<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-target="#edit" data-toggle="modal" data-emasuk='${row.masuk}' data-epulang='${row.pulang}' data-eist='${row.ist}' data-eist2='${row.ist2}' data-ekist='${row.k_ist}' data-ekist2='${row.k_ist2}' data-ekk='${row.kk}' data-eid='${row.id}' data-ehari='${row.hari}' >Edit</button> &nbsp; <button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-hid='${row.id}' data-toggle="modal">Hapus</button>`;
                         return data;
                     } 
                 },
@@ -343,8 +465,7 @@
         });   
                 
         /* Tambah kk*/
-        tambahkkForm.addEventListener('submit', e => {
-            e.preventDefault()
+        $("#tambahkkForm").on('submit', e => {
 
             const tkk = document.getElementById('tkk')
             const csrf = document.getElementsByName('csrfmiddlewaretoken')       
@@ -363,15 +484,34 @@
                     } else if(response.status == 'duplikat'){
                         alert('Duplikat Data, proses dibatalkan.')
                     } 
-                    
-                    table.ajax.reload(null, false);
+                },
+                error: function (error) {
+                    alert('Terjadi kesalahan sistem, hubungi IT.')
+                }
+            });
 
-                    $('#tambahKK').modal('hide');
-                    $("#tambahkkForm")[0].reset();   
+        });
+
+        $("#editkkForm").on('submit', e => {
+
+            const ekk = document.getElementById('ekk')
+            const new_kk = document.getElementById('new_kk').value
+            
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'ekk_json' %}",
+                data: {
+                    'ekk': ekk.value,
+                    new_kk
+                },
+                headers:{"X-CSRFToken":token},
+                success: function (response) { 
                     
-                    var newOption = new Option(response.data.text, response.data.id, false, false);
-                    $('#kk').append(newOption).trigger('change');
-                        
+                    if (response.status == 'ok') { 
+                        console.log(response.status)       
+                    } else if(response.status == 'duplikat'){
+                        alert('Duplikat Data, proses dibatalkan.')
+                    } 
                 },
                 error: function (error) {
                     alert('Terjadi kesalahan sistem, hubungi IT.')
@@ -382,101 +522,77 @@
 
         
         /* Tambah*/
-        tambahForm.addEventListener('submit', e => {
+        $("#tambahForm").on('submit', e => {
             e.preventDefault()
-
-            const tgl = document.getElementById('tgl1')
-            const libur = document.getElementById('libur')
-            const insentif = document.getElementById('insentifMask')
-            const csrf = document.getElementsByName('csrfmiddlewaretoken')       
-            
+            const kk = $("#kk").val()
+            const jam_masuk = $("#jam_masuk").val()
+            const jam_istirahat = $("#jam_istirahat").val()
+            const jam_istirahat2 = $("#jam_istirahat2").val()
+            const jam_pulang = $("#jam_pulang").val()
+            const jam_kistirahat = $("#jam_kistirahat").val()
+            const jam_kistirahat2 = $("#jam_kistirahat2").val()
+            const hari = $("#hari").val()
             $.ajax({
-                type: 'POST',
-                url: "{% url 'tlibur_nasional' %}",
-                data: {
-                    'csrfmiddlewaretoken': csrf[0].value,
-                    'tgl': tgl.value,
-                    'libur': libur.value,
-                    'insentif': insentif.value
-                },
-                success: function (response) { 
-                    
-                    if (response.status == 'ok') { 
-                        console.log(response.status)       
-                    } else if(response.status == 'duplikat'){
-                        alert('Duplikat Data, proses dibatalkan.')
-                    } 
-                    
-                    table.ajax.reload(null, false);
-
-                    $('#tambah').modal('hide');
-                    $("#tambahForm")[0].reset();  
-                    $('#tgl1').val().trigger("change");                 
-                        
-                },
-                error: function (error) {
-                    alert('Terjadi kesalahan sistem, hubungi IT.')
+                url:"{% url 'tjamkerja' %}",
+                method:"post",
+                data:{kk,jam_masuk,jam_istirahat,jam_istirahat2,jam_pulang,jam_kistirahat,jam_kistirahat2,hari},
+                headers:{"X-CSRFToken":token},
+                success(e){
+                    if(e.status == 'duplikat'){
+                        alert("Jam kerja sudah ada!")
+                    }
+                    table.ajax.reload()
+                   $("#tambah").modal("hide")
+                   $("#tambahForm")[0].reset()
+                   hariSelect[0].selectize.clear()
+                   kkSelect[0].selectize.clear()
                 }
-            });
-
+            })
+            
         });
 
         /* Edit*/
-        editForm.addEventListener('submit', e => {
+        $("#editForm").on('submit', e => {
             e.preventDefault()
-
-            const eid = document.getElementById('edit_id')
-            const etgl = document.getElementById('tgl2')
-            const elibur = document.getElementById('elibur')
-            const einsentif = document.getElementById('einsentifMask')
-            const csrf = document.getElementsByName('csrfmiddlewaretoken')       
-            
+            const id = $("#edit_id").val();
+            const jam_masuk = $("#ejam_masuk").val();
+            const jam_pulang = $("#ejam_pulang").val();
+            const jam_istirahat = $("#ejam_istirahat").val();
+            const jam_istirahat2 = $("#ejam_istirahat2").val();
+            const jam_kistirahat = $("#ejam_kistirahat").val();
+            const jam_kistirahat2 = $("#ejam_kistirahat2").val();
+            const kk = $("#ejkk").val();
+            const hari = $("#ejhari").val();    
+            console.log(id,jam_masuk,jam_pulang,jam_istirahat,jam_istirahat2,jam_kistirahat,jam_kistirahat2,kk,hari)
             $.ajax({
-                type: 'POST',
-                url: "{% url 'elibur_nasional' %}",
-                data: {
-                    'csrfmiddlewaretoken': csrf[0].value,
-                    'eid': eid.value,
-                    'etgl': etgl.value,
-                    'elibur': elibur.value,
-                    'einsentif': einsentif.value,
-                },
-                success: function (response) { 
-                    
-                    if (response.status == 'ok') { 
-                        console.log(response.status)       
-                    } else if(response.status == 'duplikat'){
-                        alert('Duplikat Data, proses dibatalkan.')
-                    } 
-                    
-                    table.ajax.reload(null, false);
-
-                    $('#edit').modal('hide');
-                    $("#editForm")[0].reset(); 
-                    $('#tgl2').val().trigger("change");                    
-                        
-                },
-                error: function (error) {
-                    alert('Terjadi kesalahan sistem, hubungi IT.')
+                url:"{% url 'edit_jkerja' %}",
+                method:'post',
+                data:{id,jam_masuk,jam_pulang,jam_istirahat,jam_istirahat2,jam_kistirahat,jam_kistirahat2,kk,hari},
+                headers:{"X-CSRFToken":token},
+                success(e){
+                    ejkkSelect[0].selectize.clear()
+                    ehariSelect[0].selectize.clear()
+                   $("#editForm")[0].reset()
+                    table.ajax.reload()
+                    $("#edit").modal("hide")
                 }
-            });
-
+            })
         });
 
         /* Hapus*/
-        hapusForm.addEventListener('submit', e => {
+        $("#hapusForm").on('submit', e => {
             e.preventDefault()
 
             const hid = document.getElementById('hapus_id')
-            const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+            console.log(hid)
             
             $.ajax({
                 type: 'POST',
-                url: "{% url 'hlibur_nasional' %}",
+                url: "{% url 'hapus_jkerja' %}",
                 data: {
-                    'csrfmiddlewaretoken': csrf[0].value,
                     'hid': hid.value,
                 },
+                headers:{"X-CSRFToken":token},
                 success: function (response) { 
                     
                     if (response.status == 'ok') { 
@@ -497,24 +613,28 @@
         });
 
     });
-</script>
-
-<!-- Modal Script -->
-<script>
 
 $('#edit').on('show.bs.modal', function (e) {
-      
     var edit_id = $(e.relatedTarget).data('eid');
-    var etgl = $(e.relatedTarget).data('tgl');
-    var elibur = $(e.relatedTarget).data('libur');
-    var einsentif = $(e.relatedTarget).data('insentif');
-    
+    var emasuk = $(e.relatedTarget).data('emasuk');
+    var epulang = $(e.relatedTarget).data('epulang');
+    var eist = $(e.relatedTarget).data('eist');
+    var eist2 = $(e.relatedTarget).data('eist2');
+    var ekist = $(e.relatedTarget).data('ekist');
+    var ekist2 = $(e.relatedTarget).data('ekist2');
+    var ekk = $(e.relatedTarget).data('ekk');
+    var ehari = $(e.relatedTarget).data('ehari');
+    console.log(edit_id,emasuk,epulang,eist,eist2,ekist,ekist2,ekk)
     //populate the textbox
     $(e.currentTarget).find('input[name="edit_id"]').val(edit_id);
-    $(e.currentTarget).find('input[name="tgl2"]').val(etgl);
-    $(e.currentTarget).find('input[name="elibur"]').val(elibur);
-    $(e.currentTarget).find('input[name="einsentif"]').val(einsentif);
-      
+    $(e.currentTarget).find('input[name="ejam_masuk"]').val(emasuk);
+    $(e.currentTarget).find('input[name="ejam_pulang"]').val(epulang);
+    $(e.currentTarget).find('input[name="ejam_istirahat"]').val(eist);
+    $(e.currentTarget).find('input[name="ejam_istirahat2"]').val(eist2);
+    $(e.currentTarget).find('input[name="ejam_kistirahat"]').val(ekist);
+    $(e.currentTarget).find('input[name="ejam_kistirahat2"]').val(ekist2);
+    ejkkSelect[0].selectize.setValue(ekk)
+    ehariSelect[0].selectize.setValue(ehari)    
 });
 
 $('#hapus').on('show.bs.modal', function (e) {
@@ -526,56 +646,68 @@ $('#hapus').on('show.bs.modal', function (e) {
         
   });
 
-</script>
+  $("#tambahKK").on("show.bs.modal",function(e){
+    $("#tambah").modal("hide")
+    $("#edit").modal("hide")
+    $("#hapus").modal("hide")
+  })
+  $("#editKK").on("show.bs.modal",function(e){
+    $("#tambah").modal("hide")
+    $("#edit").modal("hide")
+    $("#hapus").modal("hide")
+  })
 
-<!-- Masking -->
-<script>
+  $("#tambahKK").on("hide.bs.modal",function(e){
+    $("#tambah").modal("show")
+  })
+  $("#editKK").on("hide.bs.modal",function(e){
+    $("#tambah").modal("show")
+  })
+
     
     var rp_mask = document.getElementById('insentifMask');
     
-    rp_mask.addEventListener('keyup', function(e){
+    $(rp_mask).on('keyup', function(e){
+        console.log("sd")
         rp_mask.value = formatRupiah(this.value);
     });
 
     var erp_mask = document.getElementById('einsentifMask');
     
-    erp_mask.addEventListener('keyup', function(e){
+    $(erp_mask).on('keyup', function(e){
         erp_mask.value = formatRupiah(this.value);
     });
 
     /* Fungsi */
     function formatRupiah(angka, prefix)
     {
+        console.clear()
         var number_string = angka.replace(/[^,\d]/g, '').toString(),
             split    = number_string.split(','),
             sisa     = split[0].length % 3,
-            rupiah     = split[0].substr(0, sisa),
+            rupiah     = split[0].substr(0, sisa)
             ribuan     = split[0].substr(sisa).match(/\d{3}/gi);
-            
+        console.log(split,'split')
+        console.log("-----")
+        console.log(sisa,"sisa")
+        console.log("-----")
+        console.log(rupiah,'rupiah')
+        console.log("-----")
+        console.log(ribuan,"ribuan")
+        console.log("-----")
         if (ribuan) {
             separator = sisa ? '.' : '';
+            console.log(separator)
             rupiah += separator + ribuan.join('.');
         }
         
+        console.log(rupiah)
         rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
         return prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
     }
 
 </script>
 
-<!-- Select2 -->
-<script>
-    $(function(){
-    'use strict'        
 
-        $('#kk').select2({
-            dropdownParent: $('#tambah'),
-        });
-
-        $('#ekk').select2({
-            dropdownParent: $('#editKK'),
-        });
-    });
-</script>
 
 {% endblock hrd_ajax %}

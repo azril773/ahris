@@ -174,6 +174,14 @@ class promo_demo(ImportExportModelAdmin):
 @admin.register(sangsi_db)
 class sangsi(ImportExportModelAdmin):
     list_display = ("pegawai","tgl_berlaku","tgl_berakhir")
+
+@admin.register(ijin_db)
+class ijin(ImportExportModelAdmin):
+    list_display = ("pegawai","ijin")
+
+@admin.register(absensi_db)
+class absensi(ImportExportModelAdmin):
+    list_display = ("pegawai","tgl_absen")
 admin.site.site_header = "AHRIS"
 admin.site.site_title = "AHRIS"
 admin.site.site_url = "/hrd/pengaturan"    
