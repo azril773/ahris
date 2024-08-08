@@ -6,5 +6,5 @@ urlpatterns = [
     path('adminnya/', admin.site.urls),
     path('', auth_views.LoginView.as_view(template_name='hrd_app/login.html'), name='login'),
 
-    path('tasik/', include('hrd_app.urls')),
+    path('hrd', include('hrd_app.router.urls')),
 ]
