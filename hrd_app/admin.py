@@ -182,6 +182,15 @@ class ijin(ImportExportModelAdmin):
 @admin.register(absensi_db)
 class absensi(ImportExportModelAdmin):
     list_display = ("pegawai","tgl_absen")
+@admin.register(lembur_db)
+class lembur(ImportExportModelAdmin):
+    list_display = ("tgl_lembur","pegawai")
+@admin.register(rekap_lembur_db)
+class lembur(ImportExportModelAdmin):
+    list_display = ("periode","tahun","pegawai")
+@admin.register(kompen_db)
+class lembur(ImportExportModelAdmin):
+    list_display = ("tgl_kompen","pegawai")
 admin.site.site_header = "AHRIS"
 admin.site.site_title = "AHRIS"
 admin.site.site_url = "/hrd/pengaturan"    

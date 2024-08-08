@@ -32,10 +32,13 @@ services:
       MYSQL_DATABASE: hrd
     networks:
       - ahris
+      
     
 networks:
   ahris:
     driver: bridge
+  # nama:
+  #   external: true
 
 
 # 192.168.144.3'

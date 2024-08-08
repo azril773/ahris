@@ -594,7 +594,7 @@ class absensi_db(models.Model):
     lama_istirahat = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     lama_istirahat2 = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     jam_pulang = models.TimeField(null=True)
-    jam_istirahat = models.FloatField(null=True)
+    jam_istirahat = models.DecimalField(null=True,max_digits=5, decimal_places=2)
     
     total_jam_kerja = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=0)
     total_jam_istirahat = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=0)
@@ -681,7 +681,7 @@ class lembur_db(models.Model):
     edit_date = models.DateTimeField(auto_now=True, null=True)
     
     def __int__(self):
-        return self.pegawai
+        return self.pegawai.nama
 
     class Meta:
         verbose_name = 'Lembur'
@@ -732,7 +732,7 @@ class kompen_db(models.Model):
     edit_date = models.DateTimeField(auto_now=True, null=True)
     
     def __str__(self):
-        return self.pegawai
+        return self.pegawai.nama
 
     class Meta:
         verbose_name = 'Kompensasi'
