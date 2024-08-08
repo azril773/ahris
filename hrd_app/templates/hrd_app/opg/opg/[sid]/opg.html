@@ -1,0 +1,564 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        
+    <!-- alert berhasil -->
+    <div class="alert alert-info alert-dismissible" role="alert" id="berhasil" style="display: none;">
+        <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <span id="pesan_berhasil"></span>
+    </div>
+  
+    <!-- alert gagal-->
+    <div class="alert alert-danger alert-dismissible" role="alert" id="alert" style="display: none;">
+        <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <span id="pesan_gagal"></span>
+    </div>
+
+        <!-- Absensi -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Data OPG &nbsp; ({{dari}} - {{sampai}})</h6>
+    
+        <!-- Info absensi -->        
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">
+                            
+            <!-- Button Tambah Ijin -->
+            <button data-target="#tambahOPG" data-toggle="modal" class="btn btn-primary mg-b-6">Tambah OPG</button>
+
+            <!-- Button Cari Data Ijin -->
+            <button data-target="#cariOPG" data-toggle="modal" class="btn btn-warning mg-b-6">Cari Data OPG</button> &nbsp; &nbsp;
+
+            {% include 'hrd_app/master/modul_absensi.html' %} 
+
+            </div>          
+        </div>
+
+        <br>        
+
+        <div class="d-flex align-items-center justify-content-start">
+            <div class="col-md-12 pd-x-0">  
+                {% if sid == 0 %}
+                    <a href="{% url 'opg' 0 %}" class="btn btn-info mg-b-8">Semua Divisi</a> &nbsp; 
+                    
+                    {% for s in status %}  
+                        <a href="{% url 'opg' s.id %}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp; 
+                    {% endfor %}
+                {% else %}
+                    <a href="{% url 'opg' 0 %}" class="btn btn-outline-info mg-b-8">Semua Divisi</a> &nbsp; 
+                    
+                    {% for s in status %}  
+                        {% if s.id == sid %}
+                            <a href="{% url 'opg' s.id %}" class="btn btn-info mg-b-8">{{s.status}}</a> &nbsp;
+                        {% else %}     
+                            <a href="{% url 'opg' s.id %}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp;
+                        {% endif %}    
+                    {% endfor %}
+                {% endif %}
+
+            </div>            
+        </div>
+
+        <br>
+
+        <div id="loader"></div>            
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table id="tabelku" class="table display responsive" style="width:100%">
+            <thead>
+                <tr>
+                  <th>Nama</th>
+                  <th>Nik</th>
+                  <th>Userid</th>
+                  <th>Divisi</th>
+                  <th>Opg Tgl</th>
+                  <th>Diambil Tgl</th>
+                  <th>Keterangan</th>
+                  <th>Action</th>
+                </tr>
+            </thead>
+            </table>
+        </div>
+
+        <!-- Modal -->
+        <div id="tambahOPG" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form OPG</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form id="tambahForm">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-8">
+                
+                                <div class="col-lg-6">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Pegawai:</label>
+                                        <select name="pegawai" id="pegawai" class="" data-placeholder='Pilih' required=required>
+                                            <option label="Pilih Pegawai"></option>
+                                            {% for p in pegawai %}
+                                            <option value="{{p.idp}}">{{p.nama}}/{{p.nik}} - {{p.userid}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-6">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Tanggal OPG:</label>
+                                        <input type="text" name="tgl" id="tgl" class="form-control tgl1" placeholder="Tanggal OPG">
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <button type="submit" id="submit_buttonTmbh" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
+                                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                                </div>        
+                            </div>                        
+                        </div>            
+                    </form>            
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="pakaiOPG" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Pakai OPG</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form id="pakaiForm">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-8">
+                                
+                                <div class="col-lg-12">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Diambil Tanggal:</label>
+                                        <input type="text" name="ptgl" id="ptgl" class="form-control tgl1" placeholder="Diambil Tanggal">
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="pakai_id" id="pakai_id" class="form-control">
+
+                                <div class="modal-footer">
+                                    <button type="submit" id="submit_buttonSmpn" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
+                                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                                </div>        
+                            </div>                        
+                        </div>            
+                    </form>            
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="batalOPG" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Pembatalan OPG</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form id="batalForm">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-8">
+                
+                                <div class="col-lg-12">
+                                    <div class="form-group mg-b-10-force">
+                                        <p class="hitam">Apakah Anda Yakin ?</p>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="batal_id" id="batal_id" class="form-control">
+
+                                <div class="modal-footer">
+                                    <button type="submit" id="submit_buttonBtl" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Batalkan OPG</button>
+                                    <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Tutup Form</button>
+                                </div>        
+                            </div>                        
+                        </div>            
+                    </form>            
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+        
+        <div id="hapusOPG" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Hapus OPG</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form id="hapusForm">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-8">
+                
+                                <div class="col-lg-12">
+                                    <div class="form-group mg-b-10-force">
+                                        <p class="hitam">Apakah Anda Yakin ?</p>
+                                    </div>
+                                </div>
+
+                                <input type="hidden" name="hapus_id" id="hapus_id" class="form-control">
+
+                                <div class="modal-footer">
+                                    <button type="submit" id="submit_buttonHps" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Hapus OPG</button>
+                                    <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Tutup Form</button>
+                                </div>        
+                            </div>                        
+                        </div>            
+                    </form>            
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="cariOPG" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Cari Data OPG</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form action="{% url 'copg' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Dari Tanggal-(tgl-bln-tahun):</label>
+                                <input type="text" name="ctgl1" id="ctgl1" class="form-control tgl1" placeholder="Dari Tanggal" required>
+                            </div>
+                        </div>
+        
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Sampai Tanggal-(tgl-bln-tahun):</label>
+                                <input type="text" name="ctgl2" id="ctgl2" class="form-control tgl1" placeholder="Dari Tanggal" required>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form> 
+
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+        
+    </div>
+
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>    
+    /* tabel */
+    sid = "{{dsid}}"
+    dr = "{{dr}}"
+    sp = "{{sp}}"
+
+    var table = $('#tabelku').DataTable({
+        "ajax": "{% url 'opg_json' dr sp sid %}",
+
+        columns: [
+
+            { data: 'nama' },
+            { data: 'nik' },
+            { data: 'userid' },
+            { data: 'divisi' },
+            { data: 'opg_tgl' },
+            { data: 'diambil_tgl' },
+            { data: 'ket' },
+            { 
+                data: null,
+                "render": function(data, type, row, meta){ 
+                    if (row.status == 0){
+                        data = '<button data-target="#pakaiOPG" data-toggle="modal" class="btn btn-sm btn-info mb-1 tx-12" data-id_pakai='+row.id+'>Pakai OPG</button> &nbsp; <button data-target="#hapusOPG" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-id_hapus='+row.id+'>Hapus OPG</button> &nbsp;';
+                    } else {
+                        data = '<button data-target="#batalOPG" data-toggle="modal" class="btn btn-sm btn-warning mb-1 tx-12" data-id_batal='+row.id+'>Batalkan OPG</button> &nbsp; <button data-target="#hapusOPG" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-id_hapus='+row.id+'>Hapus OPG</button> &nbsp;';
+                    }  
+                    
+                    return data;
+                } 
+            },
+            
+        ],   
+
+        "rowCallback": function (row, data) {
+            $('td', row).eq(0).addClass('hitam');
+            $('td', row).eq(1).addClass('hitam');
+            $('td', row).eq(2).addClass('hitam');
+            $('td', row).eq(3).addClass('hitam');
+            $('td', row).eq(4).addClass('hitam');
+            $('td', row).eq(5).addClass('hitam');
+            $('td', row).eq(6).addClass('hitam');
+            $('td', row).eq(7).addClass('hitam');
+        },
+
+        destroy: true,
+        ordering: false,
+        paging: false,
+        scrollX: '100%',
+        scrollY: 300,
+        processing: true,
+
+        "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            loadingRecords: '&nbsp;',
+            processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+            emptyTable: "&nbsp;",
+
+            paginate: {
+                previous: '<i class="cs-chevron-left"></i>',
+                next: '<i class="cs-chevron-right"></i>',
+            },
+        },
+
+    });  
+    
+    /* Tambah OPG */
+    $("#submit_buttonTmbh").on('click', e => {
+        e.preventDefault()
+
+        const pegawai = document.getElementById('pegawai')
+        const tgl = document.getElementById('tgl')  
+        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+        
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'topg' %}",
+            data: {
+                'csrfmiddlewaretoken': csrf[0].value,
+                'pegawai': pegawai.value,
+                'tgl': tgl.value,
+            },
+            success: function (response) { 
+                
+                if (response.status == 'ok') { 
+                    console.log(response.status)       
+                } else if(response.status == 'duplikat'){
+                    alert('Duplikat Data, proses dibatalkan.')
+                } else if(response.status == 'ada geseroff'){
+                    alert('Terdapat data Geser OFF di tanggal yang diinput, proses dibatalkan.')
+                } else if(response.status == 'pegawai tidak masuk'){
+                    alert('Di tanggal yang diinput, pegawai ybs tidak masuk, proses dibatalkan.')
+                } else if(response.status == 'bukan tgl merah') {
+                    alert('Di tanggal yang diinput, bukan hari off reguler pegawai ybs dan bukan libur nasional, proses dibatalkan.')
+                } else if(response.status == 'bukan off reguler') {
+                    alert('Di tanggal yang diinput, bukan hari off reguler pegawai ybs dan bukan libur nasional, proses dibatalkan.')
+                } else if(response.status == 'belum ada data absensi') {
+                    alert('Belum terdapat data absensi di tanggal yang diinput, proses dibatalkan.')
+                }
+                
+                table.ajax.reload(null, false);
+
+                $('#tambahOPG').modal('hide');
+                $("#tambahForm")[0].reset();
+                $('#pegawai').val('').trigger("change");                   
+                      
+            },
+            error: function (error) {
+                alert('Terjadi kesalahan sistem, hubungi IT.')
+            }
+        });
+
+    });
+
+    /* Pakai OPG */
+    $("#submit_buttonSmpn").on('click', e => {
+        e.preventDefault()
+
+        const id_pakai = document.getElementById('pakai_id')
+        const ptgl = document.getElementById('ptgl')  
+        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+        
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'popg' %}",
+            data: {
+                'csrfmiddlewaretoken': csrf[0].value,
+                'ptgl': ptgl.value,
+                'id_pakai': id_pakai.value,
+            },
+            success: function (response) { 
+                
+                if (response.status == 'ok') { 
+                    console.log(response.status)       
+                } else if(response.status == 'hari off'){
+                    alert('OPG diambil di hari off reguler pegawai ybs, proses dibatalkan.')
+                } else if(response.status == 'ada geseroff'){
+                    alert('Terdapat data Geser OFF di tanggal yang diinput, proses dibatalkan.')
+                } else if(response.status == 'pegawai masuk'){
+                    alert('Di tanggal yang diinput, pegawai ybs masuk, proses dibatalkan.')
+                } else if(response.status == 'data absensi tidak ada') {
+                    alert('Belum terdapat data absensi di tanggal yang diinput, proses dibatalkan.')
+                }
+                
+                table.ajax.reload(null, false);
+
+                $('#pakaiOPG').modal('hide');
+                $("#pakaiForm")[0].reset();             
+                      
+            },
+            error: function (error) {
+                alert('Terjadi kesalahan sistem, hubungi IT.')
+            }
+        });
+
+    });
+
+    /* Batal OPG */
+    $("#submit_buttonBtl").on('click', e => {
+        e.preventDefault()
+
+        const id_batal = document.getElementById('batal_id')
+        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+        
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'bopg' %}",
+            data: {
+                'csrfmiddlewaretoken': csrf[0].value,
+                'id_batal': id_batal.value,
+            },
+            success: function (response) { 
+                
+                if (response.status == 'ok') { 
+                    console.log(response.status)       
+                } 
+                
+                table.ajax.reload(null, false);
+
+                $('#batalOPG').modal('hide');
+                $("#batalForm")[0].reset();             
+                      
+            },
+            error: function (error) {
+                alert('Terjadi kesalahan sistem, hubungi IT.')
+            }
+        });
+
+    });
+
+    /* Hapus OPG */
+    $("#submit_buttonHps").on('click', e => {
+        e.preventDefault()
+
+        const id_hapus = document.getElementById('hapus_id')
+        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+        
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'hopg' %}",
+            data: {
+                'csrfmiddlewaretoken': csrf[0].value,
+                'id_hapus': id_hapus.value,
+            },
+            success: function (response) { 
+                
+                if (response.status == 'ok') { 
+                    console.log(response.status)       
+                } 
+                
+                table.ajax.reload(null, false);
+
+                $('#hapusOPG').modal('hide');
+                $("#hapusForm")[0].reset();             
+                      
+            },
+            error: function (error) {
+                alert('Terjadi kesalahan sistem, hubungi IT.')
+            }
+        });
+
+    });
+
+    $("#submit_button").on("click", function() {
+        var $this = $(this);
+        $this.attr('disabled', true);
+    });
+
+</script>
+
+<!-- Modal Script -->
+<script>
+    const pgw = $('#pegawai').selectize()
+    $("#tambahOPG").on('hidden.bs.modal', function () {
+        pgw[0].selectize.clear(true)
+    })
+    $('#pakaiOPG').on('show.bs.modal', function (e) {
+      
+      var id_pakai = $(e.relatedTarget).data('id_pakai');
+      
+      //populate the textbox
+      $(e.currentTarget).find('input[name="pakai_id"]').val(id_pakai);
+      
+    });
+    
+    $('#hapusOPG').on('show.bs.modal', function (e) {
+      
+      var id_hapus = $(e.relatedTarget).data('id_hapus');
+      
+      //populate the textbox
+      $(e.currentTarget).find('input[name="hapus_id"]').val(id_hapus);
+      
+    });
+    
+    $('#batalOPG').on('show.bs.modal', function (e) {
+      
+      var id_batal = $(e.relatedTarget).data('id_batal');
+      
+      //populate the textbox
+      $(e.currentTarget).find('input[name="batal_id"]').val(id_batal);
+      
+    });
+</script>
+
+<!-- Select2 -->
+<script>
+    
+</script>
+
+{% endblock hrd_ajax %}

@@ -1,0 +1,713 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        <!-- Pesan Error -->
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Pengaturan -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Pengaturan {{modul_aktif}}</h6>
+    
+        <!-- Modul Pengaturan -->        
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">   
+                
+                <button data-target="#tambah" data-toggle="modal" class="btn btn-primary mg-b-6">Tambah</button> &nbsp; &nbsp; &nbsp; &nbsp;
+                
+                {% include 'hrd_app/master/modul_pengaturan.html' %}
+            </div>          
+        </div>
+
+        <br>
+
+        <div id="loader"></div>    
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table id="tabelku" class="table display responsive" style="width:100%">
+            <thead>
+                <tr>
+                <th nowrap>Kelompok Kerja</th>
+                <th>Masuk</th>
+                <th>Istirahat</th>
+                <th>Kembali Istirahat</th>
+                <th>Istirahat 2</th>
+                <th>Kembali Istirahat 2</th>
+                <th>Pulang</th>
+                <th>Action</th>
+                </tr>
+            </thead>
+            </table>
+        </div>
+        
+        <!-- Modal -->
+        <div id="tambahKK" class="modal fade" style="z-index: 9999; display: none;">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Tambah Kelompok Kerja</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form id="tambahkkForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Kelompok Kerja:</label>
+                                <input type="text" name="tkk" id="tkk" class="form-control">
+                            </div>
+                        </div>
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="tambah" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Tambah {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form id="tambahForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                
+                                <label class="form-control-label tx-inverse">Kelompok Kerja: &nbsp; <a href="#!" data-toggle="modal" data-target="#tambahKK"><i class='fa fa-plus-circle'></i></a> &nbsp; <a href="#!" data-toggle="modal" data-target="#editKK"><i class='fa fa-pencil'></i></a></label>
+
+                                <select name="kk" id="kk" data-placeholder='Pilih' required=required>
+                                    <option label="Pilih Kelompok Kerja"></option>
+                                    {% for k in kk %}
+                                    <option value="{{k.id}}">{{k.kelompok}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Masuk:</label>
+                                <input type="time" name="jam_masuk" id="jam_masuk" value="00:00" class="form-control easyui-timespinner">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Pulang:</label>
+                                <input type="time" name="jam_pulang" id="jam_pulang" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Istirahat:</label>
+                                <input type="time" name="jam_istirahat" id="jam_istirahat" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat:</label>
+                                <input type="time" name="jam_kistirahat" id="jam_kistirahat" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Istirahat2:</label>
+                                <input type="time" name="jam_istirahat2" id="jam_istirahat2" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat2:</label>
+                                <input type="time" name="jam_kistirahat2" id="jam_kistirahat2" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Hari:</label>
+
+                                <select name="hari" id="hari" class="shadow-sm" data-placeholder='Pilih' required=required>
+                                    <option value="">slds</option>
+                                </select>
+                            </div>
+                        </div>
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="editKK" class="modal fade" style="z-index: 9999; display: none;">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Edit Kelompok Kerja</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form id="editkkForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Kelompok Kerja yang diedit:</label>
+                                <select name="ekk" id="ekk" class="form-control select2-show-search" data-placeholder='Pilih' required=required>
+                                    <option label="Pilih Kelompok Kerja"></option>
+                                    {% for k in kk %}
+                                    <option value="{{k.id}}">{{k.kelompok}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Edit menjadi:</label>
+                                <input type="text" name="new_kk" id="new_kk" class="form-control">
+                            </div>
+                        </div>
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+        
+        <div id="edit" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Edit {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form id="editForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                
+                                <label class="form-control-label tx-inverse">Kelompok Kerja:</label>
+
+                                <select name="ejkk" id="ejkk" data-placeholder='Pilih' required=required>
+                                    <option label="Pilih Kelompok Kerja"></option>
+                                    {% for k in kk %}
+                                    <option value="{{k.id}}">{{k.kelompok}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Masuk:</label>
+                                <input type="time" name="ejam_masuk" id="ejam_masuk" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Pulang:</label>
+                                <input type="time" name="ejam_pulang" id="ejam_pulang" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Istirahat:</label>
+                                <input type="time" name="ejam_istirahat" id="ejam_istirahat" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat:</label>
+                                <input type="time" name="ejam_kistirahat" id="ejam_kistirahat" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Istirahat2:</label>
+                                <input type="time" name="ejam_istirahat2" id="ejam_istirahat2" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat2:</label>
+                                <input type="time" name="ejam_kistirahat2" id="ejam_kistirahat2" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Hari:</label>
+
+                                <select name="ejhari" id="ejhari" data-placeholder='Pilih' required=required>
+                                    <option label="" value="">Pilih Hari</option>
+                                    <option label="Senin" value="Senin">Senin</option>
+                                    <option label="Selasa" value="Selasa">Selasa</option>
+                                    <option label="Rabu" value="Rabu">Rabu</option>
+                                    <option label="Kamis" value="Kamis">Kamis</option>
+                                    <option label="Jumat" value="Jumat">Jumat</option>
+                                    <option label="Sabtu" value="Sabtu">Sabtu</option>
+                                    <option label="Minggu" value="Minggu">Minggu</option>
+                                    <option label="Semua Hari" value="Semua Hari">Semua Hari</option>
+                                </select>
+                            </div>
+                        </div>
+                        <input type="hidden" name="edit_id" id="edit_id">
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>            
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>        
+
+        <div id="hapus" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Hapus {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form id="hapusForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-12">
+                            <p class="hitam">Apakah Anda Yakin ?</p>
+                            <input type="hidden" name="hapus_id" id="hapus_id" class="form-control">
+                        </div>
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Hapus</button>
+                        <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+        <label for="">sdskd</label>
+        <input type="text" id="coba">
+    </div>
+
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<!-- Select2 -->
+<script>
+    $("[type='time']").flatpickr({
+        enableTime:true,
+        noCalendar:true,
+        dateFormat:"H:i",
+        time_24hr:true
+    });
+        const kkSelect = $('#kk').selectize();
+        const hariSelect = $('#hari').selectize({
+            maxItems: null,
+            valueField: 'hari',
+            labelField: 'hari',
+            searchField: 'hari',
+            options: [
+              {hari:'Senin'},
+              {hari:'Selasa'},
+              {hari:'Rabu'},
+              {hari:'Kamis'},
+              {hari:'Jumat'},
+              {hari:'Sabtu'},
+              {hari:'Minggu'},
+              {hari:'Semua Hari'}
+            ],
+            create: false
+        });
+
+        $('#ekk').selectize();
+
+        const ejkkSelect = $('#ejkk').selectize();
+
+        const ehariSelect = $('#ejhari').selectize();
+
+    $(document).ready(function() {
+        const token = document.querySelector('[name=csrfmiddlewaretoken]').value
+        /* tabel */
+        var table = $('#tabelku').DataTable({
+            "ajax": "{% url 'jam_kerja_json' %}",
+
+            columns: [
+
+                { data: 'kk_nama' },
+                { data: 'masuk' },
+                { data: 'ist' },
+                { data: 'k_ist' },
+                { data: 'ist2' },
+                { data: 'k_ist2' },
+                { data: 'pulang' },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){    
+                        data = `<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-target="#edit" data-toggle="modal" data-emasuk='${row.masuk}' data-epulang='${row.pulang}' data-eist='${row.ist}' data-eist2='${row.ist2}' data-ekist='${row.k_ist}' data-ekist2='${row.k_ist2}' data-ekk='${row.kk}' data-eid='${row.id}' data-ehari='${row.hari}' >Edit</button> &nbsp; <button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-hid='${row.id}' data-toggle="modal">Hapus</button>`;
+                        return data;
+                    } 
+                },
+                
+            ],   
+
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+                $('td', row).eq(6).addClass('hitam');
+            },
+
+            destroy: true,
+            ordering: false,
+            paging: false,
+            scrollX: '100%',
+            scrollY: 300,
+            processing: true,
+
+            "language": {
+                searchPlaceholder: 'Cari...',
+                sSearch: '',
+                loadingRecords: '&nbsp;',
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+                emptyTable: "&nbsp;",
+
+                paginate: {
+                    previous: '<i class="cs-chevron-left"></i>',
+                    next: '<i class="cs-chevron-right"></i>',
+                },
+            },
+
+        });   
+                
+        /* Tambah kk*/
+        $("#tambahkkForm").on('submit', e => {
+
+            const tkk = document.getElementById('tkk')
+            const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+            
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'tkk_json' %}",
+                data: {
+                    'csrfmiddlewaretoken': csrf[0].value,
+                    'tkk': tkk.value,
+                },
+                success: function (response) { 
+                    
+                    if (response.status == 'ok') { 
+                        console.log(response.status)       
+                    } else if(response.status == 'duplikat'){
+                        alert('Duplikat Data, proses dibatalkan.')
+                    } 
+                },
+                error: function (error) {
+                    alert('Terjadi kesalahan sistem, hubungi IT.')
+                }
+            });
+
+        });
+
+        $("#editkkForm").on('submit', e => {
+
+            const ekk = document.getElementById('ekk')
+            const new_kk = document.getElementById('new_kk').value
+            
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'ekk_json' %}",
+                data: {
+                    'ekk': ekk.value,
+                    new_kk
+                },
+                headers:{"X-CSRFToken":token},
+                success: function (response) { 
+                    
+                    if (response.status == 'ok') { 
+                        console.log(response.status)       
+                    } else if(response.status == 'duplikat'){
+                        alert('Duplikat Data, proses dibatalkan.')
+                    } 
+                },
+                error: function (error) {
+                    alert('Terjadi kesalahan sistem, hubungi IT.')
+                }
+            });
+
+        });
+
+        
+        /* Tambah*/
+        $("#tambahForm").on('submit', e => {
+            e.preventDefault()
+            const kk = $("#kk").val()
+            const jam_masuk = $("#jam_masuk").val()
+            const jam_istirahat = $("#jam_istirahat").val()
+            const jam_istirahat2 = $("#jam_istirahat2").val()
+            const jam_pulang = $("#jam_pulang").val()
+            const jam_kistirahat = $("#jam_kistirahat").val()
+            const jam_kistirahat2 = $("#jam_kistirahat2").val()
+            const hari = $("#hari").val()
+            $.ajax({
+                url:"{% url 'tjamkerja' %}",
+                method:"post",
+                data:{kk,jam_masuk,jam_istirahat,jam_istirahat2,jam_pulang,jam_kistirahat,jam_kistirahat2,hari},
+                headers:{"X-CSRFToken":token},
+                success(e){
+                    if(e.status == 'duplikat'){
+                        alert("Jam kerja sudah ada!")
+                    }
+                    table.ajax.reload()
+                   $("#tambah").modal("hide")
+                   $("#tambahForm")[0].reset()
+                   hariSelect[0].selectize.clear()
+                   kkSelect[0].selectize.clear()
+                }
+            })
+            
+        });
+
+        /* Edit*/
+        $("#editForm").on('submit', e => {
+            e.preventDefault()
+            const id = $("#edit_id").val();
+            const jam_masuk = $("#ejam_masuk").val();
+            const jam_pulang = $("#ejam_pulang").val();
+            const jam_istirahat = $("#ejam_istirahat").val();
+            const jam_istirahat2 = $("#ejam_istirahat2").val();
+            const jam_kistirahat = $("#ejam_kistirahat").val();
+            const jam_kistirahat2 = $("#ejam_kistirahat2").val();
+            const kk = $("#ejkk").val();
+            const hari = $("#ejhari").val();    
+            console.log(id,jam_masuk,jam_pulang,jam_istirahat,jam_istirahat2,jam_kistirahat,jam_kistirahat2,kk,hari)
+            $.ajax({
+                url:"{% url 'edit_jkerja' %}",
+                method:'post',
+                data:{id,jam_masuk,jam_pulang,jam_istirahat,jam_istirahat2,jam_kistirahat,jam_kistirahat2,kk,hari},
+                headers:{"X-CSRFToken":token},
+                success(e){
+                    ejkkSelect[0].selectize.clear()
+                    ehariSelect[0].selectize.clear()
+                   $("#editForm")[0].reset()
+                    table.ajax.reload()
+                    $("#edit").modal("hide")
+                }
+            })
+        });
+
+        /* Hapus*/
+        $("#hapusForm").on('submit', e => {
+            e.preventDefault()
+
+            const hid = document.getElementById('hapus_id')
+            console.log(hid)
+            
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'hapus_jkerja' %}",
+                data: {
+                    'hid': hid.value,
+                },
+                headers:{"X-CSRFToken":token},
+                success: function (response) { 
+                    
+                    if (response.status == 'ok') { 
+                        console.log(response.status)       
+                    }
+                    
+                    table.ajax.reload(null, false);
+
+                    $('#hapus').modal('hide');
+                    $("#hapusForm")[0].reset();                   
+                        
+                },
+                error: function (error) {
+                    alert('Terjadi kesalahan sistem, hubungi IT.')
+                }
+            });
+
+        });
+
+    });
+
+$('#edit').on('show.bs.modal', function (e) {
+    var edit_id = $(e.relatedTarget).data('eid');
+    var emasuk = $(e.relatedTarget).data('emasuk');
+    var epulang = $(e.relatedTarget).data('epulang');
+    var eist = $(e.relatedTarget).data('eist');
+    var eist2 = $(e.relatedTarget).data('eist2');
+    var ekist = $(e.relatedTarget).data('ekist');
+    var ekist2 = $(e.relatedTarget).data('ekist2');
+    var ekk = $(e.relatedTarget).data('ekk');
+    var ehari = $(e.relatedTarget).data('ehari');
+    console.log(edit_id,emasuk,epulang,eist,eist2,ekist,ekist2,ekk)
+    //populate the textbox
+    $(e.currentTarget).find('input[name="edit_id"]').val(edit_id);
+    $(e.currentTarget).find('input[name="ejam_masuk"]').val(emasuk);
+    $(e.currentTarget).find('input[name="ejam_pulang"]').val(epulang);
+    $(e.currentTarget).find('input[name="ejam_istirahat"]').val(eist);
+    $(e.currentTarget).find('input[name="ejam_istirahat2"]').val(eist2);
+    $(e.currentTarget).find('input[name="ejam_kistirahat"]').val(ekist);
+    $(e.currentTarget).find('input[name="ejam_kistirahat2"]').val(ekist2);
+    ejkkSelect[0].selectize.setValue(ekk)
+    ehariSelect[0].selectize.setValue(ehari)    
+});
+
+$('#hapus').on('show.bs.modal', function (e) {
+      
+      var hapus_id = $(e.relatedTarget).data('hid');
+      
+      //populate the textbox
+      $(e.currentTarget).find('input[name="hapus_id"]').val(hapus_id);
+        
+  });
+
+  $("#tambahKK").on("show.bs.modal",function(e){
+    $("#tambah").modal("hide")
+    $("#edit").modal("hide")
+    $("#hapus").modal("hide")
+  })
+  $("#editKK").on("show.bs.modal",function(e){
+    $("#tambah").modal("hide")
+    $("#edit").modal("hide")
+    $("#hapus").modal("hide")
+  })
+
+  $("#tambahKK").on("hide.bs.modal",function(e){
+    $("#tambah").modal("show")
+  })
+  $("#editKK").on("hide.bs.modal",function(e){
+    $("#tambah").modal("show")
+  })
+
+    
+    var rp_mask = document.getElementById('insentifMask');
+    
+    $(rp_mask).on('keyup', function(e){
+        console.log("sd")
+        rp_mask.value = formatRupiah(this.value);
+    });
+
+    var erp_mask = document.getElementById('einsentifMask');
+    
+    $(erp_mask).on('keyup', function(e){
+        erp_mask.value = formatRupiah(this.value);
+    });
+
+    /* Fungsi */
+    function formatRupiah(angka, prefix)
+    {
+        console.clear()
+        var number_string = angka.replace(/[^,\d]/g, '').toString(),
+            split    = number_string.split(','),
+            sisa     = split[0].length % 3,
+            rupiah     = split[0].substr(0, sisa)
+            ribuan     = split[0].substr(sisa).match(/\d{3}/gi);
+        console.log(split,'split')
+        console.log("-----")
+        console.log(sisa,"sisa")
+        console.log("-----")
+        console.log(rupiah,'rupiah')
+        console.log("-----")
+        console.log(ribuan,"ribuan")
+        console.log("-----")
+        if (ribuan) {
+            separator = sisa ? '.' : '';
+            console.log(separator)
+            rupiah += separator + ribuan.join('.');
+        }
+        
+        console.log(rupiah)
+        rupiah = split[1] != undefined ? rupiah + ',' + split[1] : rupiah;
+        return prefix == undefined ? rupiah : (rupiah ? 'Rp. ' + rupiah : '');
+    }
+
+</script>
+
+
+
+{% endblock hrd_ajax %}
