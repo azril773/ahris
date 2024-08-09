@@ -426,7 +426,7 @@ def pabsen(request):
                 tabsen.save()
     
     dmesin = []
-    luserid.append("102207")
+    
     # ambil data mesin simpan di att dan dmesin array
     for m in mesin_db.objects.filter(status='Active'):
         
@@ -440,8 +440,8 @@ def pabsen(request):
             # Data absensi
             absensi = conn.get_attendance()
             for a in absensi:
+                print(luserid)
                 if dari <= a.timestamp <= sampai:   
-                    print(a.user_id)
                     if a.user_id in luserid:              
                         data = {
                             "userid": a.user_id,
@@ -469,10 +469,10 @@ def pabsen(request):
     #     "punch":0,
     #     "mesin":"FS"
     # })
-    # with open(r"static/data.json","r") as f:
-    #     att = f.read()
-    # att = json.loads(att)
-    att = sorted(dmesin, key=lambda i: i['jam_absen'])
+    with open(r"static/data.json","r") as f:
+        att = f.read()
+    att = json.loads(att)
+    att = sorted(att, key=lambda i: i['jam_absen'])
     print(att)
 
     # att = sorted(att, key=lambda i: i['jam_absen'])
@@ -506,6 +506,7 @@ def pabsen(request):
         ddt.append(data)
         
     dt = []    
+    
     # proses data simpan di dt array
     if not att:
         pass
@@ -583,70 +584,53 @@ def pabsen(request):
                                     ab.masuk = jam_absen.time()
                                     ab.save()
                             elif ab.pulang is not None or ab.istirahat is not None or ab.kembali is not None:
-                                ab.masuk_b = jam_absen.time()
-                                ab.save()
+                                if ab.masuk is None:
+                                    ab.masuk = jam_absen.time()
+                                    ab.save()
+                                else:
+                                    ab.masuk_b = jam_absen.time()
+                                    ab.save()
                             else:
                                 ab.masuk = jam_absen.time()
                                 ab.save()
 # ++++++++++++++++++++++++++++++++++++++++  MASUK MALAM TASIK +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 0 and jam_absen.hour > 18:
                             # pastikan untuk userid hotel
-                            if pg is not None:
-                                if pg["status_id"] == 3:
-                                    ab2 = absensi_db.objects.get(tgl_absen=tplus.date(),pegawai__userid=a["userid"])
-                                    if ab.masuk is not None:
-                                        if ab.masuk.hour > 18:
-                                            pass
+                            if pg["status_id"] == 3:
+                                if ab.masuk is not None or ab.istirahat is not None or ab.kembali is not None or ab.pulang is not None:
+                                    try:
+                                        ab2 = absensi_db.objects.get(tgl_absen=tplus.date(),pegawai__userid=a["userid"])
+                                        if ab2.masuk is None:
+                                            ab2.masuk = jam_absen.time()
+                                            ab2.save()
                                         else:
-                                            if ab2.masuk is not None:
+                                            if int(ab2.masuk.hour) > 18:
                                                 pass
                                             else:
                                                 ab2.masuk = jam_absen.time()
                                                 ab2.save()
-                                    elif ab.istirahat is not None:
-                                        if ab.istirahat.hour < 9:
-                                            pass
-                                        else:
-                                            if ab2.masuk is not None:
-                                                pass
-                                            else:
-                                                ab2.masuk = jam_absen.time()
-                                                ab2.save()
-                                    elif ab.kembali is not None:
-                                        if ab.kembali.hour < 9:
-                                            pass
-                                        else:
-                                            if ab2.masuk is not None:
-                                                pass
-                                            else:
-                                                ab2.masuk = jam_absen.time()
-                                                ab2.save()
-                                    elif ab.pulang is not None:
-                                        if ab.pulang.hour < 9:
-                                            pass
-                                        else:
-                                            if ab2.masuk is not None:
-                                                pass
-                                            else:
-                                                ab2.masuk = jam_absen.time()
-                                                ab2.save()
-                                    else:
-                                        ab.masuk = jam_absen.time()
-                                        ab.save()
+                                    except:
+                                        absensi_db(
+                                            tgl_absen=tplus.date(),
+                                            pegawai_id=ab.pegawai_id,
+                                            masuk=jam_absen.time()
+                                        ).save()                    
                                 else:
-                                    if ab.masuk is not None:
-                                        d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab.tgl_absen,ab.masuk)
-                                        if d.total_seconds() / 3600 > 5:
-                                            ab.masuk_b = jam_absen.time()
-                                            ab.save()
-                                        else:
-                                            pass
-                                    elif ab.pulang is not None or ab.istirahat is not None or ab.kembali is not None:
+                                    ab.masuk = jam_absen.time()
+                                    ab.save()
+                            else:
+                                if ab.masuk is not None:
+                                    if int(ab.masuk.hour) < 18:
                                         ab.masuk_b = jam_absen.time()
                                         ab.save()
                                     else:
-                                        ab.masuk_b = jam_absen.time()
-                                        ab.save()
+                                        pass
+                                elif ab.pulang is not None or ab.istirahat is not None or ab.kembali is not None:
+                                    ab.masuk_b = jam_absen.time()
+                                    ab.save()
+                                else:
+                                    ab.masuk = jam_absen.time()
+                                    ab.save()
 # ++++++++++++++++++++++++++++++++++++++++  ISTIRAHAT  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 2 and int(jam_absen.hour) > 8 and int(jam_absen.hour) < 21:
                             if ab.istirahat is not None:
@@ -686,63 +670,58 @@ def pabsen(request):
                             elif int(jam_absen.hour) < 8:
                                 if pg is not None:
                                     if pg["status_id"] == 3:
-                                        try:
-                                            ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
-                                            if ab2.istirahat is not None:
-                                                if ab2.istirahat.hour < 9:
-                                                    ab2.istirahat = jam_absen.time()
-                                                    ab2.save()
-                                                else:
-                                                    ab.istirahat = jam_absen.time()
-                                                    ab.save()
-                                            elif ab2.masuk is not None:
-                                                if ab2.masuk.hour > 18:
-                                                    ab2.istirahat = jam_absen.time()
-                                                    ab2.save()
-                                                else:
-                                                    ab.istirahat = jam_absen.time()
-                                                    ab.save()
-                                            elif ab2.kembali is not None:
-                                                if ab2.kembali.hour > 9:
-                                                    ab.istirahat = jam_absen.time()
-                                                    ab.save()
-                                                else:
-                                                    ab2.istirahat = jam_absen.time()
-                                                    ab2.save()
-                                            elif ab2.pulang is not None:
-                                                if ab2.pulang.hour > 9:
-                                                    ab.istirahat = jam_absen.time()
-                                                    ab.save()
-                                                else:
-                                                    ab2.istirahat = jam_absen.time()
-                                                    ab2.save()
+                                        if ab.masuk is not None:
+                                            if int(ab.masuk.hour) > 18:
+                                                ab.istirahat = jam_absen.time()
+                                                ab.save()
                                             else:
-                                                ab2.istirahat = jam_absen.time()
-                                                ab2.save()
-                                        except absensi_db.DoesNotExist:
-                                            ab.istirahat = jam_absen.time()
-                                            ab.save()
+                                                pass
+                                        else:
+                                            try:
+                                                ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
+                                                if ab2.masuk is not None:
+                                                    if ab2.masuk.hour > 18:
+                                                        ab2.istirahat = jam_absen.time()
+                                                        ab2.save()
+                                                    else:
+                                                        ab.istirahat = jam_absen.time()
+                                                        ab.save()
+                                                elif ab2.kembali is not None:
+                                                    if ab2.kembali.hour > 9:
+                                                        ab.istirahat = jam_absen.time()
+                                                        ab.save()
+                                                    else:
+                                                        ab2.istirahat = jam_absen.time()
+                                                        ab2.save()
+                                                elif ab2.pulang is not None:
+                                                    if ab2.pulang.hour > 9:
+                                                        ab.istirahat = jam_absen.time()
+                                                        ab.save()
+                                                    else:
+                                                        ab2.istirahat = jam_absen.time()
+                                                        ab2.save()
+                                                else:
+                                                    ab2.istirahat = jam_absen.time()
+                                                    ab2.save()
+                                            except absensi_db.DoesNotExist:
+                                                ab.istirahat = jam_absen.time()
+                                                ab.save()
                                     else:
                                         try:
                                             # tanda
                                             ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
-                                            if ab2.istirahat is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.istirahat)
-                                                if d.total_seconds() / 3600 > 5:
-                                                    ab2.istirahat_b = jam_absen.time()
-                                                    ab2.save()
-                                                else:
+                                            if ab2.masuk is not None or ab2.kembali is not None:
+                                                ab2.istirahat_b = jam_absen.time()
+                                                ab2.save()
+                                            elif ab2.istirahat is not None:
+                                                if int(ab2.istirahat.hour) < 8 or int(ab2.istirahat.hour) > 21:
                                                     pass
-                                            elif ab2.kembali is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali)
-                                                if d.total_seconds() / 3600 > 5:
+                                                else:
                                                     ab2.istirahat_b = jam_absen.time()
                                                     ab2.save()
                                             elif ab2.pulang is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                                if d.total_seconds() / 3600 > 3:
-                                                    ab2.istirahat_b = jam_absen.time()
-                                                    ab2.save()
+                                                ab2.istirahat_b = jam_absen.time()
+                                                ab2.save()
                                             else:
                                                 if ab2.masuk_b is not None:
                                                     if int(ab2.masuk_b.hour) > 18:
@@ -751,10 +730,10 @@ def pabsen(request):
                                                     else:
                                                         pass
                                                 else:
-                                                    ab2.istirahat_b = jam_absen.time()
+                                                    ab2.istirahat = jam_absen.time()
                                                     ab2.save()
                                         except absensi_db.DoesNotExist:
-                                            ab.istirahat_b = jam_absen.time()
+                                            ab.istirahat = jam_absen.time()
                                             ab.save()
                                 else:
                                     pass
@@ -785,35 +764,29 @@ def pabsen(request):
                                     else:
                                         try:
                                             ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.istirahat2)
-                                            if ab2.istirahat2 is not None:
-                                                if ab2.istirahat2 < 9:
-                                                    ab2.istirahat2 = jam_absen.time()
-                                                    ab2.save()
-                                                else:
-                                                    ab.istirahat2 = jam_absen.time()
-                                                    ab.save()
-                                            elif ab2.masuk is not None:
+                                            if ab2.masuk is not None:
                                                 if int(ab2.masuk.hour) < 18:
                                                     ab.istirahat2 = jam_absen.time()
                                                     ab.save()
                                                 else:
                                                     ab2.istirahat2 = jam_absen.time()
                                                     ab2.save()
+                                            elif ab2.istirahat is not None:
+                                                if int(ab2.istirahat.hour) > 8 and int(ab2.istirahat.hour) < 21:
+                                                    ab.istirahat2 = jam_absen.time()
+                                                    ab.save()
+                                                else:
+                                                    ab2.istirahat2 = jam_absen.time()
+                                                    ab2.save()
                                             elif ab2.kembali is not None:
-                                                if int(ab2.kembali.hour) > 8:
+                                                if int(ab2.kembali.hour) > 8 and int(ab2.kembali.hour) < 21:
                                                     ab.istirahat2 = jam_absen.time()
                                                     ab.save()
                                                 else:
                                                     ab2.istirahat2 = jam_absen.time()
                                                     ab2.save()
                                             elif ab2.pulang is not None:
-                                                if int(ab2.pulang.hour) < 9:
-                                                    ab2.istirahat2 = jam_absen.time()
-                                                    ab2.save()
-                                                else:
-                                                    ab.istirahat2 = jam_absen.time()
-                                                    ab.save()
+                                                pass
                                             else:
                                                 ab2.istirahat2 = jam_absen.time()
                                                 ab2.save()
@@ -826,26 +799,32 @@ def pabsen(request):
                                 else:
                                     try:
                                         ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
-                                        if ab2.istirahat2 is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.istirahat2)
-                                            if d.total_seconds() / 3600 > 3:
-                                                ab2.istirahat2_b = jam_absen.time()
+                                        if ab2.masuk is not None:
+                                            if int(ab2.masuk.hour) > 18:
+                                                ab2.istirahat2 = jam_absen
                                                 ab2.save()
                                             else:
-                                                pass
-                                        elif ab2.kembali is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali)
-                                            if d.total_seconds() / 3600 < 3:
+                                                ab2.istirahat2_b = jam_absen
+                                                ab2.save()
+                                        elif ab2.istirahat is not None:
+                                            if int(ab2.istirahat.hour) < 8 or int(ab2.istirahat.hour) > 21:
                                                 pass
                                             else:
-                                                ab2.istirahat2_b = jam_absen.time()
+                                                ab2.istirahat2_b = jam_absen
+                                                ab2.save()
+                                        elif ab2.kembali is not None:
+                                            if int(ab2.kembali.hour) < 8 or int(ab2.kembali.hour) > 21:
+                                                ab2.istirahat2 = jam_absen
+                                                ab2.save()
+                                            else:
+                                                ab2.istirahat2_b = jam_absen
                                                 ab2.save()
                                         elif ab2.pulang is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                            if d.total_seconds() / 3600 < 3:
-                                                pass
+                                            if int(ab2.pulang.hour) < 9:
+                                                ab2.istirahat2 = jam_absen
+                                                ab2.save()
                                             else:
-                                                ab2.istirahat2_b = jam_absen.time()
+                                                ab2.istirahat2_b = jam_absen
                                                 ab2.save()
                                         else:
                                             if ab2.masuk_b is not None:
@@ -861,7 +840,7 @@ def pabsen(request):
                                         absensi_db(
                                             tgl_absen=tmin.date(),
                                             pegawai_id=ab.pegawai.pk,
-                                            istirahat2_b=jam_absen
+                                            istirahat2=jam_absen
                                         ).save()
 # ++++++++++++++++++++++++++++++++++++++++  KEMBALI +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 3 and int(jam_absen.hour) > 9:
@@ -904,35 +883,35 @@ def pabsen(request):
                                     else:
                                         try:
                                             ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali2)
-                                            if ab2.istirahat2 is not None:
-                                                if ab2.kembali2.hour < 9:
-                                                    ab2.kembali2 = jam_absen.time()
-                                                    ab2.save()
-                                                else:
-                                                    ab.kembali2 = jam_absen.time()
-                                                    ab.save()
-                                            elif ab2.masuk is not None:
+                                            if ab2.masuk is not None:
                                                 if int(ab2.masuk.hour) < 18:
                                                     ab.kembali2 = jam_absen.time()
                                                     ab.save()
                                                 else:
                                                     ab2.kembali2 = jam_absen.time()
                                                     ab2.save()
-                                            elif ab2.kembali2 is not None:
-                                                if int(ab2.kembali2.hour) > 8 and int(ab2.kembali2.hour) < 21:
+                                            elif ab2.istirahat is not None:
+                                                if int(ab2.istirahat.hour) > 8 and int(ab2.istirahat.hour) < 21:
+                                                    ab.kembali2 = jam_absen.time()
+                                                    ab.save()
+                                                else:
+                                                    ab2.kembali2 = jam_absen.time()
+                                                    ab2.save()
+                                            elif ab2.kembali is not None:
+                                                if int(ab2.kembali.hour) > 8 and int(ab2.kembali.hour) < 21:
                                                     ab.kembali2 = jam_absen.time()
                                                     ab.save()
                                                 else:
                                                     ab2.kembali2 = jam_absen.time()
                                                     ab2.save()
                                             elif ab2.pulang is not None:
-                                                if int(ab2.pulang.hour) > 9:
-                                                    ab.kembali2 = jam_absen.time()
-                                                    ab.save()
-                                                else:
-                                                    ab2.kembali2 = jam_absen.time()
-                                                    ab2.save()
+                                                # if int(ab2.pulang.hour) > 9:
+                                                # ab.kembali2 = jam_absen.time()
+                                                # ab.save()
+                                                pass
+                                                # else:
+                                                #     ab2.kembali2 = jam_absen.time()
+                                                #     ab2.save()
                                             else:
                                                 ab2.kembali2 = jam_absen.time()
                                                 ab2.save()
@@ -942,19 +921,32 @@ def pabsen(request):
                                 else:
                                     try:
                                         ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
-                                        if ab2.kembali2 is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali2)
-                                            if d.total_seconds() / 3600 > 3:
-                                                ab2.kembali2_b = jam_absen.time()
+                                        if ab2.masuk is not None:
+                                            if int(ab2.masuk.hour) > 18:
+                                                ab2.kembali2 = jam_absen
                                                 ab2.save()
                                             else:
-                                                pass
-                                        elif ab2.pulang is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                            if d.total_seconds() / 3600 < 3:
+                                                ab2.kembali2_b = jam_absen
+                                                ab2.save()
+                                        elif ab2.istirahat is not None:
+                                            if int(ab2.istirahat.hour) < 8 or int(ab2.istirahat.hour) > 21:
+                                                ab2.kembali2 = jam_absen
+                                                ab2.save()
+                                            else:
+                                                ab2.kembali2_b = jam_absen
+                                                ab2.save()
+                                        elif ab2.kembali is not None:
+                                            if int(ab2.kembali.hour) < 8 or int(ab2.kembali.hour) > 21:
                                                 pass
                                             else:
-                                                ab2.kembali2_b = jam_absen.time()
+                                                ab2.kembali2_b = jam_absen
+                                                ab2.save()
+                                        elif ab2.pulang is not None:
+                                            if int(ab2.pulang.hour) < 9:
+                                                ab2.kembali2 = jam_absen
+                                                ab2.save()
+                                            else:
+                                                ab2.kembali2_b = jam_absen
                                                 ab2.save()
                                         else:
                                             if ab2.masuk_b is not None:
@@ -967,7 +959,7 @@ def pabsen(request):
                                                 ab2.kembali2_b = jam_absen.time()
                                                 ab2.save()
                                     except absensi_db.DoesNotExist:
-                                        ab.kembali2_b = jam_absen.time()
+                                        ab.kembali2 = jam_absen.time()
                                         ab.save()
 # ++++++++++++++++++++++++++++++++++++++++  KEMBALI MALAM +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 3 and (int(jam_absen.hour) > 21 or int(jam_absen.hour) < 9):
@@ -997,34 +989,16 @@ def pabsen(request):
                                         else:
                                             try:
                                                 ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
-                                                if ab2.kembali is not None:
-                                                    if ab2.kembali.hour < 9:
-                                                        ab2.kembali = jam_absen.time()
-                                                        ab2.save()
-                                                    else:
-                                                        ab.kembali = jam_absen.time()
-                                                        ab.save()
-                                                elif ab2.masuk is not None:
+                                                if ab2.masuk is not None:
                                                     if int(ab2.masuk.hour) < 18:
                                                         ab.kembali = jam_absen.time()
                                                         ab.save()
                                                     else:
                                                         ab2.kembali = jam_absen.time()
                                                         ab2.save()
-                                                elif ab2.istirahat is not None:
-                                                    if ab2.istirahat.hour < 9:
-                                                        ab.kembali = jam_absen.time()
-                                                        ab.save()
-                                                    else:
-                                                        ab2.kembali = jam_absen.time()
-                                                        ab2.save()
-                                                elif ab2.pulang is not None:
-                                                    if ab2.pulang.hour < 9:
-                                                        ab2.kembali = jam_absen.time()
-                                                        ab2.save()
-                                                    else:
-                                                        ab.kembali = jam_absen.time()
-                                                        ab.save()
+                                                elif ab2.istirahat is not None or ab2.kembali is not None or ab2.pulang is not None:
+                                                    ab.kembali = jam_absen.time()
+                                                    ab.save()
                                                 else:
                                                     ab2.kembali = jam_absen.time()
                                                     ab2.save()
@@ -1035,19 +1009,14 @@ def pabsen(request):
                                         try:
                                             ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                             if ab2.kembali is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali)
-                                                if d.total_seconds() / 3600 > 3:
-                                                    ab2.kembali_b = jam_absen.time()
+                                                if int(jam_absen.hour) - int(ab2.kembali.hour) > 5:
+                                                    ab2.kembali_b = jam_absen
                                                     ab2.save()
                                                 else:
                                                     pass
                                             elif ab2.pulang is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                                if d.total_seconds() / 3600 < 3:
-                                                    pass
-                                                else:
-                                                    ab2.kembali_b = jam_absen.time()
-                                                    ab2.save()
+                                                ab2.kembali_b = jam_absen
+                                                ab2.save()
                                             else:
                                                 if ab2.masuk_b is not None:
                                                     ab2.kembali_b = jam_absen.time()
@@ -1070,8 +1039,7 @@ def pabsen(request):
                                     ab.pulang = jam_absen.time()
                                     ab.save()
                             else:
-                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(r.date(),ab.pulang)
-                                if d.total_seconds() / 3600 > 3:
+                                if (int(jam_absen.hour) - int(ab.pulang.hour)) > 5:
                                     ab.pulang_b = jam_absen.time()
                                     ab.save()
                                 else:
@@ -1091,12 +1059,11 @@ def pabsen(request):
                                         try:
                                             ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                             if ab2.pulang is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                                if d.total_seconds() / 3600 > 5:
+                                                if int(ab2.pulang.hour) > 9:
                                                     ab.pulang = jam_absen.time()
                                                     ab.save()
                                                 else:
-                                                    ab2.pulang = jam_absen.time()
+                                                    pass
                                             elif ab.istirahat is not None or ab.kembali is not None or ab.masuk is not None:
                                                 ab.pulang = jam_absen.time()
                                                 ab.save()
@@ -1105,8 +1072,7 @@ def pabsen(request):
                                                     ab.pulang = jam_absen.time()
                                                     ab.save()
                                                 else:
-                                                    ab2.pulang = jam_absen.time()
-                                                    ab2.save()
+                                                    pass
                                             else:
                                                 ab2.pulang = jam_absen.time()
                                                 ab2.save()
@@ -1116,39 +1082,28 @@ def pabsen(request):
                                 else:
                                     try:
                                         ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
-                                        if ab2.pulang is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                            if d.total_seconds() / 3600 > 3:
-                                                ab2.pulang_b = jam_absen.time()
-                                                ab2.save()
-                                            else:
-                                                pass
-                                        elif ab2.masuk is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.masuk)
-                                            if d.total_seconds() / 3600 < 3:
+                                        if ab2.masuk is not None:
+                                            if int(ab2.masuk.hour) > 18:
                                                 ab2.pulang = jam_absen
                                                 ab2.save()
                                             else:
                                                 ab2.pulang_b = jam_absen
                                                 ab2.save()
                                         elif ab2.istirahat is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.istirahat)
-                                            if d.total_seconds() / 3600 < 3:
+                                            if int(ab2.istirahat.hour) < 8 or int(ab2.istirahat.hour) > 21:
                                                 ab2.pulang = jam_absen
                                                 ab2.save()
                                             else:
                                                 ab2.pulang_b = jam_absen
                                                 ab2.save()
                                         elif ab2.kembali is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali)
-                                            if d.total_seconds() / 3600 < 3:
+                                            if int(ab2.kembali.hour) < 8 or int(ab2.kembali.hour) > 21:
                                                 pass
                                             else:
                                                 ab2.pulang_b = jam_absen
                                                 ab2.save()
                                         elif ab2.pulang is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                            if d.total_seconds() / 3600 < 3:
+                                            if int(ab2.pulang.hour) < 9:
                                                 ab2.pulang = jam_absen
                                                 ab2.save()
                                             else:
@@ -1165,7 +1120,7 @@ def pabsen(request):
                                                 ab2.pulang_b = jam_absen.time()
                                                 ab2.save()
                                     except absensi_db.DoesNotExist:
-                                        ab.pulang_b = jam_absen.time()
+                                        ab.pulang = jam_absen.time()
                                         ab.save()
 
 
@@ -1313,12 +1268,11 @@ def pabsen(request):
                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
                     print("MASUKKKKK")
                     print(p["hari_off"],nh)
-                    print(p)
                     if p['hari_off'] == nh:
                         # jika dia bisa mendapatkan opg 
                         print("LUAR OPG")
                         if p['status_id'] in lsopg:
-                            print(lsopg)
+                            print("DALAM OPG")
                             # jika ada geder off dari hari ini ke hari lain
                             if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
                                 pass
