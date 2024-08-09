@@ -4,7 +4,7 @@ from hrd_app.controllers.lib import *
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Lembur
 @login_required
-def lembur(request, sid):
+def lembur(request, sidd):
     iduser = request.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
