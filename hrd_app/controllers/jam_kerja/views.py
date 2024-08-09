@@ -6,6 +6,8 @@ from hrd_app.controllers.lib import *
 @login_required
 def jam_kerja(request):
     iduser = request.user.id
+
+    
     if akses_db.objects.filter(user_id=iduser).exists():
         
         dakses = akses_db.objects.get(user_id=iduser)
