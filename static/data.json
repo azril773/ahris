@@ -7,13 +7,31 @@
     },
     {
         "userid": "101095",
+        "jam_absen": "2024-08-05 06:02:57",
+        "punch": 0,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-05 06:03:57",
+        "punch": 0,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
         "jam_absen": "2024-08-05 12:01:57",
         "punch": 2,
         "mesin": "Staff"
     },
     {
         "userid": "101095",
-        "jam_absen": "2024-08-05 13:01:57",
+        "jam_absen": "2024-08-05 13:02:57",
+        "punch": 3,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-05 13:0:57",
         "punch": 3,
         "mesin": "Staff"
     },
@@ -25,7 +43,19 @@
     },
     {
         "userid": "101095",
-        "jam_absen": "2024-08-05 16:01:57",
+        "jam_absen": "2024-08-05 14:02:57",
+        "punch": 4,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-05 16:02:57",
+        "punch": 5,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-05 16:03:57",
         "punch": 5,
         "mesin": "Staff"
     },
@@ -37,122 +67,168 @@
     },
     {
         "userid": "101095",
-        "jam_absen": "2024-08-06 23:01:57",
+        "jam_absen": "2024-08-05 21:00:56",
+        "punch": 1,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-05 21:01:29",
+        "punch": 1,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-05 23:01:56",
         "punch": 0,
         "mesin": "Staff"
     },
     {
         "userid": "101095",
-        "jam_absen": "2024-08-07 02:01:57",
+        "jam_absen": "2024-08-06 02:02:56",
         "punch": 2,
         "mesin": "Staff"
     },
     {
         "userid": "101095",
-        "jam_absen": "2024-08-07 03:01:57",
+        "jam_absen": "2024-08-06 03:02:56",
         "punch": 3,
         "mesin": "Staff"
     },
     {
         "userid": "101095",
-        "jam_absen": "2024-08-07 07:30:57",
+        "jam_absen": "2024-08-06 23:01:56",
+        "punch": 0,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-07 02:02:56",
+        "punch": 2,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-07 03:02:56",
+        "punch": 3,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-07 23:01:56",
+        "punch": 0,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-08 02:02:56",
+        "punch": 2,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "101095",
+        "jam_absen": "2024-08-08 03:02:56",
+        "punch": 3,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "102221",
+        "jam_absen": "2024-08-07 12:01:56",
+        "punch": 0,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "102221",
+        "jam_absen": "2024-08-07 15:02:56",
+        "punch": 2,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "102221",
+        "jam_absen": "2024-08-07 16:02:56",
+        "punch": 3,
+        "mesin": "Staff"
+    },
+    {
+        "userid": "102221",
+        "jam_absen": "2024-08-07 20:02:56",
         "punch": 1,
         "mesin": "Staff"
     },
     {
-        "userid":"101095",
-        "jam_absen":"2024-08-07 23:30:57",
-        "punch":0,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-07 23:01:56",
+        "punch": 0,
+        "mesin": "Staff"
     },
     {
-        "userid":"101095",
-        "jam_absen":"2024-08-08 03:30:57",
-        "punch":2,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 02:02:56",
+        "punch": 2,
+        "mesin": "Staff"
     },
     {
-        "userid":"101095",
-        "jam_absen":"2024-08-07 04:30:57",
-        "punch":3,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 03:02:56",
+        "punch": 3,
+        "mesin": "Staff"
     },
     {
-        "userid":"101095",
-        "jam_absen":"2024-08-07 23:30:57",
-        "punch":1,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 06:02:56",
+        "punch": 1,
+        "mesin": "Staff"
     },
     {
-        "userid":"102221",
-        "jam_absen":"2024-08-07 23:30:57",
-        "punch":0,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 08:01:56",
+        "punch": 0,
+        "mesin": "Staff"
     },
     {
-        "userid":"102221",
-        "jam_absen":"2024-08-08 02:30:57",
-        "punch":2,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 12:02:56",
+        "punch": 2,
+        "mesin": "Staff"
     },
     {
-        "userid":"102221",
-        "jam_absen":"2024-08-08 03:30:57",
-        "punch":3,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 13:02:56",
+        "punch": 3,
+        "mesin": "Staff"
     },
     {
-        "userid":"102221",
-        "jam_absen":"2024-08-08 07:30:57",
-        "punch":1,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 16:02:56",
+        "punch": 1,
+        "mesin": "Staff"
     },
     {
-        "userid":"102221",
-        "jam_absen":"2024-08-08 15:00:57",
-        "punch":0,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 17:01:56",
+        "punch": 0,
+        "mesin": "Staff"
     },
     {
-        "userid":"102221",
-        "jam_absen":"2024-08-07 17:30:57",
-        "punch":2,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 19:02:56",
+        "punch": 2,
+        "mesin": "Staff"
     },
     {
-        "userid":"102221",
-        "jam_absen":"2024-08-07 18:30:57",
-        "punch":3,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 20:02:56",
+        "punch": 3,
+        "mesin": "Staff"
     },
     {
-        "userid":"102221",
-        "jam_absen":"2024-08-07 21:30:57",
-        "punch":1,
-        "mesin":"Staff"
-    },
-    {
-        "userid":"102221",
-        "jam_absen":"2024-08-09 15:00:57",
-        "punch":0,
-        "mesin":"Staff"
-    },
-    {
-        "userid":"102221",
-        "jam_absen":"2024-08-09 17:30:57",
-        "punch":2,
-        "mesin":"Staff"
-    },
-    {
-        "userid":"102221",
-        "jam_absen":"2024-08-09 18:30:57",
-        "punch":3,
-        "mesin":"Staff"
-    },
-    {
-        "userid":"102221",
-        "jam_absen":"2024-08-09 21:30:57",
-        "punch":1,
-        "mesin":"Staff"
+        "userid": "102221",
+        "jam_absen": "2024-08-08 21:02:56",
+        "punch": 1,
+        "mesin": "Staff"
     }
+
+
+    
  ]
+

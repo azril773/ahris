@@ -19,6 +19,7 @@ import math
 import json
 import time
 import pandas as pd
+import re
 from decimal import *
 
 # PYZK / FINGER MACHINE
