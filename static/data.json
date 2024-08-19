@@ -1,6 +1,24 @@
 [
     {
         "userid":"101095",
+        "jam_absen":"2024-08-01 12:02:43",
+        "punch":2,
+        "mesin":"FS"
+    },
+    {
+        "userid":"101095",
+        "jam_absen":"2024-08-01 13:02:43",
+        "punch":3,
+        "mesin":"FS"
+    },
+    {
+        "userid":"101095",
+        "jam_absen":"2024-08-01 16:02:43",
+        "punch":1,
+        "mesin":"FS"
+    },
+    {
+        "userid":"101095",
         "jam_absen":"2024-08-01 23:02:43",
         "punch":0,
         "mesin":"FS"
@@ -23,6 +41,60 @@
         "punch":1,
         "mesin":"FS"
     },
+    {
+        "userid":"101095",
+        "jam_absen":"2024-08-02 08:02:43",
+        "punch":0,
+        "mesin":"FS"
+    },
+    {
+        "userid":"101095",
+        "jam_absen":"2024-08-02 12:02:43",
+        "punch":2,
+        "mesin":"FS"
+    },
+    {
+        "userid":"101095",
+        "jam_absen":"2024-08-02 13:02:43",
+        "punch":3,
+        "mesin":"FS"
+    },
+    {
+        "userid":"101095",
+        "jam_absen":"2024-08-02 16:02:43",
+        "punch":1,
+        "mesin":"FS"
+    },
+    {
+        "userid":"101095",
+        "jam_absen":"2024-08-02 17:02:43",
+        "punch":0,
+        "mesin":"FS"
+    },
+    {
+        "userid":"101095",
+        "jam_absen":"2024-08-02 18:02:43",
+        "punch":2,
+        "mesin":"FS"
+    },
+    {
+        "userid":"101095",
+        "jam_absen":"2024-08-02 19:02:43",
+        "punch":3,
+        "mesin":"FS"
+    },
+    {
+        "userid":"101095",
+        "jam_absen":"2024-08-02 21:02:43",
+        "punch":1,
+        "mesin":"FS"
+    },
+
+
+
+
+
+
     {
         "userid":"102221",
         "jam_absen":"2024-08-02 12:02:43",
@@ -62,6 +134,54 @@
     {
         "userid":"102221",
         "jam_absen":"2024-08-03 14:02:43",
+        "punch":1,
+        "mesin":"FS"
+    },
+    {
+        "userid":"102221",
+        "jam_absen":"2024-08-04 23:02:43",
+        "punch":0,
+        "mesin":"FS"
+    },
+    {
+        "userid":"102221",
+        "jam_absen":"2024-08-05 02:02:43",
+        "punch":2,
+        "mesin":"FS"
+    },
+    {
+        "userid":"102221",
+        "jam_absen":"2024-08-05 03:02:43",
+        "punch":3,
+        "mesin":"FS"
+    },
+    {
+        "userid":"102221",
+        "jam_absen":"2024-08-05 07:02:43",
+        "punch":1,
+        "mesin":"FS"
+    },
+    {
+        "userid":"102221",
+        "jam_absen":"2024-08-05 08:02:43",
+        "punch":0,
+        "mesin":"FS"
+    },
+    {
+        "userid":"102221",
+        "jam_absen":"2024-08-05 12:02:43",
+        "punch":2,
+        "mesin":"FS"
+    },
+    {
+        "userid":"102221",
+        "jam_absen":"2024-08-05 13:02:43",
+        "punch":3,
+        "mesin":"FS"
+    },
+    {
+        "userid":"102221",
+        "jam_absen":"2024-08-05 15:02:43",
         "punch":1,
         "mesin":"FS"
     }

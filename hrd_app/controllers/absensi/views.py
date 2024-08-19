@@ -135,8 +135,15 @@ def cari_absensi(request):
                 if ab.keterangan_absensi is not None:
                     sket += f'{ab.keterangan_absensi}, '                 
                 if ab.keterangan_ijin is not None:
+                    if ab.masuk is not None and ab.jam_masuk is not None:
+                        if ab.masuk > ab.jam_masuk:
+                            sket += f"Terlambat masuk, "
                     sket += f'{ab.keterangan_ijin}, '
-                    kijin = ''                
+                    kijin = ''
+                else:
+                    if ab.masuk is not None and ab.jam_masuk is not None:
+                        if ab.masuk > ab.jam_masuk:
+                            sket += f"Terlambat masuk tanpa ijin, "                
                 if ab.keterangan_lain is not None:
                     sket += f'{ab.keterangan_lain}, '                    
                 if ab.libur_nasional is not None:
@@ -253,8 +260,15 @@ def cari_absensi(request):
                 if ab.keterangan_absensi is not None:
                     sket += f'{ab.keterangan_absensi}, '                 
                 if ab.keterangan_ijin is not None:
+                    if ab.masuk is not None and ab.jam_masuk is not None:
+                        if ab.masuk > ab.jam_masuk:
+                            sket += f"Terlambat masuk, "
                     sket += f'{ab.keterangan_ijin}, '
-                    kijin = ''                
+                    kijin = ''
+                else:
+                    if ab.masuk is not None and ab.jam_masuk is not None:
+                        if ab.masuk > ab.jam_masuk:
+                            sket += f"Terlambat masuk tanpa ijin, "                
                 if ab.keterangan_lain is not None:
                     sket += f'{ab.keterangan_lain}, '                    
                 if ab.libur_nasional is not None:
@@ -424,8 +438,16 @@ def absensi_json(request, dr, sp, sid):
                 if ab.keterangan_absensi is not None:
                     sket += f'{ab.keterangan_absensi}, '                 
                 if ab.keterangan_ijin is not None:
+                    if ab.masuk is not None and ab.jam_masuk is not None:
+                        if ab.masuk > ab.jam_masuk:
+                            sket += f"Terlambat masuk, "
                     sket += f'{ab.keterangan_ijin}, '
-                    kijin = ''                
+                    kijin = ''
+                else:
+                    if ab.masuk is not None and ab.jam_masuk is not None:
+                        if ab.masuk > ab.jam_masuk:
+                            sket += f"Terlambat masuk tanpa ijin, "
+
                 if ab.keterangan_lain is not None:
                     sket += f'{ab.keterangan_lain}, '                    
                 if ab.libur_nasional is not None:
@@ -542,8 +564,15 @@ def absensi_json(request, dr, sp, sid):
                 if ab.keterangan_absensi is not None:
                     sket += f'{ab.keterangan_absensi}, '                 
                 if ab.keterangan_ijin is not None:
+                    if ab.masuk is not None and ab.jam_masuk is not None:
+                        if ab.masuk > ab.jam_masuk:
+                            sket += f"Terlambat masuk, "
                     sket += f'{ab.keterangan_ijin}, '
-                    kijin = ''                
+                    kijin = ''
+                else:
+                    if ab.masuk is not None and ab.jam_masuk is not None:
+                        if ab.masuk > ab.jam_masuk:
+                            sket += f"Terlambat masuk tanpa ijin, "                
                 if ab.keterangan_lain is not None:
                     sket += f'{ab.keterangan_lain}, '                    
                 if ab.libur_nasional is not None:
@@ -800,6 +829,7 @@ def pabsen(request):
                 
                 jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
                 pg = next((pgw for pgw in pegawai if pgw["userid"] == a["userid"]),None)
+                print(pg["status_id"] == 3,"OEGAWAU")
                 # # Versi Cirebon
 
                 for r in rangetgl:
@@ -852,36 +882,48 @@ def pabsen(request):
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         if a["punch"] == 0 and jam_absen.hour > 4 and jam_absen.hour < 18 :
                             if ab.masuk is not None:
-                                s = jam_absen - datetime.combine(ab.tgl_absen,ab.masuk)
-                                if s.total_seconds() / 3600 > 4:
+                                if ab.masuk.hour > 18:
                                     ab.masuk_b = jam_absen.time()
                                     ab.save()
                                     data = {
                                         "userid": a["userid"],
                                         "jam_absen": jam_absen,
-                                        "punch": 6,
+                                        "punch": 10,
                                         "mesin": a["mesin"],
                                         "ket": "Masuk B"
                                     }
                                     dt.append(data)
                                 else:
-                                    ab.masuk = jam_absen.time()
-                                    ab.save()
-                                    data = {
-                                        "userid": a["userid"],
-                                        "jam_absen": jam_absen,
-                                        "punch": a["punch"],
-                                        "mesin": a["mesin"],
-                                        "ket": "Masuk"
-                                    }
-                                    dt.append(data)
+                                    s = jam_absen - datetime.combine(ab.tgl_absen,ab.masuk)
+                                    if s.total_seconds() / 3600 > 4:
+                                        ab.masuk_b = jam_absen.time()
+                                        ab.save()
+                                        data = {
+                                            "userid": a["userid"],
+                                            "jam_absen": jam_absen,
+                                            "punch": 10,
+                                            "mesin": a["mesin"],
+                                            "ket": "Masuk B"
+                                        }
+                                        dt.append(data)
+                                    else:
+                                        ab.masuk = jam_absen.time()
+                                        ab.save()
+                                        data = {
+                                            "userid": a["userid"],
+                                            "jam_absen": jam_absen,
+                                            "punch": a["punch"],
+                                            "mesin": a["mesin"],
+                                            "ket": "Masuk"
+                                        }
+                                        dt.append(data)
                             elif ab.pulang is not None or ab.istirahat is not None or ab.kembali is not None:
                                 ab.masuk_b = jam_absen.time()
                                 ab.save()
                                 data = {
                                         "userid": a["userid"],
                                         "jam_absen": jam_absen,
-                                        "punch": 6,
+                                        "punch": 10,
                                         "mesin": a["mesin"],
                                         "ket": "Masuk B"
                                 }
@@ -1019,8 +1061,8 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                     else:
-                                        ab.masuk = jam_absen.time()
-                                        ab.save()
+                                        ab2.masuk = jam_absen.time()
+                                        ab2.save()
                                         data = {
                                             "userid": a["userid"],
                                             "jam_absen": jam_absen,
@@ -1064,7 +1106,7 @@ def pabsen(request):
                                         }
                                         dt.append(data)
                                     else:
-                                        ab.masuk_b = jam_absen.time()
+                                        ab.masuk = jam_absen.time()
                                         ab.save()
                                         data = {
                                             "userid": a["userid"],
@@ -1083,7 +1125,7 @@ def pabsen(request):
                                     data = {
                                         "userid": a["userid"],
                                         "jam_absen": jam_absen,
-                                        "punch": a["punch"],
+                                        "punch": 12,
                                         "mesin": a["mesin"],
                                         "ket": "Istirahat B"
                                     }
@@ -1104,7 +1146,7 @@ def pabsen(request):
                                     data = {
                                         "userid": a["userid"],
                                         "jam_absen": jam_absen,
-                                        "punch": a["punch"],
+                                        "punch": 12,
                                         "mesin": a["mesin"],
                                         "ket": "Istirahat B"
                                     }
@@ -1167,7 +1209,7 @@ def pabsen(request):
                                         }
                                         dt.append(data)
                                     else:
-                                        ab.istirahat_b = jam_absen.time()
+                                        ab.istirahat = jam_absen.time()
                                         ab.save()
                                         data = {
                                             "userid": a["userid"],
@@ -1303,9 +1345,8 @@ def pabsen(request):
                                             # tanda
                                             ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                             if ab2.istirahat is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.istirahat)
-                                                if d.total_seconds() / 3600 > 5:
-                                                    ab2.istirahat_b = jam_absen.time()
+                                                if ab2.istirahat.hour < 9:
+                                                    ab2.istirahat = jam_absen.time()
                                                     ab2.save()
                                                     data = {
                                                         "userid": a["userid"],
@@ -1316,6 +1357,8 @@ def pabsen(request):
                                                     }
                                                     dt.append(data)
                                                 else:
+                                                    ab2.istirahat_b = jam_absen.time()
+                                                    ab2.save()
                                                     data = {
                                                         "userid": a["userid"],
                                                         "jam_absen": jam_absen - timedelta(days=1),
@@ -1325,8 +1368,18 @@ def pabsen(request):
                                                     }
                                                     dt.append(data)
                                             elif ab2.kembali is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali)
-                                                if d.total_seconds() / 3600 > 5:
+                                                if ab2.kembali.hour < 9:
+                                                    ab2.istirahat = jam_absen.time()
+                                                    ab2.save()
+                                                    data = {
+                                                        "userid": a["userid"],
+                                                        "jam_absen": jam_absen - timedelta(days=1),
+                                                        "punch": 8,
+                                                        "mesin": a["mesin"],
+                                                        "ket": "Istirahat Malam"
+                                                    }
+                                                    dt.append(data)
+                                                else:
                                                     ab2.istirahat_b = jam_absen.time()
                                                     ab2.save()
                                                     data = {
@@ -1338,8 +1391,18 @@ def pabsen(request):
                                                     }
                                                     dt.append(data)
                                             elif ab2.pulang is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                                if d.total_seconds() / 3600 > 3:
+                                                if ab2.pulang.hour < 9:
+                                                    ab2.istirahat = jam_absen.time()
+                                                    ab2.save()
+                                                    data = {
+                                                        "userid": a["userid"],
+                                                        "jam_absen": jam_absen - timedelta(days=1),
+                                                        "punch": 8,
+                                                        "mesin": a["mesin"],
+                                                        "ket": "Istirahat Malam"
+                                                    }
+                                                    dt.append(data)
+                                                else:
                                                     ab2.istirahat_b = jam_absen.time()
                                                     ab2.save()
                                                     data = {
@@ -1373,7 +1436,7 @@ def pabsen(request):
                                                         }
                                                         dt.append(data)
                                                 else:
-                                                    ab2.istirahat_b = jam_absen.time()
+                                                    ab2.istirahat = jam_absen.time()
                                                     ab2.save()
                                                     data = {
                                                         "userid": a["userid"],
@@ -1384,7 +1447,7 @@ def pabsen(request):
                                                     }
                                                     dt.append(data)
                                         except absensi_db.DoesNotExist:
-                                            ab.istirahat_b = jam_absen.time()
+                                            ab.istirahat = jam_absen.time()
                                             ab.save()
                                             data = {
                                                 "userid": a["userid"],
@@ -1405,7 +1468,7 @@ def pabsen(request):
                                     data = {
                                         "userid": a["userid"],
                                         "jam_absen": jam_absen,
-                                        "punch": 10,
+                                        "punch": 14,
                                         "mesin": a["mesin"],
                                         "ket": "Istirahat 2 B"
                                     }
@@ -1425,7 +1488,7 @@ def pabsen(request):
                                 data = {
                                     "userid": a["userid"],
                                     "jam_absen": jam_absen,
-                                    "punch": 10,
+                                    "punch": 14,
                                     "mesin": a["mesin"],
                                     "ket": "Istirahat 2 B"
                                 }
@@ -1584,9 +1647,8 @@ def pabsen(request):
                                     try:
                                         ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                         if ab2.istirahat2 is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.istirahat2)
-                                            if d.total_seconds() / 3600 > 3:
-                                                ab2.istirahat2_b = jam_absen.time()
+                                            if ab2.istirahat2.hour < 9:
+                                                ab2.istirahat2 = jam_absen.time()
                                                 ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
@@ -1597,6 +1659,8 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                             else:
+                                                ab2.istirahat2_b = jam_absen.time()
+                                                ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
                                                     "jam_absen": jam_absen - timedelta(days=1),
@@ -1606,8 +1670,9 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                         elif ab2.kembali is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali)
-                                            if d.total_seconds() / 3600 < 3:
+                                            if ab2.kembali.hour < 9:
+                                                ab2.istirahat2 = jam_absen.time()
+                                                ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
                                                     "jam_absen": jam_absen - timedelta(days=1),
@@ -1628,8 +1693,9 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                         elif ab2.pulang is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                            if d.total_seconds() / 3600 < 3:
+                                            if ab2.pulang.hour < 9:
+                                                ab2.istirahat2 = jam_absen.time()
+                                                ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
                                                     "jam_absen": jam_absen - timedelta(days=1),
@@ -1672,7 +1738,7 @@ def pabsen(request):
                                                     }
                                                     dt.append(data)
                                             else:
-                                                ab2.istirahat2_b = jam_absen
+                                                ab2.istirahat2 = jam_absen
                                                 ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
@@ -1686,7 +1752,7 @@ def pabsen(request):
                                         absensi_db(
                                             tgl_absen=tmin.date(),
                                             pegawai_id=ab.pegawai.pk,
-                                            istirahat2_b=jam_absen
+                                            istirahat2=jam_absen
                                         ).save()
                                         data = {
                                             "userid": a["userid"],
@@ -1706,7 +1772,7 @@ def pabsen(request):
                                     data = {
                                         "userid": a["userid"],
                                         "jam_absen": jam_absen,
-                                        "punch": 9,
+                                        "punch": 13,
                                         "mesin": a["mesin"],
                                         "ket": "Kembali B"
                                     }
@@ -1726,7 +1792,7 @@ def pabsen(request):
                                 data = {
                                     "userid": a["userid"],
                                     "jam_absen": jam_absen,
-                                    "punch": 9,
+                                    "punch": 13,
                                     "mesin": a["mesin"],
                                     "ket": "Kembali B"
                                 }
@@ -1751,7 +1817,7 @@ def pabsen(request):
                                     data = {
                                         "userid": a["userid"],
                                         "jam_absen": jam_absen,
-                                        "punch": 11,
+                                        "punch": 15,
                                         "mesin": a["mesin"],
                                         "ket": "Kembali 2 B"
                                     }
@@ -1771,7 +1837,7 @@ def pabsen(request):
                                 data = {
                                     "userid": a["userid"],
                                     "jam_absen": jam_absen,
-                                    "punch": 11,
+                                    "punch": 15,
                                     "mesin": a["mesin"],
                                     "ket": "Kembali 2 B"
                                 }
@@ -1934,9 +2000,8 @@ def pabsen(request):
                                     try:
                                         ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                         if ab2.kembali2 is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali2)
-                                            if d.total_seconds() / 3600 > 3:
-                                                ab2.kembali2_b = jam_absen.time()
+                                            if ab2.kembali2.hour < 9:
+                                                ab2.kembali2 = jam_absen.time()
                                                 ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
@@ -1947,6 +2012,8 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                             else:
+                                                ab2.kembali2_b = jam_absen.time()
+                                                ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
                                                     "jam_absen": jam_absen - timedelta(days=1),
@@ -1956,8 +2023,9 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                         elif ab2.pulang is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                            if d.total_seconds() / 3600 < 3:
+                                            if ab2.pulang.hour < 9:
+                                                ab2.kembali2 = jam_absen.time()
+                                                ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
                                                     "jam_absen": jam_absen - timedelta(days=1),
@@ -2000,7 +2068,7 @@ def pabsen(request):
                                                     }
                                                     dt.append(data)
                                             else:
-                                                ab2.kembali2_b = jam_absen.time()
+                                                ab2.kembali2 = jam_absen.time()
                                                 ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
@@ -2011,7 +2079,7 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                     except absensi_db.DoesNotExist:
-                                        ab.kembali2_b = jam_absen.time()
+                                        ab.kembali2 = jam_absen.time()
                                         ab.save()
                                         data = {
                                             "userid": a["userid"],
@@ -2056,7 +2124,7 @@ def pabsen(request):
                                         }
                                         dt.append(data)
                                     else:
-                                        ab.kembali_b = jam_absen
+                                        ab.kembali = jam_absen
                                         ab.save()
                                         data = {
                                             "userid": a["userid"],
@@ -2212,9 +2280,8 @@ def pabsen(request):
                                         try:
                                             ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                             if ab2.kembali is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali)
-                                                if d.total_seconds() / 3600 > 3:
-                                                    ab2.kembali_b = jam_absen.time()
+                                                if ab2.kembali.hour < 9:
+                                                    ab2.kembali = jam_absen.time()
                                                     ab2.save()
                                                     data = {
                                                         "userid": a["userid"],
@@ -2225,6 +2292,8 @@ def pabsen(request):
                                                     }
                                                     dt.append(data)
                                                 else:
+                                                    ab2.kembali_b = jam_absen.time()
+                                                    ab2.save()
                                                     data = {
                                                         "userid": a["userid"],
                                                         "jam_absen": jam_absen,
@@ -2234,8 +2303,9 @@ def pabsen(request):
                                                     }
                                                     dt.append(data)
                                             elif ab2.pulang is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                                if d.total_seconds() / 3600 < 3:
+                                                if ab2.pulang.hour < 9:
+                                                    ab2.kembali = jam_absen.time()
+                                                    ab2.save()
                                                     data = {
                                                         "userid": a["userid"],
                                                         "jam_absen": jam_absen,
@@ -2300,7 +2370,7 @@ def pabsen(request):
                                     data = {
                                         "userid": a["userid"],
                                         "jam_absen": jam_absen,
-                                        "punch": 7,
+                                        "punch": 11,
                                         "mesin": a["mesin"],
                                         "ket": "Pulang B"
                                     }
@@ -2324,7 +2394,7 @@ def pabsen(request):
                                     data = {
                                         "userid": a["userid"],
                                         "jam_absen": jam_absen,
-                                        "punch": 7,
+                                        "punch": 11,
                                         "mesin": a["mesin"],
                                         "ket": "Pulang B"
                                     }
@@ -2452,9 +2522,8 @@ def pabsen(request):
                                     try:
                                         ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                         if ab2.pulang is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                            if d.total_seconds() / 3600 > 3:
-                                                ab2.pulang_b = jam_absen.time()
+                                            if ab2.pulang.hour < 9:
+                                                ab2.pulang = jam_absen.time()
                                                 ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
@@ -2465,6 +2534,8 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                             else:
+                                                ab2.pulang_b = jam_absen.time()
+                                                ab2.save()
                                                 data = {
                                                     "userid": a["userid"],
                                                     "jam_absen": jam_absen,
@@ -2474,8 +2545,7 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                         elif ab2.masuk is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.masuk)
-                                            if d.total_seconds() / 3600 < 3:
+                                            if ab2.masuk.hour > 18:
                                                 ab2.pulang = jam_absen
                                                 ab2.save()
                                                 data = {
@@ -2498,8 +2568,7 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                         elif ab2.istirahat is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.istirahat)
-                                            if d.total_seconds() / 3600 < 3:
+                                            if ab2.istirahat.hour < 9:
                                                 ab2.pulang = jam_absen
                                                 ab2.save()
                                                 data = {
@@ -2522,8 +2591,7 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                         elif ab2.kembali is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.kembali)
-                                            if d.total_seconds() / 3600 < 3:
+                                            if ab2.kembali.hour < 9:
                                                 data = {
                                                     "userid": a["userid"],
                                                     "jam_absen": jam_absen,
@@ -2544,8 +2612,7 @@ def pabsen(request):
                                                 }
                                                 dt.append(data)
                                         elif ab2.pulang is not None:
-                                            d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
-                                            if d.total_seconds() / 3600 < 3:
+                                            if ab2.pulang.hour < 9:
                                                 ab2.pulang = jam_absen
                                                 ab2.save()
                                                 data = {
@@ -2583,10 +2650,10 @@ def pabsen(request):
                                                 else:
                                                     pass
                                             else:
-                                                ab2.pulang_b = jam_absen.time()
+                                                ab2.pulang = jam_absen.time()
                                                 ab2.save()
                                     except absensi_db.DoesNotExist:
-                                        ab.pulang_b = jam_absen.time()
+                                        ab.pulang = jam_absen.time()
                                         ab.save()
                                         data = {
                                             "userid": a["userid"],
@@ -3615,6 +3682,10 @@ def pu(r,tgl,userid,sid):
             abs.istirahat_b = d.jam_absen.time().strftime('%H:%M:%S')
         elif d.punch == 13:
             abs.kembali_b = d.jam_absen.time().strftime('%H:%M:%S')
+        elif d.punch == 14:
+            abs.istirahat2_b = d.jam_absen.time().strftime('%H:%M:%S')
+        elif d.punch == 15:
+            abs.kembali2_b = d.jam_absen.time().strftime('%H:%M:%S')
         if abs.masuk is not None and abs.pulang is not None:
             if abs.pulang > abs.masuk:
                 dmsk = f'{abs.tgl_absen} {abs.masuk}'
