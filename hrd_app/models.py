@@ -171,6 +171,7 @@ pilihan_pengelola = (("Owner", "Owner"),("HRD", "HRD"), ("Lainnya", "Lainnya"))
         
 class pegawai_db(models.Model):
     nama = models.CharField(max_length=200, null=True)
+    email = models.CharField(max_length=200, null=True)
     userid = models.CharField(max_length=100, unique=True, null=True)
     gender = models.CharField(max_length=10, null=True)
 
@@ -594,7 +595,7 @@ class absensi_db(models.Model):
     lama_istirahat = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     lama_istirahat2 = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     jam_pulang = models.TimeField(null=True)
-    jam_istirahat = models.DecimalField(null=True,max_digits=5, decimal_places=2)
+    jam_istirahat = models.TimeField(null=True) 
     
     total_jam_kerja = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=0)
     total_jam_istirahat = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=0)

@@ -4,7 +4,7 @@ from hrd_app.controllers.lib import *
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Lembur
 @login_required
-def lembur(request, sidd):
+def lembur(request, sid):
     iduser = request.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
@@ -100,7 +100,11 @@ def lembur_belum_proses(request, sid):
         sp = datetime.strftime(sampai,'%d-%m-%Y')                 
         
         status = status_pegawai_lembur_db.objects.all().values("status_pegawai_id","status_pegawai__status")
-        sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+        try:
+            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = sid_lembur.status_pegawai.pk
+        except:
+            sid_lembur = 0
         pegawai = []
         for p in pegawai_db.objects.filter(aktif=1):
             if int(sid) == 0:
@@ -130,7 +134,7 @@ def lembur_belum_proses(request, sid):
             'pegawai' : pegawai,
             'dsid' : dsid,
             'sid' : int(sid),
-            'sil': sid_lembur.pk,
+            'sil': sid_lembur,
             'dari' : dari,
             'sampai' : sampai,
             'dr': dr,
@@ -470,6 +474,7 @@ def tambah_lembur(request):
                     elif awal == 0 and akhir > 0:
                         lebih = lebih_akhir   
                     # pengolahan lembur   
+                    print(lebih,"WLLWKLWKLWKWL")
                     if lebih == 0:
                         # -------------------------------------------------
                         # pemotong jam masuk
@@ -493,7 +498,6 @@ def tambah_lembur(request):
                                     pass                                   
                         # -------------------------------------------------
                         # pemotong jam pulang                                
-                        
                         if akhir > 0:                                       
                             batas_pulang = jadwal_pulang + timedelta(hours=akhir)                                      
                         else:  
@@ -514,7 +518,6 @@ def tambah_lembur(request):
                                     pemotong_plg = (b_plg.index(b) + 1) * 0.5
                                 else:
                                     pass 
-                        print(pemotong_plg,"PEMOTONG PULANG")
                         # -------------------------------------------------
                         # pemotong jam istirahat
                         
@@ -529,15 +532,22 @@ def tambah_lembur(request):
                                 else:                                    
                                     # -------------------------------------------------
                                     # istirahat 1
-                                    lama_ist = (ist_1 * int(Decimal(ab.lama_istirahat) * 60)) + 5                                     
+                                    lama_ist = (ist_1 * 60) + 5                                     
                                     a_ist = absen_ist + timedelta(minutes=lama_ist)  
+                                    print(a_ist,"COBA")
                                     b_ist.append(a_ist)     
                                     for x in range(int(looping) - 1):
                                         a2_ist = b_ist[x] + timedelta(minutes=30)
                                         b_ist.append(a2_ist)
-                                    
                                     if absen_kmb <= a_ist:
-                                        pemotong_ist = 0
+                                        cb = (absen_ist + timedelta(minutes=(ist_1 * 60))) - absen_kmb
+                                        print(cb,"MASUKASAISISI")
+                                        cb = datetime.strptime(str(cb), "%H:%M:%S")
+                                        cb = cb.hour + cb.minute / 60 + cb.second / 3600
+                                        if cb < 0.50:
+                                            pemotong_ist = 0
+                                        else:
+                                            pemotong_ist = -cb
                                         pemotong_ist2 = 0
                                         s_ist.append(pemotong_ist)
                                     else:
@@ -552,7 +562,7 @@ def tambah_lembur(request):
                             else:
                                 # -------------------------------------------------
                                 # istirahat 1
-                                lama_ist = (ist_1 * int(Decimal(ab.lama_istirahat) * 60)) + 5                                     
+                                lama_ist = (ist_1 * 60) + 5                                     
                                 
                                 a_ist = absen_ist + timedelta(minutes=lama_ist)  
                                 print(a_ist,"COBA")
@@ -561,11 +571,17 @@ def tambah_lembur(request):
                                 for x in range(int(looping) - 1):
                                     a2_ist = b_ist[x] + timedelta(minutes=30)
                                     b_ist.append(a2_ist)
-                                
                                 if absen_kmb <= a_ist:
-                                    pemotong_ist = 0
-                                    pemotong_ist2 = 0
-                                    s_ist.append(pemotong_ist)
+                                        cb = (absen_ist + timedelta(minutes=(ist_1 * 60))) - absen_kmb
+                                        cb = datetime.strptime(str(cb), "%H:%M:%S")
+                                        print(cb,"MASUKASAISISI")
+                                        cb = cb.hour + cb.minute / 60 + cb.second / 3600
+                                        if cb < 0.50:
+                                            pemotong_ist = 0
+                                        else:
+                                            pemotong_ist = -cb
+                                        pemotong_ist2 = 0
+                                        s_ist.append(pemotong_ist)
                                 else:
                                     for b in b_ist:                             
                                         if absen_kmb > b:
@@ -584,18 +600,22 @@ def tambah_lembur(request):
                                     absen_ist2 = datetime.combine(ab.tgl_absen, ab.istirahat2)
                                     absen_kmb2 = datetime.combine(ab.tgl_absen, ab.kembali2)
                                     
-                                    lama_ist2 = (ist_2 * int(Decimal(ab.lama_istirahat2) * 60)) + 5                                     
-                                    print(Decimal(ab.lama_istirahat2))
+                                    lama_ist2 = (ist_2 * 60) + 5                                     
                                     a_ist2 = absen_ist2 + timedelta(minutes=lama_ist2)  
                                     b_ist2.append(a_ist2)     
                                     
                                     for x in range(int(looping) - 1):
                                         a2_ist2 = b_ist2[x] + timedelta(minutes=30)
                                         b_ist2.append(a2_ist2)
-                                    
                                     if absen_kmb2 <= a_ist2:
+                                        cb = a_ist2 - absen_kmb2
+                                        cb = datetime.strptime(str(cb), "%H:%M:%S")
+                                        cb = cb.hour + cb.minute / 60 + cb.second / 3600
+                                        if cb < 0.50:
+                                            pemotong_ist2 = 0
+                                        else:
+                                            pemotong_ist2 = -cb
                                         pemotong_ist = s_ist[0]
-                                        pemotong_ist2 = 0
                                     else:
                                         for b in b_ist2:                             
                                             if absen_kmb2 > b:
@@ -718,6 +738,7 @@ def tambah_lembur(request):
         rk.edit_by = nama_user          
         rk.save()
     else:  
+        print(tlembur, tkompen, sisa_lembur_sbl,"SINI BANG")
         tambah_rekap = rekap_lembur_db(
             pegawai_id = int(idp),
             periode = prd,
@@ -777,7 +798,7 @@ def proses_ulang_lembur(request, idl):
         ab = absensi_db.objects.select_related('pegawai').get(tgl_absen=tgl, pegawai_id=int(idp))            
         
         # Tanpa istirahat (di jadwal kerja)
-        if ab.jam_istirahat == 0:
+        if (ab.jam_istirahat == 0 and ab.jam_istirahat is not None) or ab.jam_istirahat is None:
             if ab.masuk is not None and ab.pulang is not None:
                 
                 jadwal_masuk = datetime.combine(ab.tgl_absen, ab.jam_masuk)
@@ -957,7 +978,7 @@ def proses_ulang_lembur(request, idl):
                                 # -------------------------------------------------
                                 # istirahat 1
                                 
-                                lama_ist = (ist_1 * 60) + 5                                     
+                                lama_ist = (ist_1 * int(Decimal(ab.lama_istirahat) * 60)) + 5                                     
                                 
                                 a_ist = absen_ist + timedelta(minutes=lama_ist)  
                                 b_ist.append(a_ist)     
@@ -983,7 +1004,7 @@ def proses_ulang_lembur(request, idl):
                             # -------------------------------------------------
                             # istirahat 1
                             
-                            lama_ist = (ist_1 * 60) + 5                                     
+                            lama_ist = (ist_1 * int(Decimal(ab.lama_istirahat) * 60)) + 5                                     
                             
                             a_ist = absen_ist + timedelta(minutes=lama_ist)  
                             b_ist.append(a_ist)     
@@ -1014,7 +1035,7 @@ def proses_ulang_lembur(request, idl):
                                 absen_ist2 = datetime.combine(ab.tgl_absen, ab.istirahat2)
                                 absen_kmb2 = datetime.combine(ab.tgl_absen, ab.kembali2)
                                 
-                                lama_ist2 = (ist_2 * 60) + 5                                     
+                                lama_ist2 = (ist_2 * int(Decimal(ab.lama_istirahat2) * 60)) + 5  
                                 
                                 a_ist2 = absen_ist2 + timedelta(minutes=lama_ist2)  
                                 b_ist2.append(a_ist2)     
@@ -1035,8 +1056,8 @@ def proses_ulang_lembur(request, idl):
                                             pass                                      
                             
                     else:                                
-                        pemotong_ist = -1
-                        pemotong_ist2 = 0
+                        pemotong_ist = Decimal(-ab.lama_istirahat)
+                        pemotong_ist2 = Decimal(-ab.lama_istirahat2)
 
                     # additional perhitungan istirahat
                     if ist_1 + ist_2 > 1:
@@ -1046,12 +1067,18 @@ def proses_ulang_lembur(request, idl):
                         pi = pemotong_ist + pemotong_ist2    
                     
                     # perhitungan lembur
+                    pi = pemotong_ist + pemotong_ist2
+                    pemotong_msk = Decimal(pemotong_msk)
+                    pi = Decimal(pi)
+                    pemotong_plg = Decimal(pemotong_plg)
+                    awal = Decimal(awal)
+                    akhir = Decimal(akhir)
                     if awal > 0 and akhir > 0:
-                        lembur = (awal + akhir) - (pemotong_msk + pi + pemotong_plg)
+                        lembur = Decimal((awal + akhir)) - (pemotong_msk + pi + pemotong_plg)
                     elif awal > 0 and akhir == 0:     
                         lembur = (awal) - (pemotong_msk + pi + pemotong_plg)
                     elif awal == 0 and akhir > 0:
-                        lembur = (akhir) - (pemotong_msk + pi + pemotong_plg) 
+                        lembur = (akhir) - (pemotong_msk + pi + pemotong_plg)
                         
                     lb.status = 1
                     lb.proses_lembur = lembur
@@ -1108,6 +1135,7 @@ def proses_ulang_lembur(request, idl):
         rk.edit_by = nama_user          
         rk.save()
     else:  
+        print(tlembur, tkompen, sisa_lembur_sbl,"SINI BANG")
         tambah_rekap = rekap_lembur_db(
             pegawai_id = int(idp),
             periode = prd,
@@ -1740,6 +1768,43 @@ def kompen_json(request, idp, prd, thn):
                                 
         return JsonResponse({"data": data})
 
+@login_required
+def kompen(r):
+    iduser = r.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+
+        dsid = dakses.sid_id  
+
+        pgw = pegawai_db.objects.get(userid=iduser)
+
+        # get all jam kerja 
+        jk = jamkerja_db.objects.filter(kk_id=pgw.kelompok_kerja.pk)
+
+        # dt_raw = sorted(draw,key=lambda i: i["jam_absen"])
+        status = status_pegawai_db.objects.all().order_by('id')
+        
+        ###
+        try:
+            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = pgw.status_id)
+            sid_lembur = sid_lembur.status_pegawai.pk
+        except:
+            sid_lembur = 0
+
+        data = {
+            'akses' : akses,
+            'status' : status,
+            'dsid': dsid,
+            'sid': pgw.status_id,
+            'sil': sid_lembur,
+            "pegawai":pgw,
+            'userid':pgw.userid,
+            'modul_aktif' : 'Absensi'
+            }
+            
+        return render(r,'hrd_app/kompen/kompen.html', data)
 
 
 @login_required

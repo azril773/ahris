@@ -118,7 +118,7 @@
                                 <div class="col-lg-6">
                                     <div class="form-group mg-b-10-force">
                                         <label class="form-control-label tx-inverse">Pegawai:</label>
-                                        <select name="pegawai" id="pegawai" class="form-control select2-show-search" data-placeholder='Pilih' required=required>
+                                        <select name="pegawai" id="pegawai" class="" data-placeholder='Pilih' required=required>
                                             <option label="Pilih Pegawai"></option>
                                             {% for p in pegawai %}
                                             <option value="{{p.idp}}">{{p.nama}}/{{p.nik}} - {{p.userid}}</option>
@@ -223,7 +223,7 @@
                             <div class="col-lg-6">
                                 <div class="form-group mg-b-10-force">
                                     <label class="form-control-label tx-inverse">Periode:</label>
-                                    <select name="periode" id="periode" class="form-control select2-show-search" data-placeholder='Pilih Periode' required=required>
+                                    <select name="periode" id="periode" class="" data-placeholder='Pilih Periode' required=required>
                                         <option label="Pilih Periode"></option>
                                         <option value="1">Januari</option>
                                         <option value="2">Pebruari</option>
@@ -355,7 +355,7 @@
                                 <div class="col-lg-4">
                                     <div class="form-group mg-b-10-force">
                                         <label class="form-control-label tx-inverse">Jenis Kompen:</label>
-                                        <select name="jkompen" id="jkompen" class="form-control select2-show-search" data-placeholder='Pilih' required=required>
+                                        <select name="jkompen" id="jkompen" class="" data-placeholder='Pilih' required=required>
                                             <option label="Pilih Periode"></option>
                                             <option value="awal">Awal</option>
                                             <option value="akhir">Akhir</option>
@@ -459,11 +459,50 @@
 
 <script>    
     /* tabel */
+
+    const pegawaiSelectize = $('#pegawai').selectize({
+    });
+    {% comment %} pegawaiSelectize[0].selectize.disable() {% endcomment %}
+
+    const periodeSelectize = $('#periode').selectize();
+
+    const jkompenSelectize = $('#jkompen').selectize();
     dr = "{{dr}}"
     sp = "{{sp}}"
     prd = "{{prd}}"
     thn = "{{thn}}"
     sid = "{{sid}}"
+    {% comment %} const token = document.querySelector('input[name="csrfmiddlewaretoken"]').value {% endcomment %}
+    {% comment %} $("#tgl").on("blur",(e) => {
+        setTimeout(() => {
+            const tgl = $("#tgl").val()
+            if(tgl !== ""){
+                pegawaiSelectize[0].selectize.enable()
+            }else{
+                pegawaiSelectize[0].selectize.disable()
+            }
+        }, 100)
+    }) {% endcomment %}
+
+    {% comment %} function getAbsensi(id){
+        if(id && $("#tgl").val()){
+            $.ajax({
+                url: `{% url 'absensi_id' %}`,
+                method:"POST",
+                data: {
+                    id: id,
+                    tgl: $("#tgl").val()
+                },
+                headers: {
+                    "X-CSRFToken": token
+                },
+                success(e){
+                    console.log(e)
+                }
+            })
+        }
+    } {% endcomment %}
+
 
     var table = $('#tabelku').DataTable({
         "ajax": "{% url 'lembur_json' sid prd thn %}",
@@ -477,21 +516,21 @@
             { 
                 data: null,
                 "render": function(data, type, row, meta){    
-                    data = '<a href="" data-target="#detailLembur" data-toggle="modal" data-idp='+row.idp+' data-nama='+row.nama+' data-prd='+row.prd+' data-thn='+row.thn+'>'+row.lembur+'</a';
+                    data = '<a href="" style="color:#0d6efd;" data-target="#detailLembur" data-toggle="modal" data-idp='+row.idp+' data-nama='+row.nama+' data-prd='+row.prd+' data-thn='+row.thn+'>'+row.lembur+'</a';
                     return data;
                 } 
             },
             { 
                 data: null,
                 "render": function(data, type, row, meta){    
-                    data = '<a href="" data-target="#detailKompen" data-toggle="modal" data-idp='+row.idp+' data-nama='+row.nama+' data-prd='+row.prd+' data-thn='+row.thn+'>'+row.kompen+'</a';
+                    data = '<a href="" style="color:#0d6efd;" data-target="#detailKompen" data-toggle="modal" data-idp='+row.idp+' data-nama='+row.nama+' data-prd='+row.prd+' data-thn='+row.thn+'>'+row.kompen+'</a';
                     return data;
                 } 
             },
             { 
                 data: null,
                 "render": function(data, type, row, meta){    
-                    data = '<a href="" data-target="#bayarLembur" data-toggle="modal" data-id='+row.id+'>'+row.bayar+'</a';
+                    data = '<a href="" style="color:#0d6efd;" data-target="#bayarLembur" data-toggle="modal" data-id='+row.id+'>'+row.bayar+'</a';
                     return data;
                 } 
             },
@@ -551,7 +590,7 @@
         const tgl_kompen = document.getElementById('tgl_kompen')
         const idp_kompen = document.getElementById('idp_kompen')
         const kompen = document.getElementById('kompen')
-        const jkompen = document.getElementById('jkompen')
+        const jkompen = jkompenSelectize[0].selectize
         const csrf = document.getElementsByName('csrfmiddlewaretoken')       
 
         $.ajax({
@@ -562,7 +601,7 @@
                 'tgl_kompen':tgl_kompen.value,
                 'idp': idp_kompen.value,
                 'kompen':kompen.value,
-                'jkompen':jkompen.value
+                'jkompen':jkompen.getValue()
             },
             success: function (response) {
                                 
@@ -575,7 +614,7 @@
 
                 $('#tambahKompen').modal('hide');
                 $("#tkompenForm")[0].reset();
-                $('#jkompen').val('').trigger("change");
+                jkompen.clear()
                       
             },
             error: function (error) {
@@ -694,12 +733,6 @@
         });
 
     });
-
-
-</script>
-
-<!-- Modal Script -->
-<script>
 
     $('#batalLembur').on('show.bs.modal', function (e) {
         
@@ -852,17 +885,6 @@
     $(function(){
     'use strict'        
 
-        $('#pegawai').select2({
-            dropdownParent: $('#tambahLembur'),
-        });
-
-        $('#periode').select2({
-            dropdownParent: $('#cariLembur'),
-        });
-
-        $('#jkompen').select2({
-            dropdownParent: $('#tambahKompen'),
-        });
     });
 </script>
 

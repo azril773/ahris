@@ -420,6 +420,9 @@ def tambah_pegawai(r):
             pendidikan = []
         status_pegawai = status_pegawai_db.objects.get(status="Staff")
 
+        if email == '':
+            return JsonResponse({'status':"error","msg":"email tidak boleh kosong"},status=400,safe=False)
+
         if pegawai_db.objects.filter(userid=userid).exists():
             status = "duplikat"
         else:
@@ -1073,5 +1076,3 @@ def detail_pegawai_json(request, idp):
         data.append(pg)       
                             
         return JsonResponse({"data": data})
-
-    

@@ -1,0 +1,392 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<div class="br-pagebody">  
+
+    <div class="row">
+        <div class="col-6">
+            <div class="br-section-wrapper">
+                <p class="tx-inverse" style="text-transform: uppercase;">halaman data transaksi - {{ pegawai.nama }} / {{ pegawai.nik }} - ( {{ nh }} - {{ tgl }} {{ nm }} {{ tahun }} )</p>
+                <div class="table mt-5">
+                    <table class="" id="table_raw" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>JAM ABSEN</th>
+                                <th>ABSEN</th>
+                                <th>ACTION</th>
+                            </tr>
+                        </thead>
+                        <tbody class="tx-inverse">
+                            
+                        </tbody>
+                    </table>
+                </div>
+                <!-- Button Proses Data -->
+            <a href="{% url 'absensi' sid %}" class="btn btn-info mg-b-6">KEMBALI</a>&nbsp; &nbsp;
+
+            <!-- Button Cari Data Absen -->
+            <button data-target="#tambah_jam_absen" data-toggle="modal" class="btn btn-warning mg-b-6">TAMBAH JAM ABSEN</button>  &nbsp; &nbsp;
+            <a href="{% url 'pu' tgl pegawai.userid sid %}" class="btn btn-success mg-b-6">PROSES ULANG ABSENSI</a>  &nbsp; &nbsp;
+
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="br-section-wrapper tx-inverse">
+                <p style="text-transform:capitalize;">{{ pegawai.nama }} / {{ pegawai.nik }} - {{ pegawai.divisi }}</p>
+                <p>userid : {{ pegawai.userid }}</p>
+                <p>Jam Kerja : <button data-target="#edit_jamkerja" data-toggle="modal" style="color:#0d6efd;">{{ ab.jam_masuk }} - {{ ab.jam_pulang }} / Istirahat : {{ ab.lama_istirahat }} Jam </button></p>
+                <p>Group kerja : {{ pegawai.kelompok_kerja }}</p>
+                <div class="table mt-5">
+                    <table class="" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Jam</th>
+                                <th>Hari</th>
+                            </tr>
+                        </thead>
+                        <tbody class="tx-inverse">
+                            {% for k in kk %}
+                                <tr>
+                                    <td> {{ k.jam_masuk }} - {{ k.jam_pulang }} / Istirahat : {{ k.lama_istirahat }} Jam </td>
+                                    <td> {{ k.hari }} </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal proses -->
+    <div id="tambah_jam_absen" class="modal fade">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+            <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Tambah Jam Absen</h6>          
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>          
+            </div>
+            
+            <form id="tambahForm" method="post">
+                {% csrf_token %}
+                <div class="form-layout form-layout-1">
+                <div class="row mg-b-25">
+    
+                    <div class="col-lg-6">
+                        <label for="opsi_absen">Absen: </label>
+                        <select name="" id="opsi_absen">
+                            <option value="">Pilih Absen</option>
+                        </select>
+                    </div>
+    
+                    <div class="col-lg-6">
+                        <label for="jam_absen">Jam:</label>
+                        <input type="time" id="jam_absen" name="jam_absen" class="form-control" placeholder="Jam Absen">
+                    </div>
+
+                    <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+    
+                    <div class="modal-footer">
+                    <button type="submit" id="submit_buttonTambah" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Proses Data</button>
+                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                    </div>              
+    
+                </div>
+                </div>            
+            </form>              
+        </div>
+        </div><!-- modal-dialog -->
+    </div>
+    <!-- Modal proses -->
+    <div id="edit_jamkerja" class="modal fade">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+            <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Edit Jam Kerja</h6>          
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>          
+        </div>
+        <form id="editJForm" action="{% url "edit_jamkerja" userid tgl sid %}" method="post">
+            {% csrf_token %}
+            <div class="modal-body">
+                    <div class="mx-5">
+                    <div class="row">
+                        <div class="row">
+                            <div class="col-lg-6 mb-2">
+                                <label for="jam_masuk">Jam Masuk: </label>
+                                <input type="time" id="jam_masuk" name="jam_masuk" class="form-control" placeholder="Jam Masuk">
+                            </div>
+            
+                            <div class="col-lg-6 mb-2">
+                                <label for="jam_keluar">Jam Keluar:</label>
+                                <input type="time" id="jam_keluar" name="jam_keluar" class="form-control" placeholder="Jam Keluar">
+                            </div>
+                            <div class="col-lg-6">
+                                <label for="jam_istirahat">Jam Istirahat:</label>
+                                <input type="time" id="jam_istirahat" name="jam_istirahat" class="form-control" placeholder="Jam Istirahat">
+                            </div>
+                            <div class="col-lg-6">
+                                <label for="lama_istirahat">Lama Istirahat:</label>
+                                <input type="number" min="0" step="0.01" id="lama_istirahat" name="lama_istirahat" class="form-control" placeholder="Lama Istirahat">
+                            </div>
+    
+                        </div>         
+                    </div>
+                    </div>            
+                </div>
+                <input type="hidden" name="id" value="{{ab.id}}">
+                <div class="modal-footer">
+                    <button type="submit" id="submit_buttonEditJ" class="btn btn-info tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Proses Data</button>
+                    <button type="button" class="btn btn-danger tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                </div>     
+            </form>              
+        </div>
+        </div><!-- modal-dialog -->
+    </div>
+
+    <div id="hapus_jam" class="modal fade">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+            <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Hapus {{modul_aktif}}</h6>          
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>          
+            </div>
+            
+            <form id="hapusForm" method="post">
+                {% csrf_token %}
+                <div class="form-layout form-layout-1">
+                <div class="row mg-b-25">
+    
+                    <div class="col-lg-12">
+                        <p class="hitam">Apakah Anda Yakin ?</p>
+                        <input type="hidden" name="hapus_id" id="hapus_id" class="form-control">
+                    </div>
+    
+                    <div class="modal-footer">
+                    <button type="submit" id="submit_button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Hapus</button>
+                    <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                    </div>              
+    
+                </div>
+                </div>            
+            </form>              
+        </div>
+        </div><!-- modal-dialog -->
+    </div>
+
+
+    <div id="edit_punch" class="modal fade">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+            <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Ubah Absen</h6>          
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>          
+            </div>
+            
+            <form id="ubahForm" method="post">
+                {% csrf_token %}
+                <div class="form-layout form-layout-1">
+                <div class="row mg-b-25">
+                    <p></p>
+                    <select name="ubah_absen" id="ubah_absen" style="width: 200px;">
+                        <option value="">Pilih Absen</option>
+                    </select>
+                    <input type="hidden" name="id" id="id">
+                </div>
+                </div>
+                
+                <div class="modal-footer">
+                    <button type="submit" id="submit_buttonUbah" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Proses Data</button>
+                    <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                    </div>        
+            </form>              
+        </div>
+        </div><!-- modal-dialog -->
+    </div>
+
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>
+
+    const token = document.querySelector("[name=csrfmiddlewaretoken]").value;
+
+
+    const tables = $("#table_raw").DataTable({
+        ajax: {
+            url: "{% url 'get_trans_json' %}",
+            data: {
+                userid: "{{ userid }}",
+                tgl: "{{ tgl }}",
+            },
+            headers: {
+                "X-CSRFToken": token
+            },
+        },
+
+        columns: [
+            {data: "jam_absen"},
+            {
+                data: "punch",
+                render: (data,type,row,meta) => {
+                    html = ''
+                    html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>${row.ket}</span>`
+                    return html
+                }
+            },
+            {
+                data: "id",
+                render: (data,type,row,meta) => {
+                    html = `
+                        <span data-id="${data}" data-toggle="modal" data-target="#hapus_jam" style="color:#0d6efd;cursor:pointer;">Hapus</span>
+                    `
+                    return html
+                }
+            },
+        ],
+        searching: false,
+        destroy: true,
+        ordering: false,
+        paging: false,
+        processing: true,
+    });
+
+
+
+    $("[type='time']").flatpickr({
+        enableTime:true,
+        noCalendar:true,
+        dateFormat:"H:i",
+        time_24hr:true
+    });
+    const opsi_absen = $("#opsi_absen").selectize({
+        valueField: "id",
+        labelField: "absen",
+        searchField: ["absen"],
+        options: [
+        { absen: "Masuk", id: "0|Masuk" },
+        { absen: "Pulang", id: "1|Pulang" },
+        { absen: "Keluar", id: "2|Keluar" },
+        { absen: "Kembali", id: "3|Kembali" },
+        { absen: "Keluar 2", id: "4|Keluar 2" },
+        { absen: "Kembali 2", id: "5|Kembali 2" },
+        { absen: "Masuk Malam", id: "6|Masuk Malam" },
+        { absen: "Pulang Malam", id: "7|Pulang Malam" },
+        { absen: "Keluar Malam", id: "8|Keluar Malam" },
+        { absen: "Kembali Malam", id: "9|Kembali Malam" },
+        { absen: "Masuk B", id: "10|Masuk B" },
+        { absen: "Keluar B", id: "12|Keluar B" },
+        { absen: "Kembali B", id: "13|Kembali B" },
+        { absen: "Pulang B", id: "11|Pulang B" },
+        ],
+    });
+    const ubah_absen = $("#ubah_absen").selectize({
+        valueField: "id",
+        labelField: "absen",
+        searchField: ["absen"],
+        options: [
+          { absen: "Masuk", id: "0|Masuk" },
+          { absen: "Pulang", id: "1|Pulang" },
+          { absen: "Keluar", id: "2|Keluar" },
+          { absen: "Kembali", id: "3|Kembali" },
+          { absen: "Keluar 2", id: "4|Keluar 2" },
+          { absen: "Kembali 2", id: "5|Kembali 2" },
+          { absen: "Masuk Malam", id: "6|Masuk Malam" },
+          { absen: "Pulang Malam", id: "7|Pulang Malam" },
+          { absen: "Keluar Malam", id: "8|Keluar Malam" },
+          { absen: "Kembali Malam", id: "9|Kembali Malam" },
+          { absen: "Masuk B", id: "10|Masuk B" },
+          { absen: "Keluar B", id: "12|Keluar B" },
+          { absen: "Kembali B", id: "13|Kembali B" },
+          { absen: "Pulang B", id: "11|Pulang B" },
+        ],
+    });
+
+    
+    $("#hapus_jam").on("show.bs.modal", function(e){
+        console.log(e.relatedTarget)
+        var id = $(e.relatedTarget).data("id");
+        console.log(id)
+        $("#hapus_id").val(id);
+    });
+
+
+    $("#hapusForm").on("submit",(e) => {
+        e.preventDefault()
+        $.ajax({
+            url: "{% url 'hapus_jam' %}",
+            method: "POST",
+            data: {id:$("#hapus_id").val()},
+            headers: {
+                "X-CSRFToken": token
+            },
+            success: (res) => {
+                tables.ajax.reload()
+                $("#hapus_jam").modal("hide")
+            }
+        })
+    })
+
+    $("#tambahForm").on("submit",(e) => {
+        const tgl = "{{tgl}}"
+        const idp = "{{pegawai.userid}}"
+        e.preventDefault()
+        $.ajax({
+            url: "{% url 'tambah_jam' %}",
+            method: "POST",
+            data: {
+                tgl,idp,
+                jam_absen: $("#jam_absen").val(),
+                absen: opsi_absen[0].selectize.getValue(),
+                sid: "{{ sid }}"
+            },
+            headers: {
+                "X-CSRFToken": token
+            },
+            success: (res) => {
+                tables.ajax.reload()
+                $("#tambah_jam_absen").modal("hide")
+            }
+        })
+    })
+
+    $("#edit_punch").on("show.bs.modal", function(e){
+        var id = $(e.relatedTarget).data("id");
+        $("#id").val(id);
+    });
+
+    $("#ubahForm").on("submit",(e) => {
+        e.preventDefault()
+        console.log($("#opsi_absen").html())
+        $.ajax({
+            url: "{% url 'ubah_absen' %}",
+            method: "POST",
+            data: {
+                id:$("#id").val(),
+                absen: ubah_absen[0].selectize.getValue()
+            },
+            headers: {
+                "X-CSRFToken": token
+            },
+            success: (res) => {
+                tables.ajax.reload()
+                ubah_absen[0].selectize.clear()
+                $("#edit_punch").modal("hide")
+            }
+        })
+    })
+
+</script>
+
+{% endblock hrd_ajax %}

@@ -68,8 +68,17 @@ urlpatterns = [
     path('', include("hrd_app.router.status_pegawai.backend.urls")),
     # +++++++++++++++++++ URLS STATUS PEGAWAI +++++++++++++++++++
 
+    # +++++++++++++++++++ URLS PRODEMO +++++++++++++++++++
+    path('', include("hrd_app.router.prodemo.ui.urls")),
+    path('', include("hrd_app.router.prodemo.backend.urls")),
+    # +++++++++++++++++++ URLS PRODEMO +++++++++++++++++++
 
+    # +++++++++++++++++++ URLS SANGSI +++++++++++++++++++
+    path('', include("hrd_app.router.sangsi.ui.urls")),
+    path('', include("hrd_app.router.sangsi.backend.urls")),
+    # +++++++++++++++++++ URLS SANGSI +++++++++++++++++++
 
+    
     path('pengaturan', views.pengaturan, name='pengaturan'),
 
 

@@ -210,6 +210,7 @@
                     console.log(e)
                     $("#sangsiModal").modal("hide")
                     $("#buttonTambahSangsi").prop("disabled",false)
+                    tableSangsi.ajax.reload()
                 },
                 error:(err) => {
                     console.log(err)

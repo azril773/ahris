@@ -88,8 +88,8 @@
         <div id="loader"></div>            
 
         <!-- Table -->
-        <div class="table-wrapper">
-            <table id="tabelku" class="table display responsive" style="width:100%">
+        <div class="">
+            <table id="tabelku" class="table display responsive">
             <thead>
                 <tr>
                 <th nowrap>Tanggal</th>
@@ -102,11 +102,16 @@
                 <th>Keluar</th>
                 <th>Kembali</th>
                 <th>Pulang</th>
+                <th>Masuk (B)</th>
+                <th>Keluar (B)</th>
+                <th>Kembali (B)</th>
+                <th>Pulang (B)</th>
                 <th>T.Jam</th>
-                <th nowrap>Keterangan</th>
+                <th>Keterangan</th>
                 <th>Action</th>
                 </tr>
             </thead>
+            <tbody></tbody>
             </table>
         </div>
 
@@ -173,7 +178,7 @@
                 </button>          
                 </div>
                 
-                <form action="{% url 'cabsen' %}" method="post">
+                <form method="post" id="cariForm">
                     {% csrf_token %}
                     <div class="form-layout form-layout-1">
                     <div class="row mg-b-25">
@@ -195,11 +200,48 @@
                         <input type="hidden" name="sid" class="form-control" value="{{sid}}">
         
                         <div class="modal-footer">
-                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
+                        <button type="submit" id="submit_buttonCari" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
                         <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
                         </div>              
         
                     </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+
+        <!-- Modal ijin -->
+        <div id="editIjin" class="modal fade" style="width:100%">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Ubah Keterangan</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form id="ubah_ket" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                        <label for="ket">Daftar Ijin</label>
+                        <select name="jenis_ijin" id="jenis_ijin" class="mb-4">
+                            <option value="">Pilih Ijin</option>
+                            {% for j in jenis_ijin %}
+                                <option value="{{j.id}}">{{j.jenis_ijin}}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="ket">Keterangan Tambah</label>
+                        {% comment %} <label for="ket">Keterangan Tambahan</label> {% endcomment %}
+                        <textarea name="ket" class="form-control" id="ket" style="width: 600px;"></textarea>
+                        <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+                        <input type="hidden" name="id" id="idAb" class="form-control">
+                        <div class="mt-3 d-flex justify-content-end gap-3">
+                            <button type="submit" class="btn btn-primary mr-2">Ubah</button>
+                            <button class="btn btn-secondary">Batalkan</button>
+                        </div>
                     </div>            
                 </form>              
             </div>
@@ -229,28 +271,78 @@
 
                 { data: 'tgl' },
                 { data: 'hari' },
-                { data: 'nama' },
+                { 
+                    data: 'nama',
+                    "render": function(data, type, row, meta){    
+                        tgl_absen = ""+row.tgl_absen+"";
+                        userid = ""+row.userid+"";
+                        data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}'>${row.nama}</a>`;
+                        return data;
+                    }
+                },
                 { data: 'nik' },
                 { data: 'userid' },
                 { data: 'bagian' },
-                { data: 'masuk' },
+                {
+                    data: 'masuk',
+                    render:(data,type,row,meta) => {
+                        data = data == null ? "" : data
+                        let render = ''
+                        if(data > row.jam_masuk){
+                            render = `<span class="text-danger">${data}</span>`
+                        } else {
+                            render = `${data}`
+                        }
+                        return render
+                    }
+                },
                 { data: 'keluar' },
-                { data: 'kembali' },
-                { data: 'pulang' },
+                {
+                    data: 'kembali',
+                    render:(data,type,row,meta) => {
+                        let render = ""
+                        if(data !==  null){
+                            let str = data.split("/")[0]
+                            if(str > row.jam_kembali){
+                                render = `<span class="text-danger">${data}</span> / ${data.split("/")[1]}`
+                            } else {
+                                render = `${data}`
+                            }
+                        } 
+                        return render   
+                    }
+                },
+                { data: 'pulang'},
+                { data: 'masuk_b' },
+                { data: 'keluar_b' },
+                { data: 'kembali_b' },
+                { data: 'pulang_b' },
                 { data: 'tj' },
-                { data: 'ket' },
+                {
+                    data: 'ket',
+                    render:(data,type,row,meta) => {
+                        if (row.pulang == null && row.ket == " ") {
+                            return `<span class="tx-inverse">Belum Absen Pulang</span>`
+                        } else {
+                            return `<span class="tx-inverse">${data}</span>`
+                        }
+                    }
+                },
                 { 
                     data: null,
                     "render": function(data, type, row, meta){    
-                        data = '<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-bs-toggle="modal" data-bs-target="#ubahPotongan" data-id="'+row.id+'">Edit</button>';
-                        return data;
+                        if(row.masuk == null || row.pulang == null || row.masuk > row.jam_masuk){
+                            data = '<button class="btn btn-sm btn-warning mb-1 tx-12" data-toggle="modal" data-target="#editIjin" data-id="'+row.id+'">Edit</button>';
+                            return data;
+                        } else {
+                            return ""
+                        }
                     } 
                 },
                 
             ],   
 
             "rowCallback": function (row, data) {
-                console.log(data)
                 if(data.sln == 1){
                     $('td', row).eq(0).addClass('merah');
                 } else{
@@ -267,12 +359,16 @@
                 $('td', row).eq(9).addClass('hitam');
                 $('td', row).eq(10).addClass('hitam');
                 $('td', row).eq(11).addClass('hitam');
+                $('td', row).eq(12).addClass('hitam');
+                $('td', row).eq(13).addClass('hitam');
+                $('td', row).eq(14).addClass('hitam');
+                $('td', row).eq(15).addClass('hitam');
             },
+
 
             destroy: true,
             ordering: false,
             paging: false,
-            scrollX: '100%',
             scrollY: 300,
             processing: true,
 
@@ -288,11 +384,188 @@
                     next: '<i class="cs-chevron-right"></i>',
                 },
             },
-
         });   
         
 
     });
+
+    $("#cariForm").on("submit",(e) => {
+        const token = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        e.preventDefault()
+        var tgl1 = $("#ctgl1").val();
+        var tgl2 = $("#ctgl2").val();
+        var sid = "{{sid}}";
+        $("#tabelku").DataTable().destroy();
+        $("#tabelku").DataTable({
+            ajax:{
+                url: "{% url 'cabsen' %}",
+                type: "POST",
+                headers: {'X-CSRFToken': token},
+                data: {
+                    'ctgl1': tgl1,
+                    'ctgl2': tgl2,
+                    'sid': sid
+                },
+            },
+            columns: [
+
+                { data: 'tgl' },
+                { data: 'hari' },
+                { 
+                    data: 'nama',
+                    "render": function(data, type, row, meta){    
+                        tgl_absen = ""+row.tgl_absen+"";
+                        userid = ""+row.userid+"";
+                        data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}'>${row.nama}</a>`;
+                        return data;
+                    }
+                },
+                { data: 'nik' },
+                { data: 'userid' },
+                { data: 'bagian' },
+                {
+                    data: 'masuk',
+                    render:(data,type,row,meta) => {
+                        data = data == null ? "" : data
+                        let render = ''
+                        if(data > row.jam_masuk){
+                            render = `<span class="text-danger">${data}</span>`
+                        } else {
+                            render = `${data}`
+                        }
+                        return render
+                    }
+                },
+                { data: 'keluar' },
+                {
+                    data: 'kembali',
+                    render:(data,type,row,meta) => {
+                        let render = ""
+                        if(data !==  null){
+                            let str = data.split("/")[0]
+                            if(str > row.jam_kembali){
+                                render = `<span class="text-danger">${data}</span> / ${data.split("/")[1]}`
+                            } else {
+                                render = `${data}`
+                            }
+                        } 
+                        return render   
+                    }
+                },
+                { data: 'pulang'},
+                { data: 'masuk_b' },
+                { data: 'keluar_b' },
+                { data: 'kembali_b' },
+                { data: 'pulang_b' },
+                { data: 'tj' },
+                {
+                    data: 'ket',
+                    render:(data,type,row,meta) => {
+                        if (row.pulang == null && row.ket == " ") {
+                            return `<span class="tx-inverse">Belum Absen Pulang</span>`
+                        } else {
+                            return `<span class="tx-inverse">${data}</span>`
+                        }
+                    }
+                },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){    
+                        if(row.masuk == null || row.pulang == null || row.masuk > row.jam_masuk){
+                            data = '<button class="btn btn-sm btn-warning mb-1 tx-12" data-toggle="modal" data-target="#editIjin" data-id="'+row.id+'">Edit</button>';
+                            return data;
+                        } else {
+                            return ""
+                        }
+                    } 
+                },
+                
+            ],   
+
+            "rowCallback": function (row, data) {
+                if(data.sln == 1){
+                    $('td', row).eq(0).addClass('merah');
+                } else{
+                    $('td', row).eq(0).addClass('hitam');
+                }
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+                $('td', row).eq(6).addClass('hitam');
+                $('td', row).eq(7).addClass('hitam');
+                $('td', row).eq(8).addClass('hitam');
+                $('td', row).eq(9).addClass('hitam');
+                $('td', row).eq(10).addClass('hitam');
+                $('td', row).eq(11).addClass('hitam');
+                $('td', row).eq(12).addClass('hitam');
+                $('td', row).eq(13).addClass('hitam');
+                $('td', row).eq(14).addClass('hitam');
+                $('td', row).eq(15).addClass('hitam');
+            },
+
+            destroy: true,
+            ordering: false,
+            paging: false,
+            scrollY: 300,
+            processing: true,
+
+            "language": {
+                searchPlaceholder: 'Cari...',
+                sSearch: '',
+                loadingRecords: '&nbsp;',
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+                emptyTable: "&nbsp;",
+
+                paginate: {
+                    previous: '<i class="cs-chevron-left"></i>',
+                    next: '<i class="cs-chevron-right"></i>',
+                },
+            },
+        })
+
+        $("#pilih_tgl_cari").modal('hide')
+        
+    })
+    const jenisIjin = $("#jenis_ijin").selectize();
+
+    $("#editIjin").on('show.bs.modal', function(e){
+        var id = $(e.relatedTarget).data('id');
+        console.log(id)
+    });
+
+    $("#editIjin").on('show.bs.modal', function(e){
+        var id = $(e.relatedTarget).data('id');
+        console.log(id)
+        $("#idAb").val(id)
+    });
+
+    $("#ubah_ket").on("submit", (e) => {
+        e.preventDefault();
+        const token = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        var jenis_ijin = $("#jenis_ijin").val();
+        var ket = $("#ket").val();
+        var id = $("#idAb").val();
+        var sid = "{{sid}}";
+        $.ajax({
+            url: "{% url 'edit_ijin' %}",
+            type: "POST",
+            headers: {'X-CSRFToken': token},
+            data: {
+                'jenis_ijin': jenis_ijin,
+                'ket': ket,
+                'id': id,
+                'sid': sid
+            },
+            success: function(data){
+                console.log(data)
+                $("#editIjin").modal('hide')
+                $("#tabelku").DataTable().ajax.reload();
+            }
+        })
+    })
+
 
 </script>   
  

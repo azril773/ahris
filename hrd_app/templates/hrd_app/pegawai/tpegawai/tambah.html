@@ -68,7 +68,6 @@
                                   <input class="form-control" type="text" name="nama" id="nama" required>
                                 </div>
                               </div>
-
                               <div class="col-lg-3">
                                 <div class="form-group">
                                   <label class="form-control-label tx-inverse">Gender: <span class="tx-danger">*</span></label>
@@ -238,8 +237,8 @@
                               
                                 <div class="col-lg-3">
                                     <div class="form-group">
-                                    <label class="form-control-label tx-inverse">Email:</label>
-                                    <input class="form-control" type="email" name="email" id="email">
+                                    <label class="form-control-label tx-inverse">Email: <span class="tx-danger">*</span></label>
+                                    <input class="form-control" type="email" name="email" required id="email">
                                     </div>
                                 </div>
 
@@ -1141,6 +1140,9 @@ if($(e.target).is("button")){
         console.log(e)
         window.location = '{% url "pegawai" dsid %}'
         console.log('sd')
+      },
+      error:(e) => {
+        console.log(e)
       }
     })
   }
