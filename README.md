@@ -1,35 +1,21 @@
-## SIMALIS Atk
 
-<img align="center" src="https://static.vecteezy.com/system/resources/previews/024/029/499/original/school-item-pencil-with-transparent-background-free-png.png" width="250" height="200">
+# New AHRIS Tasik
+Project ini merupakan upgrade dari AHRIS terdahulu dengan memperbaiki masalah dan menambahkan beberapa fitur terbaru sesuai dengan _request_ user. Berikut beberapa _update_ serta fitur baru yang ada didalam project ini.
 
-For ubuntu environment only
+_update:_
+- Memperbaiki masalah kelambatan dalam proses data absensi
+- Mengimplementasikan struktur folder MVC (Model, View, Controller)
+- Membuat _logic_ dari jam kerja sesuai dengan _request_ user
+- Menyatukan navigasi sehingga lebih mudah dimengerti oleh user
 
-1.  install this libs first ()
-    $ sudo apt install python3-pip python3-venv mysql-server python3-dev libmysqlclient-dev
+_fitur:_
 
-2.  create virtual environment name : env
-    $ python3 -m venv env    
+- Terdapat jam absensi baru yaitu Masuk, Pulang, Keluar, Kembali (B)
+- _Broadcasting_ absensi user ke email user yang didaftarkan
 
-3.  install libs in virtual env
-    (env) pip install -r requirements.txt
 
-4.  create database name : hrd
-    mysql> create database hrd
+## Authors
 
-5.  makemigrations and migrate model to database
-    (env) python manage.py makemigrations
-    (env) python manage.py migrate
+- [@azril773](https://www.github.com/azril773)
+- [@gatot]()
 
-6.  create super user
-    (env) python manage.py createsuperuser
-
-7.  if in development mode:
-    (env) python manage.py runserver 0.0.0.0:8001
-    you can use any port available, here i use 8001
-
-8.  open browser
-    localhost:8001/adminnya
-    login with super user account
-    add first status pegawai with "Staff"
-    add your akses (choose your user, choose your akses, empty pegawai, choose sid with Staff)
-    in the right corner click "lihat situs to go to site"
