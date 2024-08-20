@@ -1,0 +1,1150 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+
+<div class="br-pagebody">  
+  {% csrf_token %}
+
+    <div class="br-section-wrapper">
+        <!-- Pesan Error -->
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Absensi -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Tambah Pegawai</h6>
+{% comment %}     
+        <!-- Info absensi -->        
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">   
+                            
+            <!-- Button Registrasi -->
+            <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-primary mg-b-6">Registrasi</button>            
+
+            <!-- Button Perjanjian & Kontrak Kerja -->
+            <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-dark mg-b-6">Perjanjian & Kontrak Kerja</button>
+            </div>          
+        </div> {% endcomment %}
+
+        <br>           
+       
+        <div class="row">
+            <div class="col-lg-12">
+                <div id="wizard1">
+                    <h3>General Data</h3>
+                    <section id="generalData">
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-10">
+                              <div class="col-lg-6">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Nama: <span class="tx-danger">*</span></label>
+                                  <input class="form-control" type="text" name="nama" id="nama" required>
+                                </div>
+                              </div>
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Gender: <span class="tx-danger">*</span></label>
+                                    <select name="gender" id="gender" class="form-control select2-show-search" required=required>
+                                        <option value="">Pilih Gender</option>
+                                        <option value="Laki-Laki">Laki-Laki</option>
+                                        <option value="Perempuan">Perempuan</option>
+                                    </select>
+                                </div>
+                              </div>
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Tgl Masuk: <span class="tx-danger">*</span></label>
+                                  <input type="text" name="tgl_masuk" id="tgl_masuk" class="form-control tgl1" placeholder="tgl-bln-tahun" required>
+                                </div>
+                              </div> 
+                              
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">NIK: <span class="tx-danger">*</span></label>
+                                  <input class="form-control" type="text" name="nik" id="nik" required>
+                                </div>
+                              </div> 
+                              
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Userid: <span class="tx-danger">*</span></label>
+                                  <input class="form-control" type="text" name="userid" id="userid" required>
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Divisi: <span class="tx-danger">*</span></label>
+                                  <select name="div" id="div" class="form-control select2-show-search" data-placeholder="" required>
+                                    <option label=""></option>
+                                    {% for d in divisi %}
+                                    <option value={{d.id}}>{{d.divisi}}</option>
+                                    {% endfor %}
+                                </select>
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Counter:</label>
+                                  <select name="counter" id="counter" class="form-control select2-show-search" data-placeholder="" required>
+                                    <option label=""></option>
+                                    {% for c in counter %}
+                                    <option value={{c.id}}>{{c.counter}}</option>
+                                    {% endfor %}
+                                </select>
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Jabatan:</label>
+                                  <select name="jabatan" id="jabatan" class="form-control select2-show-search" data-placeholder="" required>
+                                    <option label=""></option>
+                                    {% for j in jabatan %}
+                                    <option value={{j.id}}>{{j.jabatan}}</option>
+                                    {% endfor %}
+                                </select>
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Kelompok Kerja: <span class="tx-danger">*</span></label>
+                                  <select name="kk" id="kk" class="form-control select2-show-search" data-placeholder="" required>
+                                    <option label=""></option>
+                                    {% for k in kk %}
+                                    <option value={{k.id}}>{{k.kelompok}}</option>
+                                    {% endfor %}
+                                </select>
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Hari OFF: <span class="tx-danger">*</span></label>
+                                  <select name="hr" id="hr" class="form-control select2-show-search" data-placeholder="" required>
+                                    <option label=""></option>
+                                    {% for h in hr %}
+                                    <option value={{h.id}}>{{h.hari}}</option>
+                                    {% endfor %}
+                                </select>
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Cuti Awal: <span class="tx-danger">*</span></label>
+                                  <input class="form-control" type="text" name="ca" id="ca">
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Rekening:</label>
+                                  <input class="form-control" type="text" name="rek" id="rek">
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Payroll By: <span class="tx-danger">*</span></label>
+                                  <select name="payroll" id="payroll" class="form-control select2-show-search" required>
+                                    <option value="Lainnya">Lainnya</option>
+                                    <option value="HRD">HRD</option>
+                                    <option value="Owner">Owner</option>
+                                </select>
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">No. BPJS KS:</label>
+                                  <input class="form-control" type="text" name="nks" id="nks">
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">No. BPJS TK:</label>
+                                  <input class="form-control" type="text" name="ntk" id="ntk">
+                                </div>
+                              </div> 
+
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Premi KS:</label>
+                                  <input class="form-control" type="text" name="pks" id="pks">
+                                </div>
+                              </div>
+                              
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Premi TK:</label>
+                                  <input class="form-control" type="text" name="ptk" id="ptk">
+                                </div>
+                              </div> 
+                              
+                            </div>
+                        </div>
+                    </section>
+
+                    <h3>Data Pribadi</h3>
+                    <section id="dataPribadi">
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-10">
+                                <div class="col-lg-6">
+                                    <div class="form-group">
+                                    <label class="form-control-label tx-inverse">Alamat:</label>
+                                    <input class="form-control" type="text" name="alamat" id="alamat" required>
+                                    </div>
+                                </div> 
+                              
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                    <label class="form-control-label tx-inverse">HP / Telp.: <span class="tx-danger">*</span></label>
+                                    <input class="form-control" type="text" name="phone" id="phone" required>
+                                    </div>
+                                </div>
+                              
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                    <label class="form-control-label tx-inverse">Email: <span class="tx-danger">*</span></label>
+                                    <input class="form-control" type="email" name="email" required id="email">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                    <label class="form-control-label tx-inverse">Kota Kelahiran: <span class="tx-danger">*</span></label>
+                                    <input class="form-control" type="text" name="kota_lahir" id="kota_lahir" required>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                    <label class="form-control-label tx-inverse">Tgl Lahir: <span class="tx-danger">*</span></label>
+                                    <input type="text" name="tgl_lahir" id="tgl_lahir" class="form-control tgl2" placeholder="tgl-bln-tahun" required>
+                                    </div>
+                                </div> 
+
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                    <label class="form-control-label tx-inverse">Tinggi Badan:</label>
+                                    <input class="form-control" type="number" name="tinggi" id="tinggi">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                    <label class="form-control-label tx-inverse">Berat Badan:</label>
+                                    <input class="form-control" type="text" name="berat" id="berat">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                    <label class="form-control-label tx-inverse">Gol Darah:</label>
+                                    <select name="goldarah" id="goldarah" class="form-control select2-show-search" data-placeholder="">
+                                        <option label=""></option>
+                                        <option value="O">O</option>
+                                        <option value="A">A</option>
+                                        <option value="B">B</option>
+                                        <option value="AB">AB</option>
+                                    </select>
+                                    </div>
+                                </div> 
+
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                    <label class="form-control-label tx-inverse">Agama: <span class="tx-danger">*</span></label>
+                                        <select name="agama" id="agama" class="form-control select2-show-search" required
+                                    >
+                                            <option value="Islam">Islam</option>
+                                            <option value="Katholik">Katholik</option>
+                                            <option value="Kristen">Kristen</option>
+                                            <option value="Hindu">Hindu</option>
+                                            <option value="Budha">Budha</option>
+                                            <option value="Konghucu">Konghucu</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                    &nbsp;
+                                    </div>
+                                </div>
+                                
+                                <div class="col-lg-3">
+                                    <div class="form-group">
+                                    &nbsp;
+                                    </div>
+                                </div>
+                              
+                            </div>
+                        </div>
+                        
+                        <p>&nbsp;</p>
+
+                        <div class="form-layout form-layout-1">
+                          <span class="tx-inverse">DATA KELUARGA</span> <br><br>
+
+                          <div id="data_keluarga" class="row mg-b-10">       
+                            
+                              <div class="col-lg-12">
+                                  <div class="row mg-b-1">
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <select name="thubungan_keluarga" id="thubungan_keluarga" class="form-control select2-show-search" data-placeholder="Pilih Hubungan">
+                                                <option label="Pilih Hubungan"></option>            
+                                                <option value="Ayah">Ayah</option>                                                
+                                                <option value="Ibu">Ibu</option>
+                                                <option value="Kakak">Kakak</option>
+                                                <option value="Adik">Adik</option>
+                                                <option value="Istri">Istri</option>
+                                                <option value="Anak">Anak</option>
+                                                <option value="Sepupu">Sepupu</option>
+                                                <option value="Ipar">Ipar</option>
+                                                <option value="Mertua">Mertua</option>
+                                                <option value="Lainnya">Lainnya</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                        <input class="form-control" type="text" name="tnama_keluarga" id="tnama_keluarga" placeholder="Nama">    
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                        <input type="text" name="ttgl_lahir_keluarga" id="ttgl_lahir_keluarga" class="form-control tgl3" placeholder="Tgl Lahir">
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <select name="tgender_keluarga" id="tgender_keluarga" class="form-control select2-show-search" data-placeholder="Gender">
+                                                <option label="Gender"></option>
+                                                <option value="Perempuan">Perempuan</option>
+                                                <option value="Laki-Laki">Laki-Laki</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-2">
+                                        <div class="form-group">
+                                            <select name="tgoldarah_keluarga" id="tgoldarah_keluarga" class="form-control select2-show-search" data-placeholder="Gol Darah">
+                                                <option label="Gol Darah"></option>
+                                                <option value="O">O</option>
+                                                <option value="A">A</option>
+                                                <option value="B">B</option>
+                                                <option value="AB">AB</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                      <div class="form-group">
+                                          <button type="button" class="btn btn-primary" id="tambahKeluarga">Tambahkan</button>
+                                      </div>
+                                  </div>
+
+                                  </div>
+                              </div>
+                          </div>
+                          <div class="" id="keluarga" style></div>
+                        </div>
+
+                        <p>&nbsp;</p>
+
+                        <div class="form-layout form-layout-1">
+                          <span class="tx-inverse">PIHAK YANG DAPAT DIHUBUNGI</span> <br><br>
+
+                            <div id="data_kl" class="row mg-b-10">
+
+                              <div class="col-lg-12">
+                                  <div class="row mg-b-1">
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <select name="thubungan_kl" id="thubungan_kl" class="form-control select2-show-search" data-placeholder="Pilih Hubungan">
+                                                <option label="Pilih Hubungan"></option>            
+                                                <option value="Ayah">Ayah</option>                                                
+                                                <option value="Ibu">Ibu</option>
+                                                <option value="Kakak">Kakak</option>
+                                                <option value="Adik">Adik</option>
+                                                <option value="Istri">Istri</option>
+                                                <option value="Anak">Anak</option>
+                                                <option value="Sepupu">Sepupu</option>
+                                                <option value="Ipar">Ipar</option>
+                                                <option value="Mertua">Mertua</option>
+                                                <option value="Lainnya">Lainnya</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                        <input class="form-control" type="text" name="tnama_kl" id="tnama_kl" placeholder="Nama">    
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <select name="tgender_kl" id="tgender_kl" class="form-control select2-show-search" data-placeholder="Gender">
+                                                <option label="Gender"></option>
+                                                <option value="Perempuan">Perempuan</option>
+                                                <option value="Laki-Laki">Laki-Laki</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                          <input class="form-control" type="text" name="tphone" id="tphone" placeholder="HP / Telp.">   
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-3">
+                                      <div class="form-group">
+                                          <button type="button" class="btn btn-primary" id="tambahPihak">Tambahkan</button>
+                                      </div>
+                                  </div>
+
+                                  </div>
+                              </div>
+                            </div>
+                            <div id="pihak"></div>
+                        </div>
+                    </section>
+
+                    <h3>Pengalaman Kerja & Pendidikan</h3>
+                    <section id="pengelamanpendidikan">
+                      <div class="form-layout form-layout-1">
+                        <span class="tx-inverse">PENGALAMAN KERJA</span>
+                        <button class="btn btn-primary ml-4" id="buttonModalTambahPengalaman" data-target="#tambahPengalaman" data-toggle="modal">Tambah</button>
+                        <br><br>
+                        <div id="pengalaman">
+
+                        </div>
+                      </div>
+
+                      <p>&nbsp;</p>
+
+                      <div class="form-layout form-layout-1">
+                        <span class="tx-inverse">PENDIDIKAN</span>
+                        <button class="btn btn-primary ml-4" id="buttonModalTambahPendidikan" data-target="#tambahPendidikan" data-toggle="modal">Tambah</button>
+                        <br><br>
+                        <div id="pendidikan">
+
+                        </div>
+                      </div>
+                    </section>
+                    
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal -->
+
+    </div>
+
+</div><!-- br-pagebody -->
+<div class="modal fade" id="tambahPendidikan" tabindex="-1" aria-labelledby="tambahPendidikanLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tambahPendidikanLabel">Tambah Pendidikan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <select name="pendidikanModalPendidikan" id="pendidikanModalPendidikan">
+              <option value="">Pilih Pendidikan</option>
+              <option value="SMP">SMP</option>
+              <option value="SMK/SMA">SMK</option>
+              <option value="KULIAH">Kuliah</option>
+            </select>
+          </div>
+          <div class="w-1/2">
+            <input type="text" class="form-control" name="namaModalPendidikan" placeholder="Nama Sekolah" id="namaModalPendidikan">
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <select name="kotaModalPendidikan" id="kotaModalPendidikan">
+              <option value="">Pilih Kota/Kabupaten</option>
+              {% for k in kota_kabupaten %}
+              <option value="{{k.pk}}">{{k.nama_koka}}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="w-1/2">
+            <input type="text" class="form-control tgl2" name="dari_tahun" placeholder="Dari Tahun" id="dari_tahunModalPendidikan">
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <input type="text" class="form-control tgl2" name="sampai_tahun" placeholder="Sampai Tahun" id="sampai_tahunModalPendidikan">
+          </div>
+          <div class="w-1/2">
+            <input type="text" class="form-control" name="jurusan" placeholder="Jurusan" id="jurusanModalPendidikan">
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-full">
+            <input type="text" class="form-control" name="gelar" placeholder="Gelar" id="gelarModalPendidikan">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" id="buttonTambahPendidikan">Tambah</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="tambahPengalaman" tabindex="-1" role="dialog" aria-labelledby="tambahPengalamanModelTitle" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="tambahPengalamanModelTitle">Tambah Pengalaman</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <input type="text" class="form-control" name="perusahaan" placeholder="Perusahaan" id="perusahaan">
+          </div>
+          <div class="w-1/2">
+            <select name="kotaModalPengalaman" id="kotaModalPengalaman">
+              <option value="">Pilih Kota/Kabupaten</option>
+              {% for k in kota_kabupaten %}
+              <option value="{{k.pk}}">{{k.nama_koka}}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-1/2">
+            <input type="text" class="form-control tgl2" name="dari" placeholder="Dari" id="dariModalPengalaman">
+          </div>
+          <div class="w-1/2">
+            <input type="text" class="form-control tgl2" name="sampai" placeholder="Sampai" id="sampaiModalPengalaman">
+          </div>
+        </div>
+        <div class="flex gap-3 mb-3">
+          <div class="w-full">
+            <input type="text" class="form-control" name="jabatan" placeholder="jabatan" id="jabatanModalPengalaman">
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" id="buttonTambahPengalaman">Tambah</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>
+  $(document).ready(function(){
+    localStorage.removeItem("data_pihak")
+    localStorage.removeItem("data_keluarga")
+  })
+</script>
+
+
+<script>
+    $(document).on('change', '#thubungan_keluarga', function() {
+        if ($('#thubungan_keluarga :selected').text() == "Ayah") {
+            $('#tgender_keluarga').val('Laki-Laki').trigger("change");
+        } else if($('#thubungan_keluarga :selected').text() == "Ibu" || $('#thubungan_keluarga :selected').text() == "Istri"){
+          $('#tgender_keluarga').val('Perempuan').trigger("change");
+        } else{
+          $('#tgender_keluarga').val('').trigger("change");
+        }
+    });
+  
+    $(document).on('change', '#thubungan_kl', function() {
+        if ($('#thubungan_kl :selected').text() == "Ayah") {
+            $('#tgender_kl').val('Laki-Laki').trigger("change");
+        } else if($('#thubungan_kl :selected').text() == "Ibu" || $('#thubungan_kl :selected').text() == "Istri"){
+          $('#tgender_kl').val('Perempuan').trigger("change");
+        } else{
+          $('#tgender_kl').val('').trigger("change");
+        }
+    });
+</script>
+
+
+
+{% comment %} Tambah Keluarga {% endcomment %}
+<script>
+  const kotaModalPendidikan = $("#kotaModalPendidikan").selectize()
+  const pendidikanSelectize = $("#pendidikanModalPendidikan").selectize()
+  const kotaModalPengalaman = $("#kotaModalPengalaman").selectize()
+  const tambahPendidikanModal = $("#tambahPendidikan")
+  const tambahPengalamanModal = $("#tambahPengalaman")
+  localStorage.removeItem("data_pendidikan")
+
+  $("#buttonTambahPendidikan").on("click",function(e){
+    console.log("ok")
+    const pendidikan = $("#pendidikanModalPendidikan").val()
+    const nama = $("#namaModalPendidikan").val()
+    const kota = $("#kotaModalPendidikan").val()
+    const nama_koka = $("#kotaModalPendidikan").find(":selected").text()
+    const dari_tahun = moment($("#dari_tahunModalPendidikan").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
+    const sampai_tahun = moment($("#sampai_tahunModalPendidikan").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
+    const jurusan = $("#jurusanModalPendidikan").val()
+    const gelar = $("#gelarModalPendidikan").val()
+    const json = JSON.parse(localStorage.getItem("data_pendidikan")) ? JSON.parse(localStorage.getItem("data_pendidikan")) : []
+    console.log(pendidikan,nama,kota,dari_tahun,sampai_tahun)
+    if(pendidikan == "" || nama == "" || kota == "" || dari_tahun  == "" || sampai_tahun == "") return false
+    console.log(json)
+    if(json.length > 0){
+      const check = json.filter(e => e.pendidikan == pendidikan)
+      if(check.length > 0) return false
+    }
+
+    const obj = {
+      nama,pendidikan,kota,nama_koka,dari_tahun,sampai_tahun,jurusan:jurusan ? jurusan : "-",gelar:gelar ? gelar : "-",id:0
+    }
+
+    json.push(obj)
+    localStorage.setItem("data_pendidikan",JSON.stringify(json))
+    tambahPdk(json)
+    tambahPendidikanModal.modal("hide")
+    $("#pendidikanModalPendidikan").val("")
+    $("#namaModalPendidikan").val("")
+    $("#kotaModalPendidikan").val("")
+    pendidikanSelectize[0].selectize.clear()
+    kotaModalPendidikan[0].selectize.clear()
+    $("#dari_tahunModalPendidikan").val("")
+    $("#sampai_tahunModalPendidikan").val("")
+    $("#jurusanModalPendidikan").val("")
+    $("#gelarModalPendidikan").val("")
+  })
+
+
+  $("#buttonTambahPengalaman").on("click",function(e){
+    const perusahaan = $("#perusahaan").val()
+    const kota = $("#kotaModalPengalaman").val()
+    const nama_koka = $("#kotaModalPengalaman").find(":selected").text()
+    console.log(nama_koka,"sd")
+    const dari_tahun = moment($("#dariModalPengalaman").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
+    const sampai_tahun = moment($("#sampaiModalPengalaman").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
+    const jabatan = $("#jabatanModalPengalaman").val()
+    const json = JSON.parse(localStorage.getItem("data_pengalaman")) ? JSON.parse(localStorage.getItem("data_pengalaman")) : []
+    if(perusahaan == "" || nama == "" || kota == "" || dari_tahun  == "" || sampai_tahun == "") return false
+    
+
+    const obj = {
+      perusahaan,kota,nama_koka,dari_tahun,sampai_tahun,jabatan:jabatan ? jabatan : "-",id:0
+    }
+    console.log("ok")
+    json.push(obj)
+    localStorage.setItem("data_pengalaman",JSON.stringify(json))
+    tambahPgl(json)
+    tambahPengalamanModal.modal("hide")
+    $("#perushaan").val("")
+    $("#kotaModalPengalaman").val("")
+    kotaModalPengalaman[0].selectize.clear()
+    $("#dariModalPengalaman").val("")
+    $("#sampaiModalPengalaman").val("")
+    $("#jabatanModalPengalaman").val("")
+
+  })
+
+  $("#pendidikan").on("click",".hapusPendidikan",function(e){
+    const id = $(e.target).attr("data-id")
+    const json = JSON.parse(localStorage.getItem("data_pendidikan"))
+    json.splice(id,1)
+    localStorage.setItem("data_pendidikan",JSON.stringify(json))
+    tambahPdk(json)
+  })
+
+  $("#pengalaman").on("click",".hapusPengalaman",function(e){
+    const id = $(e.target).attr("data-id")
+    const json = JSON.parse(localStorage.getItem("data_pengalaman"))
+    json.splice(id,1)
+    localStorage.setItem("data_pengalaman",JSON.stringify(json))
+    tambahPgl(json)
+  })
+
+
+
+
+
+
+
+  $(document).on("click","#tambahKeluarga",function(e){
+      const hubungan = $("#thubungan_keluarga").val()
+      const nama_keluarga = $("#tnama_keluarga").val()
+      const tgl_lahir_keluarga = $("#ttgl_lahir_keluarga").val()
+      const gender = $("#tgender_keluarga").val()
+      const goldarah = $("#tgoldarah_keluarga").val()
+
+      const obj = {
+        hubungan,
+        nama_keluarga,
+        tgl_lahir_keluarga,
+        gender,
+        goldarah
+      }
+
+
+      let dataKeluarga = localStorage.getItem("data_keluarga") ? JSON.parse(localStorage.getItem("data_keluarga")) : []
+      if(nama_keluarga == "" || tgl_lahir_keluarga == "" || gender == "" || goldarah == "") return 
+      if(/ayah|ibu/gi.test(hubungan)){
+        const cek = dataKeluarga.find(e => e.hubungan == hubungan)
+        const cekU = dataKeluarga.find(e => e.nama_keluarga == nama_keluarga)
+        if(!cek && !cekU){
+          dataKeluarga.push(obj) 
+        }
+      }else{
+        const cekU = dataKeluarga.find(e => e.nama_keluarga == nama_keluarga)
+        if(!cekU){
+          dataKeluarga.push(obj)
+        }
+      }
+      console.log(dataKeluarga)
+      $("#keluarga").html("")
+      let i = 0
+      dataKeluarga.forEach(e => {
+        $("#keluarga").append(`
+          <div class="row mb-3" id="keluargaList">       
+                            <div class="col-lg-12">
+                                <div class="row mg-b-1">
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                          <input name="thubungan_keluarga" value="${e.hubungan}" disabled id="thubungan_keluarga" class="form-control" />
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <input class="form-control" type="text" value="${e.nama_keluarga}" disabled name="tnama_keluarga" id="tnama_keluarga" placeholder="Nama">    
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <input type="text" name="ttgl_lahir_keluarga" value="${e.tgl_lahir_keluarga}" disabled id="ttgl_lahir_keluarga" class="form-control tgl3" placeholder="Tgl Lahir">
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                       <input name="tgender_keluarga" value="${e.gender}" disabled id="tgender_keluarga" class="form-control" />
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <input name="tgoldarah_keluarga" value="${e.goldarah}" disabled id="tgoldarah_keluarga" class="form-control" />
+                                      </div>
+                                  </div>
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <button class="btn btn-danger hapusKeluarga" data-id="${i}">Hapus</button>
+                                      </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+        `)
+        i++
+      })
+
+      localStorage.setItem("data_keluarga",JSON.stringify(dataKeluarga))
+  })
+
+  $(document).on("click","#keluargaList",function(e){
+    if($(e.target).is("button")){
+      let json = JSON.parse(localStorage.getItem("data_keluarga"))
+      const id = $(e.target).attr("data-id")
+      json.splice(id,1)
+      let i = 0
+      $("#keluarga").html("")
+      json.forEach(e => {
+        $("#keluarga").append(`
+          <div class="row mb-3" id="keluargaList">       
+                            <div class="col-lg-12">
+                                <div class="row mg-b-1">
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                          <input name="thubungan_keluarga" value="${e.hubungan}" disabled id="thubungan_keluarga" class="form-control" />
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <input class="form-control" type="text" value="${e.nama_keluarga}" disabled name="tnama_keluarga" id="tnama_keluarga" placeholder="Nama">    
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <input type="text" name="ttgl_lahir_keluarga" value="${e.tgl_lahir_keluarga}" disabled id="ttgl_lahir_keluarga" class="form-control tgl3" placeholder="Tgl Lahir">
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                       <input name="tgender_keluarga" value="${e.gender}" disabled id="tgender_keluarga" class="form-control" />
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <input name="tgoldarah_keluarga" value="${e.goldarah}" disabled id="tgoldarah_keluarga" class="form-control" />
+                                      </div>
+                                  </div>
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <button class="btn btn-danger hapusKeluarga" data-id="${i}">Hapus</button>
+                                      </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+        `)
+        i++
+      })
+      localStorage.setItem("data_keluarga",JSON.stringify(json))
+      console.log(json)
+    }
+  })
+
+$(document).on("click","#tambahPihak",function(e){
+  const hubungan = $("#thubungan_kl").val()
+  const nama = $("#tnama_kl").val()
+  const gender = $("#tgender_kl").val()
+  const phone = $("#tphone").val()
+
+  const obj = {
+    hubungan,
+    nama,
+    gender,
+    phone
+  }
+
+
+  let dataPihak = localStorage.getItem("data_pihak") ? JSON.parse(localStorage.getItem("data_pihak")) : []
+  if(nama == "" || gender == "" || phone == "") return 
+  if(/ayah|ibu/gi.test(hubungan)){
+    const cek = dataPihak.find(e => e.hubungan == hubungan)
+    const cekU = dataPihak.find(e => e.nama == nama)
+    if(!cek && !cekU){
+      dataPihak.push(obj) 
+    }
+  }else{
+    const cekU = dataPihak.find(e => e.nama == nama)
+    if(!cekU){
+      dataPihak.push(obj)
+    }
+  }
+  console.log(dataPihak)
+  $("#pihak").html("")
+  let i = 0
+  dataPihak.forEach(e => {
+    $("#pihak").append(`
+      <div class="row mb-3" id="pihakList">       
+                            <div class="col-lg-12">
+                                <div class="row mg-b-1">
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                          <input name="thubungan_kl" value="${e.hubungan}" disabled id="thubungan_kl" class="form-control" />
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <input class="form-control" type="text" value="${e.nama}" disabled name="tnama_kl" id="tnama_kl" placeholder="Nama">    
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <input type="text" name="tgender_kl" value="${e.gender}" disabled id="tgender_kl" class="form-control tgl3" placeholder="Tgl Lahir">
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                       <input name="tphone" value="${e.phone}" disabled id="tphone" class="form-control" />
+                                      </div>
+                                  </div>
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <button class="btn btn-danger hapusKeluarga" data-id="${i}">Hapus</button>
+                                      </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+        
+    `)
+    i++
+  })
+  console.log(dataPihak)
+  localStorage.setItem("data_pihak",JSON.stringify(dataPihak))
+})
+
+$(document).on("click","#pihakList",function(e){
+if($(e.target).is("button")){
+  let json = JSON.parse(localStorage.getItem("data_pihak"))
+  const id = $(e.target).attr("data-id")
+  json.splice(id,1)
+  let i = 0
+  $("#pihak").html("")
+  json.forEach(e => {
+    $("#pihak").append(`
+      <div class="row mb-3" id="pihakList">       
+                            <div class="col-lg-12">
+                                <div class="row mg-b-1">
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                          <input name="thubungan_kl" value="${e.hubungan}" disabled id="thubungan_kl" class="form-control" />
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <input class="form-control" type="text" value="${e.nama}" disabled name="tnama_kl" id="tnama_kl" placeholder="Nama">    
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <input type="text" name="tgender_kl" value="${e.gender}" disabled id="tgender_kl" class="form-control tgl3" placeholder="Tgl Lahir">
+                                      </div>
+                                  </div>
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                       <input name="tphone" value="${e.phone}" disabled id="tphone" class="form-control" />
+                                      </div>
+                                  </div>
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <button class="btn btn-danger hapusKeluarga" data-id="${i}">Hapus</button>
+                                      </div>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+    `)
+    i++
+  })
+  localStorage.setItem("data_pihak",JSON.stringify(json))
+  console.log(json)
+}
+})
+
+   $('#wizard1').steps({
+        headerTag: 'h3',
+        bodyTag: 'section',
+        autoFocus: true,
+        titleTemplate: '<span class="number">#index#</span> <span class="title">#title#</span>',
+        onFinished: tambahData
+    });
+    function tambahPgl(pengalaman){
+      let i = 0
+      $("#pengalaman").html("")
+      pengalaman.forEach(e => {
+        $("#pengalaman").append(`
+        <div class="row mg-b-10">
+                            <div class="col-lg-3">
+                              <div class="form-group">
+                                <input type="text" name="perusahaan" id="perusahaan" value="${e.perusahaan}" class="form-control" placeholder="Perusahaan">
+                              </div>
+                          </div>
+                              <div class="col-lg-3">
+                                  <div class="form-group">
+                                    <input type="text" name="kota" id="kota" value="${e.nama_koka}" class="form-control" placeholder="Kota">
+                                  </div>
+                              </div>
+                              <div class="col-lg-2">
+                                  <div class="form-group">
+                                    <input type="text" name="dtahun" id="dtahun_pgl" value="${moment(e.dari_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Dari Tahun">
+                                  </div>
+                              </div> 
+  
+                              <div class="col-lg-2">
+                                <div class="form-group">
+                                  <input type="text" name="stahun" id="stahun_pgl" value="${moment(e.sampai_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Sampai Tahun">
+                                </div>
+                              </div> 
+  
+                              <div class="col-lg-3">
+                                  <div class="form-group">
+                                    <input type="text" name="jabatan" id="jabatan" value="${e.jabatan}" class="form-control" placeholder="Jabatan">
+                                  </div>
+                              </div>
+                              <div class="col-lg-3">
+                                  <div class="form-group">
+                                    <button class="btn btn-danger hapusPengalaman" data-id='${i}'>Hapus</button>
+                                  </div>
+                              </div>
+  
+  </div>
+        `)
+        i++
+      })
+    }
+  
+    function tambahPdk(pendidikan){
+      let i = 0
+      $("#pendidikan").html("")
+      pendidikan.forEach(e => {
+        console.log(e)
+        $("#pendidikan").append(`
+          <div class="row mg-b-10">
+                            <div class="col-lg-3">
+                              <div class="form-group">
+                                <input type="text" name="pendidikan" id="pendidikan" value="${e.pendidikan}" class="form-control" placeholder="Pendidikan">
+                              </div>
+                          </div>
+                              <div class="col-lg-3">
+                                  <div class="form-group">
+                                    <input type="text" name="lembaga" id="lembaga" value="${e.nama}" class="form-control" placeholder="Nama Lembaga Pendidikan">
+                                  </div>
+                              </div>
+  
+                              <div class="col-lg-2">
+                                  <div class="form-group">
+                                    <input type="text" name="kota" id="kota_lembaga" value="${e.nama_koka}" class="form-control" placeholder="Kota">   
+                                  </div>
+                              </div>
+  
+                              <div class="col-lg-2">
+                                  <div class="form-group">
+                                    <input type="text" name="dtahun" id="dtahun_lembaga" value="${moment(e.dari_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Dari Tahun">
+                                  </div>
+                              </div> 
+  
+                              <div class="col-lg-2">
+                                <div class="form-group">
+                                  <input type="text" name="stahun" id="stahun_lembaga" value="${moment(e.sampai_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Sampai Tahun">
+                                </div>
+                              </div> 
+  
+                              <div class="col-lg-3">
+                                  <div class="form-group">
+                                    <input type="text" name="jurusan" id="jurusan" value="${e.jurusan}" class="form-control" placeholder="Jurusan">
+                                  </div>
+                              </div>
+  
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <input type="text" name="gelar" id="gelar" value="${e.gelar}" class="form-control" placeholder="Gelar">
+                                </div>
+                              </div>
+                              <div class="col-lg-3">
+                                  <div class="form-group">
+                                    <button class="btn btn-danger hapusPendidikan" data-id='${i}'>Hapus</button>
+                                  </div>
+                              </div>
+                          </div>
+        `)
+        i++
+      })
+    }
+  
+  function tambahData(e){
+    // General Data
+    const nama = $("#nama").val()
+    const gender = $("#gender").val()
+    const tgl_masuk = $("#tgl_masuk").val()
+    const nik = $("#nik").val()
+    const userid = $("#userid").val()
+    const div = $("#div").val()
+    const counter = $("#counter").val()
+    const jabatan = $("#jabatan").val()
+    const kk = $("#kk").val()
+    const hr = $("#hr").val()
+    const ca = $("#ca").val()
+    const rek = $("#rek").val()
+    const payroll = $("#payroll").val()
+    const nks = $("#nks").val()
+    const ntk = $("#ntk").val()
+    const pks = $("#pks").val()
+    const ptk = $("#ptk").val()
+
+    // Data Pribadi
+    const alamat = $("#alamat").val()
+    const phone = $("#phone").val()
+    const email = $("#email").val()
+    const kota_lahir = $("#kota_lahir").val()
+    const tgl_lahir = $("#tgl_lahir").val()
+    const tinggi = $("#tinggi").val()
+    const berat = $("#berat").val()
+    const goldarah = $("#goldarah").val()
+    const agama = $("#agama").val()
+
+    // Keluarga & Pihak
+    const keluarga = localStorage.getItem("data_keluarga")
+    const pihak = localStorage.getItem("data_pihak")
+    const pengalaman = localStorage.getItem("data_pengalaman")
+    const pendidikan = localStorage.getItem("data_pendidikan")
+
+
+    // AJAX 
+    const token = document.querySelector("[name=csrfmiddlewaretoken]").value
+    $.ajax({
+      url:`{% url "tambah_pegawai" %}`,
+      method:"post",
+      data:{nama,gender,tgl_masuk,nik,userid,div,counter,jabatan,kk,hr,ca,rek,payroll,nks,ntk,pks,ptk,keluarga,pihak,pengalaman,pendidikan,alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah,agama},
+      headers:{"X-CSRFToken":token},
+      success:(e) => {
+        console.log(e)
+        window.location = '{% url "pegawai" dsid %}'
+        console.log('sd')
+      },
+      error:(e) => {
+        console.log(e)
+      }
+    })
+  }
+</script>
+{% endblock hrd_ajax %}

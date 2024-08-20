@@ -227,7 +227,16 @@
 
             { data: 'tgl' },
             { data: 'hari' },
-            { data: 'nama' },
+            { 
+                data: 'nama',
+                "render": function(data, type, row, meta){    
+                    tgl_absen = ""+row.tgl_absen+"";
+                    userid = ""+row.userid+"";
+                    console.log(userid)
+                    data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}'>${row.nama}</a>`;
+                    return data;
+                }
+            },
             { data: 'nik' },
             { data: 'userid' },
             { data: 'bagian' },
@@ -240,8 +249,12 @@
             { 
                 data: null,
                 "render": function(data, type, row, meta){    
-                    data = '<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-bs-toggle="modal" data-bs-target="#ubahPotongan" data-id="'+row.id+'">Edit</button>';
-                    return data;
+                    if(row.masuk == null || row.pulang == null){
+                        data = '<button class="btn btn-sm btn-warning mb-1 tx-12" data-toggle="modal" data-target="#editIjin" data-id="'+row.id+'">Edit</button>';
+                        return data;
+                    } else {
+                        return ""
+                    }
                 } 
             },
             

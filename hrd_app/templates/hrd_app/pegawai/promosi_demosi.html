@@ -45,7 +45,7 @@
             <div class="mg-r-auto">   
                             
             <!-- Button Registrasi -->
-            <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-primary mg-b-6">Registrasi</button>
+            <a href="{% url "tpegawai" %}" class="btn btn-primary mg-b-6">Registrasi</a>
 
             <!-- Button Pegawai Aktif -->
             <a href="{% url 'pegawai' sid %}"><button class="btn btn-success mg-b-6">Pegawai Aktif</button></a>
@@ -65,6 +65,7 @@
         <br>   
 
         <div class="row">
+            {% csrf_token %}
             <div class="col-lg-6">
                 <div class="form-layout form-layout-2">
                     <div class="row no-gutters">
@@ -72,14 +73,21 @@
                         <!-- Promosi -->
                         <div class="col-md-12 mg-t--1 mg-md-t-0">
                             <div class="form-group mg-md-l--1">
-                              <label class="form-control-label tx-gray-800">Promosi:</label>
-                                <table class="table">
-                                    <tr>
-                                        <th><span class="tx-inverse tx-13">Tanggal</span></th>
-                                        <th><span class="tx-inverse tx-13">Jabatan Sebelum</span></th>
-                                        <th><span class="tx-inverse tx-13">Jabatan Saat Ini</span></th>
+                                <div class="flex justify-between">
+                                    <label class="form-control-label tx-gray-800">Promosi:</label>
+                                    <button class="form-control-label btn btn-primary" data-toggle="modal" data-target="#promosiModal">Tambah Promosi</button>
+                                </div>
+                                <table class="table" id="tablePromosi">
+                                    <thead>
+                                        <tr>
+                                            <th><span class="tx-inverse tx-13">Tanggal</span></th>
+                                            <th><span class="tx-inverse tx-13">Jabatan Sebelum</span></th>
+                                            <th><span class="tx-inverse tx-13">Jabatan Saat Ini</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
 
-                                    </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -94,14 +102,21 @@
                         <!-- Demosi -->
                         <div class="col-md-12 mg-t--1 mg-md-t-0">
                             <div class="form-group mg-md-l--1">
-                              <label class="form-control-label tx-gray-800">Demosi:</label>
-                                <table class="table">
-                                    <tr>
-                                        <th><span class="tx-inverse tx-13">Tanggal</span></th>
-                                        <th><span class="tx-inverse tx-13">Jabatan Sebelum</span></th>
-                                        <th><span class="tx-inverse tx-13">Jabatan Saat Ini</span></th>
+                                <div class="flex justify-between">
+                                    <label class="form-control-label tx-gray-800">Demosi:</label>
+                                    <button class="form-control-label btn btn-warning" data-toggle="modal" data-target="#demosiModal">Tambah Demosi</button>
+                                </div>
+                                <table class="table" id="tableDemosi">
+                                    <thead>
+                                        <tr>
+                                            <th><span class="tx-inverse tx-13">Tanggal</span></th>
+                                            <th><span class="tx-inverse tx-13">Jabatan Sebelum</span></th>
+                                            <th><span class="tx-inverse tx-13">Jabatan Saat Ini</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
 
-                                    </tr>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -113,82 +128,251 @@
 
 </div><!-- br-pagebody -->
 
+<!-- Modal Promosi -->
+<div class="modal fade" id="promosiModal" tabindex="-1" aria-labelledby="promosiModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="promosiModalLabel">Tambah Promosi</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="flex gap-3 mb-3">
+                <div class="w-full">
+                    <input type="text" class="tgl2 form-control" placeholder="Tanggal" id='tgl_promosi'>
+                </div>
+            </div>
+            <div class="flex gap-3 ">
+                <div class="w-1/2">
+                    <select name="jabatan_sebelum" disabled id="jabatan_sebelum_promosi">
+                        {% for jbt in jabatan %}
+                        {% if jbt.pk == jabatan_sebelum %}
+                        <option value="{{jbt.pk}}" selected>{{jbt.jabatan}}</option>
+                        {% else %}
+                        <option value="{{jbt.pk}}">{{jbt.jabatan}}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="id" id="id" value="{{idp}}">
+                </div>
+                <div class="w-1/2">
+                    <select name="jabatan_sekarang" id="jabatan_sekarang_promosi">
+                        <option value="">Pilih Jabatan Sekarang</option>
+                        {% for jbt in jabatan %}
+                        <option value="{{jbt.pk}}">{{jbt.jabatan}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+          <button type="button" class="btn btn-primary" id="buttonTambahPromosi">Tambah</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Demosi -->
+<div class="modal fade modal-xl" id="demosiModal" tabindex="-1" aria-labelledby="demosiModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="demosiModalLabel">Tambah Demosi</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body p-4">
+            <div class="flex gap-3 mb-3">
+                <div class="w-full">
+                    <input type="text" class="tgl2 form-control" placeholder="Tanggal" id='tgl_demosi'>
+                </div>
+            </div>
+            <div class="flex gap-3 ">
+                <div class="w-1/2">
+                    <select name="jabatan_sebelum" disabled id="jabatan_sebelum_demosi">
+                        {% for jbt in jabatan %}
+                        {% if jbt.pk == jabatan_sebelum %}
+                        <option value="{{jbt.pk}}" selected>{{jbt.jabatan}}</option>
+                        {% else %}
+                        <option value="{{jbt.pk}}">{{jbt.jabatan}}</option>
+                        {% endif %}
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="w-1/2">
+                    <select name="jabatan_sekarang" id="jabatan_sekarang_demosi">
+                        <option value="">Pilih Jabatan sekarang</option>
+                        {% for jbt in jabatan %}
+                        <option value="{{jbt.pk}}">{{jbt.jabatan}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+          <button type="button" class="btn btn-primary" id="buttonTambahDemosi">Tambah</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock breadcrumb %}
 
 {% block hrd_ajax %}
 
 <script>
     $(document).ready(function() {
+        const jabatanSebDemosiSelectize = $("#jabatan_sebelum_demosi").selectize()
+        const jabatanSetDemosiSelectize = $("#jabatan_sekarang_demosi").selectize()
+        const jabatanSebPromosiSelectize = $("#jabatan_sebelum_promosi").selectize()
+        const jabatanSetPromosiSelectize = $("#jabatan_sekarang_promosi").selectize()
+        const token = document.querySelector("[name=csrfmiddlewaretoken]").value
 
-        var table = $('#tabelku').DataTable({
-
-            "ajax": "{% url 'pegawai_json' sid %}",
-
-            columns: [
-
-                { data: 'nama' },
-                { 
-                    data: null,
-                    "render": function(data, type, row, meta){    
-                        if(row.gender == 'Laki-Laki'){
-                            data = 'L'
-                        } else (
-                            data = 'P'
-                        )
-                        return data;
-                    } 
-                },     
-                { data: 'nik' },
-                { data: 'userid' },
-                { data: 'divisi' },  
-                { data: 'jabatan' },
-                { data: 'libur' },
-                { data: 'kkerja' },
-                { data: 'payroll' },
-                { 
-                    data: null,
-                    "render": function(data, type, row, meta){    
-                        data = '<button data-target="#tambahKompen" data-toggle="modal" class="btn btn-sm btn-warning mb-1 tx-12" data-idp='+row.idp+'>Edit</button> &nbsp; <button data-target="#detailPegawai" data-toggle="modal" class="btn btn-sm btn-primary mb-1 tx-12" data-idp='+row.idp+'>Lebih Detail</button> &nbsp; <button data-target="#tambahKompen" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-idp='+row.idp+'>Non Aktifkan</button>';
-                        
-                        return data;
-                    } 
-                },
-            ],
-
-            "rowCallback": function (row, data) {
-                $('td', row).eq(0).addClass('hitam');  
+    const demosi = $("#tableDemosi").DataTable({
+        ajax: {
+            url:"{% url 'promodemo_json' idp %}",
+            method:"POST",
+            data:{status:"0"},
+            headers:{"X-CSRFToken":token},
+        },
+        columns:[
+            {
+                data:"tgl"
+            },
+            {data:"jabatan_sebelum"},
+            {data:"jabatan_sekarang"}
+        ],
+        "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
                 $('td', row).eq(1).addClass('hitam');
                 $('td', row).eq(2).addClass('hitam');
                 $('td', row).eq(3).addClass('hitam');
-                $('td', row).eq(4).addClass('hitam');                
-                $('td', row).eq(5).addClass('hitam');                
-                $('td', row).eq(6).addClass('hitam');              
-                $('td', row).eq(7).addClass('hitam');              
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
             },
-
+            destroy: true,
+            processing: true,
+            searching: false,
+            info: false,
+        
+    })
+    const promosi = $("#tablePromosi").DataTable({
+        ajax: {
+            url:"{% url 'promodemo_json' idp %}",
+            method:"POST",
+            data:{status:"1"},
+            headers:{"X-CSRFToken":token},
+        },
+        columns:[
+            {
+                data:"tgl"
+            },
+            {data:"jabatan_sebelum"},
+            {data:"jabatan_sekarang"}
+        ],
+        "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+            },
             destroy: true,
             ordering: false,
             paging: false,
-            scrollX: '100%',
-            scrollY: 300,
             processing: true,
-
-            "language": {
-                searchPlaceholder: 'Cari...',
-                sSearch: '',
-                loadingRecords: '&nbsp;',
-                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
-                emptyTable: "&nbsp;",
-
-                paginate: {
-                    previous: '<i class="cs-chevron-left"></i>',
-                    next: '<i class="cs-chevron-right"></i>',
+            searching: false,
+            info: false,
+        
+    })
+        $("#buttonTambahDemosi").on("click",function(e){
+            const tgl = $("#tgl_demosi").val()
+            const jabatan_seb = $("#jabatan_sebelum_demosi").val()
+            const jabatan_sek = $("#jabatan_sekarang_demosi").val()
+            const id = $("#id").val()
+            console.log(jabatan_seb,jabatan_sek)
+            $.ajax({
+                url:'{% url "tambah_prodemo" %}',
+                method:"post",
+                data:{tgl,jabatan_seb,status:0,jabatan_sek,id},
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    $("#demosiModal").modal("hide")
+                    demosi.ajax.reload()
+                    promosi.ajax.reload()
+                    jabatanSebDemosiSelectize[0].selectize.setValue(jabatan_sek)
+                    const tgl = $("#tgl_demosi").val("")
+                    jabatanSetDemosiSelectize[0].selectize.clear()
                 },
-            },
+                error:(err) => {
+                    console.log(err)
+                }
+            })
+    
+        })
 
-        }); 
+        $("#demosiModal").on("show.bs.modal",function(e){
+            $.ajax({
+                url:'{% url "getPegawai" idp %}',
+                method:"post",
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    console.log(e)
+                    jabatanSebDemosiSelectize[0].selectize.setValue(e.data.fields.jabatan)
+                        
+                },
+                error:(err) => {
+                    console.log(err)
+                }
+            })
+        })
 
+        $("#promosiModal").on("show.bs.modal",function(e){
+            $.ajax({
+                url:'{% url "getPegawai" idp %}',
+                method:"post",
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    console.log(e)
+                    jabatanSebPromosiSelectize[0].selectize.setValue(e.data.fields.jabatan)
+                        
+                },
+                error:(err) => {
+                    console.log(err)
+                }
+            })
+        })
+    
+        $("#buttonTambahPromosi").on("click",function(e){
+            const tgl = $("#tgl_promosi").val()
+            const jabatan_seb = $("#jabatan_sebelum_promosi").val()
+            const jabatan_sek = $("#jabatan_sekarang_promosi").val()
+            const id = $("#id").val()
+            $.ajax({
+                url:'{% url "tambah_prodemo" %}',
+                method:"post",
+                data:{tgl,jabatan_seb,status:1,jabatan_sek,id},
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    $("#promosiModal").modal("hide")
+                    demosi.ajax.reload()
+                    promosi.ajax.reload()
+                    jabatanSebPromosiSelectize[0].selectize.setValue(jabatan_sek)
+                    const tgl = $("#tgl_promosi").val("")
+                    jabatanSetPromosiSelectize[0].selectize.clear()
+                },
+                error:(err) => {
+                    console.log(err)
+                }
+            })
+        })
     });
+
 
 </script>   
  

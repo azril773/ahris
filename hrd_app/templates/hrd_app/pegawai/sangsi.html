@@ -43,9 +43,10 @@
         <!-- Info absensi -->        
         <div class="d-flex align-items-center justify-content-start">     
             <div class="mg-r-auto">   
+                {% csrf_token %}
                             
             <!-- Button Registrasi -->
-            <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-primary mg-b-6">Registrasi</button>
+            <a href="{% url "tpegawai" %}" class="btn btn-primary mg-b-6">Registrasi</a>
 
             <!-- Button Pegawai Aktif -->
             <a href="{% url 'pegawai' sid %}"><button class="btn btn-success mg-b-6">Pegawai Aktif</button></a>
@@ -72,13 +73,22 @@
                         <!-- Sangsi -->
                         <div class="col-md-12 mg-t--1 mg-md-t-0">
                             <div class="form-group mg-md-l--1">
-                              <label class="form-control-label tx-gray-800">Sangsi:</label>
-                                <table class="table">
-                                    <tr>
-                                        <th><span class="tx-inverse tx-13">Tanggal Berlaku</span></th>
-                                        <th><span class="tx-inverse tx-13">Status Sangsi</span></th>
-                                        <th><span class="tx-inverse tx-13">Deskripsi Pelanggaran</span></th>
-                                    </tr>
+                                <div class="flex justify-between">
+                                    <label class="form-control-label tx-gray-800">Sangsi:</label>
+                                    <button class="btn btn-primary form-control-label" data-toggle="modal" data-target="#sangsiModal">Tambah Sangsi</button>
+                                </div>
+                                <table class="table" id="tableSangsi">
+                                    <thead>
+                                        <tr>
+                                            <th><span class="tx-inverse tx-13">Tanggal Berlaku</span></th>
+                                            <th><span class="tx-inverse tx-13">Tanggal Berakhir</span></th>
+                                            <th><span class="tx-inverse tx-13">Status Sangsi</span></th>
+                                            <th><span class="tx-inverse tx-13">Deskripsi Pelanggaran</span></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -90,12 +100,128 @@
 
 </div><!-- br-pagebody -->
 
+<div class="modal fade" id="sangsiModal" tabindex="-1" aria-labelledby="sangsiModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="sangsiModalLabel">Tambah Sangsi</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="flex gap-3 mb-3">
+                <div class="w-full">
+                    <input type="text" class="tgl2 form-control" placeholder="Tanggal Berlaku" id='tgl_berlaku_sangsi'>
+                </div>
+            </div>
+            <div class="flex gap-3 ">
+                <div class="w-1/2">
+                    <select name="status" id="status_sangsi">
+                        <option value="">Pilih Sangsi</option>
+                        <option value="SP1">SP 1</option>
+                        <option value="SP2">SP 2</option>
+                        <option value="SP3">SP 3</option>
+                    </select>
+                    <input type="hidden" name="id" id="id" value="{{idp}}">
+                </div>
+                <div class="w-1/2">
+                    <textarea name="deskripsi_sangsi" id="deskripsi_sangsi" placeholder="Deskripsi Sangsi" class="form-control"></textarea>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Tutup</button>
+          <button type="button" class="btn btn-primary" id="buttonTambahSangsi">Tambah</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock breadcrumb %}
 
 {% block hrd_ajax %}
 
 <script>
     $(document).ready(function() {
+
+
+        const token = document.querySelector("[name=csrfmiddlewaretoken]").value
+        const tableSangsi = $("#tableSangsi").DataTable({
+            ajax:{
+                url:"{% url 'sangsi_json' idp %}",
+                method:"post",
+                headers:{"X-CSRFToken":token}
+            },
+            columns:[
+                {data:"tgl_berlaku"},
+                {data:"tgl_berakhir"},
+                {data:"status"},
+                {data:"deskripsi"}
+            ],
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');  
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');                
+                $('td', row).eq(5).addClass('hitam');                
+                $('td', row).eq(6).addClass('hitam');              
+                $('td', row).eq(7).addClass('hitam');              
+            },
+        })
+
+        const statusSelectize = $("#status_sangsi").selectize()
+        $("#sangsiModal").on("show.bs.modal",function(e){
+            statusSelectize[0].selectize.clear()
+            $("#deskripsi_sangsi").val("")
+            $.ajax({
+                url:"{% url 'get_sangsi_pegawai' idp %}",
+                method:"post",
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    if(Object.keys(e.data).length <= 0) {
+                        const tgl_berlaku = moment(new Date()).format("DD-MM-YYYY")
+                        $("#tgl_berlaku_sangsi").val(tgl_berlaku)
+                        $("#tgl_berlaku_sangsi").prop("disabled",true)
+                    }else{
+                        console.log(e)
+                        const tgl_berlaku = moment(e.data.fields.tgl_berakhir).format("DD-MM-YYYY")
+                        $("#tgl_berlaku_sangsi").val(tgl_berlaku)
+                        $("#tgl_berlaku_sangsi").prop("disabled",true)
+                    }
+                }
+            })
+            console.log(e)
+        })
+
+        $("#buttonTambahSangsi").on("click",function(e){
+            $("#buttonTambahSangsi").prop("disabled",true)
+            const tgl_berlaku = moment($("#tgl_berlaku_sangsi").val(),"DD-MM-YYYY").format("YYYY-MM-DD")
+            const tgl_berakhir = moment(moment(moment(tgl_berlaku,"YYYY-MM-DD")).add(6, 'months')._d).format("YYYY-MM-DD")
+            console.log(tgl_berakhir)
+            const status = $("#status_sangsi").val()
+            const deskripsi = $("#deskripsi_sangsi").val()
+            $.ajax({
+                url:"{% url 'tambah_sangsi' idp %}",
+                data:{tgl_berlaku,tgl_berakhir,status,deskripsi},
+                method:"post",
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    console.log(e)
+                    $("#sangsiModal").modal("hide")
+                    $("#buttonTambahSangsi").prop("disabled",false)
+                    tableSangsi.ajax.reload()
+                },
+                error:(err) => {
+                    console.log(err)
+                    $("#buttonTambahSangsi").prop("disabled",false)
+                }
+            })
+
+        })
+
+
+
 
         var table = $('#tabelku').DataTable({
 
