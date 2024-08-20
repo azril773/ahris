@@ -19,3 +19,9 @@ _fitur:_
 - [@azril773](https://www.github.com/azril773)
 - [@gatot]()
 
+
+## Screenshots
+
+![App Screenshot](https://i.postimg.cc/W444rGNV/Screenshot-from-2024-08-20-10-44-09.png)
+
+![App Scrennshot](https://i.postimg.cc/66Zpd5X8/Screenshot-from-2024-08-20-10-44-05.png)
