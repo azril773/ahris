@@ -742,8 +742,8 @@ def pabsen(request):
             # Data absensi
             absensi = conn.get_attendance()
             for a in absensi:
+                print(a.user_id)
                 if dari <= a.timestamp <= sampai:   
-                    print(a.user_id)
                     if a.user_id in luserid:              
                         data = {
                             "userid": a.user_id,
@@ -774,7 +774,7 @@ def pabsen(request):
     with open(r"static/data.json","r") as f:
         att = f.read()
     att = json.loads(att)
-    att = sorted(att, key=lambda i: i['jam_absen'])
+    att = sorted(dmesin, key=lambda i: i['jam_absen'])
     print(att)
 
     # att = sorted(att, key=lambda i: i['jam_absen'])
