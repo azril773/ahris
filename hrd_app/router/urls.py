@@ -78,6 +78,10 @@ urlpatterns = [
     path('', include("hrd_app.router.sangsi.backend.urls")),
     # +++++++++++++++++++ URLS SANGSI +++++++++++++++++++
 
+    # +++++++++++++++++++ URLS LAPORAN +++++++++++++++++++
+    path('', include("hrd_app.router.laporan.backend.urls")),
+    path('', include("hrd_app.router.laporan.ui.urls")),
+
     
     path('pengaturan', views.pengaturan, name='pengaturan'),
 

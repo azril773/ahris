@@ -117,3 +117,5 @@ from hrd_app.controllers.libur_nasional.views import *
 # +++++++++++++++++++++++++++ OPG ++++++++++++++++++++++++++++++++
 from hrd_app.controllers.opg.views import *
 
+# +++++++++++++++++++++++++++ LAPORAN ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.laporan.views import *

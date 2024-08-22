@@ -35,14 +35,13 @@ def lembur(request, sid):
         pegawai = []
         for p in pegawai_db.objects.filter(aktif=1):
             if int(sid) == 0:
-                if int(sid) == p.status.pk:
-                    data = {
-                        'idp':p.id,
-                        'nama':p.nama,
-                        'nik':p.nik,
-                        'userid':p.userid
-                    }    
-                    pegawai.append(data)
+                data = {
+                    'idp':p.id,
+                    'nama':p.nama,
+                    'nik':p.nik,
+                    'userid':p.userid
+                }    
+                pegawai.append(data)
             else:
                 if p.status_id == sid:     
                     data = {

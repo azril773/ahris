@@ -135,9 +135,6 @@ def cari_absensi(request):
                 if ab.keterangan_absensi is not None:
                     sket += f'{ab.keterangan_absensi}, '                 
                 if ab.keterangan_ijin is not None:
-                    if ab.masuk is not None and ab.jam_masuk is not None:
-                        if ab.masuk > ab.jam_masuk:
-                            sket += f"Terlambat masuk, "
                     sket += f'{ab.keterangan_ijin}, '
                     kijin = ''
                 else:
@@ -260,9 +257,6 @@ def cari_absensi(request):
                 if ab.keterangan_absensi is not None:
                     sket += f'{ab.keterangan_absensi}, '                 
                 if ab.keterangan_ijin is not None:
-                    if ab.masuk is not None and ab.jam_masuk is not None:
-                        if ab.masuk > ab.jam_masuk:
-                            sket += f"Terlambat masuk, "
                     sket += f'{ab.keterangan_ijin}, '
                     kijin = ''
                 else:
@@ -309,7 +303,6 @@ def cari_absensi(request):
                 }
 
                 data.append(absen)
-        print(data, "data")
         return JsonResponse({"data": data })
 
 
@@ -438,9 +431,6 @@ def absensi_json(request, dr, sp, sid):
                 if ab.keterangan_absensi is not None:
                     sket += f'{ab.keterangan_absensi}, '                 
                 if ab.keterangan_ijin is not None:
-                    if ab.masuk is not None and ab.jam_masuk is not None:
-                        if ab.masuk > ab.jam_masuk:
-                            sket += f"Terlambat masuk, "
                     sket += f'{ab.keterangan_ijin}, '
                     kijin = ''
                 else:
@@ -564,15 +554,12 @@ def absensi_json(request, dr, sp, sid):
                 if ab.keterangan_absensi is not None:
                     sket += f'{ab.keterangan_absensi}, '                 
                 if ab.keterangan_ijin is not None:
-                    if ab.masuk is not None and ab.jam_masuk is not None:
-                        if ab.masuk > ab.jam_masuk:
-                            sket += f"Terlambat masuk, "
                     sket += f'{ab.keterangan_ijin}, '
                     kijin = ''
                 else:
                     if ab.masuk is not None and ab.jam_masuk is not None:
                         if ab.masuk > ab.jam_masuk:
-                            sket += f"Terlambat masuk tanpa ijin, "                
+                            sket += f"Terlambat masuk tanpa ijin, "
                 if ab.keterangan_lain is not None:
                     sket += f'{ab.keterangan_lain}, '                    
                 if ab.libur_nasional is not None:
@@ -742,7 +729,6 @@ def pabsen(request):
             # Data absensi
             absensi = conn.get_attendance()
             for a in absensi:
-                print(a.user_id)
                 if dari <= a.timestamp <= sampai:   
                     if a.user_id in luserid:              
                         data = {
@@ -758,7 +744,6 @@ def pabsen(request):
 
             conn.enable_device()
         except Exception as e:
-            print("Process terminate : {}".format(e))
             messages.error(request, "Process terminate : {}".format(e))
 
         finally:
@@ -775,7 +760,6 @@ def pabsen(request):
         att = f.read()
     att = json.loads(att)
     att = sorted(dmesin, key=lambda i: i['jam_absen'])
-    print(att)
 
     # att = sorted(att, key=lambda i: i['jam_absen'])
     ddr = []
@@ -829,7 +813,6 @@ def pabsen(request):
                 
                 jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
                 pg = next((pgw for pgw in pegawai if pgw["userid"] == a["userid"]),None)
-                print(pg["status_id"] == 3,"OEGAWAU")
                 # # Versi Cirebon
 
                 for r in rangetgl:
@@ -837,13 +820,11 @@ def pabsen(request):
                     tplus = r + timedelta(days=1)
                     ab = absensi_db.objects.select_related('pegawai').get(tgl_absen=r.date(), pegawai__userid=a['userid'])
                     if jam_absen.date() == r.date():
-                        bb_msk = jam_absen - timedelta(hours=5)
-                        ba_msk = jam_absen + timedelta(hours=5)
+                        bb_msk = jam_absen - timedelta(hours=3)
+                        ba_msk = jam_absen + timedelta(hours=3)
                         jk = None
                         if a["punch"] == 0:
-                            jk = jamkerja_db.objects.filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk.time(),jam_masuk__lte=ba_msk.time()).order_by("-jam_masuk")
-                        elif a["punch"] == 1:
-                            jk = jamkerja_db.objects.filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_pulang__gte=bb_msk.time(),jam_pulang__lte=ba_msk.time()).order_by("-jam_pulang")
+                            jk = jamkerja_db.objects.filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk,jam_masuk__lte=ba_msk).order_by("-jam_masuk")
 
                         if jk is not None and ab.jam_masuk is None and ab.jam_pulang is None:
                             selisih = []
@@ -862,6 +843,7 @@ def pabsen(request):
                                         mins = s
                             if mins != 0:
                                 jk = jk[selisih.index(mins)]
+                                print(jk,"HALLOOOOO")
                                 p = pegawai_db.objects.get(userid=a["userid"])
                                 time = datetime.combine(jam_absen.date(),jk.jam_kembali_istirahat) - datetime.combine(jam_absen.date(),jk.jam_istirahat)
                                 time2 = datetime.combine(jam_absen.date(),jk.jam_kembali_istirahat2) - datetime.combine(jam_absen.date(),jk.jam_istirahat2)
@@ -876,8 +858,6 @@ def pabsen(request):
                                 ab.jam_pulang = jk.jam_pulang
                                 ab.lama_istirahat = ist_t
                                 ab.lama_istirahat2 = ist_t2
-                                print("OKOKOKOKOOKK")
-                                print(jk.jam_istirahat)
                                 ab.jam_istirahat = jk.jam_istirahat
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         if a["punch"] == 0 and jam_absen.hour > 4 and jam_absen.hour < 18 :
@@ -1766,7 +1746,6 @@ def pabsen(request):
                         elif a["punch"] == 3 and int(jam_absen.hour) > 9:
                             if ab.kembali is not None:
                                 if int(jam_absen.hour) - int(ab.kembali.hour) > 4:
-                                    print("OKOKOKOKOK")
                                     ab.kembali_b = jam_absen.time()
                                     ab.save()
                                     data = {
@@ -2810,14 +2789,9 @@ def pabsen(request):
                 # jika tidak ada absen masuk dan pulang
                 # rencana cronjob jalan
                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-                    print("MASUKKKKK")
-                    print(p["hari_off"],nh)
-                    print(p)
                     if p['hari_off'] == nh:
                         # jika dia bisa mendapatkan opg 
-                        print("LUAR OPG")
                         if p['status_id'] in lsopg:
-                            print(lsopg)
                             # jika ada geder off dari hari ini ke hari lain
                             if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
                                 pass
@@ -2834,7 +2808,6 @@ def pabsen(request):
                                         keterangan = 'OFF Pengganti Reguler',                         
                                         add_by = 'Program',
                                     )    
-                                    print("MSK")
                                     tambah_opg.save()
                         else:
                             pass
@@ -3234,7 +3207,6 @@ def pabsen(request):
                             hour = selisih.hour
                             
                             jam = int(hour) + float(menit) + float(detik)
-                            print(jam)
                             tjk = jam                
                 else:
                     tjk = 0
@@ -3274,10 +3246,8 @@ def pabsen(request):
                         # if dselisih_b.hour < 10:
 
                         djam_selisih_b = f'{ab.tgl_absen} {dselisih_b}'
-                        print(djam_selisih_b)
 
                         # Split the string to separate the date and time parts
-                        print(djam_selisih_b,"COBA")
                         date_part, delta_part, time_part = djam_selisih_b.split(' ', 2)
                         # Parse the date and time
                         base_datetime = datetime.strptime(date_part + ' ' + time_part.split(",")[1], '%Y-%m-%d %H:%M:%S')
@@ -3290,7 +3260,6 @@ def pabsen(request):
                         else:
                             adjusted_datetime = base_datetime
                         selisih_b = adjusted_datetime
-                        print(selisih_b.hour,"SELISIH")
                         if int(selisih_b.hour) <= 4:
                             tjk_b = 0
                         else:
@@ -3492,8 +3461,7 @@ def pabsen(request):
                     
             else:
                 pass            
-    return JsonResponse({"ok":"ok"})
-    # return redirect ('cabsen_s',dr=dr, sp=sp, sid=int(sid))   
+    return redirect ('absensi',sid=int(sid))   
 
 @login_required
 def detail_absensi(r,userid,tgl,sid):
@@ -3611,7 +3579,6 @@ def tambah_jam(r):
         tgl = datetime.strptime(r.POST.get("tgl"),"%Y-%m-%d")
         idp = r.POST.get("idp")
         jam_absen = datetime.combine(tgl,datetime.strptime(r.POST.get("jam_absen"),"%H:%M").time())
-        print(jam_absen)
         absen = r.POST.get("absen")
         absen = absen.split("|")
         data_trans_db(
@@ -3740,7 +3707,6 @@ def pu(r,tgl,userid,sid):
                     hour = selisih.hour
                     
                     jam = int(hour) + float(menit) + float(detik)
-                    print(jam)
                     tjk = jam                
         else:
             tjk=0
@@ -3780,9 +3746,7 @@ def pu(r,tgl,userid,sid):
                 dselisih_b = plg_b - msk_b
                 # if dselisih_b.hour < 10
                 djam_selisih_b = f'{abs.tgl_absen} {dselisih_b}'
-                print(djam_selisih_b)
                 # Split the string to separate the date and time parts
-                print(djam_selisih_b,"COBA")
                 date_part, delta_part, time_part = djam_selisih_b.split(' ', 2)
                 # Parse the date and time
                 base_datetime = datetime.strptime(date_part + ' ' + time_part.split(",")[1], '%Y-%m-%d %H:%M:%S')
@@ -3794,7 +3758,6 @@ def pu(r,tgl,userid,sid):
                 else:
                     adjusted_datetime = base_datetime
                 selisih_b = adjusted_datetime
-                print(selisih_b.hour,"SELISIH")
                 if int(selisih_b.hour) <= 4:
                     tjk_b = 0
                 else:
