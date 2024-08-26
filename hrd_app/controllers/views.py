@@ -20,7 +20,7 @@ import json
 import time
 import pandas as pd
 from decimal import *
-
+import re
 # PYZK / FINGER MACHINE
 from zk import ZK, const
 from struct import pack
@@ -117,3 +117,5 @@ from hrd_app.controllers.libur_nasional.views import *
 # +++++++++++++++++++++++++++ OPG ++++++++++++++++++++++++++++++++
 from hrd_app.controllers.opg.views import *
 
+# +++++++++++++++++++++++++++ LAPORAN ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.laporan.views import *

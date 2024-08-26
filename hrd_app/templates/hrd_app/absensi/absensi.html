@@ -88,8 +88,8 @@
         <div id="loader"></div>            
 
         <!-- Table -->
-        <div class="">
-            <table id="tabelku" class="table display responsive">
+        <div class="" style="width: 100%">
+            <table id="tabelku" class="table">
             <thead>
                 <tr>
                 <th nowrap>Tanggal</th>
@@ -265,7 +265,9 @@
         sp = "{{sp}}"
 
         var table = $('#tabelku').DataTable({
-            "ajax": "{% url 'absensi_json' dr sp sid %}",
+            ajax:{
+                url:"{% url 'absensi_json' dr sp sid %}"
+            } ,
 
             columns: [
 
@@ -304,7 +306,11 @@
                         if(data !==  null){
                             let str = data.split("/")[0]
                             if(str > row.jam_kembali){
-                                render = `<span class="text-danger">${data}</span> / ${data.split("/")[1]}`
+                                if(data.split("/")[1] == null){
+                                    render = `<span class="text-danger">${data}</span>`
+                                } else {
+                                    render = `<span class="text-danger">${data}</span> / ${data.split("/")[1]}`
+                                }
                             } else {
                                 render = `${data}`
                             }
@@ -321,7 +327,10 @@
                 {
                     data: 'ket',
                     render:(data,type,row,meta) => {
-                        if (row.pulang == null && row.ket == " ") {
+                        console.log(row.masuk)
+                        if (row.masuk == null && row.ket == " ") {
+                            return `<span class="tx-inverse">Tidak Absen Masuk</span>`
+                        }else if (row.pulang == null && row.ket == " ") {
                             return `<span class="tx-inverse">Belum Absen Pulang</span>`
                         } else {
                             return `<span class="tx-inverse">${data}</span>`
@@ -369,6 +378,7 @@
             destroy: true,
             ordering: false,
             paging: false,
+            scrollX:"100%",
             scrollY: 300,
             processing: true,
 
@@ -444,7 +454,11 @@
                         if(data !==  null){
                             let str = data.split("/")[0]
                             if(str > row.jam_kembali){
-                                render = `<span class="text-danger">${data}</span> / ${data.split("/")[1]}`
+                                if(data.split("/")[1] == null){
+                                    render = `<span class="text-danger">${data}</span>`
+                                } else {
+                                    render = `<span class="text-danger">${data}</span> / ${data.split("/")[1]}`
+                                }
                             } else {
                                 render = `${data}`
                             }
@@ -463,6 +477,8 @@
                     render:(data,type,row,meta) => {
                         if (row.pulang == null && row.ket == " ") {
                             return `<span class="tx-inverse">Belum Absen Pulang</span>`
+                        }else if (row.masuk == null && row.ket == " ") {
+                            return `<span class="tx-inverse">Tidak Absen Masuk</span>`
                         } else {
                             return `<span class="tx-inverse">${data}</span>`
                         }
@@ -508,6 +524,7 @@
             destroy: true,
             ordering: false,
             paging: false,
+            scrollX:"100%",
             scrollY: 300,
             processing: true,
 

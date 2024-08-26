@@ -171,24 +171,37 @@ def edit_jam_kerja(r):
         jam_kistirahat = r.POST.get("jam_kistirahat")
         jam_kistirahat2 = r.POST.get("jam_kistirahat2")
         kk = r.POST.get("kk")
-        hari = r.POST.get("hari")
-        try:
-            get = jamkerja_db.objects.get(pk=int(eid))
-            jamkerja_db.objects.filter(id=int(eid)).update(
+        hari = r.POST.getlist("hari[]")
+        for h in hari:
+            if h.lower() == 'semua hari':
+                hari = ["Semua Hari"]
+                break
+                
+        print(hari)
+
+        if len(hari) >= 7:
+            hari = ["Semua Hari"]
+        jamkerja_db.objects.filter(id=int(eid)).delete()
+        for h in hari:
+            # if jamkerja_db.objects.filter(kk_id=int(kk),hari=h).exists():
+            #     continue
+            
+            if h.lower() == 'semua hari':
+                if jamkerja_db.objects.filter(~Q(hari='semua hari'),kk_id=int(kk)).exists():
+                    break
+            print("OKOSKD")
+            jamkerja_db(
+                kk_id=kk,
                 jam_masuk=jam_masuk,
                 jam_pulang=jam_pulang,
                 jam_istirahat=jam_istirahat,
                 jam_kembali_istirahat=jam_kistirahat,
                 jam_istirahat2=jam_istirahat2,
                 jam_kembali_istirahat2=jam_kistirahat2,
-                hari=hari,
-                kk_id=int(kk)
-            )
-            print(r.POST)
-            status = "Ok"
-            return JsonResponse({"status": status})
-        except:
-            return JsonResponse({"status": "gagal update"})
+                hari=h
+            ).save()
+        status = "ok"
+        return JsonResponse({"status": status})
 
 
 @login_required

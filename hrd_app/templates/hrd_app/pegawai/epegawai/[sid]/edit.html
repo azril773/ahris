@@ -176,7 +176,7 @@
                                   <select name="hr" id="hr" class="form-control select2-show-search" data-placeholder="" required>
                                     <option label=""></option>
                                     {% for h in hr %}
-                                    {% if pg.hari_off_id %}
+                                    {% if pg.hari_off_id == h.id %}
                                       <option value={{h.id}} selected>{{h.hari}}</option>
                                     {% else %}
                                       <option value={{h.id}}>{{h.hari}}</option>

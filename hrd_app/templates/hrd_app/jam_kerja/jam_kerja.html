@@ -309,14 +309,6 @@
 
                                 <select name="ejhari" id="ejhari" data-placeholder='Pilih' required=required>
                                     <option label="" value="">Pilih Hari</option>
-                                    <option label="Senin" value="Senin">Senin</option>
-                                    <option label="Selasa" value="Selasa">Selasa</option>
-                                    <option label="Rabu" value="Rabu">Rabu</option>
-                                    <option label="Kamis" value="Kamis">Kamis</option>
-                                    <option label="Jumat" value="Jumat">Jumat</option>
-                                    <option label="Sabtu" value="Sabtu">Sabtu</option>
-                                    <option label="Minggu" value="Minggu">Minggu</option>
-                                    <option label="Semua Hari" value="Semua Hari">Semua Hari</option>
                                 </select>
                             </div>
                         </div>
@@ -405,7 +397,23 @@
 
         const ejkkSelect = $('#ejkk').selectize();
 
-        const ehariSelect = $('#ejhari').selectize();
+        const ehariSelect = $('#ejhari').selectize({
+            maxItems: null,
+            valueField: 'hari',
+            labelField: 'hari',
+            searchField: 'hari',
+            options: [
+              {hari:'Senin'},
+              {hari:'Selasa'},
+              {hari:'Rabu'},
+              {hari:'Kamis'},
+              {hari:'Jumat'},
+              {hari:'Sabtu'},
+              {hari:'Minggu'},
+              {hari:'Semua Hari'}
+            ],
+            create: false
+        });
 
     $(document).ready(function() {
         const token = document.querySelector('[name=csrfmiddlewaretoken]').value

@@ -140,6 +140,7 @@ def edit_pegawai(request,idp):
         pribadi.tgl_lahir = pribadi.tgl_lahir.strftime("%d-%m-%Y")
         pribadi.tinggi_badan = ".".join(str(pribadi.tinggi_badan).split(","))
         pribadi.berat_badan = ".".join(str(pribadi.berat_badan).split(","))
+        print(pg.hari_off_id,"SDKSDLK")
         data = {
             'akses' : akses,
             'id':idp,
@@ -149,6 +150,7 @@ def edit_pegawai(request,idp):
             'divisi': divisi,
             'jabatan': jabatan,
             'kk':kk,
+            "pg_hr":pg.hari_off_id,
             'hr':hr,
             'pg':pg,
             'today':datetime.strftime(today,'%d-%m-%Y'),
@@ -196,7 +198,7 @@ def epegawai(r,idp):
         pks = r.POST.get("pks")
         ptk = r.POST.get("ptk")
 
-
+        print(hr,"ARI")
         # Data Pribadi
         alamat = r.POST.get("alamat")
         phone = r.POST.get("phone")
@@ -222,6 +224,7 @@ def epegawai(r,idp):
         if pegawai_db.objects.filter(~Q(pk=int(idp)),userid=userid).exists():
             status = "duplikat"
         else:
+            print("OKSODKSDOK")
             pegawai = pegawai_db.objects.filter(userid=userid).update(
                 nama=nama,
                 gender=gender,
@@ -247,7 +250,7 @@ def epegawai(r,idp):
                 edit_by=r.user.username
 
                 # status
-            )            
+            )   
 
             
 
