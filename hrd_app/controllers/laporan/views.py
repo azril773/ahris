@@ -22,7 +22,8 @@ def laporan(r,sid):
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
-        jenis_ijin = jenis_ijin_db.objects.all()   
+        jenis_ijin = jenis_ijin_db.objects.all()  
+        sall = status_pegawai_db.objects.all()
         data = {
             'akses' : akses,
             'status' : status,
@@ -32,11 +33,13 @@ def laporan(r,sid):
             'jenis_ijin' : jenis_ijin,
             "list_year":list_year,
             "bulan":sp.month,
+            "nama_bulan":nama_bulan(sp.month),
             "tahun":sp.year,
+            "sall":sall,
             'modul_aktif' : 'Laporan'
         }
         
-        return render(r,'hrd_app/laporan/laporan.html', data)
+        return render(r,'hrd_app/laporan/[sid]/laporan.html', data)
         
     else:    
         messages.info(r, 'Data akses Anda belum di tentukan.')        
@@ -48,10 +51,8 @@ def laporan_json(r):
     bulan = r.POST.get('bulan')
     tahun = r.POST.get('tahun')
     date = tahun+"-"+bulan+"-25"
-    sp = datetime.today().strftime(date)
-    sp = datetime.strptime(sp, '%Y-%m-%d')
+    sp = datetime.strptime(date,"%Y-%m-%d")
     dr = sp - timedelta(days=30)
-    print(dr,sp)
 
     data = []
 
@@ -62,6 +63,19 @@ def laporan_json(r):
             terlambat = 0
             terlambat_ijin = 0
             total_hari = 0
+            sdp = 0
+            sb = 0
+            sdl = 0
+            nkh = 0
+            im = 0
+            cm = 0
+            wft = 0
+            snt = 0
+            ijin = 0
+            af = 0
+            ct = 0 #keterangan absensi
+            opg = 0
+            dl = 0
             ab = absensi_db.objects.filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
             if ab.exists():
                 for a in ab:
@@ -75,17 +89,69 @@ def laporan_json(r):
                                 terlambat_ijin += 1
                             else:
                                 terlambat += 1
+                    if a.keterangan_ijin is not None:
+                        if re.search("sdp",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            sdp += 1
+                        elif re.search("sb",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            sb += 1
+                        elif re.search("sdl",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            sdl += 1
+                        elif re.search("skh",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            nkh += 1
+                        elif re.search("im",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            im += 1
+                        elif re.search("wft",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            wft += 1
+                        elif re.search("snt",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            snt += 1
+                        elif re.search("ijin",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            ijin += 1
+                        elif re.search("dl",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            dl += 1
+                    if a.keterangan_absensi is not None:
+                        if re.search("cuti",a.keterangan_absensi,re.I):
+                            print(a.keterangan_absensi)
+                            ct += 1
+                        elif re.search("af",a.keterangan_absensi,re.I):
+                            print(a.keterangan_absensi)
+                            af += 1
+                        elif re.search("opg",a.keterangan_absensi,re.I):
+                            print(a.keterangan_absensi)
+                            opg += 1
+            
             obj = {
                 "id" : pgw.id,
                 "nik":pgw.nik,
                 "jk":pgw.gender[0],
                 "nama": pgw.nama,
                 "divisi":pgw.divisi.divisi,
-                "off": off,
-                "terlambat": terlambat,
+                "off": off if off > 0 else "",
+                "terlambat": terlambat if terlambat > 0 else "",
                 "hari_off":pgw.hari_off.hari,
-                "terlambat_ijin": terlambat_ijin,
-                "total_hari": total_hari,
+                "terlambat_ijin": terlambat_ijin if terlambat_ijin > 0 else "",
+                "total_hari": total_hari if total_hari > 0 else "",
+                "sdp":sdp if sdp > 0 else "",
+                "sb":sb if sb > 0 else "",
+                "sdl":sdl if sdl > 0 else "",
+                "nkh":nkh if nkh > 0 else "",
+                "im":im if im > 0 else "",
+                "cm":cm if cm > 0 else "",
+                "wft":wft if wft > 0 else "",
+                "snt":snt if snt > 0 else "",
+                "ijin":ijin if ijin > 0 else "",
+                "af":af if af > 0 else "",
+                "ct":ct if ct > 0 else "",
+                "opg":opg if opg > 0 else "",
+                "dl":dl if dl > 0 else ""
             }
             data.append(obj)
     else:
@@ -95,6 +161,22 @@ def laporan_json(r):
             terlambat = 0
             terlambat_ijin = 0
             total_hari = 0
+
+
+            sdp = 0
+            sb = 0
+            sdl = 0
+            nkh = 0
+            im = 0
+            cm = 0
+            wft = 0
+            snt = 0
+            ijin = 0
+            af = 0
+            ct = 0 #keterangan absensi
+            opg = 0
+            dl = 0
+
             ab = absensi_db.objects.filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
             if ab.exists():
                 for a in ab:
@@ -108,24 +190,250 @@ def laporan_json(r):
                                 terlambat_ijin += 1
                             else:
                                 terlambat += 1
+                    if a.keterangan_ijin is not None:
+                        if re.search("sdp",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            sdp += 1
+                        elif re.search("sb",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            sb += 1
+                        elif re.search("sdl",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            sdl += 1
+                        elif re.search("skh",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            nkh += 1
+                        elif re.search("im",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            im += 1
+                        elif re.search("wft",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            wft += 1
+                        elif re.search("snt",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            snt += 1
+                        elif re.search("ijin",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            ijin += 1
+                        elif re.search("dl",a.keterangan_ijin,re.I):
+                            print(a.keterangan_ijin)
+                            dl += 1
+                    if a.keterangan_absensi is not None:
+                        if re.search("cuti",a.keterangan_absensi,re.I):
+                            print(a.keterangan_absensi)
+                            ct += 1
+                        elif re.search("af",a.keterangan_absensi,re.I):
+                            print(a.keterangan_absensi)
+                            af += 1
+                        elif re.search("opg",a.keterangan_absensi,re.I):
+                            print(a.keterangan_absensi)
+                            opg += 1
+            print(sdp)
             obj = {
                 "id" : pgw.id,
                 "nik":pgw.nik,
                 "jk":pgw.gender[0],
                 "nama": pgw.nama,
                 "divisi":pgw.divisi.divisi,
-                "off": off,
-                "terlambat": terlambat,
+                "off": off if off > 0 else "",
+                "terlambat": terlambat if terlambat > 0 else "",
                 "hari_off":pgw.hari_off.hari,
-                "terlambat_ijin": terlambat_ijin,
-                "total_hari": total_hari,
+                "terlambat_ijin": terlambat_ijin if terlambat_ijin > 0 else "",
+                "total_hari": total_hari if total_hari > 0 else "",
+                "sdp":sdp if sdp > 0 else "",
+                "sb":sb if sb > 0 else "",
+                "sdl":sdl if sdl > 0 else "",
+                "nkh":nkh if nkh > 0 else "",
+                "im":im if im > 0 else "",
+                "cm":cm if cm > 0 else "",
+                "wft":wft if wft > 0 else "",
+                "snt":snt if snt > 0 else "",
+                "ijin":ijin if ijin > 0 else "",
+                "af":af if af > 0 else "",
+                "ct":ct if ct > 0 else "",
+                "opg":opg if opg > 0 else "",
+                "dl":dl if dl > 0 else ""
             }
             data.append(obj)
-    for dt in data:
-        print(dt,"\n") 
     return JsonResponse({"data":data},status=200)
 
 
 
-def laporan_json_periode(r,sid,periode):
-    pass
+@login_required
+def print_laporan(r,sid,id,bulan,tahun):
+    iduser = r.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+        dsid = dakses.sid_id     
+        pegawai = pegawai_db.objects.get(id=id)
+        status = status_pegawai_db.objects.all().order_by('id')
+        
+        ###
+        try:
+            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = sid_lembur.status_pegawai.pk
+        except:
+            sid_lembur = 0
+        jenis_ijin = jenis_ijin_db.objects.all()   
+        date = tahun+"-"+bulan+"-25"
+        sp = datetime.strptime(date,"%Y-%m-%d")
+        dr = sp - timedelta(days=30)
+        data = {
+            'akses' : akses,
+            'status' : status,
+            'dsid': dsid,
+            "dari":dr.date(),
+            "sampai":sp.date(),
+            "dr":dr,
+            "pegawai":pegawai,
+            "id":id,
+            "sp":sp,
+            'sid': sid,
+            'sil': sid_lembur,
+            'jenis_ijin' : jenis_ijin,
+            'modul_aktif' : 'Print Laporan'
+        }
+        
+        return render(r,'hrd_app/laporan/[sid]/[id]/[bulan]/[tahun]/print_laporan.html', data)
+    # return render(r,"hrd_app/laporan/print_laporan.html")
+
+
+def laporan_json_periode(r,sid,id,dr,sp):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        
+        data = []
+        print(dr,sp)
+        dari = datetime.strptime(dr,'%Y-%m-%d %H:%M:%S').date()
+        dari_loop = datetime.strptime(dr,'%Y-%m-%d %H:%M:%S').date()
+        sampai_today = datetime.today().date()
+        sampai = datetime.strptime(sp,'%Y-%m-%d %H:%M:%S').date()
+        delta = timedelta(days=1)
+        hari_count = 0
+        while dari_loop <= sampai:
+            dari_loop += delta
+            hari_count += 1
+        kehadiran = 0
+        tselisih = 0.0
+        trlmbt = 0
+        for a in absensi_db.objects.select_related('pegawai').filter(tgl_absen__range=(dari,sampai_today),pegawai_id=id).order_by('tgl_absen','pegawai__divisi__divisi'):
+            if a.masuk is not None and a.pulang is not None:
+                kehadiran += 1
+            sket = " "
+            
+            ab = absensi_db.objects.get(id=a.id)     
+            hari = ab.tgl_absen.strftime("%A")
+            hari_ini = nama_hari(hari) 
+            
+            if ab.pegawai.counter_id is None:
+                bagian = ab.pegawai.divisi.divisi
+            else:
+                bagian = f'{ab.pegawai.divisi.divisi} - {ab.pegawai.counter.counter}' 
+                
+            if ab.masuk is not None:
+                msk = f"{ab.masuk}"
+            else:
+                msk = None
+            if ab.pulang is not None:
+                plg = f"{ab.pulang}"
+            else:
+                plg = None
+            if ab.masuk_b is not None:
+                msk_b = f"{ab.masuk_b}"
+            else:
+                msk_b = None
+            if ab.pulang_b is not None:
+                plg_b = f"{ab.pulang_b}"
+            else:
+                plg_b = None
+            if ab.istirahat is not None and ab.istirahat2 is not None:
+                ist = f'{ab.istirahat} / {ab.istirahat2}'
+            elif ab.istirahat is not None and ab.istirahat2 is None:                  
+                ist = f'{ab.istirahat}'
+            elif ab.istirahat is None and ab.istirahat2 is not None:                  
+                ist = f'{ab.istirahat2}'
+            else:
+                ist = ""    
+            if ab.istirahat_b is not None and ab.istirahat2_b is not None:
+                ist_b += f" {ab.istirahat_b} / {ab.istirahat2_b})"
+            elif ab.istirahat_b is not None and ab.istirahat2_b is None:
+                ist_b += f" {ab.istirahat_b}"
+            elif ab.istirahat_b is None and ab.istirahat2_b is not None:
+                ist_b += f" {ab.istirahat2_b}"
+            else:
+                ist_b = ""
+        
+                
+            if ab.kembali is not None and ab.kembali2 is not None:
+                kmb = f'{ab.kembali} / {ab.kembali2}'
+            elif ab.kembali is not None and ab.kembali2 is None:                  
+                kmb = f'{ab.kembali}'
+            elif ab.kembali is None and ab.kembali2 is not None:                  
+                kmb = f'{ab.kembali2}'    
+            else:
+                kmb = ""        
+            if ab.kembali_b is not None and ab.kembali2_b is not None:
+                kmb_b += f" {ab.kembali_b} / {ab.kembali2_b})"
+            elif ab.kembali_b is not None and ab.kembali2_b is None:
+                kmb_b += f" {ab.kembali_b}"
+            elif ab.kembali_b is None and ab.kembali2_b is not None:
+                kmb_b += f" {ab.kembali2_b}"
+            else:
+                kmb_b = "" 
+            
+            if ab.keterangan_absensi is not None:
+                sket += f'{ab.keterangan_absensi}, '                 
+            if ab.keterangan_ijin is not None:
+                sket += f'{ab.keterangan_ijin}, '
+                kijin = ''
+            else:
+                if ab.masuk is not None and ab.jam_masuk is not None:
+                    if ab.masuk > ab.jam_masuk:
+                        tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
+                        trlmbt += 1
+                        sket += f"Terlambat masuk tanpa ijin, "
+            if ab.keterangan_lain is not None:
+                sket += f'{ab.keterangan_lain}, '                    
+            if ab.libur_nasional is not None:
+                sket += f'{ab.libur_nasional}, '
+                sln = 1
+            else:
+                sln = 0          
+            if ab.istirahat is not None and ab.lama_istirahat is not None:
+                jmkem = datetime.combine(ab.tgl_absen,ab.jam_istirahat) + timedelta(minutes=float(ab.lama_istirahat) * 60) + timedelta(minutes=5)
+                jmkem = jmkem.time()
+            else:
+                jmkem = None
+            print(dari)
+            absen = {
+                'id': ab.id,
+                'tgl': datetime.strftime(ab.tgl_absen,'%d-%m-%Y'),
+                'hari': hari_ini,
+                "tgl_absen":ab.tgl_absen,
+                'nama': ab.pegawai.nama,
+                'nik': ab.pegawai.nik,
+                'userid': ab.pegawai.userid,
+                'bagian': bagian,
+                "jam_masuk":ab.jam_masuk,
+                "jam_pulang":ab.jam_pulang,
+                'masuk': msk,
+                'keluar': ist,
+                'kembali': kmb,
+                'pulang': plg,
+                'masuk_b': msk_b,
+                'keluar_b': ist_b,
+                'kembali_b': kmb_b,
+                'pulang_b': plg_b,
+                "jam_kembali":jmkem,
+                "total_jam":ab.total_jam_kerja,
+                'tj': ab.total_jam_kerja,
+                'ket': sket,
+                'sln': sln,
+                'kehadiran': kehadiran,
+                'ln': ab.libur_nasional
+            }
+            data.append(absen)
+        tselisih = str(tselisih).split(".")
+        slc = slice(0,2)
+        return JsonResponse({"data": data,"kehadiran":kehadiran,"hari":hari_count,"tselisih":f"{tselisih[0]},{tselisih[1][slc]}","trlmbt":trlmbt })

@@ -20,7 +20,7 @@ import json
 import time
 import pandas as pd
 from decimal import *
-
+import re
 # PYZK / FINGER MACHINE
 from zk import ZK, const
 from struct import pack

@@ -297,6 +297,7 @@ def tambah_opg(request):
                     status = 'pegawai tidak masuk'
                 else:
                     if nh == off:
+                        print("OSDKOSKDOKD")
                         topg = opg_db(
                             pegawai_id = int(dpegawai),
                             opg_tgl = tgl,
