@@ -23,7 +23,7 @@
     </div>
 
         <!-- Absensi -->
-        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Data Ijin &nbsp; ({{dari}} - {{sampai}})</h6>
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10" id="range">Data Ijin &nbsp; ({{dari}} - {{sampai}})</h6>
     
         <!-- Info absensi -->        
         <div class="d-flex align-items-center justify-content-start">     
@@ -31,6 +31,7 @@
                             
             <!-- Button Tambah Ijin -->
             <button data-target="#tambahIjin" data-toggle="modal" class="btn btn-primary mg-b-6">Tambah Data Ijin</button>
+            <button data-target="#tambahIjinMelahirkan" data-toggle="modal" class="btn btn-success mg-b-6">Tambah Cuti Melahirkan</button>
 
             <!-- Button Cari Data Ijin -->
             <button data-target="#cariIjin" data-toggle="modal" class="btn btn-warning mg-b-6">Cari Data Ijin</button> &nbsp; &nbsp;
@@ -107,7 +108,7 @@
                                 <div class="col-lg-12">
                                     <div class="form-group mg-b-10-force">
                                         <label class="form-control-label tx-inverse ">Tanggal:</label>
-                                        <input type="text" name="tgl" class="tgl1 form-control" id="tgl" class="form-control multi" placeholder="Tanggal Ijin">
+                                        <input type="text" name="tgl" class="form-control multi" id="tgl" placeholder="Tanggal Ijin">
                                     </div>
                                 </div>
 
@@ -144,6 +145,59 @@
 
                                 <div class="modal-footer">
                                     <button type="button" id="submit_buttonTambah" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
+                                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                                </div>        
+                            </div>                        
+                        </div>            
+                    </form>
+            
+                    
+                </div>
+            </div><!-- modal-dialog -->
+        </div>
+        <div id="tambahIjinMelahirkan" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+                <div class="modal-content bd-0 tx-14">
+                    <div class="modal-header pd-y-20 pd-x-25">
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Cuti Melahirkan</h6>          
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>          
+                    </div>
+                    
+                    <form id="tambahForm">
+                        {% csrf_token %}
+                        <div class="form-layout form-layout-1">
+                            <div class="row mg-b-8">
+                
+                                <div class="col-lg-6">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse ">Dari Tanggal:</label>
+                                        <input type="text" name="tgl" class="form-control tgl1" id="tglm1" placeholder="Dari Tanggal">
+                                    </div>
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse ">Sampai Tanggal:</label>
+                                        <input type="text" name="tgl" class="form-control tgl1" id="tglm2" placeholder="Sampai Tanggal">
+                                    </div>
+                                </div>
+
+                                <div class="col-lg-12">
+                                    <div class="form-group mg-b-10-force">
+                                        <label class="form-control-label tx-inverse">Pegawai:</label>
+                                        <select name="pegawai" id="pegawaim" class="" data-placeholder='Pilih' required=required>
+                                            <option label="Pilih Pegawai"></option>
+                                            {% for p in pp %}
+                                            <option value="{{p.idp}}">{{p.nama}}/{{p.nik}} - {{p.userid}}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+                                </div>
+
+
+                                <div class="modal-footer">
+                                    <button type="button" id="submit_buttonTambahM" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
                                     <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
                                 </div>        
                             </div>                        
@@ -201,7 +255,7 @@
                 </button>          
                 </div>
                 
-                <form action="{% url 'cijin' %}" method="post">
+                <form id="formCariIjin" method="post">
                     {% csrf_token %}
                     <div class="form-layout form-layout-1">
                     <div class="row mg-b-25">
@@ -220,7 +274,7 @@
                             </div>
                         </div>
 
-                        <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+                        <input type="hidden" name="sid" id="sid" class="form-control" value="{{sid}}">
         
                         <div class="modal-footer">
                         <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
@@ -241,7 +295,7 @@
 {% endblock breadcrumb %}
 
 {% block hrd_ajax %}
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.30.1/locale/id.min.js" integrity="sha512-he8U4ic6kf3kustvJfiERUpojM8barHoz0WYpAUDWQVn61efpm3aVAD8RWL8OloaDDzMZ1gZiubF9OSdYBqHfQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>    
     const pegawai =$('#pegawai').selectize();
 
@@ -251,7 +305,7 @@
     dr = "{{dr}}"
     sp = "{{sp}}"
     console.log(sid)
-    var table = $('#tabelku').DataTable({
+    let table = $('#tabelku').DataTable({
         "ajax": "{% url 'ijin_json' dr sp sid %}",
 
         columns: [
@@ -381,14 +435,108 @@
 
     });
 
+
+    $("#formCariIjin").on("submit",(e) => {
+        e.preventDefault()
+        const ctgl1 = $("#ctgl1").val()
+        const ctgl2 = $("#ctgl2").val()
+        const sid = $("#sid").val()
+        $("tabelku").DataTable().destroy()
+        table = $('#tabelku').DataTable({
+            "ajax": `/hrd/ijin_json/${ctgl1}/${ctgl2}/${sid}`,
+    
+            columns: [
+    
+                { data: 'tgl' },
+                { data: 'hari' },
+                { data: 'nama' },
+                { data: 'nik' },
+                { data: 'userid' },
+                { data: 'divisi' },
+                { data: 'ijin' },
+                { data: 'ket' },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){    
+                        data = '<button data-target="#batalIjin" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-id_batal='+row.id+'>Batalkan Ijin</button>';
+                        return data;
+                    } 
+                },
+                
+            ],   
+    
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+                $('td', row).eq(6).addClass('hitam');
+                $('td', row).eq(7).addClass('hitam');
+                $('td', row).eq(8).addClass('hitam');
+            },
+    
+            destroy: true,
+            ordering: false,
+            paging: false,
+            scrollX: '100%',
+            scrollY: 300,
+            processing: true,
+    
+            "language": {
+                searchPlaceholder: 'Cari...',
+                sSearch: '',
+                loadingRecords: '&nbsp;',
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+                emptyTable: "&nbsp;",
+    
+                paginate: {
+                    previous: '<i class="cs-chevron-left"></i>',
+                    next: '<i class="cs-chevron-right"></i>',
+                },
+            },
+    
+        });   
+        $("#range").html(`Data Ijin &nbsp; (${moment(ctgl1,"DD-MM-YYYY").format("D MMMM YYYY")} - ${moment(ctgl2,"DD-MM-YYYY").format("D MMMM YYYY")})`)
+        $("#cariIjin").modal('hide');
+
+    })
+
     $("#submit_buttonBatal").on("click", function() {
         var $this = $(this);
         $this.attr('disabled', true);
     });
-    $("#submit_buttonTambah").on("click", function() {
-        var $this = $(this);
-        $this.attr('disabled', true);
-    });
+
+    const pegawaiSelectize = $("#pegawaim").selectize()
+    const token = document.querySelector("input[name='csrfmiddlewaretoken']").value
+    $("#submit_buttonTambahM").on("click",function(e){
+        const dari = $("#tglm1").val()
+        const sampai = $("#tglm2").val()
+        const pegawai = $("#pegawaim").val()
+        
+        $.ajax({
+            url:"/hrd/tcuti_melahirkan/",
+            method:"post",
+            data:{
+                dari,
+                sampai,
+                pegawai
+            },
+            headers:{
+                "X-CSRFToken":token
+            },
+            success(e){
+                console.log(e)
+                table.ajax.reload(null, false);
+                $("#tambahIjinMelahirkan").modal("hide")
+            },
+            error(err){
+                alert(err.responseJSON.msg)
+            }
+        })
+        
+    })
 
 </script>
 

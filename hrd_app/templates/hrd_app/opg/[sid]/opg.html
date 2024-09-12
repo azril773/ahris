@@ -269,10 +269,10 @@
                             </div>
                         </div>
 
-                        <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+                        <input type="hidden" name="sid" class="form-control" id="sidP" value="{{sid}}">
         
                         <div class="modal-footer">
-                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
+                        <button type="submit" id="buttonCariOpg" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
                         <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
                         </div>              
         
@@ -519,6 +519,76 @@
         var $this = $(this);
         $this.attr('disabled', true);
     });
+
+    $("#buttonCariOpg").on("click",function(e){
+        e.preventDefault();
+        const ctgl1 = $("#ctgl1").val();
+        const ctgl2 = $("#ctgl2").val();
+        const sid = $("#sidP").val()
+        const token = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        console.log(ctgl1, ctgl2, sid)
+        $('#tabelku').DataTable().destroy();
+        $('#tabelku').DataTable({
+            "ajax": `/hrd/opg_json/${ctgl1}/${ctgl2}/${sid}`,
+    
+            columns: [
+    
+                { data: 'nama' },
+                { data: 'nik' },
+                { data: 'userid' },
+                { data: 'divisi' },
+                { data: 'opg_tgl' },
+                { data: 'diambil_tgl' },
+                { data: 'ket' },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){ 
+                        if (row.status == 0){
+                            data = '<button data-target="#pakaiOPG" data-toggle="modal" class="btn btn-sm btn-info mb-1 tx-12" data-id_pakai='+row.id+'>Pakai OPG</button> &nbsp; <button data-target="#hapusOPG" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-id_hapus='+row.id+'>Hapus OPG</button> &nbsp;';
+                        } else {
+                            data = '<button data-target="#batalOPG" data-toggle="modal" class="btn btn-sm btn-warning mb-1 tx-12" data-id_batal='+row.id+'>Batalkan OPG</button> &nbsp; <button data-target="#hapusOPG" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-id_hapus='+row.id+'>Hapus OPG</button> &nbsp;';
+                        }  
+                        
+                        return data;
+                    } 
+                },
+                
+            ],   
+    
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+                $('td', row).eq(6).addClass('hitam');
+                $('td', row).eq(7).addClass('hitam');
+            },
+    
+            destroy: true,
+            ordering: false,
+            paging: false,
+            scrollX: '100%',
+            scrollY: 300,
+            processing: true,
+    
+            "language": {
+                searchPlaceholder: 'Cari...',
+                sSearch: '',
+                loadingRecords: '&nbsp;',
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+                emptyTable: "&nbsp;",
+    
+                paginate: {
+                    previous: '<i class="cs-chevron-left"></i>',
+                    next: '<i class="cs-chevron-right"></i>',
+                },
+            },
+    
+        });  
+        $('#cariOPG').modal('hide');
+    })
 
 </script>
 

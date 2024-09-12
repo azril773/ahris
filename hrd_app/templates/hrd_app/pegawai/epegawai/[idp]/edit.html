@@ -60,7 +60,6 @@
         </div>
 
         <br>           
-       
         <div class="row">
             <div class="col-lg-12">
                 <div id="wizard1">
@@ -78,9 +77,15 @@
                               <div class="col-lg-3">
                                 <div class="form-group">
                                   <label class="form-control-label tx-inverse">Gender: <span class="tx-danger">*</span></label>
-                                    <select name="gender" id="gender" class="form-control select2-show-search" required=required>
-                                        <option value="Perempuan">Perempuan</option>
-                                        <option value="Laki-Laki">Laki-Laki</option>
+                                    <select name="gender" id="gender" class="form-control select2-show-search" required>
+                                      <p>{{pg.gender}}</p>
+                                      {% for g in gender %}
+                                        {% if g == pg.gender %}
+                                            <option value="{{pg.gender}}" selected>{{pg.gender}}</option>
+                                          {% else %}
+                                            <option value="{{pg.gender}}">{{pg.gender}}</option>
+                                        {% endif %}
+                                      {% endfor %}
                                     </select>
                                 </div>
                               </div>

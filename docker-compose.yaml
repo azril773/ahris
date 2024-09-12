@@ -3,17 +3,18 @@ version: "3.8"
 services:
   hrd_app:
     container_name: hrd_app
-    build: .
-    image: azril/docker
+    build: 
+      context: .
+      dockerfile: Dockerfile
     restart: unless-stopped
     depends_on:
       - mysql
-    ports:
-      - 3000:8000
-    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - static_volume:/static
+    command: sh -c "sleep 3 && python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --no-input && gunicorn --workers 3 hrd.wsgi:application --bind 0.0.0.0:8000"
     environment:
       DB_NAME: root
-      DB_PASS: 123
+      DB_PASS: ""
       DB_HOST: mysql
       DB_PORT: 3306
     # volumes:
@@ -25,18 +26,38 @@ services:
   mysql:
     container_name: mysql
     image: mysql:latest
-    ports:
-      - 3307:3306
     environment:
-      MYSQL_ROOT_PASSWORD: "123"
+      # MYSQL_ROOT_PASSWORD: "123"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
       MYSQL_DATABASE: hrd
     networks:
       - ahris
       
-    
+  nginx:
+    container_name: nginx
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    command: sh -c "sleep 10 && nginx -g 'daemon off;'"
+    ports:
+      - 8000:80
+    depends_on:
+      - hrd_app
+    restart: "always"
+    volumes:
+      - static_volume:/static
+    networks:
+      - ahris
+
+
 networks:
   ahris:
     driver: bridge
+
+
+volumes:
+  static_volume:
+  
   # nama:
   #   external: true
 

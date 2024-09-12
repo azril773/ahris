@@ -79,8 +79,13 @@
                                 <div class="form-group">
                                   <label class="form-control-label tx-inverse">Gender: <span class="tx-danger">*</span></label>
                                     <select name="gender" id="gender" class="form-control select2-show-search" required=required>
-                                        <option value="Perempuan">Perempuan</option>
-                                        <option value="Laki-Laki">Laki-Laki</option>
+                                      {% for g in gender %}
+                                        {% if g == pg.gender %}
+                                          <option value="{{g}}" selected>{{g}}</option>
+                                        {% else %}
+                                          <option value="{{g}}">{{g}}</option>
+                                      {% endif %}
+                                    {% endfor %}
                                     </select>
                                 </div>
                               </div>

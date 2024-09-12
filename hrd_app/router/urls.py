@@ -3,7 +3,6 @@ from hrd_app.controllers import views
 from django.contrib.auth import views as auth_views
 urlpatterns = [
     path('logindispatch', views.logindispatch, name='dispatch'),
-    path('login', auth_views.LoginView.as_view(template_name='hrd_app/login.html'), name='login'),
     path('logout', views.user_logout, name='logout'),
     
     path('', views.beranda, name='beranda'),

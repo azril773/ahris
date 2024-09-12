@@ -64,7 +64,7 @@ def opg(request, sid):
             'modul_aktif' : 'OPG'
         }
         
-        return render(request,'hrd_app/opg/opg/[sid]/opg.html', data)
+        return render(request,'hrd_app/opg/[sid]/opg.html', data)
         
     else:    
         messages.info(request, 'Data akses Anda belum di tentukan.')        
@@ -209,9 +209,10 @@ def opg_json(request, dr, sp, sid):
     if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
-        
+        print(sid)
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
+        print(dari,sampai)
                 
         if int(sid) == 0:
             for i in opg_db.objects.filter(opg_tgl__range=(dari,sampai)):
@@ -255,7 +256,7 @@ def opg_json(request, dr, sp, sid):
                     'status':i.status
                 }
                 data.append(op)
-                               
+        print(data)       
         return JsonResponse({"data": data})
 
 

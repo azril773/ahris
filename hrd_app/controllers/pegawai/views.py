@@ -74,7 +74,7 @@ def edit_pegawai(request,idp):
         kontak_lain = kontak_lain_db.objects.filter(pegawai_id=int(idp))
         pengalaman = pengalaman_db.objects.filter(pegawai_id=int(idp))
         pendidikan = pendidikan_db.objects.filter(pegawai_id=int(idp))
-        pribadi = pribadi_db.objects.get(pegawai_id=pg.pk)
+        pribadi = pribadi_db.objects.filter(pegawai_id=pg.pk)
         today = date.today()
         krg = []
         kln = []
@@ -135,12 +135,14 @@ def edit_pegawai(request,idp):
         kota_kabupaten = kota_kabupaten_db.objects.all()
         # for k in kota_kabupaten:
         #     kota_kabupaten_db(nama_kota_kabupaten=k["nama_kota_kabupaten"]).save()
-        pg.tgl_masuk = pg.tgl_masuk.strftime("%d-%m-%Y")
+        if pg.tgl_masuk is not None:
+            pg.tgl_masuk = pg.tgl_masuk.strftime("%d-%m-%Y")
         data = serialize("json",kota_kabupaten)
-        pribadi.tgl_lahir = pribadi.tgl_lahir.strftime("%d-%m-%Y")
-        pribadi.tinggi_badan = ".".join(str(pribadi.tinggi_badan).split(","))
-        pribadi.berat_badan = ".".join(str(pribadi.berat_badan).split(","))
-        print(pg.hari_off_id,"SDKSDLK")
+        if len(pribadi) > 0:
+            pribadi.tgl_lahir = pribadi.tgl_lahir.strftime("%d-%m-%Y")
+            pribadi.tinggi_badan = ".".join(str(pribadi.tinggi_badan).split(","))
+            pribadi.berat_badan = ".".join(str(pribadi.berat_badan).split(","))
+            print(pg.hari_off_id,"SDKSDLK")
         data = {
             'akses' : akses,
             'id':idp,
@@ -149,6 +151,7 @@ def edit_pegawai(request,idp):
             'counter': counter,
             'divisi': divisi,
             'jabatan': jabatan,
+            "gender":["Laki-Laki","Perempuan"],
             'kk':kk,
             "pg_hr":pg.hari_off_id,
             'hr':hr,
@@ -219,8 +222,11 @@ def epegawai(r,idp):
         pihak = json.loads(pihak)
         pengalaman = json.loads(pengalaman)
         pendidikan = json.loads(pendidikan)
-        status_pegawai = status_pegawai_db.objects.get(status="Staff")
-
+        try:
+            pgw = pegawai_db.objects.get(pk=int(id))
+        except:
+            return JsonResponse({"status":"error"},status=400)
+        status_pegawai = status_pegawai_db.objects.get(pk=pgw.status.pk)
         if pegawai_db.objects.filter(~Q(pk=int(idp)),userid=userid).exists():
             status = "duplikat"
         else:
@@ -310,10 +316,8 @@ def epegawai(r,idp):
                 ).save()
 
             # Tambah Data Pribadi
-            pribadi = pribadi_db.objects.get(pegawai_id=id)
-            if not pribadi:
-                return False
-            else:
+            pribadi = pribadi_db.objects.filter(pegawai_id=id)
+            if len(pribadi) > 0:
                 print(tinggi)
                 pribadi_db.objects.filter(pegawai_id=id).update(
                     pegawai_id=int(pgw.pk),
@@ -328,6 +332,7 @@ def epegawai(r,idp):
                     agama=agama
                 )
             status= 'OK'
+        print("OK")
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
 
 @login_required
@@ -649,7 +654,7 @@ def data_pribadi(request,idp):
         dsid = dakses.sid_id   
         
         pg =pegawai_db.objects.get(id=int(idp))
-        pribadi = pribadi_db.objects.get(pegawai_id=pg.pk)
+        pribadi = pribadi_db.objects.filter(pegawai_id=pg.pk)
         kontak_lain = kontak_lain_db.objects.filter(pegawai_id=pg.pk)
         keluarga = keluarga_db.objects.filter(pegawai_id=pg.pk)
         sid = pg.status_id          
@@ -690,7 +695,6 @@ def pendidikan_kerja(request,idp):
             obj = p
             obj.kota = p.kota
             pdk.append(obj)
-        print(pendidikan[0].dari_tahun)
         pengalaman = pengalaman_db.objects.filter(pegawai_id=pg.pk)
         data = {
             'akses' : akses,
@@ -910,7 +914,7 @@ def pegawai_json(request, sid):
         
         data = []
         if int(sid) == 0:
-            for p in pegawai_db.objects.filter(aktif=1):
+            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=1):
                 
                 if p.tgl_masuk is None:
                     tmasuk = None
@@ -942,7 +946,7 @@ def pegawai_json(request, sid):
                 }
                 data.append(pg)
         else: 
-            for p in pegawai_db.objects.filter(aktif=1, status_id=int(sid)):
+            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=1, status_id=int(sid)):
                 
                 if p.tgl_masuk is None:
                     tmasuk = None
@@ -985,7 +989,7 @@ def non_aktif_json(request, sid):
         
         data = []
         if int(sid) == 0:
-            for p in pegawai_db.objects.filter(aktif=0):
+            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=0):
                 
                 if p.tgl_masuk is None:
                     tmasuk = None
@@ -999,7 +1003,7 @@ def non_aktif_json(request, sid):
                     'nik':p.nik,
                     'userid':p.userid,
                     'divisi':p.divisi.divisi,
-                    'counter':p.counter,
+                    'counter':p.counter.counter,
                     'jabatan':p.jabatan.jabatan,
                     'tgl_masuk':tmasuk,
                     'nbpjs_ks':p.no_bpjs_ks,
@@ -1014,7 +1018,7 @@ def non_aktif_json(request, sid):
                 }
                 data.append(pg)
         else: 
-            for p in pegawai_db.objects.filter(aktif=0, status_id=int(sid)):
+            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=0, status_id=int(sid)):
                 
                 if p.tgl_masuk is None:
                     tmasuk = None
@@ -1028,7 +1032,7 @@ def non_aktif_json(request, sid):
                     'nik':p.nik,
                     'userid':p.userid,
                     'divisi':p.divisi.divisi,
-                    'counter':p.counter,
+                    'counter':p.counter.counter,
                     'jabatan':p.jabatan.jabatan,
                     'tgl_masuk':tmasuk,
                     'nbpjs_ks':p.no_bpjs_ks,
