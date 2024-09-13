@@ -105,11 +105,11 @@ def cari_absensi(request):
                     ist = ""    
 
                 if a.istirahat_b is not None and a.istirahat2_b is not None:
-                    ist_b += f" {a.istirahat_b} / {a.istirahat2_b})"
+                    ist_b = f" {a.istirahat_b} / {a.istirahat2_b})"
                 elif a.istirahat_b is not None and a.istirahat2_b is None:
-                    ist_b += f" {a.istirahat_b}"
+                    ist_b = f" {a.istirahat_b}"
                 elif a.istirahat_b is None and a.istirahat2_b is not None:
-                    ist_b += f" {a.istirahat2_b}"
+                    ist_b = f" {a.istirahat2_b}"
                 else:
                     ist_b = ""
             
@@ -124,11 +124,11 @@ def cari_absensi(request):
                     kmb = ""        
 
                 if a.kembali_b is not None and a.kembali2_b is not None:
-                    kmb_b += f" {a.kembali_b} / {a.kembali2_b})"
+                    kmb_b = f" {a.kembali_b} / {a.kembali2_b})"
                 elif a.kembali_b is not None and a.kembali2_b is None:
-                    kmb_b += f" {a.kembali_b}"
+                    kmb_b = f" {a.kembali_b}"
                 elif a.kembali_b is None and a.kembali2_b is not None:
-                    kmb_b += f" {a.kembali2_b}"
+                    kmb_b = f" {a.kembali2_b}"
                 else:
                     kmb_b = "" 
                 
@@ -398,11 +398,11 @@ def absensi_json(request, dr, sp, sid):
                     ist = ""    
 
                 if a.istirahat_b is not None and a.istirahat2_b is not None:
-                    ist_b += f" {a.istirahat_b} / {a.istirahat2_b})"
+                    ist_b = f" {a.istirahat_b} / {a.istirahat2_b})"
                 elif a.istirahat_b is not None and a.istirahat2_b is None:
-                    ist_b += f" {a.istirahat_b}"
+                    ist_b = f" {a.istirahat_b}"
                 elif a.istirahat_b is None and a.istirahat2_b is not None:
-                    ist_b += f" {a.istirahat2_b}"
+                    ist_b = f" {a.istirahat2_b}"
                 else:
                     ist_b = ""
             
@@ -417,11 +417,11 @@ def absensi_json(request, dr, sp, sid):
                     kmb = ""        
 
                 if a.kembali_b is not None and a.kembali2_b is not None:
-                    kmb_b += f" {a.kembali_b} / {a.kembali2_b})"
+                    kmb_b = f" {a.kembali_b} / {a.kembali2_b})"
                 elif a.kembali_b is not None and a.kembali2_b is None:
-                    kmb_b += f" {a.kembali_b}"
+                    kmb_b = f" {a.kembali_b}"
                 elif a.kembali_b is None and a.kembali2_b is not None:
-                    kmb_b += f" {a.kembali2_b}"
+                    kmb_b = f" {a.kembali2_b}"
                 else:
                     kmb_b = "" 
                 
@@ -520,11 +520,11 @@ def absensi_json(request, dr, sp, sid):
                     ist = ""    
 
                 if a.istirahat_b is not None and a.istirahat2_b is not None:
-                    ist_b += f" {a.istirahat_b} / {a.istirahat2_b})"
+                    ist_b = f" {a.istirahat_b} / {a.istirahat2_b})"
                 elif a.istirahat_b is not None and a.istirahat2_b is None:
-                    ist_b += f" {a.istirahat_b}"
+                    ist_b = f" {a.istirahat_b}"
                 elif a.istirahat_b is None and a.istirahat2_b is not None:
-                    ist_b += f" {a.istirahat2_b}"
+                    ist_b = f" {a.istirahat2_b}"
                 else:
                     ist_b = ""
             
@@ -539,11 +539,11 @@ def absensi_json(request, dr, sp, sid):
                     kmb = ""        
 
                 if a.kembali_b is not None and a.kembali2_b is not None:
-                    kmb_b += f" {a.kembali_b} / {a.kembali2_b})"
+                    kmb_b = f" {a.kembali_b} / {a.kembali2_b})"
                 elif a.kembali_b is not None and a.kembali2_b is None:
-                    kmb_b += f" {a.kembali_b}"
+                    kmb_b = f" {a.kembali_b}"
                 elif a.kembali_b is None and a.kembali2_b is not None:
-                    kmb_b += f" {a.kembali2_b}"
+                    kmb_b = f" {a.kembali2_b}"
                 else:
                     kmb_b = "" 
                 
@@ -892,7 +892,7 @@ def pabsen(request):
                                     dt.append(data)
                                 else:
                                     s = jam_absen - datetime.combine(ab.tgl_absen,ab.masuk)
-                                    if s.total_seconds() / 3600 > 4:
+                                    if s.total_seconds() / 3600 > 7:
                                         ab.masuk_b = jam_absen.time()
                                         ab.save()
                                         data = {
@@ -1096,7 +1096,7 @@ def pabsen(request):
                                 else:
                                     if ab.masuk is not None:
                                         d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab.tgl_absen,ab.masuk)
-                                        if d.total_seconds() / 3600 > 5:
+                                        if d.total_seconds() / 3600 > 7:
                                             ab.masuk_b = jam_absen.time()
                                             ab.save()
                                             data = {
@@ -1141,7 +1141,7 @@ def pabsen(request):
 # ++++++++++++++++++++++++++++++++++++++++  ISTIRAHAT  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 2 and int(jam_absen.hour) > 8 and int(jam_absen.hour) < 21:
                             if ab.istirahat is not None:
-                                if (int(jam_absen.hour) - int(ab.istirahat.hour)) > 4:
+                                if (int(jam_absen.hour) - int(ab.istirahat.hour)) > 5:
                                     ab.istirahat_b = jam_absen.time()
                                     ab.save()
                                     data = {
@@ -1484,7 +1484,7 @@ def pabsen(request):
 # ++++++++++++++++++++++++++++++++++++++++  ISTIRAHAT 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 4 and int(jam_absen.hour) > 8 and int(jam_absen.hour) < 21:
                             if ab.istirahat2 is not None:
-                                if (int(jam_absen.hour) - int(ab.istirahat2.hour)) > 4:
+                                if (int(jam_absen.hour) - int(ab.istirahat2.hour)) > 5:
                                     ab.istirahat2_b = jam_absen.time()
                                     ab.save()
                                     data = {
@@ -1786,7 +1786,7 @@ def pabsen(request):
 # ++++++++++++++++++++++++++++++++++++++++  KEMBALI +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 3 and int(jam_absen.hour) > 9:
                             if ab.kembali is not None:
-                                if int(jam_absen.hour) - int(ab.kembali.hour) > 4:
+                                if int(jam_absen.hour) - int(ab.kembali.hour) > 5:
                                     ab.kembali_b = jam_absen.time()
                                     ab.save()
                                     data = {
@@ -1831,7 +1831,7 @@ def pabsen(request):
 # ++++++++++++++++++++++++++++++++++++++++  KEMBALI 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 5 and int(jam_absen.hour) > 9:
                             if ab.kembali2 is not None:
-                                if int(jam_absen.hour) - int(ab.kembali2.hour) > 4:
+                                if int(jam_absen.hour) - int(ab.kembali2.hour) > 5:
                                     ab.kembali2_b = jam_absen.time()
                                     ab.save()
                                     data = {
@@ -2407,7 +2407,7 @@ def pabsen(request):
                                     dt.append(data)
                             else:
                                 d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(r.date(),ab.pulang)
-                                if d.total_seconds() / 3600 > 8:
+                                if d.total_seconds() / 3600 >= 5:
                                     ab.pulang_b = jam_absen.time()
                                     ab.save()
                                     data = {
@@ -2433,6 +2433,7 @@ def pabsen(request):
                         elif a["punch"] == 1 and int(jam_absen.hour) < 9:
                             if pg is not None:
                                 if re.search('hotel',pg["status"],re.IGNORECASE) is not None:
+                                    ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                     if ab.masuk is not None:
                                         if int(ab.masuk.hour) > 18:
                                             ab.pulang = jam_absen.time()
@@ -2446,6 +2447,8 @@ def pabsen(request):
                                             }
                                             dt.append(data)
                                         else:
+                                            ab2.pulang = jam_absen.time()
+                                            ab2.save()
                                             data = {
                                                 "userid": a["userid"],
                                                 "jam_absen": jam_absen,
@@ -2458,7 +2461,6 @@ def pabsen(request):
                                         try:
                                             ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                             if ab2.pulang is not None:
-                                                d = datetime.combine(r.date(),jam_absen.time()) - datetime.combine(ab2.tgl_absen,ab2.pulang)
                                                 if ab2.pulang.hour < 9:
                                                     ab2.pulang = jam_absen.time()
                                                     ab2.save()
@@ -2481,17 +2483,6 @@ def pabsen(request):
                                                         "ket": "Pulang Malam"
                                                     }
                                                     dt.append(data)
-                                            elif ab.istirahat is not None or ab.kembali is not None or ab.masuk is not None:
-                                                ab.pulang = jam_absen.time()
-                                                ab.save()
-                                                data = {
-                                                    "userid": a["userid"],
-                                                    "jam_absen": jam_absen,
-                                                    "punch": 7,
-                                                    "mesin": a["mesin"],
-                                                    "ket": "Pulang Malam"
-                                                }
-                                                dt.append(data)
                                             elif ab2.masuk is not None:
                                                 if int(ab2.masuk.hour) < 18:
                                                     ab.pulang = jam_absen.time()
@@ -2515,6 +2506,17 @@ def pabsen(request):
                                                         "ket": "Pulang Malam"
                                                     }
                                                     dt.append(data)
+                                            elif ab.istirahat is not None or ab.kembali is not None or ab.masuk is not None:
+                                                ab.pulang = jam_absen.time()
+                                                ab.save()
+                                                data = {
+                                                    "userid": a["userid"],
+                                                    "jam_absen": jam_absen,
+                                                    "punch": 7,
+                                                    "mesin": a["mesin"],
+                                                    "ket": "Pulang Malam"
+                                                }
+                                                dt.append(data)
                                             else:
                                                 ab2.pulang = jam_absen.time()
                                                 ab2.save()

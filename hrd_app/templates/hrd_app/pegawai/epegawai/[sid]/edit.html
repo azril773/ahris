@@ -126,6 +126,21 @@
                                 </select>
                                 </div>
                               </div> 
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Status: <span class="tx-danger">*</span></label>
+                                  <select name="status" id="status" class="form-control select2-show-search" data-placeholder="" required>
+                                    <option label=""></option>
+                                    {% for s in status %}
+                                    {% if pg.status_id == s.id %}
+                                      <option value={{s.id}} selected>{{s.status}}</option>
+                                    {% else %}
+                                      <option value={{s.id}}>{{s.status}}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                                </div>
+                              </div> 
 
                               <div class="col-lg-3">
                                 <div class="form-group">
@@ -288,7 +303,7 @@
                                     <div class="form-group">
                                       <input type="hidden" name="id" value="{{id}}" id="id">
                                     <label class="form-control-label tx-inverse">Tgl Lahir: <span class="tx-danger">*</span></label>
-                                    <input type="text" name="tgl_lahir" id="tgl_lahir" class="form-control tgl2" value="{{pribadi.tgl_lahir}}" placeholder="tgl-bln-tahun" required>
+                                    <input type="text" name="tgl_lahir" id="tgl_lahir" class="form-control tgl1" value="{{pribadi.tgl_lahir}}" placeholder="tgl-bln-tahun" required>
                                     </div>
                                 </div> 
 
@@ -765,19 +780,19 @@ tambahPdk(pendidikan)
     const sampai_tahun = moment($("#sampaiModalPengalaman").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
     const jabatan = $("#jabatanModalPengalaman").val()
     const json = JSON.parse(localStorage.getItem("data_pengalaman"))
-    if(pendidikan == "" || nama == "" || kota == "" || dari_tahun  == "" || sampai_tahun == "") return false
-    const check = json.filter(e => e.pendidikan == pendidikan)
+    if(perusahaan == "" || nama == "" || kota == "" || dari_tahun  == "" || sampai_tahun == "") return false
+    const check = json.filter(e => e.perusahaan == perusahaan)
     if(check.length > 0) return false
 
     const obj = {
       perusahaan,kota,nama_koka,dari_tahun,sampai_tahun,jabatan:jabatan ? jabatan : "-",id:0
     }
-    console.log("ok")
+    console.log(perusahaan)
     json.push(obj)
     localStorage.setItem("data_pengalaman",JSON.stringify(json))
     tambahPgl(json)
     tambahPengalamanModal.modal("hide")
-    $("#perushaan").val("")
+    $("#perusahaan").val("")
     $("#kotaModalPengalaman").val("")
     kotaModalPengalaman[0].selectize.clear()
     $("#dariModalPengalaman").val("")
@@ -939,11 +954,12 @@ pihak.forEach(e => {
     let i = 0
     $("#pengalaman").html("")
     pengalaman.forEach(e => {
+      console.log(e.perusahaan)
       $("#pengalaman").append(`
       <div class="row mg-b-10">
                           <div class="col-lg-3">
                             <div class="form-group">
-                              <input type="text" name="perusahaan" id="perusahaan" value="${e.perusahaan}" class="form-control" placeholder="Perusahaan">
+                              <input type="text"value="${e.perusahaan}" class="form-control" placeholder="Perusahaan">
                             </div>
                         </div>
                             <div class="col-lg-3">
@@ -1049,6 +1065,7 @@ pihak.forEach(e => {
       const tgl_masuk = moment($("#tgl_masuk").val(),"DD-MM-YYYY").format("YYYY-MM-DD")
       const nik = $("#nik").val()
       const userid = $("#userid").val()
+      const status = $("#status").val()
       const div = $("#div").val()
       const counter = $("#counter").val()
       const jabatan = $("#jabatan").val()
@@ -1082,10 +1099,13 @@ pihak.forEach(e => {
       $.ajax({
         url:`{% url "edit_pegawai" id %}`,
         method:"post",
-        data:{nama,gender,tgl_masuk,nik,userid,div,counter,jabatan,kk,hr,ca,rek,payroll,nks,ntk,pks,ptk,keluarga,pihak,pengalaman,pendidikan,alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah,agama,id},
+        data:{nama,gender,tgl_masuk,nik,userid,status,div,counter,jabatan,kk,hr,ca,rek,payroll,nks,ntk,pks,ptk,keluarga,pihak,pengalaman,pendidikan,alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah,agama,id},
         headers:{"X-CSRFToken":token},
         success:(e) => {
-          console.log(e)
+          localStorage.removeItem("data_pendidikan")
+          localStorage.removeItem("data_pengalaman")
+          localStorage.removeItem("data_keluarga")
+          localStorage.removeItem("data_pihak")
           window.location = "{% url 'pegawai' sid %}"
           console.log('sd')
         }

@@ -9,6 +9,7 @@ urlpatterns = [
     path('hapus_jam', views.hapus_jam, name='hapus_jam'),
     path('tambah_jam', views.tambah_jam, name='tambah_jam'),
     path('ubah_absen', views.ubah_absen, name='ubah_absen'),
+    path('cabsen', views.cari_absensi, name='cabsen'),  
 
 
     path('pu/<str:tgl>/<int:userid>/<int:sid>', views.pu, name='pu'),

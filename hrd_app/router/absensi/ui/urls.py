@@ -8,7 +8,6 @@ urlpatterns = [
 
     
     path('absensi/<int:sid>', views.absensi, name='absensi'),
-    path('cabsen', views.cari_absensi, name='cabsen'),  
     path('dabsen/<str:userid>/<str:tgl>/<int:sid>', views.detail_absensi, name='dabsen'),
     path('edit_jamkerja/<str:userid>/<str:tgl>/<int:sid>', views.edit_jamkerja, name='edit_jamkerja'),
 ] 

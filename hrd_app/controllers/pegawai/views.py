@@ -69,12 +69,19 @@ def edit_pegawai(request,idp):
         divisi = divisi_db.objects.all().order_by('divisi')
         jabatan = jabatan_db.objects.all().order_by('jabatan')
         kk = kelompok_kerja_db.objects.all().order_by('kelompok')
+        status = status_pegawai_db.objects.all().order_by('status')
         hr = hari_db.objects.all()
         keluarga = keluarga_db.objects.filter(pegawai_id=int(idp))
         kontak_lain = kontak_lain_db.objects.filter(pegawai_id=int(idp))
         pengalaman = pengalaman_db.objects.filter(pegawai_id=int(idp))
         pendidikan = pendidikan_db.objects.filter(pegawai_id=int(idp))
-        pribadi = pribadi_db.objects.filter(pegawai_id=pg.pk)
+        try:
+            pribadi = pribadi_db.objects.get(pegawai_id=pg.pk)
+            pribadi.tgl_lahir = pribadi.tgl_lahir.strftime("%d-%m-%Y")
+            pribadi.tinggi_badan = ".".join(str(pribadi.tinggi_badan).split(","))
+            pribadi.berat_badan = ".".join(str(pribadi.berat_badan).split(","))
+        except:
+            pribadi = None
         today = date.today()
         krg = []
         kln = []
@@ -138,11 +145,6 @@ def edit_pegawai(request,idp):
         if pg.tgl_masuk is not None:
             pg.tgl_masuk = pg.tgl_masuk.strftime("%d-%m-%Y")
         data = serialize("json",kota_kabupaten)
-        if len(pribadi) > 0:
-            pribadi.tgl_lahir = pribadi.tgl_lahir.strftime("%d-%m-%Y")
-            pribadi.tinggi_badan = ".".join(str(pribadi.tinggi_badan).split(","))
-            pribadi.berat_badan = ".".join(str(pribadi.berat_badan).split(","))
-            print(pg.hari_off_id,"SDKSDLK")
         data = {
             'akses' : akses,
             'id':idp,
@@ -156,6 +158,7 @@ def edit_pegawai(request,idp):
             "pg_hr":pg.hari_off_id,
             'hr':hr,
             'pg':pg,
+            "status":status,
             'today':datetime.strftime(today,'%d-%m-%Y'),
             'keluarga':krg,
             'kontak_lain':kln,
@@ -188,6 +191,7 @@ def epegawai(r,idp):
         tgl_masuk = r.POST.get("tgl_masuk")
         nik = r.POST.get("nik")
         userid = r.POST.get("userid")
+        status = r.POST.get("status")
         div = r.POST.get("div")
         counter = r.POST.get("counter")
         jabatan = r.POST.get("jabatan")
@@ -226,7 +230,7 @@ def epegawai(r,idp):
             pgw = pegawai_db.objects.get(pk=int(id))
         except:
             return JsonResponse({"status":"error"},status=400)
-        status_pegawai = status_pegawai_db.objects.get(pk=pgw.status.pk)
+        status_pegawai = status_pegawai_db.objects.get(pk=status)
         if pegawai_db.objects.filter(~Q(pk=int(idp)),userid=userid).exists():
             status = "duplikat"
         else:
@@ -348,6 +352,7 @@ def tpegawai(r):
         divisi = divisi_db.objects.all().order_by('divisi')
         jabatan = jabatan_db.objects.all().order_by('jabatan')
         kk = kelompok_kerja_db.objects.all().order_by('kelompok')
+        status = status_pegawai_db.objects.all().order_by('status')
         hr = hari_db.objects.all()
 
         kota_kabupaten = kota_kabupaten_db.objects.all()
@@ -358,6 +363,7 @@ def tpegawai(r):
             "counter":counter,
             "divisi":divisi,
             "jabatan":jabatan,
+            'status':status,
             "kota_kabupaten":kota_kabupaten,
             "kk":kk,
             "hr":hr
@@ -374,6 +380,7 @@ def tambah_pegawai(r):
         tgl_masuk = r.POST.get("tgl_masuk")
         nik = r.POST.get("nik")
         userid = r.POST.get("userid")
+        status = r.POST.get("status")
         div = r.POST.get("div")
         counter = r.POST.get("counter")
         jabatan = r.POST.get("jabatan")
@@ -426,8 +433,10 @@ def tambah_pegawai(r):
             pendidikan = json.loads(pendidikan)
         else:
             pendidikan = []
-        status_pegawai = status_pegawai_db.objects.get(status="Staff")
-
+        try:
+            status_pegawai = status_pegawai_db.objects.get(pk=status)
+        except:
+            status_pegawai = None
         if email == '':
             return JsonResponse({'status':"error","msg":"email tidak boleh kosong"},status=400,safe=False)
 

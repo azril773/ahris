@@ -126,6 +126,21 @@
                                 </select>
                                 </div>
                               </div> 
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Status: <span class="tx-danger">*</span></label>
+                                  <select name="status" id="status" class="form-control select2-show-search" data-placeholder="" required>
+                                    <option label=""></option>
+                                    {% for s in status %}
+                                    {% if pg.status_id == s.id %}
+                                      <option value={{s.id}} selected>{{s.status}}</option>
+                                    {% else %}
+                                      <option value={{s.id}}>{{s.status}}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                                </div>
+                              </div> 
 
                               <div class="col-lg-3">
                                 <div class="form-group">
