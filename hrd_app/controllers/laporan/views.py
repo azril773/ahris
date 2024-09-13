@@ -131,7 +131,7 @@ def laporan_json(r):
             obj = {
                 "id" : pgw.id,
                 "nik":pgw.nik,
-                "jk":pgw.gender[0],
+                "jk":pgw.gender,
                 "nama": pgw.nama,
                 "divisi":pgw.divisi.divisi,
                 "off": off if off > 0 else "",
