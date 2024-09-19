@@ -7,6 +7,11 @@
     <div class="row">
         <div class="col-6">
             <div class="br-section-wrapper">
+                {% if messages %}
+                    {% for m in messages %}
+                    <div class="alert alert-danger">{{m.message}}</div>
+                    {% endfor %}
+                {% endif %}
                 <p class="tx-inverse" style="text-transform: uppercase;">halaman data transaksi - {{ pegawai.nama }} / {{ pegawai.nik }} - ( {{ nh }} - {{ day }} {{ nm }} {{ tahun }} )</p>
                 <div class="table mt-5">
                     <table class="" id="table_raw" style="width: 100%;">

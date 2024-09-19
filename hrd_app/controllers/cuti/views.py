@@ -164,7 +164,7 @@ def cuti_json(request, dr, sp, sid):
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
                        
         if int(sid) == 0:
-            for i in cuti_db.objects.select_related('pegawai').filter(tgl_cuti__range=(dari,sampai)):
+            for i in cuti_db.objects.select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai)):
                 
                 ct = {
                     'id':i.id,
@@ -178,7 +178,7 @@ def cuti_json(request, dr, sp, sid):
                 }
                 data.append(ct)
         else:
-            for i in cuti_db.objects.select_related('pegawai').filter(tgl_cuti__range=(dari,sampai), pegawai__status_id=int(sid)):
+            for i in cuti_db.objects.select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai), pegawai__status_id=int(sid)):
                             
                 ct = {
                     'id':i.id,

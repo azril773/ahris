@@ -263,7 +263,7 @@ def tambah_lembur(request):
         if absensi_db.objects.select_related('pegawai').filter(tgl_absen=tgl, pegawai_id=int(idp)).exists():
             ab = absensi_db.objects.select_related('pegawai').get(tgl_absen=tgl, pegawai_id=int(idp))            
             
-            # Tanpa istirahat (di jadwal kerja)
+            # Dengan istirahat (di jadwal kerja)
             if ab.lama_istirahat != 0 or ab.lama_istirahat is not None:
                 if ab.masuk is not None and ab.pulang is not None:
                     
@@ -359,8 +359,8 @@ def tambah_lembur(request):
                                 if absen_pulang < b:
                                     pemotong_plg = (b_plg.index(b) + 1) * 0.5
                                 else:
-                                    pass 
-                        if absen_pulang > (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
+                                    pass
+                        if tutuptoko.jam_tutup == batas_pulang.time() and absen_pulang < (datetime.combine(ab.tgl_absen,batas_pulang) - timedelta(minutes=3)).time():
                             pemotong_plg += 0.5
                         # -------------------------------------------------
                         # pemotong jam istirahat
@@ -570,7 +570,7 @@ def tambah_lembur(request):
                     messages.info(request, 'Absen Tidak Lengkap.')
                 
        
-            # Tanpa (di jadwal kerja)
+            # Tanpa istirahat (di jadwal kerja)
             else:
                 if ab.masuk is not None and ab.pulang is not None:
                     
@@ -675,11 +675,8 @@ def tambah_lembur(request):
                             else:  
                                 batas_pulang = jadwal_pulang + timedelta(hours=akhir)                                      
                                 
-                            # mulai_plg = batas_pulang - timedelta(minutes=3)  
+                            mulai_plg = batas_pulang - timedelta(minutes=5)  
                             tutuptoko = tutup_toko_db.objects.all().last()
-                                                                        
-                            mulai_plg2 = batas_pulang - timedelta(minutes=35)                                                                                    
-                            b_plg.append(mulai_plg2)
                                                             
                             for x in range(int(looping) - 1):
                                 a2_plg = b_plg[x] - timedelta(minutes=30)
@@ -688,14 +685,11 @@ def tambah_lembur(request):
                             if absen_pulang >= mulai_plg:
                                 pemotong_plg = 0
                             else:
-                                if absen_pulang >= mulai_plg2 and absen_pulang < mulai_plg:
-                                    pemotong_plg = 0.5
-                                else:    
-                                    for b in b_plg:
-                                        if absen_pulang < b:
-                                            pemotong_plg = (b_plg.index(b) + 2) * 0.5
-                                        else:
-                                            pass
+                                for b in b_plg:
+                                    if absen_pulang < b:
+                                        pemotong_plg = (b_plg.index(b) + 1) * 0.5
+                                    else:
+                                        pass
                             if absen_pulang >= (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
                                 pemotong_plg += 0.5                                
                             
@@ -913,26 +907,23 @@ def proses_ulang_lembur(request, idl):
                     else:  
                         batas_pulang = jadwal_pulang + timedelta(hours=akhir)                                      
                         
-                    mulai_plg = batas_pulang - timedelta(minutes=3)  
-                                                                
-                    mulai_plg2 = batas_pulang - timedelta(minutes=35)                                                                                    
-                    b_plg.append(mulai_plg2)
-                                                    
+                    mulai_plg = batas_pulang - timedelta(minutes=5) 
+                    tutuptoko = tutup_toko_db.objects.all().last() 
+                    b_plg.append(mulai_plg)                              
                     for x in range(int(looping) - 1):
                         a2_plg = b_plg[x] - timedelta(minutes=30)
                         b_plg.append(a2_plg)
                     
                     if absen_pulang >= mulai_plg:
                         pemotong_plg = 0
-                    else:
-                        if absen_pulang >= mulai_plg2 and absen_pulang < mulai_plg:
-                            pemotong_plg = 0.5
-                        else:    
-                            for b in b_plg:
-                                if absen_pulang < b:
-                                    pemotong_plg = (b_plg.index(b) + 2) * 0.5
-                                else:
-                                    pass                                    
+                    else: 
+                        for b in b_plg:
+                            if absen_pulang < b:
+                                pemotong_plg = (b_plg.index(b) + 1) * 0.5
+                            else:
+                                pass             
+                    if absen_pulang >= (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
+                        pemotong_plg += 0.5                        
                     
                     # perhitungan lembur
                     if awal > 0 and akhir > 0:
@@ -1005,11 +996,10 @@ def proses_ulang_lembur(request, idl):
                     else:  
                         batas_pulang = jadwal_pulang
                         
-                    mulai_plg = batas_pulang - timedelta(minutes=3)  
-                                                                
-                    mulai_plg2 = batas_pulang - timedelta(minutes=35)                                                                                    
-                    b_plg.append(mulai_plg2)
-                                                    
+                    mulai_plg = batas_pulang - timedelta(minutes=5)  
+                    tutuptoko = tutup_toko_db.objects.all().last()
+                    b_plg.append(mulai_plg)
+
                     for x in range(int(looping) - 1):
                         a2_plg = b_plg[x] - timedelta(minutes=30)
                         b_plg.append(a2_plg)
@@ -1017,15 +1007,13 @@ def proses_ulang_lembur(request, idl):
                     if absen_pulang >= mulai_plg:
                         pemotong_plg = 0
                     else:
-                        if absen_pulang >= mulai_plg2 and absen_pulang < mulai_plg:
-                            pemotong_plg = 0.5
-                        else:    
-                            for b in b_plg:
-                                if absen_pulang < b:
-                                    pemotong_plg = (b_plg.index(b) + 2) * 0.5
-                                else:
-                                    pass
-                            
+                        for b in b_plg:
+                            if absen_pulang < b:
+                                pemotong_plg = (b_plg.index(b) + 1) * 0.5
+                            else:
+                                pass
+                    if absen_pulang > (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
+                        pemotong_plg += 0.5       
                     # -------------------------------------------------
                     # pemotong jam istirahat
                     

@@ -605,12 +605,12 @@ def prosesMesin(m):
     ip = m[0].ipaddress
     conn = None
     zk = ZK(ip, port=4370, timeout=65)
+    dt = []
     try:
         conn = zk.connect()
         conn.disable_device()
         # Data absensi
         absensi = conn.get_attendance()
-        dt = []
         for a in absensi:
             if m[2] <= a.timestamp <= m[3]:   
                 if a.user_id in m[1]:     
@@ -2433,7 +2433,6 @@ def pabsen(request):
                         elif a["punch"] == 1 and int(jam_absen.hour) < 9:
                             if pg is not None:
                                 if re.search('hotel',pg["status"],re.IGNORECASE) is not None:
-                                    ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                     if ab.masuk is not None:
                                         if int(ab.masuk.hour) > 18:
                                             ab.pulang = jam_absen.time()
@@ -2447,16 +2446,33 @@ def pabsen(request):
                                             }
                                             dt.append(data)
                                         else:
-                                            ab2.pulang = jam_absen.time()
-                                            ab2.save()
-                                            data = {
-                                                "userid": a["userid"],
-                                                "jam_absen": jam_absen,
-                                                "punch": 7,
-                                                "mesin": a["mesin"],
-                                                "ket": "Pulang Malam"
-                                            }
-                                            dt.append(data)
+                                            try:
+                                                ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
+                                                ab2.pulang = jam_absen.time()
+                                                ab2.save()
+                                                data = {
+                                                    "userid": a["userid"],
+                                                    "jam_absen": jam_absen,
+                                                    "punch": 7,
+                                                    "mesin": a["mesin"],
+                                                    "ket": "Pulang Malam"
+                                                }
+                                                dt.append(data)
+                                            except:
+                                                absensi_db(
+                                                    tgl_absen=tmin.date(),
+                                                    pegawai_id=pg["id"],
+                                                    pulang=jam_absen.time(),
+                                                ).save()
+                                                data = {
+                                                    "userid": a["userid"],
+                                                    "jam_absen": jam_absen,
+                                                    "punch": 7,
+                                                    "mesin": a["mesin"],
+                                                    "ket": "Pulang Malam"
+                                                }
+                                                dt.append(data)
+                                                
                                     else:
                                         try:
                                             ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
@@ -2843,7 +2859,6 @@ def pabsen(request):
                         pass
                     # jika tidak ada
                     else:
-                        # jika sudah ada opg yang ditambahkan (rencana cronjob)
                         if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
                             pass
                         # jika tidak
@@ -2965,7 +2980,7 @@ def pabsen(request):
                     if a.pegawai.status_id in lsopg:
                         
                         # Staff
-                        if p['status'] == 'Staff':
+                        if p['status'] == 'Staff': # regex
                             # jika hari off nya adalah hari minggu dan masuk maka hanya akan mendapatkan 1 opg
                             if str(a.pegawai.hari_off) == str(nh):
                                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
@@ -4121,6 +4136,9 @@ def edit_jamkerja(r,userid,tgl,sid):
     istirahat = r.POST.get("jam_istirahat")
     lama_ist = r.POST.get("lama_istirahat")
     id = r.POST.get("id")
+    if masuk == '' or keluar == "" or istirahat == '' or lama_ist == "":
+        messages.add_message(r,messages.ERROR,"Form harus lengkap")
+        return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
     
     if absensi_db.objects.filter(pk=int(id)).exists():
         ab = absensi_db.objects.get(pk=int(id))
