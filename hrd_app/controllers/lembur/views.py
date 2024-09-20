@@ -161,6 +161,7 @@ def cari_lembur(request):
         dsid = dakses.sid_id
         
         periode = request.POST.get('periode')
+        print(periode)
         tahun = request.POST.get('tahun')
         sid = request.POST.get('sid')
         bln = nama_bulan(int(periode))
@@ -262,8 +263,8 @@ def tambah_lembur(request):
         if absensi_db.objects.select_related('pegawai').filter(tgl_absen=tgl, pegawai_id=int(idp)).exists():
             ab = absensi_db.objects.select_related('pegawai').get(tgl_absen=tgl, pegawai_id=int(idp))            
             
-            # Tanpa istirahat (di jadwal kerja)
-            if ist_1 != 0 or ist_2 != 0:
+            # Dengan istirahat (di jadwal kerja)
+            if ab.lama_istirahat != 0 or ab.lama_istirahat is not None:
                 if ab.masuk is not None and ab.pulang is not None:
                     
                     jadwal_masuk = datetime.combine(ab.tgl_absen, ab.jam_masuk) 
@@ -272,7 +273,7 @@ def tambah_lembur(request):
                     absen_masuk = datetime.combine(ab.tgl_absen, ab.masuk)
                     absen_pulang = datetime.combine(ab.tgl_absen, ab.pulang)
                     
-                    bm = jadwal_masuk + timedelta(minutes=4)
+                    bm = jadwal_masuk + timedelta(minutes=5)
                     batas_masuk = datetime.strptime(str(bm), "%Y-%m-%d %H:%M:%S")                                                   
                         
                     # lebih jam awal
@@ -307,7 +308,6 @@ def tambah_lembur(request):
                             lebih_akhir = 0
                     else:    
                         lebih_akhir = 0
-                
                     if awal > 0 and akhir > 0:
                         lebih = lebih_awal + lebih_akhir
                     elif awal > 0 and akhir == 0:     
@@ -342,14 +342,16 @@ def tambah_lembur(request):
                             batas_pulang = jadwal_pulang + timedelta(hours=akhir)                                      
                         else:  
                             batas_pulang = jadwal_pulang
-                            
-                        mulai_plg = batas_pulang - timedelta(minutes=3)  
-                                                                    
+
+                        mulai_plg = batas_pulang - timedelta(minutes=5)  
+                        tutuptoko = tutup_toko_db.objects.all().last()
                         b_plg.append(mulai_plg)
-                                                        
+
                         for x in range(int(looping) - 1):
                             a2_plg = b_plg[x] - timedelta(minutes=30)
                             b_plg.append(a2_plg)
+                        
+
                         if absen_pulang >= mulai_plg:
                             pemotong_plg = 0
                         else:
@@ -357,7 +359,9 @@ def tambah_lembur(request):
                                 if absen_pulang < b:
                                     pemotong_plg = (b_plg.index(b) + 1) * 0.5
                                 else:
-                                    pass 
+                                    pass
+                        if tutuptoko.jam_tutup == batas_pulang.time() and absen_pulang < (datetime.combine(ab.tgl_absen,batas_pulang) - timedelta(minutes=3)).time():
+                            pemotong_plg += 0.5
                         # -------------------------------------------------
                         # pemotong jam istirahat
                         
@@ -372,30 +376,43 @@ def tambah_lembur(request):
                                 else:                                    
                                     # -------------------------------------------------
                                     # istirahat 1
-                                    lama_ist = (ist_1 * 60) + 5                                     
-                                    a_ist = absen_ist + timedelta(minutes=lama_ist)  
-                                    b_ist.append(a_ist)     
+                                    if ab.lama_istirahat is not None:
+                                        if ist_1 > ab.lama_istirahat:
+                                            lama_ist = (ab.lama_istirahat * 60) + 5
+                                            decimal_ist = ab.lama_istirahat
+                                        else:
+                                            if ist_1 == 0:
+                                                lama_ist = (ab.lama_istirahat * 60) + 5
+                                                decimal_ist = ab.lama_istirahat
+                                            else:
+                                                lama_ist = (ist_1 * 60) + 5
+                                                decimal_ist = ist_1
+                                                
+                                    lama_ist = round(lama_ist)
+                                    print(0.5 < 0.51,"CEK")
+                                    a_ist = absen_ist + timedelta(minutes=lama_ist)
+                                    b_ist.append(a_ist)
                                     for x in range(int(looping) - 1):
                                         a2_ist = b_ist[x] + timedelta(minutes=30)
                                         b_ist.append(a2_ist)
                                     if absen_kmb <= a_ist:
-                                        print(absen_ist,absen_kmb,"MASUK")
-                                        if absen_kmb < (absen_ist + timedelta(minutes=(ist_1 * 60))):
-                                            cb = (absen_ist + timedelta(minutes=(ist_1 * 60))) - absen_kmb
+                                        selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
+                                        tist = selisihkmb.total_seconds() / 3600
+                                        tist = round(abs(float(decimal_ist) - tist),2)
+                                        decimal_part = abs(int(tist) - tist)
+                                        if decimal_part <= 0.5:
+                                            tist = int(tist) + 0.5
                                         else:
-                                            cb = absen_kmb - (absen_ist + timedelta(minutes=(ist_1 * 60)))
-                                        cb = datetime.strptime(str(cb), "%H:%M:%S")
-                                        cb = cb.hour + cb.minute / 60 + cb.second / 3600
-                                        if cb < 0.25:
-                                            pemotong_ist = 0
-                                        else:
-                                            pemotong_ist = -cb
+                                            tist = math.ceil(tist)    
+
+                 
+                                        pemotong_ist = -abs(float(decimal_ist) - tist)
                                         pemotong_ist2 = 0
                                         s_ist.append(pemotong_ist)
                                     else:
                                         for b in b_ist:                             
                                             if absen_kmb > b:
-                                                pemotong_ist = (b_ist.index(b) + 1) * 0.5  
+                                                pemotong_ist = (b_ist.index(b) + 1) * 0.5
                                                 pemotong_ist2 = 0 
                                                 s_ist.append(pemotong_ist) 
                                             else:
@@ -403,34 +420,46 @@ def tambah_lembur(request):
                             else:
                                 # -------------------------------------------------
                                 # istirahat 1
-                                lama_ist = (ist_1 * 60) + 5                                     
-                                
+                                if ab.lama_istirahat is not None:
+                                    if ist_1 > ab.lama_istirahat:
+                                        lama_ist = (ab.lama_istirahat * 60) + 5
+                                        decimal_ist = ab.lama_istirahat
+                                    else:
+                                        if ist_1 == 0:
+                                            lama_ist = (ab.lama_istirahat * 60) + 5
+                                            decimal_ist = ab.lama_istirahat
+                                        else:
+                                            lama_ist = (ist_1 * 60) + 5
+                                            decimal_ist = ist_1                                 
+                                lama_ist = round(lama_ist)
                                 a_ist = absen_ist + timedelta(minutes=lama_ist)  
-                                print(a_ist,"COBA")
                                 b_ist.append(a_ist)     
                                 
                                 for x in range(int(looping) - 1):
                                     a2_ist = b_ist[x] + timedelta(minutes=30)
                                     b_ist.append(a2_ist)
                                 if absen_kmb <= a_ist:
-                                        if absen_kmb < (absen_ist + timedelta(minutes=(ist_1 * 60))):
-                                            cb = (absen_ist + timedelta(minutes=(ist_1 * 60))) - absen_kmb
+                                        selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
+
+
+                                        tist = selisihkmb.total_seconds() / 3600
+                                        tist = round(abs(float(decimal_ist) - tist),2)
+
+
+                                        decimal_part = abs(int(tist) - tist)
+                                        if decimal_part <= 0.5:
+                                            tist = int(tist) + 0.5
                                         else:
-                                            cb = absen_kmb - (absen_ist + timedelta(minutes=(ist_1 * 60)))
-                                        cb = datetime.strptime(str(cb), "%H:%M:%S")
-                                        print(cb,"MASUKASAISISI")
-                                        cb = cb.hour + cb.minute / 60 + cb.second / 3600
-                                        if cb < 0.25:
-                                            pemotong_ist = 0
-                                        else:
-                                            pemotong_ist = -cb
-                                        pemotong_ist2 = 0
+                                            tist = math.ceil(tist)    
+
+                 
+                                        pemotong_ist = -abs(float(decimal_ist) - tist)
                                         s_ist.append(pemotong_ist)
                                 else:
                                     for b in b_ist:                             
                                         if absen_kmb > b:
                                             pemotong_ist = (b_ist.index(b) + 1) * 0.5  
-                                            pemotong_ist2 = 0 
+                                            print(pemotong_ist,"PEMOTONG")
                                             s_ist.append(pemotong_ist) 
                                         else:
                                             pass 
@@ -443,8 +472,19 @@ def tambah_lembur(request):
                                     
                                     absen_ist2 = datetime.combine(ab.tgl_absen, ab.istirahat2)
                                     absen_kmb2 = datetime.combine(ab.tgl_absen, ab.kembali2)
-                                    
-                                    lama_ist2 = (ist_2 * 60) + 5                                     
+
+                                    if ab.lama_istirahat2 is not None:
+                                        if ist_2 > ab.lama_istirahat2:
+                                            lama_ist2 = (ab.lama_istirahat2 * 60) + 5
+                                            decimal_ist2 = ab.lama_istirahat2
+                                        else:
+                                            if ist_2 == 0:
+                                                lama_ist2 = (ab.lama_istirahat2 * 60) + 5
+                                                decimal_ist2 = ab.lama_istirahat2
+                                            else:
+                                                lama_ist2 = (ist_2 * 60) + 5
+                                                decimal_ist2 = ist_2
+                                    lama_ist2 = round(lama_ist2)
                                     a_ist2 = absen_ist2 + timedelta(minutes=lama_ist2)  
                                     b_ist2.append(a_ist2)     
                                     
@@ -452,35 +492,35 @@ def tambah_lembur(request):
                                         a2_ist2 = b_ist2[x] + timedelta(minutes=30)
                                         b_ist2.append(a2_ist2)
                                     if absen_kmb2 <= a_ist2:
-                                        if absen_kmb2 < (absen_ist2 + timedelta(minutes=(ist_2 * 60))):
-                                            cb = (absen_ist2 + timedelta(minutes=(ist_2 * 60))) - absen_kmb2
+                                        selisihkmb = (a_ist2 - timedelta(minutes=5)) - absen_kmb2
+                                        tist = selisihkmb.total_seconds() / 3600
+                                        tist = round(abs(float(decimal_ist2) - tist),2)
+                                        decimal_part = abs(int(tist) - tist)
+                                        if decimal_part <= 0.5:
+                                            tist = int(tist) + 0.5
                                         else:
-                                            cb = absen_kmb2 - (absen_ist2 + timedelta(minutes=(ist_2 * 60)))
-                                        cb = datetime.strptime(str(cb), "%H:%M:%S")
-                                        cb = cb.hour + cb.minute / 60 + cb.second / 3600
-                                        if cb < 0.25:
-                                            pemotong_ist2 = 0
-                                        else:
-                                            pemotong_ist2 = -cb
-                                        pemotong_ist = s_ist[0]
+                                            tist = math.ceil(tist)    
+
+                 
+                                        pemotong_ist2 = -abs(float(decimal_ist2) - tist)
                                     else:
                                         for b in b_ist2:                             
                                             if absen_kmb2 > b:
-                                                pemotong_ist = s_ist[0]  
                                                 pemotong_ist2 = (b_ist2.index(b) + 1) * 0.5  
                                             else:
                                                 pass                                      
                                     
                         else:                   
-                            pemotong_ist = Decimal(-ist_1)
-                            pemotong_ist2 = Decimal(-ist_2)
-
+                            pemotong_ist = -ab.lama_istirahat
+                            pemotong_ist2 = 0
+                        print(pemotong_ist,"PEMOTONH")
+                        # pemotong_ist = -1
+                        # pemotong_ist2 = 0
                             # additional perhitungan istirahat
                             # if ist_1 + ist_2 > 1:
                             #     selisih_pi = (ist_1+ist_2) - 1
                             #     pi = (pemotong_ist + pemotong_ist2) + selisih_pi
                             # else:
-                        print("MASUK")
                         pi = pemotong_ist + pemotong_ist2
                         pemotong_msk = Decimal(pemotong_msk)
                         pi = Decimal(pi)
@@ -530,7 +570,7 @@ def tambah_lembur(request):
                     messages.info(request, 'Absen Tidak Lengkap.')
                 
        
-            # Tanpa (di jadwal kerja)
+            # Tanpa istirahat (di jadwal kerja)
             else:
                 if ab.masuk is not None and ab.pulang is not None:
                     
@@ -635,10 +675,8 @@ def tambah_lembur(request):
                             else:  
                                 batas_pulang = jadwal_pulang + timedelta(hours=akhir)                                      
                                 
-                            mulai_plg = batas_pulang - timedelta(minutes=3)  
-                                                                        
-                            mulai_plg2 = batas_pulang - timedelta(minutes=35)                                                                                    
-                            b_plg.append(mulai_plg2)
+                            mulai_plg = batas_pulang - timedelta(minutes=5)  
+                            tutuptoko = tutup_toko_db.objects.all().last()
                                                             
                             for x in range(int(looping) - 1):
                                 a2_plg = b_plg[x] - timedelta(minutes=30)
@@ -647,14 +685,13 @@ def tambah_lembur(request):
                             if absen_pulang >= mulai_plg:
                                 pemotong_plg = 0
                             else:
-                                if absen_pulang >= mulai_plg2 and absen_pulang < mulai_plg:
-                                    pemotong_plg = 0.5
-                                else:    
-                                    for b in b_plg:
-                                        if absen_pulang < b:
-                                            pemotong_plg = (b_plg.index(b) + 2) * 0.5
-                                        else:
-                                            pass                                    
+                                for b in b_plg:
+                                    if absen_pulang < b:
+                                        pemotong_plg = (b_plg.index(b) + 1) * 0.5
+                                    else:
+                                        pass
+                            if absen_pulang >= (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
+                                pemotong_plg += 0.5                                
                             
                             # perhitungan lembur
                             
@@ -870,26 +907,23 @@ def proses_ulang_lembur(request, idl):
                     else:  
                         batas_pulang = jadwal_pulang + timedelta(hours=akhir)                                      
                         
-                    mulai_plg = batas_pulang - timedelta(minutes=3)  
-                                                                
-                    mulai_plg2 = batas_pulang - timedelta(minutes=35)                                                                                    
-                    b_plg.append(mulai_plg2)
-                                                    
+                    mulai_plg = batas_pulang - timedelta(minutes=5) 
+                    tutuptoko = tutup_toko_db.objects.all().last() 
+                    b_plg.append(mulai_plg)                              
                     for x in range(int(looping) - 1):
                         a2_plg = b_plg[x] - timedelta(minutes=30)
                         b_plg.append(a2_plg)
                     
                     if absen_pulang >= mulai_plg:
                         pemotong_plg = 0
-                    else:
-                        if absen_pulang >= mulai_plg2 and absen_pulang < mulai_plg:
-                            pemotong_plg = 0.5
-                        else:    
-                            for b in b_plg:
-                                if absen_pulang < b:
-                                    pemotong_plg = (b_plg.index(b) + 2) * 0.5
-                                else:
-                                    pass                                    
+                    else: 
+                        for b in b_plg:
+                            if absen_pulang < b:
+                                pemotong_plg = (b_plg.index(b) + 1) * 0.5
+                            else:
+                                pass             
+                    if absen_pulang >= (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
+                        pemotong_plg += 0.5                        
                     
                     # perhitungan lembur
                     if awal > 0 and akhir > 0:
@@ -962,11 +996,10 @@ def proses_ulang_lembur(request, idl):
                     else:  
                         batas_pulang = jadwal_pulang
                         
-                    mulai_plg = batas_pulang - timedelta(minutes=3)  
-                                                                
-                    mulai_plg2 = batas_pulang - timedelta(minutes=35)                                                                                    
-                    b_plg.append(mulai_plg2)
-                                                    
+                    mulai_plg = batas_pulang - timedelta(minutes=5)  
+                    tutuptoko = tutup_toko_db.objects.all().last()
+                    b_plg.append(mulai_plg)
+
                     for x in range(int(looping) - 1):
                         a2_plg = b_plg[x] - timedelta(minutes=30)
                         b_plg.append(a2_plg)
@@ -974,15 +1007,13 @@ def proses_ulang_lembur(request, idl):
                     if absen_pulang >= mulai_plg:
                         pemotong_plg = 0
                     else:
-                        if absen_pulang >= mulai_plg2 and absen_pulang < mulai_plg:
-                            pemotong_plg = 0.5
-                        else:    
-                            for b in b_plg:
-                                if absen_pulang < b:
-                                    pemotong_plg = (b_plg.index(b) + 2) * 0.5
-                                else:
-                                    pass
-                            
+                        for b in b_plg:
+                            if absen_pulang < b:
+                                pemotong_plg = (b_plg.index(b) + 1) * 0.5
+                            else:
+                                pass
+                    if absen_pulang > (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
+                        pemotong_plg += 0.5       
                     # -------------------------------------------------
                     # pemotong jam istirahat
                     
@@ -998,17 +1029,35 @@ def proses_ulang_lembur(request, idl):
                                 # -------------------------------------------------
                                 # istirahat 1
                                 
-                                lama_ist = (ist_1 * int(Decimal(ab.lama_istirahat) * 60)) + 5                                     
-                                
-                                a_ist = absen_ist + timedelta(minutes=lama_ist)  
-                                b_ist.append(a_ist)     
-                                
+                                if ab.lama_istirahat is not None:
+                                    if ist_1 > ab.lama_istirahat:
+                                        lama_ist = (ab.lama_istirahat * 60) + 5
+                                        decimal_ist = ab.lama_istirahat
+                                    else:
+                                        if ist_1 == 0:
+                                            lama_ist = (ab.lama_istirahat * 60) + 5
+                                            decimal_ist = ab.lama_istirahat
+                                        else:
+                                            lama_ist = (ist_1 * 60) + 5
+                                            decimal_ist = ist_1
+                                            
+                                lama_ist = round(lama_ist)
+                                a_ist = absen_ist + timedelta(minutes=lama_ist)
+                                b_ist.append(a_ist)
                                 for x in range(int(looping) - 1):
                                     a2_ist = b_ist[x] + timedelta(minutes=30)
                                     b_ist.append(a2_ist)
-                                
                                 if absen_kmb <= a_ist:
-                                    pemotong_ist = 0
+                                    selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
+                                    tist = selisihkmb.total_seconds() / 3600
+                                    tist = round(abs(float(decimal_ist) - tist),2)
+                                    decimal_part = abs(int(tist) - tist)
+                                    if decimal_part <= 0.5:
+                                        tist = int(tist) + 0.5
+                                    else:
+                                        tist = math.ceil(tist)    
+                
+                                    pemotong_ist = -abs(float(decimal_ist) - tist)
                                     pemotong_ist2 = 0
                                     s_ist.append(pemotong_ist)
                                 else:
@@ -1024,17 +1073,35 @@ def proses_ulang_lembur(request, idl):
                             # -------------------------------------------------
                             # istirahat 1
                             
-                            lama_ist = (ist_1 * int(Decimal(ab.lama_istirahat) * 60)) + 5                                     
-                            
-                            a_ist = absen_ist + timedelta(minutes=lama_ist)  
-                            b_ist.append(a_ist)     
-                            
+                            if ab.lama_istirahat is not None:
+                                if ist_1 > ab.lama_istirahat:
+                                    lama_ist = (ab.lama_istirahat * 60) + 5
+                                    decimal_ist = ab.lama_istirahat
+                                else:
+                                    if ist_1 == 0:
+                                        lama_ist = (ab.lama_istirahat * 60) + 5
+                                        decimal_ist = ab.lama_istirahat
+                                    else:
+                                        lama_ist = (ist_1 * 60) + 5
+                                        decimal_ist = ist_1
+                                        
+                            lama_ist = round(lama_ist)
+                            a_ist = absen_ist + timedelta(minutes=lama_ist)
+                            b_ist.append(a_ist)
                             for x in range(int(looping) - 1):
                                 a2_ist = b_ist[x] + timedelta(minutes=30)
                                 b_ist.append(a2_ist)
-                            
                             if absen_kmb <= a_ist:
-                                pemotong_ist = 0
+                                selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
+                                tist = selisihkmb.total_seconds() / 3600
+                                tist = round(abs(float(decimal_ist) - tist),2)
+                                decimal_part = abs(int(tist) - tist)
+                                if decimal_part <= 0.5:
+                                    tist = int(tist) + 0.5
+                                else:
+                                    tist = math.ceil(tist)   
+            
+                                pemotong_ist = -abs(float(decimal_ist) - tist)
                                 pemotong_ist2 = 0
                                 s_ist.append(pemotong_ist)
                             else:
@@ -1055,18 +1122,36 @@ def proses_ulang_lembur(request, idl):
                                 absen_ist2 = datetime.combine(ab.tgl_absen, ab.istirahat2)
                                 absen_kmb2 = datetime.combine(ab.tgl_absen, ab.kembali2)
                                 
-                                lama_ist2 = (ist_2 * int(Decimal(ab.lama_istirahat2) * 60)) + 5  
-                                
+                                if ab.lama_istirahat2 is not None:
+                                    if ist_2 > ab.lama_istirahat2:
+                                        lama_ist2 = (ab.lama_istirahat2 * 60) + 5
+                                        decimal_ist2 = ab.lama_istirahat2
+                                    else:
+                                        if ist_2 == 0:
+                                            lama_ist2 = (ab.lama_istirahat2 * 60) + 5
+                                            decimal_ist2 = ab.lama_istirahat2
+                                        else:
+                                            lama_ist2 = (ist_2 * 60) + 5
+                                            decimal_ist2 = ist_2
+                                lama_ist2 = round(lama_ist2)
                                 a_ist2 = absen_ist2 + timedelta(minutes=lama_ist2)  
                                 b_ist2.append(a_ist2)     
                                 
                                 for x in range(int(looping) - 1):
                                     a2_ist2 = b_ist2[x] + timedelta(minutes=30)
                                     b_ist2.append(a2_ist2)
-                                
                                 if absen_kmb2 <= a_ist2:
+                                    selisihkmb = (a_ist2 - timedelta(minutes=5)) - absen_kmb2
+                                    tist = selisihkmb.total_seconds() / 3600
+                                    tist = round(abs(float(decimal_ist2) - tist),2)
+                                    decimal_part = abs(int(tist) - tist)
+                                    if decimal_part <= 0.5:
+                                        tist = int(tist) + 0.5
+                                    else:
+                                        tist = math.ceil(tist)    
+                
+                                    pemotong_ist2 = -abs(float(decimal_ist2) - tist)
                                     pemotong_ist = s_ist[0]
-                                    pemotong_ist2 = 0
                                 else:
                                     for b in b_ist2:                             
                                         if absen_kmb2 > b:
@@ -1446,18 +1531,31 @@ def lembur_json(request, idp, prd, thn):
         pa = periode_absen(prd,thn)
         dr = pa[0].date()
         sp = pa[1].date()
-        
-        for l in lembur_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_lembur__range=(dr,sp), status=1).order_by('tgl_lembur'):
-            lbr = {
-                'id':l.id,
-                'tgl':datetime.strftime(l.tgl_lembur,'%d-%m-%Y'),
-                'lembur':l.proses_lembur,
-                'addby':l.add_by,
-                'editby':l.edit_by,
-                'addtime':datetime.strftime(l.add_date,'%d-%m-%Y %H:%M:%S'),
-                'edittime':datetime.strftime(l.edit_date,'%d-%m-%Y %H:%M:%S')
-            }
-            data.append(lbr)   
+        print(idp,"KOSKDOKD")
+        if int(idp) == 0:
+            for l in lembur_db.objects.select_related('pegawai').filter(tgl_lembur__range=(dr,sp), status=1).order_by('tgl_lembur'):
+                lbr = {
+                    'id':l.id,
+                    'tgl':datetime.strftime(l.tgl_lembur,'%d-%m-%Y'),
+                    'lembur':l.proses_lembur,
+                    'addby':l.add_by,
+                    'editby':l.edit_by,
+                    'addtime':datetime.strftime(l.add_date,'%d-%m-%Y %H:%M:%S'),
+                    'edittime':datetime.strftime(l.edit_date,'%d-%m-%Y %H:%M:%S')
+                }
+                data.append(lbr)   
+        else:
+            for l in lembur_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_lembur__range=(dr,sp), status=1).order_by('tgl_lembur'):
+                lbr = {
+                    'id':l.id,
+                    'tgl':datetime.strftime(l.tgl_lembur,'%d-%m-%Y'),
+                    'lembur':l.proses_lembur,
+                    'addby':l.add_by,
+                    'editby':l.edit_by,
+                    'addtime':datetime.strftime(l.add_date,'%d-%m-%Y %H:%M:%S'),
+                    'edittime':datetime.strftime(l.edit_date,'%d-%m-%Y %H:%M:%S')
+                }
+                data.append(lbr)   
                                 
         return JsonResponse({"data": data})
 

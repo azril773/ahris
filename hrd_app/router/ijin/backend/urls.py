@@ -7,6 +7,7 @@ urlpatterns = [
     path('tijin', views.tambah_ijin, name='tijin'),
     path('bijin', views.batal_ijin, name='bijin'),
     path('tjenis_ijin', views.tjenis_ijin, name='tjenis_ijin'),
+    path("tcuti_melahirkan/", views.tcuti_melahirkan, name="cuti_melahirkan"),
     path('ejenis_ijin', views.ejenis_ijin, name='ejenis_ijin'),
     path('hjenis_ijin', views.hjenis_ijin, name='hjenis_ijin'),
     path('jenis_ijin_json', views.jenis_ijin_json, name='jenis_ijin_json'),

@@ -66,6 +66,7 @@
                 <th>Istirahat 2</th>
                 <th>Kembali Istirahat 2</th>
                 <th>Pulang</th>
+                <th>Hari</th>
                 <th>Action</th>
                 </tr>
             </thead>
@@ -430,6 +431,7 @@
                 { data: 'ist2' },
                 { data: 'k_ist2' },
                 { data: 'pulang' },
+                { data: 'hari' },
                 { 
                     data: null,
                     "render": function(data, type, row, meta){    
@@ -448,6 +450,7 @@
                 $('td', row).eq(4).addClass('hitam');
                 $('td', row).eq(5).addClass('hitam');
                 $('td', row).eq(6).addClass('hitam');
+                $('td', row).eq(7).addClass('hitam');
             },
 
             destroy: true,

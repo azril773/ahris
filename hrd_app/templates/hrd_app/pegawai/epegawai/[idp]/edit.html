@@ -60,7 +60,6 @@
         </div>
 
         <br>           
-       
         <div class="row">
             <div class="col-lg-12">
                 <div id="wizard1">
@@ -78,9 +77,15 @@
                               <div class="col-lg-3">
                                 <div class="form-group">
                                   <label class="form-control-label tx-inverse">Gender: <span class="tx-danger">*</span></label>
-                                    <select name="gender" id="gender" class="form-control select2-show-search" required=required>
-                                        <option value="Perempuan">Perempuan</option>
-                                        <option value="Laki-Laki">Laki-Laki</option>
+                                    <select name="gender" id="gender" class="form-control select2-show-search" required>
+                                      <p>{{pg.gender}}</p>
+                                      {% for g in gender %}
+                                        {% if g == pg.gender %}
+                                            <option value="{{pg.gender}}" selected>{{pg.gender}}</option>
+                                          {% else %}
+                                            <option value="{{pg.gender}}">{{pg.gender}}</option>
+                                        {% endif %}
+                                      {% endfor %}
                                     </select>
                                 </div>
                               </div>
@@ -116,6 +121,21 @@
                                       <option value={{d.id}} selected>{{d.divisi}}</option>
                                     {% else %}
                                       <option value={{d.id}}>{{d.divisi}}</option>
+                                    {% endif %}
+                                    {% endfor %}
+                                </select>
+                                </div>
+                              </div> 
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Status: <span class="tx-danger">*</span></label>
+                                  <select name="status" id="status" class="form-control select2-show-search" data-placeholder="" required>
+                                    <option label=""></option>
+                                    {% for s in status %}
+                                    {% if pg.status_id == s.id %}
+                                      <option value={{s.id}} selected>{{s.status}}</option>
+                                    {% else %}
+                                      <option value={{s.id}}>{{s.status}}</option>
                                     {% endif %}
                                     {% endfor %}
                                 </select>

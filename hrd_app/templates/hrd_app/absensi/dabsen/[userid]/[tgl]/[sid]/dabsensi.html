@@ -7,7 +7,12 @@
     <div class="row">
         <div class="col-6">
             <div class="br-section-wrapper">
-                <p class="tx-inverse" style="text-transform: uppercase;">halaman data transaksi - {{ pegawai.nama }} / {{ pegawai.nik }} - ( {{ nh }} - {{ tgl }} {{ nm }} {{ tahun }} )</p>
+                {% if messages %}
+                    {% for m in messages %}
+                    <div class="alert alert-danger">{{m.message}}</div>
+                    {% endfor %}
+                {% endif %}
+                <p class="tx-inverse" style="text-transform: uppercase;">halaman data transaksi - {{ pegawai.nama }} / {{ pegawai.nik }} - ( {{ nh }} - {{ day }} {{ nm }} {{ tahun }} )</p>
                 <div class="table mt-5">
                     <table class="" id="table_raw" style="width: 100%;">
                         <thead>
@@ -35,7 +40,7 @@
             <div class="br-section-wrapper tx-inverse">
                 <p style="text-transform:capitalize;">{{ pegawai.nama }} / {{ pegawai.nik }} - {{ pegawai.divisi }}</p>
                 <p>userid : {{ pegawai.userid }}</p>
-                <p>Jam Kerja : <button data-target="#edit_jamkerja" data-toggle="modal" style="color:#0d6efd;">{{ ab.jam_masuk }} - {{ ab.jam_pulang }} / Istirahat : {{ ab.lama_istirahat }} Jam </button></p>
+                <p>Jam Kerja : <button data-target="#edit_jamkerja" data-toggle="modal" style="color:#0d6efd;">{{ ab.jam_masuk }} - {{ ab.jam_pulang }} / Istirahat : {{ ab.lama_istirahat }} Jam / Istirahat 2 : {{ ab.lama_istirahat2 }} Jam </button></p>
                 <p>Group kerja : {{ pegawai.kelompok_kerja }}</p>
                 <div class="table mt-5">
                     <table class="" style="width: 100%;">
@@ -48,10 +53,26 @@
                         <tbody class="tx-inverse">
                             {% for k in kk %}
                                 <tr>
-                                    <td> {{ k.jam_masuk }} - {{ k.jam_pulang }} / Istirahat : {{ k.lama_istirahat }} Jam </td>
+                                    <td> {{ k.jam_masuk }} - {{ k.jam_pulang }} / Istirahat : {{ k.lama_istirahat }} Jam / Istirahat 2 : {{k.lama_istirahat2}} Jam </td>
                                     <td> {{ k.hari }} </td>
                                 </tr>
                             {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="col-12 mt-10">
+                <div class="br-section-wrapper tx-inverse">
+                    <table class="" id="rawtable" style="width: 100%;">
+                        <thead>
+                            <tr>
+                                <th>Tanggal</th>
+                                <th>Jam Absen</th>
+                                <th>Punch</th>
+                                <th>Ket</th>
+                            </tr>
+                        </thead>
+                        <tbody class="tx-inverse">
                         </tbody>
                     </table>
                 </div>
@@ -261,6 +282,64 @@
         paging: false,
         processing: true,
     });
+    const tableraw = $("#rawtable").DataTable({
+        ajax: {
+            url: "{% url 'get_raw_json' %}",
+            data: {
+                userid: "{{ userid }}",
+                tgl: "{{ tgl }}",
+            },
+            method:"POST",
+            headers: {
+                "X-CSRFToken": token
+            },
+        },
+
+        columns: [
+            {
+                data: "tgl",
+                render: (data,type,row,meta) => {
+                    let html = ''
+                    moment.locale("id")
+                    const display = moment(data,"YYYY-MM-DD").format("dddd D MMMM YYYY","de")
+                    html = `<span>${display}</span>`
+                    return html
+                }
+            },
+            {data: "jam_absen"},
+            {
+                data: "punch",
+            },
+            {
+                data:null,
+                render: (data,type,row,meta) => {
+                    let html = ''
+                    if(row.punch == 0){
+                        html = `<span>Masuk</span>`
+                    }else if(row.punch == 1){
+                        html = `<span>Pulang</span>`
+                    }else if(row.punch == 2){
+                        html = `<span>Istirahat</span>`
+                    }else if(row.punch == 3){
+                        html = `<span>Kembali</span>`
+                    }else if(row.punch == 4){
+                        html = `<span>Istirahat 2</span>`
+                    }else if(row.punch == 5){
+                        html = `<span>Kembali 2</span>`
+                    }
+                    return html
+                    
+                }
+            }
+        ],
+        searching: false,
+        destroy: true,
+        ordering: false,
+        scrollY: 300,
+        scrollX:"100%",
+        paging: false,
+        processing: true,
+    });
 
 
 
@@ -277,16 +356,16 @@
         options: [
         { absen: "Masuk", id: "0|Masuk" },
         { absen: "Pulang", id: "1|Pulang" },
-        { absen: "Keluar", id: "2|Keluar" },
+        { absen: "Istirahat", id: "2|Istirahat" },
         { absen: "Kembali", id: "3|Kembali" },
-        { absen: "Keluar 2", id: "4|Keluar 2" },
+        { absen: "Istirahat 2", id: "4|Istirahat 2" },
         { absen: "Kembali 2", id: "5|Kembali 2" },
         { absen: "Masuk Malam", id: "6|Masuk Malam" },
         { absen: "Pulang Malam", id: "7|Pulang Malam" },
-        { absen: "Keluar Malam", id: "8|Keluar Malam" },
+        { absen: "Istirahat Malam", id: "8|Istirahat Malam" },
         { absen: "Kembali Malam", id: "9|Kembali Malam" },
         { absen: "Masuk B", id: "10|Masuk B" },
-        { absen: "Keluar B", id: "12|Keluar B" },
+        { absen: "Istirahat B", id: "12|Istirahat B" },
         { absen: "Kembali B", id: "13|Kembali B" },
         { absen: "Pulang B", id: "11|Pulang B" },
         ],
@@ -298,16 +377,16 @@
         options: [
           { absen: "Masuk", id: "0|Masuk" },
           { absen: "Pulang", id: "1|Pulang" },
-          { absen: "Keluar", id: "2|Keluar" },
+          { absen: "Istirahat", id: "2|Istirahat" },
           { absen: "Kembali", id: "3|Kembali" },
-          { absen: "Keluar 2", id: "4|Keluar 2" },
+          { absen: "Istirahat 2", id: "4|Istirahat 2" },
           { absen: "Kembali 2", id: "5|Kembali 2" },
           { absen: "Masuk Malam", id: "6|Masuk Malam" },
           { absen: "Pulang Malam", id: "7|Pulang Malam" },
-          { absen: "Keluar Malam", id: "8|Keluar Malam" },
+          { absen: "Istirahat Malam", id: "8|Istirahat Malam" },
           { absen: "Kembali Malam", id: "9|Kembali Malam" },
           { absen: "Masuk B", id: "10|Masuk B" },
-          { absen: "Keluar B", id: "12|Keluar B" },
+          { absen: "Istirahat B", id: "12|Istirahat B" },
           { absen: "Kembali B", id: "13|Kembali B" },
           { absen: "Pulang B", id: "11|Pulang B" },
         ],

@@ -309,6 +309,7 @@
                                 if(data.split("/")[1] == null){
                                     render = `<span class="text-danger">${data}</span>`
                                 } else {
+                                    console.log(data)
                                     render = `<span class="text-danger">${data}</span> / ${data.split("/")[1]}`
                                 }
                             } else {
@@ -327,7 +328,6 @@
                 {
                     data: 'ket',
                     render:(data,type,row,meta) => {
-                        console.log(row.masuk)
                         if (row.masuk == null && row.ket == " ") {
                             return `<span class="tx-inverse">Tidak Absen Masuk</span>`
                         }else if (row.pulang == null && row.ket == " ") {
@@ -457,7 +457,8 @@
                                 if(data.split("/")[1] == null){
                                     render = `<span class="text-danger">${data}</span>`
                                 } else {
-                                    render = `<span class="text-danger">${data}</span> / ${data.split("/")[1]}`
+                                    console.log(data)
+                                    render = `<span class="text-danger">${data.split('/')[0]}</span> / ${data.split("/")[1]}`
                                 }
                             } else {
                                 render = `${data}`

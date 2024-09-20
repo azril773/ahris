@@ -29,6 +29,7 @@ def ijin(request, sid):
 
         # print(sid_lembur.id)
         pegawai = []
+        pp = []
             
         for p in pegawai_db.objects.filter(aktif=1):
             if int(sid) == 0:
@@ -49,6 +50,25 @@ def ijin(request, sid):
                     pegawai.append(data)
             else:
                 pass    
+        for p in pegawai_db.objects.filter(Q(gender="perempuan") | Q(gender="p"),aktif=1):
+            if int(sid) == 0:
+                data = {
+                    'idp':p.id,
+                    'nama':p.nama,
+                    'nik':p.nik,
+                    'userid':p.userid
+                }    
+                pp.append(data)
+            elif int(sid) == p.status_id:     
+                    data = {
+                        'idp':p.id,
+                        'nama':p.nama,
+                        'nik':p.nik,
+                        'userid':p.userid
+                    }    
+                    pp.append(data)
+            else:
+                pass    
         
         ijin = jenis_ijin_db.objects.order_by('jenis_ijin')
                         
@@ -57,6 +77,7 @@ def ijin(request, sid):
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
+            "pp":pp,
             'dsid' : dsid,
             'sid' : sid,
             'sil': sid_lembur,
@@ -276,7 +297,7 @@ def tambah_ijin(request):
     ij = jenis_ijin_db.objects.get(id=int(dijin))
         
     ltgl = dtgl.split(', ')
-    
+    print(ltgl)
     for t in ltgl:
         tgl = datetime.strptime(t,'%d-%m-%Y')        
               
@@ -319,7 +340,7 @@ def batal_ijin(request):
     try:
         ab = absensi_db.objects.get(pegawai_id=int(idp), tgl_absen=tgl)
     except:
-        return JsonResponse({"status": "error"})
+        return JsonResponse({"status": "error"},status=400)
     ab.keterangan_ijin = None
     ab.save()
     
@@ -417,3 +438,32 @@ def hjenis_ijin(r):
         status = "gagal menghapus" 
     return JsonResponse({"status":status},safe=False,status=200)
 
+
+@login_required
+def tcuti_melahirkan(r):
+    dr = r.POST.get("dari")
+    sp = r.POST.get("sampai")
+    pegawai = r.POST.get("pegawai")
+
+    try:
+        pgw = pegawai_db.objects.get(pk=int(pegawai))
+    except:
+        return JsonResponse({"status":400,"msg":"data pegawai tidak ada"},status=400)
+    dari = datetime.strptime(dr,'%d-%m-%Y').date()
+    sampai = datetime.strptime(sp,"%d-%m-%Y").date()
+    data = []
+    if ijin_db.objects.filter(tgl_ijin__range=(dari,sampai),pegawai_id=pgw.pk,ijin__jenis_ijin=r'CM$').exists():
+        return JsonResponse({"status":400,"msg":"Data ijin sudah ada","data":[]},status=400)
+    ijin = jenis_ijin_db.objects.filter(jenis_ijin__iregex=r"CM$")
+    if not ijin.exists():
+        return JsonResponse({"status":400,"msg":"Jenis ijin tidak ada","data":[]},status=400)
+    for i in range((sampai - dari).days +1 ):
+        obj = {
+            "pegawai_id":pgw.pk,
+            "ijin_id":ijin[0].pk,
+            "tgl_ijin":dari + timedelta(days=i),
+            "keterangan":f"Dispensasi - Cuti Melahirkan"
+        }
+        data.append(obj)
+    ijin_db.objects.bulk_create([ijin_db(**i) for i in data])
+    return JsonResponse({"status":"ok"},status=200)

@@ -462,7 +462,6 @@
 
     const pegawaiSelectize = $('#pegawai').selectize({
     });
-    {% comment %} pegawaiSelectize[0].selectize.disable() {% endcomment %}
 
     const periodeSelectize = $('#periode').selectize();
 
@@ -472,36 +471,6 @@
     prd = "{{prd}}"
     thn = "{{thn}}"
     sid = "{{sid}}"
-    {% comment %} const token = document.querySelector('input[name="csrfmiddlewaretoken"]').value {% endcomment %}
-    {% comment %} $("#tgl").on("blur",(e) => {
-        setTimeout(() => {
-            const tgl = $("#tgl").val()
-            if(tgl !== ""){
-                pegawaiSelectize[0].selectize.enable()
-            }else{
-                pegawaiSelectize[0].selectize.disable()
-            }
-        }, 100)
-    }) {% endcomment %}
-
-    {% comment %} function getAbsensi(id){
-        if(id && $("#tgl").val()){
-            $.ajax({
-                url: `{% url 'absensi_id' %}`,
-                method:"POST",
-                data: {
-                    id: id,
-                    tgl: $("#tgl").val()
-                },
-                headers: {
-                    "X-CSRFToken": token
-                },
-                success(e){
-                    console.log(e)
-                }
-            })
-        }
-    } {% endcomment %}
 
 
     var table = $('#tabelku').DataTable({
@@ -754,7 +723,7 @@
 
         var table2 = $('#tabelku2').DataTable({
             
-            "ajax": "../dlembur_json/"+didp+"/"+dprd+"/"+dthn,
+            "ajax": "/hrd/dlembur_json/"+didp+"/"+dprd+"/"+dthn,
 
             columns: [
 
@@ -804,7 +773,7 @@
 
       var table3 = $('#tabelku3').DataTable({
           
-          "ajax": "../dkompen_json/"+didp+"/"+dprd+"/"+dthn,
+          "ajax": "/hrd/dkompen_json/"+didp+"/"+dprd+"/"+dthn,
 
           columns: [
 
