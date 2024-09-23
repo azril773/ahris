@@ -232,8 +232,10 @@ def epegawai(r,idp):
         except:
             return JsonResponse({"status":"error"},status=400)
         status_pegawai = status_pegawai_db.objects.get(pk=status)
+        if pribadi_db.objects.filter(~Q(pegawai__userid=userid),email=email).exists():
+            return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
         if pegawai_db.objects.filter(~Q(pk=int(idp)),userid=userid).exists():
-            status = "duplikat"
+            return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
         else:
             print("OKSODKSDOK")
             pegawai = pegawai_db.objects.filter(userid=userid).update(
@@ -460,8 +462,11 @@ def tambah_pegawai(r):
         if email == '' or alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or tinggi == '' or berat == '' or goldarah == '' or agama == '':
             return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
 
+        if pribadi_db.objects.filter(email=email).exists():
+            return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
+
         if pegawai_db.objects.filter(userid=userid).exists():
-            status = "duplikat"
+            return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
         else:
             pegawai = pegawai_db(
                 nama=nama,
@@ -974,7 +979,7 @@ def pegawai_json(request, sid):
                     'ks':p.ks_premi,
                     'tk':p.tk_premi,
                     'payroll':p.payroll_by,
-                    'email':pribadi[0].email,
+                    'email':email,
                     'kkerja':p.kelompok_kerja.kelompok,
                     'sisa_cuti':p.sisa_cuti,
                     'sid':p.status_id,

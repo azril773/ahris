@@ -878,8 +878,6 @@ def pabsen(request):
                                 
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         if a["punch"] == 0 and jam_absen.hour > 4 and jam_absen.hour < 18 :
-                            if ab.pegawai.nama == "ISMAIL":
-                                print(jam_absen,ab.pegawai,"INI")
                             if ab.masuk is not None:
                                 if ab.masuk.hour > 18:
                                     ab.masuk_b = jam_absen.time()
@@ -2855,7 +2853,6 @@ def pabsen(request):
             if str(a.pegawai.hari_off) == str(nh):
                 # jika dia bisa mendapatkan opg 
                 if a.pegawai.status_id in lsopg:
-                    print("ok`")
                     # jika ada geder off dari hari ini ke hari lain
                     if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
                         pass

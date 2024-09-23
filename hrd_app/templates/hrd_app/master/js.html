@@ -1,17 +1,12 @@
 {% load static %}
 
 <script type="text/javascript" src="/static/lib/jquery/jquery.js"></script>
-<script
-  src="https://cdnjs.cloudflare.com/ajax/libs/selectize.js/0.15.2/js/selectize.min.js"
-  integrity="sha512-IOebNkvA/HZjMM7MxL0NYeLYEalloZ8ckak+NDtOViP7oiYzG5vn6WVXyrJDiJPhl4yRdmNAG49iuLmhkUdVsQ=="
-  crossorigin="anonymous"
-  referrerpolicy="no-referrer"
-></script>
+<script src="{% static "js/selectize.min.js" %}"></script>
 <script type="text/javascript" src="{% static 'lib/popper.js/popper.min.js'%}"></script>
 <script type="text/javascript" src="{% static 'lib/bootstrap/bootstrap.js'%}"></script>
 <script type="text/javascript" src="{% static 'lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js'%}"></script>
 {% comment %} <script type="text/javascript" src="{% static 'lib/moment/moment.js'%}"></script> {% endcomment %}
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.17.1/moment-with-locales.min.js"></script>
+<script src="{% static "js/moment-with-locales.min.js" %}"></script>
 <script type="text/javascript" src="{% static 'lib/jquery-ui/jquery-ui.js'%}"></script>
 <script type="text/javascript" src="{% static 'lib/jquery-switchbutton/jquery.switchButton.js'%}"></script>
 <script type="text/javascript" src="{% static 'lib/peity/jquery.peity.js'%}"></script> 
