@@ -216,8 +216,9 @@ def epegawai(r,idp):
         berat = r.POST.get("berat")
         goldarah = r.POST.get("goldarah")
         agama = r.POST.get("agama")
-
-
+        print(alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah)
+        if alamat == '' or phone == '' or email == '' or kota_lahir == '' or tgl_lahir == '' or tinggi == '' or berat == '' or goldarah == '' or agama == '':
+            return JsonResponse({"status":"error","msg":"data pribadi tidak boleh kosong"},status=400)
         keluarga = r.POST.get("keluarga")
         pihak = r.POST.get("pihak")
         pengalaman = r.POST.get("pengalaman")
@@ -310,14 +311,17 @@ def epegawai(r,idp):
             keluarga_db.objects.filter(pegawai__userid=int(userid)).delete()
             for k in keluarga:
                 print(k)
-                keluarga_db(
-                    pegawai_id=int(pgw.pk),
-                    hubungan = k['hubungan'],
-                    nama = k["nama"],
-                    tgl_lahir = datetime.strptime(k['tgl_lahir'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                    gender = k['gender'],
-                    gol_darah = k['gol_darah']
-                ).save()
+                if k["hubungan"] != "" and k["nama"] != "" and k["tgl_lahir"] != "Invalid date" and k["tgl_lahir"] != "" and "gender" != "" and k["gol_darah"] != "":
+                    keluarga_db(
+                        pegawai_id=int(pgw.pk),
+                        hubungan = k['hubungan'],
+                        nama = k["nama"],
+                        tgl_lahir = datetime.strptime(k['tgl_lahir'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        gender = k['gender'],
+                        gol_darah = k['gol_darah']
+                    ).save()
+                else:
+                    pass
 
             # Tambah Data Pribadi
             pribadi = pribadi_db.objects.filter(pegawai_id=id)
@@ -335,6 +339,20 @@ def epegawai(r,idp):
                     gol_darah=goldarah,
                     agama=agama
                 )
+            else: 
+                pribadi_db(
+                    pegawai_id=int(pgw.pk),
+                    alamat=alamat,
+                    phone=phone,
+                    email=email,
+                    kota_lahir=kota_lahir,
+                    tgl_lahir=tgl_lahir,
+                    tinggi_badan=tinggi,
+                    berat_badan=berat,
+                    gol_darah=goldarah,
+                    agama=agama
+                ).save()
+
             status= 'OK'
         print("OK")
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
@@ -394,6 +412,8 @@ def tambah_pegawai(r):
         pks = r.POST.get("pks")
         ptk = r.POST.get("ptk")
 
+        if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '':
+            return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
 
         # Data Pribadi
         alamat = r.POST.get("alamat")
@@ -437,8 +457,8 @@ def tambah_pegawai(r):
             status_pegawai = status_pegawai_db.objects.get(pk=status)
         except:
             status_pegawai = None
-        if email == '':
-            return JsonResponse({'status':"error","msg":"email tidak boleh kosong"},status=400,safe=False)
+        if email == '' or alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or tinggi == '' or berat == '' or goldarah == '' or agama == '':
+            return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
 
         if pegawai_db.objects.filter(userid=userid).exists():
             status = "duplikat"
@@ -933,6 +953,11 @@ def pegawai_json(request, sid):
                     counter = p.counter.counter
                 else:
                     counter = None     
+                pribadi = pribadi_db.objects.filter(pegawai_id=p.pk)
+                if pribadi.exists():
+                    email = pribadi[0].email
+                else:
+                    email = "" 
                 pg = {
                     'idp':p.id,
                     'nama':p.nama,
@@ -949,6 +974,7 @@ def pegawai_json(request, sid):
                     'ks':p.ks_premi,
                     'tk':p.tk_premi,
                     'payroll':p.payroll_by,
+                    'email':pribadi[0].email,
                     'kkerja':p.kelompok_kerja.kelompok,
                     'sisa_cuti':p.sisa_cuti,
                     'sid':p.status_id,
@@ -966,6 +992,11 @@ def pegawai_json(request, sid):
                     counter = p.counter.counter
                 else:
                     counter = None
+                pribadi = pribadi_db.objects.filter(pegawai_id=p.pk)
+                if pribadi.exists():
+                    email = pribadi[0].email
+                else:
+                    email = "" 
                 pg = {
                     'idp':p.id,
                     'nama':p.nama,
@@ -982,6 +1013,7 @@ def pegawai_json(request, sid):
                     'ks':p.ks_premi,
                     'tk':p.tk_premi,
                     'payroll':p.payroll_by,
+                    "email":email,
                     'kkerja':p.kelompok_kerja.kelompok,
                     'sisa_cuti':p.sisa_cuti,
                     'sid':p.status_id,

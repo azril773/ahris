@@ -11,6 +11,7 @@
 
     <div class="br-section-wrapper">
         <!-- Pesan Error -->
+         <span id="msg"></span>
         {% for message in messages %}
         <div class="container-fluid p-0">
             {% if 'safe' in message.tags %}
@@ -1184,6 +1185,8 @@ if($(e.target).is("button")){
         console.log('sd')
       },
       error:(e) => {
+        $("#msg p").remove()
+        $("#msg").append(`<p class="alert alert-danger">${e.responseJSON.msg}</p>`)
         console.log(e)
       }
     })

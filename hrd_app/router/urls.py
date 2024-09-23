@@ -81,7 +81,10 @@ urlpatterns = [
     path('', include("hrd_app.router.laporan.backend.urls")),
     path('', include("hrd_app.router.laporan.ui.urls")),
 
+    path("",include("hrd_app.router.broadcast.ui.urls")),
+    path("",include("hrd_app.router.broadcast.backend.urls")),
     
+
     path('pengaturan', views.pengaturan, name='pengaturan'),
 
 

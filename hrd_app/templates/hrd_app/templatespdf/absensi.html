@@ -1,0 +1,88 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Print Laporan</title>
+    <link rel="stylesheet" href="{% static "css/bootstrap/bootstrap.css" %}">
+    <link rel="stylesheet" href="{% static "css/print.css" %}">
+</head>
+<body>
+    <div class="container" style="font-size:13px;">
+        <h5 class="d-flex justify-content-center">Rekap Absensi</h5>
+        <code class="d-flex justify-content-center text-black">ASIA TOSERBA CIREBON</code>
+        <code class="d-flex justify-content-center mt-2 text-black" style="font-size:10px;">Jl. Karanggetas No.25-27, Kota Cirebon, Jawa Barat 45112</code>
+        <code class="d-flex justify-content-center text-black">PHONE : (0231) 202820 | EMAIL : asia_tsr_crb@yahoo.co.id</code>
+        <div class="border-top border-bottom p-2">
+            <div class="d-flex justify-content-between text-black" style="font-size:10px">
+                <div class="">
+                    <table>
+                        <tr class="">
+                            <td class="mr-5">Nama</td>
+                            <td class="d-flex justify-content-center">:</td>
+                            <td class="ml-5">Lorem, ipsum dolor.</td>
+                        </tr>
+                        <tr class="">
+                            <td>NIK</td>
+                            <td class="d-flex justify-content-center">:</td>
+                            <td>Lorem ipsum dolor sit amet.</td>
+                        </tr>
+                        <tr class="">
+                            <td>Divisi</td>
+                            <td class="d-flex justify-content-center">:</td>
+                            <td>Nama</td>
+                        </tr>
+                    </table>
+                </div>
+                <div class="">
+                    <table>
+                        <tr class="">
+                            <td class="mr-5">Periode</td>
+                            <td class="d-flex justify-content-center">:</td>
+                            <td class="ml-5">Lorem, ipsum dolor.</td>
+                        </tr>
+                        <tr class="">
+                            <td>Kehadiran</td>
+                            <td class="d-flex justify-content-center">:</td>
+                            <td>Lorem ipsum dolor sit amet.</td>
+                        </tr>
+                        <tr class="">
+                            <td>Terlambat</td>
+                            <td class="d-flex justify-content-center">:</td>
+                            <td>Nama</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <table class="table mt-2" style="font-size:8px">
+            <thead style="font-weight:bold;">
+                <tr>
+                    <td>Tanggal</td>
+                    <td>Masuk</td>
+                    <td><code class="text-black">Klr./Klr.2</code></td>
+                    <td><code class="text-black">Kmbl./Kmbl.2</code></td>
+                    <td>Pulang</td>
+                    <td>Masuk (B)</td>
+                    <td><code class="text-black">Klr./Klr.2 (B)</code></td>
+                    <td><code class="text-black">Kmbl./Kmbl.2 (B)</code></td>
+                    <td>Pulang (B)</td>
+                    <td>Total Jam</td>
+                    <td>Keterangan</td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for d in data %}
+                
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <script src="{% static "lib/bootstrap/bootstrap.js" %}"></script>
+</body>
+</html>
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+

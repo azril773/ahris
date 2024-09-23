@@ -119,3 +119,5 @@ from hrd_app.controllers.opg.views import *
 
 # +++++++++++++++++++++++++++ LAPORAN ++++++++++++++++++++++++++++++++
 from hrd_app.controllers.laporan.views import *
+
+from hrd_app.controllers.broadcast.views import *

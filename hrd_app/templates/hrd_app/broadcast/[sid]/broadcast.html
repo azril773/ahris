@@ -1,0 +1,421 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- b -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Broadcast Email</h6>
+        {% comment %} </div> {% endcomment %}
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">   
+                            
+            <!-- Button Registrasi -->
+            <button data-target="#broadcast_absen" data-toggle="modal" class="btn btn-primary mg-b-6">Broadcast Absensi</button>
+
+            <!-- Button Perjanjian & Kontrak Kerja -->
+            <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-dark mg-b-6">Broadcast Perjanjian & Kontrak Kerja</button>
+
+            <!-- Button Pegawai Non Aktif -->
+
+            </div>          
+        </div>
+
+        <br>        
+        <div class="d-flex align-items-center justify-content-start">
+            <div class="col-md-12 pd-x-0">  
+                {% if sid == 0 %}
+                    <a href="{% url 'broadcast' 0 %}" class="btn btn-info mg-b-8">Semua Divisi</a> &nbsp; 
+                        
+                    {% for s in status %}   
+                        <a href="{% url 'broadcast' s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp;  
+                    {% endfor %}
+
+                {% else %}
+                    <a href="{% url 'broadcast' 0 %}" class="btn btn-outline-info mg-b-8">Semua Divisi</a> &nbsp; 
+                    
+                    {% for s in status %}   
+                        {% if s.id == sid %}
+                            <a href="{% url 'broadcast' s.id%}" class="btn btn-info mg-b-8">{{s.status}}</a> &nbsp;   
+                        {% else %}
+                            <a href="{% url 'broadcast' s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp; 
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                
+
+            </div>            
+        </div>
+    <!-- alert berhasil -->
+        <table id="tableku" class="table" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>NAMA</th>
+                    <th>JK</th>
+                    <th>NIK</th>
+                    <th>USERID</th>
+                    <th>DIVISI</th>
+                    <th>JABATAn</th>
+                    <th>LIBUR</th>
+                    <th>KELP. KERJA</th>
+                    <th>EMAIL</th>
+                    <th>BROADCAST</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <div id="broadcast_absen" class="modal fade">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+            <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Proses Data Absensi</h6>          
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>          
+            </div>
+            
+            <form action="{% url 'pbs' %}" method="post">
+                {% csrf_token %}
+                <div class="form-layout form-layout-1">
+                <div class="row mg-b-25">
+    
+                    <div class="col-lg-12 mb-2">
+                        <label for="pegawai">Pilih Pegawai</label>
+                        <select name="pegawai" id="pegawai">
+                            <option value="">Pilih Pegawai</option>
+                            {% for p in pegawai %}
+                                <option value="{{p.pk}}">{{p.nama}} /  {{p.userid}}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+    
+                    <div class="modal-footer">
+                    <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Proses Data</button>
+                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                    </div>              
+    
+                </div>
+                </div>            
+            </form>              
+        </div>
+        </div><!-- modal-dialog -->
+    </div>
+    <div id="singleabsensi" class="modal fade">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+            <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Data Absensi</h6>          
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>          
+            </div>
+            
+            <form>
+                {% csrf_token %}
+                <div class="form-layout form-layout-1">
+                <div class="row mg-b-25 ">
+                    <input type="hidden" name="pgw" id="idpa">
+                    <div class="col-lg-12 mb-2">
+                        <label for="spgwa">Pegawai</label>
+                        <input type="text" id="spgwa" class="form-control" disabled>
+                    </div>
+                    <div class="col-lg-6">
+                        <label for="sprda">Periode</label>
+                        <select name="sprda" id="sprda">
+                            <option value="">Pilih Periode</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-6">
+                        <label for="sthna">Tahun</label>
+                        <select name="sthna" id="sthna">
+                            <option value="">Pilih Tahun</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+    
+                    <div class="modal-footer">
+                    <button type="submit" id="submit_buttonSa" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Kirim Data</button>
+                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                    </div>              
+    
+                </div>
+                </div>            
+            </form>              
+        </div>
+        </div><!-- modal-dialog -->
+    </div>
+    <div id="mspk" class="modal fade">
+        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+            <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Perjanjian Kontrak</h6>          
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>          
+            </div>
+            
+            <form >
+                {% csrf_token %}
+                <div class="form-layout form-layout-1">
+                <div class="row mg-b-25">
+                    <input type="hidden" name="pgw" id="idppk">
+                    <div class="col-lg-12 mb-2">
+                        <label for="spgwpk">Pegawai</label>
+                        <input type="text" id="spgwpk" class="form-control" disabled>
+                    </div>
+                    <div class="col-lg-6">
+                        <label for="sprdpk">Periode</label>
+                        <select name="sprdpk" id="sprdpk">
+                            <option value="">Pilih Periode</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-6">
+                        <label for="sthnpk">Tahun</label>
+                        <select name="sthnpk" id="sthnpk">
+                            <option value="">Pilih Tahun</option>
+                        </select>
+                    </div>
+
+                    <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+    
+                    <div class="modal-footer">
+                    <button type="submit" id="submit_buttonSpk" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Proses Data</button>
+                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                    </div>              
+    
+                </div>
+                </div>            
+            </form>              
+        </div>
+        </div><!-- modal-dialog -->
+    </div>
+</div><!-- br-pagebody -->
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+<script>
+    sid = "{{sid}}"
+    const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+    console.log(token)
+    const pegawaiSelectize = $("#pegawai").selectize({
+        maxItems:null
+    })
+    const sprda = $("#sprda").selectize({
+        valueField:["bulan"],
+        labelField:["nama"],
+        searchField:["nama"],
+        options:[
+            {"bulan":1,"nama":"Januari"},
+            {"bulan":2,"nama":"Februari"},
+            {"bulan":3,"nama":"Maret"},
+            {"bulan":4,"nama":"April"},
+            {"bulan":5,"nama":"Mei"},
+            {"bulan":6,"nama":"Juni"},
+            {"bulan":7,"nama":"Juli"},
+            {"bulan":8,"nama":"Agustus"},
+            {"bulan":9,"nama":"September"},
+            {"bulan":10,"nama":"Oktobe"},
+            {"bulan":11,"nama":"November"},
+            {"bulan":12,"nama":"Desember"},
+        ]
+    })
+    const sthna = $("#sthna").selectize({
+        valueField:["tahun"],
+        labelField:["tahun"],
+        searchField:["tahun"],
+        options:[
+            {"tahun":2024},
+            {"tahun":2023},
+            {"tahun":2022},
+            {"tahun":2021},
+            {"tahun":2020},
+            {"tahun":2019},
+            {"tahun":2018},
+            {"tahun":2017},
+            {"tahun":2016},
+            {"tahun":2015},
+        ]
+    })
+    const sprdpk = $("#sprdpk").selectize({
+        valueField:["bulan"],
+        labelField:["nama"],
+        searchField:["nama"],
+        options:[
+        {"bulan":1,"nama":"Januari"},
+        {"bulan":2,"nama":"Februari"},
+        {"bulan":3,"nama":"Maret"},
+        {"bulan":4,"nama":"April"},
+        {"bulan":5,"nama":"Mei"},
+        {"bulan":6,"nama":"Juni"},
+        {"bulan":7,"nama":"Juli"},
+        {"bulan":8,"nama":"Agustus"},
+        {"bulan":9,"nama":"September"},
+            {"bulan":10,"nama":"Oktobe"},
+            {"bulan":11,"nama":"November"},
+            {"bulan":12,"nama":"Desember"},
+            ]
+        })
+    const sthnpk = $("#sthnpk").selectize({
+        valueField:["tahun"],
+        labelField:["tahun"],
+        searchField:["tahun"],
+        options:[
+            {"tahun":2024},
+            {"tahun":2023},
+            {"tahun":2022},
+            {"tahun":2021},
+            {"tahun":2020},
+            {"tahun":2019},
+            {"tahun":2018},
+            {"tahun":2017},
+            {"tahun":2016},
+            {"tahun":2015},
+        ]
+    })
+    const table = $("#tableku").DataTable({
+
+        ajax:{
+            url:"{% url 'pegawai_json' sid %}",
+
+        },
+        columns: [
+
+                { data: 'nama' },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){    
+                        if(row.gender == 'Laki-Laki'){
+                            data = 'L'
+                        } else (
+                            data = 'P'
+                        )
+                        return data;
+                    } 
+                },     
+                { data: 'nik' },
+                { data: 'userid' },
+                { data: 'divisi' },  
+                { data: 'jabatan' },
+                { data: 'libur' },
+                { data: 'kkerja' },
+                { data: 'email' },
+                { 
+                    data: null,
+                    "render": function(data, type, row, meta){    
+                        data = `<button data-toggle="modal" id="bsabsensi" data-nama="${row.nama}" data-id="${row.idp}" data-target="#singleabsensi" class="btn btn-sm btn-primary">Data Absen</button>&nbsp<button id="bspk" data-target="#mspk" data-toggle="modal" class="btn btn-sm btn-dark" data-nama="${row.nama}" data-id="${row.idp}">Perjanjian Kontrak</button>`;
+                        
+                        return data;
+                    } 
+                },
+            ],
+
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');  
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');                
+                $('td', row).eq(5).addClass('hitam');                
+                $('td', row).eq(6).addClass('hitam');              
+                $('td', row).eq(7).addClass('hitam');
+                $('td', row).eq(8).addClass('hitam');              
+            },
+
+        destroy: true,
+        ordering: false,
+        paging: false,
+        scrollX: '100%',
+        scrollY: 300,
+        processing: true,
+        "language": {
+                searchPlaceholder: 'Cari...',
+                sSearch: '',
+                loadingRecords: '&nbsp;',
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+                emptyTable: "&nbsp;",
+
+                paginate: {
+                    previous: '<i class="cs-chevron-left"></i>',
+                    next: '<i class="cs-chevron-right"></i>',
+                },
+            },
+    })
+
+    $("#singleabsensi").on("show.bs.modal",function(e){
+        $("#spgwa").val($(e.relatedTarget).data("nama"))
+        $("#idpa").val($(e.relatedTarget).data("id"))
+        console.log($(e.relatedTarget).data("id"))
+    })
+    $("#mspk").on("show.bs.modal",function(e){
+        $("#spgwpk").val($(e.relatedTarget).data("nama"))
+        $("#idppk").val($(e.relatedTarget).data("id"))
+    })
+
+
+    $("#submit_buttonSa").on("click",function(e){
+        e.preventDefault()
+        const prd = $("#sprda").val()
+        const thn = $("#sthna").val()
+        const idp = $("#idpa").val()
+        $.ajax({
+            url:"{% url 'spa' %}",
+            method:"post",
+            data:{prd,idp,thn},
+            headers:{
+                "X-CSRFToken":token
+            },
+            success:(e) => {
+                console.log(e)
+            }
+        })
+    })
+    $("#submit_buttonSpk").on("click",function(e){
+        e.preventDefault()
+        const prd = $("#sprdpk").val()
+        const thn = $("#sthnpk").val()
+        const idp = $("#idppk").val()
+        $.ajax({
+            url:"{% url 'spk' %}",
+            method:"post",
+            data:{prd,idp,thn},
+            headers:{
+                "X-CSRFToken":token
+            },
+            success:(e) => {
+                console.log(e)
+            }
+        })
+    })
+</script>
+{% endblock hrd_ajax %}

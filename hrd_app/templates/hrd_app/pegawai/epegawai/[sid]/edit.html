@@ -10,6 +10,7 @@
 
     <div class="br-section-wrapper">
         <!-- Pesan Error -->
+         <span id="msg"></span>
         {% for message in messages %}
         <div class="container-fluid p-0">
             {% if 'safe' in message.tags %}
@@ -273,7 +274,7 @@
                             <div class="row mg-b-10">
                                 <div class="col-lg-6">
                                     <div class="form-group">
-                                    <label class="form-control-label tx-inverse">Alamat:</label>
+                                    <label class="form-control-label tx-inverse">Alamat: <span class="tx-danger">*</span></label>
                                     <input class="form-control" type="text" name="alamat" value="{{pribadi.alamat}}" id="alamat" required>
                                     </div>
                                 </div> 
@@ -287,7 +288,7 @@
                               
                                 <div class="col-lg-3">
                                     <div class="form-group">
-                                    <label class="form-control-label tx-inverse">Email:</label>
+                                    <label class="form-control-label tx-inverse">Email: <span class="tx-danger">*</span></label>
                                     <input class="form-control" type="email" name="email" value="{{pribadi.email}}" id="email">
                                     </div>
                                 </div>
@@ -309,21 +310,21 @@
 
                                 <div class="col-lg-3">
                                     <div class="form-group">
-                                    <label class="form-control-label tx-inverse">Tinggi Badan:</label>
+                                    <label class="form-control-label tx-inverse">Tinggi Badan: <span class="tx-danger">*</span></label>
                                     <input class="form-control" type="number" name="tinggi" value="{{pribadi.tinggi_badan}}" id="tinggi">
                                     </div>
                                 </div>
 
                                 <div class="col-lg-3">
                                     <div class="form-group">
-                                    <label class="form-control-label tx-inverse">Berat Badan:</label>
+                                    <label class="form-control-label tx-inverse">Berat Badan: <span class="tx-danger">*</span></label>
                                     <input class="form-control" type="number" name="berat" value="{{pribadi.berat_badan}}" id="berat">
                                     </div>
                                 </div>
 
                                 <div class="col-lg-3">
                                     <div class="form-group">
-                                    <label class="form-control-label tx-inverse">Gol Darah:</label>
+                                    <label class="form-control-label tx-inverse">Gol Darah: <span class="tx-danger">*</span></label>
                                     <select name="goldarah" id="goldarah" class="form-control select2-show-search" data-placeholder="">
                                         <option label=""></option>
                                         {% for drh in goldarah %}
@@ -1108,6 +1109,10 @@ pihak.forEach(e => {
           localStorage.removeItem("data_pihak")
           window.location = "{% url 'pegawai' sid %}"
           console.log('sd')
+        },
+        error:(err) => {
+          $("#msg p").remove()
+          $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
         }
       })
     }
