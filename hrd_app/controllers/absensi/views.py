@@ -1851,17 +1851,17 @@ def pabsen(request):
                                         "ket": "Kembali 2"
                                     }
                                     dt.append(data)
-                            elif ab.masuk_b is not None or ab.pulang is not None or ab.istirahat2_b is not None:
-                                ab.kembali2_b = jam_absen.time()
-                                ab.save()
-                                data = {
-                                    "userid": a["userid"],
-                                    "jam_absen": jam_absen,
-                                    "punch": 15,
-                                    "mesin": a["mesin"],
-                                    "ket": "Kembali 2 B"
-                                }
-                                dt.append(data)
+                            # elif ab.masuk_b is not None or ab.pulang is not None or ab.istirahat2_b is not None:
+                            #     ab.kembali2_b = jam_absen.time()
+                            #     ab.save()
+                            #     data = {
+                            #         "userid": a["userid"],
+                            #         "jam_absen": jam_absen,
+                            #         "punch": 15,
+                            #         "mesin": a["mesin"],
+                            #         "ket": "Kembali 2 B"
+                            #     }
+                            #     dt.append(data)
                             else:
                                 ab.kembali2 = jam_absen.time()
                                 ab.save()

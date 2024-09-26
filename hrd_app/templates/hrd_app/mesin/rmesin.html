@@ -1136,11 +1136,13 @@ if($(e.target).is("button")){
   
   function tambahData(e){
     // General Data
+    id = "{{id}}"
+    uid = "{{uid}}"
     const nama = $("#nama").val()
     const gender = $("#gender").val()
     const tgl_masuk = $("#tgl_masuk").val()
     const nik = $("#nik").val()
-    const userid = $("#userid").val()
+    let userid = $("#userid").val()
     const status = $("#status").val()
     const div = $("#div").val()
     const counter = $("#counter").val()
@@ -1175,17 +1177,18 @@ if($(e.target).is("button")){
 
     // AJAX 
     const token = document.querySelector("[name=csrfmiddlewaretoken]").value
+    userid = "{{userid}}"
     $.ajax({
-      url:`{% url "tambah_pegawai" %}`,
+      url:`{% url "tambah_data_pegawai" %}`,
       method:"post",
-      data:{nama,gender,tgl_masuk,nik,userid,status,div,counter,jabatan,kk,hr,ca,rek,payroll,nks,ntk,pks,ptk,keluarga,pihak,pengalaman,pendidikan,alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah,agama},
+      data:{nama,gender,tgl_masuk,id,nik,uid,userid,uid,status,div,counter,jabatan,kk,hr,ca,rek,payroll,nks,ntk,pks,ptk,keluarga,pihak,pengalaman,pendidikan,alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah,agama},
       headers:{"X-CSRFToken":token},
       success:(e) => {
         localStorage.removeItem("data_pendidikan")
         localStorage.removeItem("data_pengalaman")
         localStorage.removeItem("data_keluarga")
         localStorage.removeItem("data_pihak")
-        window.location = '{% url "pegawai" dsid %}'
+        window.location = '{% url "admesin" id  %}'
         console.log('sd')
       },
       error:(e) => {

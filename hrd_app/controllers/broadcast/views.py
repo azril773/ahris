@@ -2,7 +2,8 @@ from hrd_app.controllers.lib import *
 import pika
 import weasyprint
 from django.template.loader import get_template 
-import smtplib
+import smtplib, ssl
+from email import encoders
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
@@ -196,6 +197,7 @@ def single_absensi(r):
             'ln': ab.libur_nasional
         }
         data.append(absen)
+    pegawai = pegawai_db.objects.get(id=int(idp))
     tselisih = str(tselisih).split(".")
     slc = slice(0,2)
     template = get_template("hrd_app/templatespdf/absensi.html")
@@ -204,17 +206,24 @@ def single_absensi(r):
     css = weasyprint.CSS(r"static/css/bootstrap/bootstrap.css")
     file.write_pdf(r'static/pdf/absensi.pdf',stylesheets=[css])
     msg = MIMEMultipart()
+    msg["Subject"] = "Data Absensi"
+    msg["From"] = "testingahris@gmail.com"
+    msg["To"] = "azrilsugiarto06@gmail.com"
+    body = f"Hai, {pegawai.nama}"
+    part = MIMEText(body, 'plain')
+    msg.attach(part)
     with open(r'static/pdf/absensi.pdf',"rb") as f:
         pdf = MIMEApplication(f.read(),_subtype="pdf")
-        pdf.add_header("Content-Disposition","attachment",filename="coba.pdf")
-        msg.attach(pdf)
+    # encoders.encode_base64(pdf)
+    pdf.add_header("Content-Disposition","attachment",filename=f"absensi {pegawai.nama}")
+    msg.attach(pdf)
 
-    msg["Subject"] = "Data Absensi"
-    msg["From"] = "sugiartoazril@gmail.com"
-    msg["To"] = "azrilsugiarto06@gmail.com"
-    conn = smtplib.SMTP("localhost",8000)
-    conn.starttls()
-    conn.login("sugiartoazril02@gmail.com",'?)((;$(?)/_!?"($;(.+($;)kljsksjiiheksuhiartolorzajdji)+)$873))Azrihbgsknwi+#)()_8(kjrikkjsk')
+    context = ssl.create_default_context()
+    conn = smtplib.SMTP_SSL("smtp.gmail.com",465)
+    # conn.ehlo()
+    # conn.starttls(context=context)
+    # # conn.ehlo()
+    conn.login("testingahris@gmail.com",'uyvl vdac uqad skpf')
     conn.sendmail("sugiartoazril02@gmail.com",['azrilsugiarto06@gmail.com'],msg.as_string())
     conn.quit()
 

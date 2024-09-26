@@ -1,0 +1,71 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- b -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Data Mesin</h6>
+        {% comment %} </div> {% endcomment %}
+
+        <br>        
+
+        {% csrf_token %}
+        <table class="table" id="tableku">
+            <thead>
+                <tr>
+                    <th>UID</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for u in userid %}
+                    <tr>
+                        <td>{{u.userid}}</td>
+                        <td><a href="{% url "rmesin" u.userid id u.uid  %}" class="btn btn-primary">Proses</a></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    <!-- alert berhasil -->
+    </div>
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+{% block hrd_ajax %}
+<script>
+    $("#tableku").DataTable({
+        "rowCallback": function (row, data) {
+            $('td', row).eq(0).addClass('hitam');
+        }
+    })
+</script>
+{% endblock hrd_ajax %}

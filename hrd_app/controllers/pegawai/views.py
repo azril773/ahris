@@ -376,7 +376,7 @@ def tpegawai(r):
         hr = hari_db.objects.all()
 
         kota_kabupaten = kota_kabupaten_db.objects.all()
-        
+        userid = ""
         data = {
             'akses' : akses,
             'dsid': dsid,
@@ -386,7 +386,8 @@ def tpegawai(r):
             'status':status,
             "kota_kabupaten":kota_kabupaten,
             "kk":kk,
-            "hr":hr
+            "hr":hr,
+            "userid":userid
         }
     return render(r,"hrd_app/pegawai/tpegawai/tambah.html",data)
 
