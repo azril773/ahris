@@ -1,0 +1,92 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        {% if messages %}
+            {% for message in messages %}
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+        {% endif %}
+
+
+
+        <div class="row">
+            <div class="col-lg-6">
+                <h5 class="text-dark text-uppercase">Registrasi User Login</h5>
+                <div class="border p-5">
+                    <form action="{% url "proses_registrasi" %}" method="post">
+                        {% csrf_token %}
+                        <label for="username" class="text-dark">Username</label> <br>
+                        <input type="text" name="username" id="username" class="mb-2 form-control">
+                        <label for="password" class="text-dark">Password</label> <br>
+                        <input type="password" name="password" id="password" class="mb-2 form-control">
+                        <label for="kpassword" class="text-dark">Konfirmasi Password</label> <br>
+                        <input type="password" name="kpassword" id="kpassword" class="mb-2 form-control">
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Daftarkan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <h5 class="text-dark text-uppercase">Reset Password Login</h5>
+                <div class="border p-5">
+                    <form action="{% url "reset_password" %}" method="post">
+                        {% csrf_token %}
+                        <label for="username" class="text-dark">Username</label> <br>
+                        <select name="user" id="user" class='mb-2'>
+                            <option value="">Pilih User</option>
+                            {% for user in users %}
+                                <option value="{{user.pk}}">{{user.username}}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="password" class="text-dark">Password</label> <br>
+                        <input type="password" name="password" id="password" class="mb-2 form-control">
+                        <label for="kpassword" class="text-dark">Konfirmasi Password</label> <br>
+                        <input type="password" name="kpassword" id="kpassword" class="mb-2 form-control">
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Daftarkan</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>
+    $("#user").selectize()
+</script>
+
+{% endblock hrd_ajax %}

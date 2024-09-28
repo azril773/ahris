@@ -311,7 +311,7 @@
             {
                 data: null,
                 render:(e) => {
-                    return ""
+                    return "lsd"
                 }
             },
         ],
@@ -346,11 +346,9 @@
             },
 
 
-            destroy: true,
             ordering: false,
             paging: false,
             scrollY: 300,
-            scrollX:"100%",
             processing: true,
 
             "language": {
@@ -393,8 +391,6 @@
                     data:"nama",
                     render:(data,type,row,meta) => {
                         const id = row.id
-                        const bulan = "{{bulan}}"
-                        const tahun = "{{tahun}}"
                         const sid = "{{sid}}"
                         return `<a style="color:#0d6efd;" target="_blank" href="/hrd/print_laporan/${sid}/${id}/${bulan}/${tahun}">${data}</a>`
                     }

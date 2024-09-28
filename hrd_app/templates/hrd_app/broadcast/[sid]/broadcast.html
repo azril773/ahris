@@ -101,26 +101,40 @@
                 <span aria-hidden="true">&times;</span>
             </button>          
             </div>
-            
-            <form action="{% url 'pbs' %}" method="post">
+            <div class="justify-content-center text-dark" id="loadingba" hidden>
+                Loading
+            </div>
+            <form action="{% url 'bpa' sid %}" id="bpaform" method="post">
                 {% csrf_token %}
                 <div class="form-layout form-layout-1">
                 <div class="row mg-b-25">
     
                     <div class="col-lg-12 mb-2">
-                        <label for="pegawai">Pilih Pegawai</label>
-                        <select name="pegawai" id="pegawai">
+                        <label class="text-dark" for="pegawai">Pilih Pegawai</label>
+                        <select name="pegawai[]" id="pegawai">
                             <option value="">Pilih Pegawai</option>
                             {% for p in pegawai %}
                                 <option value="{{p.pk}}">{{p.nama}} /  {{p.userid}}</option>
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="col-lg-6 mb-2">
+                        <label class="text-dark" for="bulanb">Bulan</label>
+                        <select name="bulanb" id="bulanb">
+                            <option value="">Pilih Bulan</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-6 mb-2">
+                        <label class="text-dark" for="tahunb">Tahun</label>
+                        <select name="tahunb" id="tahunb">
+                            <option value="">Pilih tahun</option>
+                        </select>
+                    </div>
 
                     <input type="hidden" name="sid" class="form-control" value="{{sid}}">
     
                     <div class="modal-footer">
-                    <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Proses Data</button>
+                    <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Broadcast Data</button>
                     <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
                     </div>              
     
@@ -134,29 +148,32 @@
         <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content bd-0 tx-14">
             <div class="modal-header pd-y-20 pd-x-25">
-            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Data Absensi</h6>          
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Data Absensi</h6>         
+            {% comment %} <p id="loading" class="hidden">Loading</p>  {% endcomment %}
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>          
             </div>
-            
+            <div class="d-none justify-content-center text-dark" id="loadingsa" hidden>
+                Loading
+            </div>
             <form>
                 {% csrf_token %}
                 <div class="form-layout form-layout-1">
                 <div class="row mg-b-25 ">
                     <input type="hidden" name="pgw" id="idpa">
                     <div class="col-lg-12 mb-2">
-                        <label for="spgwa">Pegawai</label>
+                        <label for="spgwa" class="text-dark">Pegawai</label>
                         <input type="text" id="spgwa" class="form-control" disabled>
                     </div>
                     <div class="col-lg-6">
-                        <label for="sprda">Periode</label>
+                        <label for="sprda" class="text-dark">Periode</label>
                         <select name="sprda" id="sprda">
                             <option value="">Pilih Periode</option>
                         </select>
                     </div>
                     <div class="col-lg-6">
-                        <label for="sthna">Tahun</label>
+                        <label for="sthna" class="text-dark">Tahun</label>
                         <select name="sthna" id="sthna">
                             <option value="">Pilih Tahun</option>
                         </select>
@@ -184,7 +201,9 @@
                 <span aria-hidden="true">&times;</span>
             </button>          
             </div>
-            
+            <div class="d-none justify-content-center text-dark" id="loadingspk" hidden>
+                Loading
+            </div>
             <form >
                 {% csrf_token %}
                 <div class="form-layout form-layout-1">
@@ -231,6 +250,49 @@
     const pegawaiSelectize = $("#pegawai").selectize({
         maxItems:null
     })
+    $("#submit_button").on("click",function(e){
+        $("#loadingba").addClass("d-flex")
+        $("#loadingba").removeClass("d-none")
+        $("#bpaform").submit()
+        $("#submit_button").prop("disabled",true)
+
+    })
+   $("#bulanb").selectize({
+        valueField:["bulan"],
+        labelField:["nama"],
+        searchField:["nama"],
+        options:[
+            {"bulan":1,"nama":"Januari"},
+            {"bulan":2,"nama":"Februari"},
+            {"bulan":3,"nama":"Maret"},
+            {"bulan":4,"nama":"April"},
+            {"bulan":5,"nama":"Mei"},
+            {"bulan":6,"nama":"Juni"},
+            {"bulan":7,"nama":"Juli"},
+            {"bulan":8,"nama":"Agustus"},
+            {"bulan":9,"nama":"September"},
+            {"bulan":10,"nama":"Oktober"},
+            {"bulan":11,"nama":"November"},
+            {"bulan":12,"nama":"Desember"},
+        ]
+    })
+    $("#tahunb").selectize({
+        valueField:["tahun"],
+        labelField:["tahun"],
+        searchField:["tahun"],
+        options:[
+            {"tahun":2024},
+            {"tahun":2023},
+            {"tahun":2022},
+            {"tahun":2021},
+            {"tahun":2020},
+            {"tahun":2019},
+            {"tahun":2018},
+            {"tahun":2017},
+            {"tahun":2016},
+            {"tahun":2015},
+        ]
+    })
     const sprda = $("#sprda").selectize({
         valueField:["bulan"],
         labelField:["nama"],
@@ -245,7 +307,7 @@
             {"bulan":7,"nama":"Juli"},
             {"bulan":8,"nama":"Agustus"},
             {"bulan":9,"nama":"September"},
-            {"bulan":10,"nama":"Oktobe"},
+            {"bulan":10,"nama":"Oktober"},
             {"bulan":11,"nama":"November"},
             {"bulan":12,"nama":"Desember"},
         ]
@@ -281,7 +343,7 @@
         {"bulan":7,"nama":"Juli"},
         {"bulan":8,"nama":"Agustus"},
         {"bulan":9,"nama":"September"},
-            {"bulan":10,"nama":"Oktobe"},
+            {"bulan":10,"nama":"Oktober"},
             {"bulan":11,"nama":"November"},
             {"bulan":12,"nama":"Desember"},
             ]
@@ -381,9 +443,12 @@
         $("#spgwpk").val($(e.relatedTarget).data("nama"))
         $("#idppk").val($(e.relatedTarget).data("id"))
     })
-
-
+    
+    
     $("#submit_buttonSa").on("click",function(e){
+        $("#submit_buttonSa").prop("disabled",true)
+        $("#loadingsa").removeClass("d-none")
+        $("#loadingsa").addClass("d-flex")
         e.preventDefault()
         const prd = $("#sprda").val()
         const thn = $("#sthna").val()
@@ -396,11 +461,19 @@
                 "X-CSRFToken":token
             },
             success:(e) => {
-                console.log(e)
+                $("#loadingsa").removeClass("d-flex")
+                $("#loadingsa").addClass("d-none")
+                sprda[0].selectize.clear()
+                sthna[0].selectize.clear()
+                $("#spgwa").val("")
+                $("#singleabsensi").modal("hide")
+                $("#submit_buttonSa").prop("disabled",false)
             }
         })
     })
     $("#submit_buttonSpk").on("click",function(e){
+        $("#loadingspk").removeClass("d-none")
+        $("#loadingspk").addClass("d-flex")
         e.preventDefault()
         const prd = $("#sprdpk").val()
         const thn = $("#sthnpk").val()
@@ -413,6 +486,8 @@
                 "X-CSRFToken":token
             },
             success:(e) => {
+                $("#loadingspk").addClass("d-none")
+                $("#loadingspk").removeClass("d-flex")
                 console.log(e)
             }
         })

@@ -86,6 +86,10 @@ urlpatterns = [
 
     path("",include("hrd_app.router.mesin.ui.urls")),
     path("",include("hrd_app.router.mesin.backend.urls")),
+
+
+    path("",include("hrd_app.router.login.ui.urls")),
+    path("",include("hrd_app.router.login.backend.urls")),
     
 
     path('pengaturan', views.pengaturan, name='pengaturan'),

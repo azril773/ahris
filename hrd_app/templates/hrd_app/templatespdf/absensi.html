@@ -21,17 +21,17 @@
                         <tr class="">
                             <td class="mr-5">Nama</td>
                             <td class="d-flex justify-content-center">:</td>
-                            <td class="ml-5">Lorem, ipsum dolor.</td>
+                            <td class="ml-5">{{pegawai.nama}}</td>
                         </tr>
                         <tr class="">
                             <td>NIK</td>
                             <td class="d-flex justify-content-center">:</td>
-                            <td>Lorem ipsum dolor sit amet.</td>
+                            <td><code class="text-black">{{pegawai.nik}}</code></td>
                         </tr>
                         <tr class="">
                             <td>Divisi</td>
                             <td class="d-flex justify-content-center">:</td>
-                            <td>Nama</td>
+                            <td>{{pegawai.divisi}}</td>
                         </tr>
                     </table>
                 </div>
@@ -40,17 +40,17 @@
                         <tr class="">
                             <td class="mr-5">Periode</td>
                             <td class="d-flex justify-content-center">:</td>
-                            <td class="ml-5">Lorem, ipsum dolor.</td>
+                            <td class="ml-5"><code class="text-black">{{dari}} s/d {{sampai}}</code></td>
                         </tr>
                         <tr class="">
                             <td>Kehadiran</td>
                             <td class="d-flex justify-content-center">:</td>
-                            <td>Lorem ipsum dolor sit amet.</td>
+                            <td><code class="text-black">{{kehadiran}}</code></td>
                         </tr>
                         <tr class="">
                             <td>Terlambat</td>
                             <td class="d-flex justify-content-center">:</td>
-                            <td>Nama</td>
+                            <td><code class="text-black">{{terlambat}} Kali - ({{selisih}} Menit)</code></td>
                         </tr>
                     </table>
                 </div>
@@ -74,7 +74,23 @@
             </thead>
             <tbody>
                 {% for d in data %}
-                
+                <th scope="col">
+                    {% if d.lbr %}
+                        <span class="text-danger"><code class="text-black">{{d.tgl_absen}}</code></span>
+                    {% else %}
+                    <code class="text-black">{{d.tgl_absen}}</code>
+                    {% endif %}
+                </th>
+                <th scope="col"><code class="text-black">{{d.masuk |safe}}</code></th>
+                <th scope="col"><code class="text-black">{{d.keluar |safe}}</code></th>
+                <th scope="col"><code class="text-black">{{d.kembali |safe}}</code></th>
+                <th scope="col"><code class="text-black">{{d.pulang |safe}}</code></th>
+                <th scope="col"><code class="text-black">{{d.masuk_b |safe}}</code></th>
+                <th scope="col"><code class="text-black">{{d.keluar_b |safe}}</code></th>
+                <th scope="col"><code class="text-black">{{d.kembali_b |safe}}</code></th>
+                <th scope="col"><code class="text-black">{{d.pulang_b |safe}}</code></th>
+                <th scope="col"><code class="text-black">{{d.tj |safe}}</code></th>
+                <th scope="col"><code class="text-black">{{d.ket |safe}}</code></th>
                 {% endfor %}
             </tbody>
         </table>

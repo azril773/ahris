@@ -520,7 +520,7 @@ def absensi_json(request, dr, sp, sid):
                     ist = ""    
 
                 if a.istirahat_b is not None and a.istirahat2_b is not None:
-                    ist_b = f" {a.istirahat_b} / {a.istirahat2_b})"
+                    ist_b = f" {a.istirahat_b} / {a.istirahat2_b}"
                 elif a.istirahat_b is not None and a.istirahat2_b is None:
                     ist_b = f" {a.istirahat_b}"
                 elif a.istirahat_b is None and a.istirahat2_b is not None:
@@ -539,7 +539,7 @@ def absensi_json(request, dr, sp, sid):
                     kmb = ""        
 
                 if a.kembali_b is not None and a.kembali2_b is not None:
-                    kmb_b = f" {a.kembali_b} / {a.kembali2_b})"
+                    kmb_b = f" {a.kembali_b} / {a.kembali2_b}"
                 elif a.kembali_b is not None and a.kembali2_b is None:
                     kmb_b = f" {a.kembali_b}"
                 elif a.kembali_b is None and a.kembali2_b is not None:

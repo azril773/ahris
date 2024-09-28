@@ -123,3 +123,6 @@ from hrd_app.controllers.laporan.views import *
 from hrd_app.controllers.broadcast.views import *
 
 from hrd_app.controllers.mesin.views import *
+
+
+from hrd_app.controllers.login.views import *

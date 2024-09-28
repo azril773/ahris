@@ -321,9 +321,11 @@ def laporan_json_periode(r,sid,id,dr,sp):
         kehadiran = 0
         tselisih = 0.0
         trlmbt = 0
-        for a in absensi_db.objects.select_related('pegawai').filter(tgl_absen__range=(dari,sampai_today),pegawai_id=id).order_by('tgl_absen','pegawai__divisi__divisi'):
+        for a in absensi_db.objects.select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=id).order_by('tgl_absen','pegawai__divisi__divisi'):
             if a.masuk is not None and a.pulang is not None:
                 kehadiran += 1
+            elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
+                kehadiran += 2
             sket = " "
             
             ab = absensi_db.objects.get(id=a.id)     
@@ -476,8 +478,10 @@ def print_laporan_pegawai(r):
         tselisih = 0.0
         trlmbt = 0
         for a in absensi_db.objects.select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=p.pk).order_by('tgl_absen','pegawai__divisi__divisi'):
-            if a.masuk is not None and a.pulang is not None:
+            if a.masuk is not None and a.pulang is not None and a.masuk_b is None and a.pulang_b is None:
                 kehadiran += 1
+            elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
+                kehadiran += 2
             sket = " "
             
             ab = absensi_db.objects.get(id=a.id)     
