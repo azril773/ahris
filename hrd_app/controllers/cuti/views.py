@@ -229,7 +229,6 @@ def tambah_cuti(request):
     dket = request.POST.get('ket')
     
     ltgl = dtgl.split(', ')   
-    print(idp,"SDSD")
     ac = awal_cuti_db.objects.last()
     tac = ac.tgl
         

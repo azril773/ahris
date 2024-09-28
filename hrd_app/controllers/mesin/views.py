@@ -205,7 +205,6 @@ def tambah_data_pegawai(r):
 
         try:
                 mesin = mesin_db.objects.filter(id=int(id))
-                print(mesin[0].ipaddress)
                 conn = ZK(mesin[0].ipaddress,port=4370)
                 conn.connect()
                 conn.disable_device()
@@ -214,7 +213,6 @@ def tambah_data_pegawai(r):
                 # users = conn.get_user_template(uid=int(uid))
                 users = conn.get_users()
                 users = [user for user in users if user.user_id == userid]
-                print(users)
                 if len(users) <= 0:
                     return JsonResponse({"status":"error","msg":"Userid tidak valid"},status=400)
                     
@@ -330,7 +328,6 @@ def tambah_data_pegawai(r):
                 gol_darah=goldarah,
                 agama=agama
             )
-            print(alamat)
             for pgl in pengalaman:
                 pengalaman_db(
                     pegawai_id=int(pgw.pk),
@@ -354,7 +351,6 @@ def tambah_data_pegawai(r):
                 ).save()
             pribadi.save()
             status = "ok"
-            print(sid)
             user = r.user.username
 
             
@@ -414,7 +410,6 @@ def add_data(r,id):
         for user in userids:
             for pgw in pegawai:
                 if pgw.userid == user.user_id:
-                    print("OKOK")
                     if user.privilege == const.USER_ADMIN:
                         level = 1
                     else:
@@ -511,7 +506,6 @@ def cpalldata(r):
                 conn = zk.connect()
                 conn.disable_device()
                 for du in datauser:
-                    print(du.user_id)
                     conn.delete_user(user_id=du.user_id)
                     fts = []
                     for f in fingers:
@@ -576,12 +570,11 @@ def cppegawai(r):
                 mesin = mesin_db.objects.get(ipaddress=m)
                 zk = ZK(mesin.ipaddress,4370)
                 conn = zk.connect()
-                print("OK")
+
                 conn.disable_device()
 
 
                 for du in datauser:
-                    print(du.user_id)
                     conn.delete_user(user_id=du.user_id)
 
                     fts = []
@@ -646,15 +639,13 @@ def cpdivisi(r):
         for m in mesin_tujuan:
             try:
                 mesin = mesin_db.objects.get(ipaddress=m)
-                print(mesin.ipaddress,"MESIN TUJUAn")
                 zk = ZK(mesin_tujuan,4370)
                 conn = zk.connect()
-                print("OK")
                 conn.disable_device()
+            
 
 
                 for du in datauser:
-                    print(du.user_id)
                     conn.delete_user(user_id=du.user_id)
 
                     fts = []
@@ -700,7 +691,6 @@ def adduser_machine(r):
             n_data = 1
             last_uid = sorted(uids)[-1]
             uid_ready = [uid for uid in range(uids[0], uids[-1] +1 ) if uid not in uids]
-            print(uid_ready)
             if len(uid_ready) <= 0:
                 uid = last_uid + 1
                 if level == 1:
@@ -785,7 +775,6 @@ def deleteuser_machine(r):
                 conn = zk.connect()
                 conn.disable_device()
                 for userid in userids:
-                    print(userid)
                     conn.delete_user(user_id=int(userid))
                 conn.enable_device()
             except Exception as e:
@@ -808,14 +797,12 @@ def deleteuser_machineu(r):
 
         userids = pegawai.split(",")
         for m in mesin:
-            print(m)
             try:
                 mesin = mesin_db.objects.get(ipaddress=m)
                 zk = ZK(mesin.ipaddress,4370)
                 conn = zk.connect()
                 conn.disable_device()
                 for userid in userids:
-                    print(userid)
                     conn.delete_user(user_id=int(userid))
                 conn.enable_device()
             except Exception as e:

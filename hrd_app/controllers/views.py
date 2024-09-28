@@ -57,7 +57,6 @@ def beranda(request):
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses        
         dsid = dakses.sid_id
-        print(dsid,"COBA")
         
         today = date.today()
         

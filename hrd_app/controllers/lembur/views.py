@@ -161,7 +161,6 @@ def cari_lembur(request):
         dsid = dakses.sid_id
         
         periode = request.POST.get('periode')
-        print(periode)
         tahun = request.POST.get('tahun')
         sid = request.POST.get('sid')
         bln = nama_bulan(int(periode))
@@ -229,7 +228,6 @@ def tambah_lembur(request):
     akhir = float(request.POST.get('akhir'))
     ist_1 = float(request.POST.get('ist_1'))
     ist_2 = float(request.POST.get('ist_2'))
-    print(request.POST,"AKHIR")
    
     tgl = datetime.strptime(dtgl,'%d-%m-%Y').date()
   
@@ -389,7 +387,6 @@ def tambah_lembur(request):
                                                 decimal_ist = ist_1
                                                 
                                     lama_ist = round(lama_ist)
-                                    print(0.5 < 0.51,"CEK")
                                     a_ist = absen_ist + timedelta(minutes=lama_ist)
                                     b_ist.append(a_ist)
                                     for x in range(int(looping) - 1):
@@ -459,7 +456,6 @@ def tambah_lembur(request):
                                     for b in b_ist:                             
                                         if absen_kmb > b:
                                             pemotong_ist = (b_ist.index(b) + 1) * 0.5  
-                                            print(pemotong_ist,"PEMOTONG")
                                             s_ist.append(pemotong_ist) 
                                         else:
                                             pass 
@@ -513,7 +509,6 @@ def tambah_lembur(request):
                         else:                   
                             pemotong_ist = -ab.lama_istirahat
                             pemotong_ist2 = 0
-                        print(pemotong_ist,"PEMOTONH")
                         # pemotong_ist = -1
                         # pemotong_ist2 = 0
                             # additional perhitungan istirahat
@@ -527,7 +522,6 @@ def tambah_lembur(request):
                         pemotong_plg = Decimal(pemotong_plg)
                         awal = Decimal(awal)
                         akhir = Decimal(akhir)
-                        print(akhir)
                         if awal > 0 and akhir > 0:
                             lembur = Decimal((awal + akhir)) - (pemotong_msk + pi + pemotong_plg)
                         elif awal > 0 and akhir == 0:     
@@ -795,7 +789,7 @@ def tambah_lembur(request):
         rk.edit_by = nama_user          
         rk.save()
     else:  
-        print(tlembur, tkompen, sisa_lembur_sbl,"SINI BANG")
+
         tambah_rekap = rekap_lembur_db(
             pegawai_id = int(idp),
             periode = prd,
@@ -1240,7 +1234,6 @@ def proses_ulang_lembur(request, idl):
         rk.edit_by = nama_user          
         rk.save()
     else:  
-        print(tlembur, tkompen, sisa_lembur_sbl,"SINI BANG")
         tambah_rekap = rekap_lembur_db(
             pegawai_id = int(idp),
             periode = prd,
@@ -1428,7 +1421,6 @@ def rekap_lembur_json(request, sid, prd, thn):
     if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
-        print(prd,thn)
         if rekap_lembur_db.objects.select_related('pegawai').filter(periode=int(prd), tahun=int(thn)).exists():
         
             for r in rekap_lembur_db.objects.select_related('pegawai').filter(periode=int(prd), tahun=int(thn), sisa_lembur__gt=0).order_by('pegawai__divisi__divisi','pegawai__nik'):
@@ -1470,7 +1462,6 @@ def rekap_lembur_json(request, sid, prd, thn):
                         pass      
         else:
             pass        
-        print(data,"DATA")
         return JsonResponse({"data": data})
 
 
@@ -1531,7 +1522,6 @@ def lembur_json(request, idp, prd, thn):
         pa = periode_absen(prd,thn)
         dr = pa[0].date()
         sp = pa[1].date()
-        print(idp,"KOSKDOKD")
         if int(idp) == 0:
             for l in lembur_db.objects.select_related('pegawai').filter(tgl_lembur__range=(dr,sp), status=1).order_by('tgl_lembur'):
                 lbr = {
@@ -1580,7 +1570,6 @@ def tambah_kompen(request):
     sp = pt[1]
     prd = pt[2]
     thn = pt[3]   
-    print(dr,sp,prd,thn,"INI")
     rkp = rekap_lembur_db.objects.select_related('pegawai').get(pegawai_id=int(idp), periode=prd, tahun=thn)
     sisa_lembur = rkp.sisa_lembur
     
@@ -1955,7 +1944,6 @@ def tstatus_pegawai_lembur(r):
     if status_pegawai_lembur_db.objects.filter(status_pegawai_id=status).exists():
         return JsonResponse({'status':'duplikat'},safe=False,status=400)
     else:
-        print(status)
         status_pegawai_lembur_db(status_pegawai_id=int(status)).save()
         return JsonResponse({'status':'berhasil'},safe=False,status=201)
 

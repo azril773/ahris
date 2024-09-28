@@ -84,7 +84,6 @@ def cari_geser_off(request):
         dr = request.POST.get('ctgl1')
         sp = request.POST.get('ctgl2')
         sid = request.POST.get('sid')
-        print(dr,"DARI")
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()               
         

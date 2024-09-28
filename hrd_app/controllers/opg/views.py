@@ -209,10 +209,8 @@ def opg_json(request, dr, sp, sid):
     if request.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
-        print(sid)
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-        print(dari,sampai)
                 
         if int(sid) == 0:
             for i in opg_db.objects.select_related("pegawai","pegawai__divisi").filter(opg_tgl__range=(dari,sampai)):
@@ -256,7 +254,6 @@ def opg_json(request, dr, sp, sid):
                     'status':i.status
                 }
                 data.append(op)
-        print(data)       
         return JsonResponse({"data": data})
 
 
@@ -298,8 +295,8 @@ def tambah_opg(request):
                     status = 'pegawai tidak masuk'
                 else:
                     if nh == off:
-                        print("OSDKOSKDOKD")
                         topg = opg_db(
+                            
                             pegawai_id = int(dpegawai),
                             opg_tgl = tgl,
                             keterangan = 'OFF Pengganti Reguler',

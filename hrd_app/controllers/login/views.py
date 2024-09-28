@@ -64,7 +64,6 @@ def reset_password(r):
         username = r.POST.get("user")
         password = r.POST.get("password")
         kpassword = r.POST.get("kpassword")
-        print(username)
         # nama_depan = r.POST.get("nama_depan")
         if password != kpassword:
             messages.error(r,"Password tidak cocok")

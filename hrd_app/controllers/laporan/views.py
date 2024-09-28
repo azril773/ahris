@@ -93,41 +93,29 @@ def laporan_json(r):
                                 terlambat += 1
                     if a.keterangan_ijin is not None:
                         if re.search("sdp",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             sdp += 1
                         elif re.search("sb",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             sb += 1
                         elif re.search("sdl",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             sdl += 1
                         elif re.search("skh",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             nkh += 1
                         elif re.search("im",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             im += 1
                         elif re.search("wft",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             wft += 1
                         elif re.search("snt",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             snt += 1
                         elif re.search("ijin",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             ijin += 1
                         elif re.search("dl",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             dl += 1
                     if a.keterangan_absensi is not None:
                         if re.search("cuti",a.keterangan_absensi,re.I):
-                            print(a.keterangan_absensi)
                             ct += 1
                         elif re.search("af",a.keterangan_absensi,re.I):
-                            print(a.keterangan_absensi)
                             af += 1
                         elif re.search("opg",a.keterangan_absensi,re.I):
-                            print(a.keterangan_absensi)
                             opg += 1
             
             obj = {
@@ -196,43 +184,30 @@ def laporan_json(r):
                                 terlambat += 1
                     if a.keterangan_ijin is not None:
                         if re.search("sdp",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             sdp += 1
                         elif re.search("sb",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             sb += 1
                         elif re.search("sdl",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             sdl += 1
                         elif re.search("skh",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             nkh += 1
                         elif re.search("im",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             im += 1
                         elif re.search("wft",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             wft += 1
                         elif re.search("snt",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             snt += 1
                         elif re.search("ijin",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             ijin += 1
                         elif re.search("dl",a.keterangan_ijin,re.I):
-                            print(a.keterangan_ijin)
                             dl += 1
                     if a.keterangan_absensi is not None:
                         if re.search("cuti",a.keterangan_absensi,re.I):
-                            print(a.keterangan_absensi)
                             ct += 1
                         elif re.search("af",a.keterangan_absensi,re.I):
-                            print(a.keterangan_absensi)
                             af += 1
                         elif re.search("opg",a.keterangan_absensi,re.I):
-                            print(a.keterangan_absensi)
                             opg += 1
-            print(sdp)
             obj = {
                 "id" : pgw.id,
                 "nik":pgw.nik,
@@ -308,7 +283,6 @@ def laporan_json_periode(r,sid,id,dr,sp):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
-        print(dr,sp)
         dari = datetime.strptime(dr,'%Y-%m-%d %H:%M:%S').date()
         dari_loop = datetime.strptime(dr,'%Y-%m-%d %H:%M:%S').date()
         sampai_today = datetime.today().date()
@@ -411,7 +385,6 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 jmkem = jmkem.time()
             else:
                 jmkem = None
-            print(dari)
             absen = {
                 'id': ab.id,
                 'tgl': datetime.strftime(ab.tgl_absen,'%d-%m-%Y'),

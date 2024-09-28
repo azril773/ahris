@@ -239,7 +239,6 @@ def ijin_json(request, dr, sp, sid):
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-        print(sid,"SID")
         for i in ijin_db.objects.select_related('pegawai','ijin').filter(tgl_ijin__range=(dari,sampai)):
             if int(sid) == 0:
                 
@@ -297,7 +296,6 @@ def tambah_ijin(request):
     ij = jenis_ijin_db.objects.get(id=int(dijin))
         
     ltgl = dtgl.split(', ')
-    print(ltgl)
     for t in ltgl:
         tgl = datetime.strptime(t,'%d-%m-%Y')        
               
