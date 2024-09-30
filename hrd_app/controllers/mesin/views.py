@@ -403,7 +403,7 @@ def add_data(r,id):
         datamesin = [i.userid for i in datamesin_db.objects.all()]
         userids = [user for user in users if user.user_id not in datamesin]
 
-        pegawai = pegawai_db.objects.filter(userid__in=userids)
+        pegawai = pegawai_db.objects.filter(userid__in=userids,aktif=1)
         # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
 
         # print(userids)

@@ -677,8 +677,20 @@ def data_pribadi(request,idp):
         
         pg =pegawai_db.objects.get(id=int(idp))
         pribadi = pribadi_db.objects.filter(pegawai_id=pg.pk)
+        if pribadi.exists():
+            pribadi = pribadi[0]
+        else:
+            pribadi = None
         kontak_lain = kontak_lain_db.objects.filter(pegawai_id=pg.pk)
+        if kontak_lain.exists():
+            kontak_lain = kontak_lain[0]
+        else:
+            kontak_lain = None
         keluarga = keluarga_db.objects.filter(pegawai_id=pg.pk)
+        if keluarga.exists():
+            keluarga = keluarga[0]
+        else:
+            keluarga = None
         sid = pg.status_id          
                 
         data = {

@@ -90,23 +90,25 @@
                 </thead>
                 <tbody>
                     {% for ab in d.absensi %}
-                    <th scope="col">
-                        {% if ab.lbr %}
-                            <span class="text-danger">{{ab.tgl_absen}}</span>
-                        {% else %}
-                            {{ab.tgl_absen}}
-                        {% endif %}
-                    </th>
-                    <th scope="col">{{ab.masuk |safe}}</th>
-                    <th scope="col">{{ab.keluar |safe}}</th>
-                    <th scope="col">{{ab.kembali |safe}}</th>
-                    <th scope="col">{{ab.pulang |safe}}</th>
-                    <th scope="col">{{ab.masuk_b |safe}}</th>
-                    <th scope="col">{{ab.keluar_b |safe}}</th>
-                    <th scope="col">{{ab.kembali_b |safe}}</th>
-                    <th scope="col">{{ab.pulang_b |safe}}</th>
-                    <th scope="col">{{ab.tj |safe}}</th>
-                    <th scope="col">{{ab.ket |safe}}</th>
+                    <tr>
+                        <th scope="col">
+                            {% if ab.lbr %}
+                                <span class="text-danger">{{ab.tgl_absen}}</span>
+                            {% else %}
+                                {{ab.tgl_absen}}
+                            {% endif %}
+                        </th>
+                        <th scope="col">{{ab.masuk |safe}}</th>
+                        <th scope="col">{{ab.keluar |safe}}</th>
+                        <th scope="col">{{ab.kembali |safe}}</th>
+                        <th scope="col">{{ab.pulang |safe}}</th>
+                        <th scope="col">{{ab.masuk_b |safe}}</th>
+                        <th scope="col">{{ab.keluar_b |safe}}</th>
+                        <th scope="col">{{ab.kembali_b |safe}}</th>
+                        <th scope="col">{{ab.pulang_b |safe}}</th>
+                        <th scope="col">{{ab.tj |safe}}</th>
+                        <th scope="col">{{ab.ket |safe}}</th>
+                    </tr>
                     {% endfor %}
                         
                     </tbody>
