@@ -806,6 +806,7 @@ def pabsen(request):
         
     dt = []    
     # proses data simpan di dt array
+    obj 
     if not att:
         pass
     else:
