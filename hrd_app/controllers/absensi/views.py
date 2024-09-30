@@ -634,8 +634,14 @@ def prosesMesin(m):
         return dt
     
 
-def prosesAbsen(m):
-    print(m)
+def prosesAbsen(m,att,luserid):
+    # print(m)
+    for a in att:
+        if a['userid'] in luserid:
+            # print(a)
+            
+            # simpan data raw jika belum ada di list ddr
+              
     return m
 @login_required
 def pabsen(request):    
@@ -830,9 +836,16 @@ def pabsen(request):
         keys = obj.keys()
         dtmultiple = []
         print(datetime.now())
+        pool = Pool(processes=3)
         for key in keys:
-            thread = threading.Thread(target=prosesAbsen,kwargs={"m":obj[key]})
-            thread.start()
+            result = pool.apply_async(prosesAbsen,[obj[key],att,luserid])
+            dtmultiple.append(result)
+        [t.wait() for t in dtmultiple]
+        rs = [dts.get() for dts in dtmultiple]
+        print(rs)
+            # thread = threading.Thread(target=prosesAbsen,kwargs={"m":obj[key],"att":att,"luserid":luserid})
+            # thread.start()
+            # thread.join()
         # coba = [datas.get() for datas in dtmultiple]
         # print("OKOKOK") 
         print(keys)
