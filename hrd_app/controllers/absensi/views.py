@@ -1,5 +1,6 @@
 from hrd_app.controllers.lib import *
 import pika
+import threading
 from multiprocessing import Pool
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Absensi
@@ -631,7 +632,11 @@ def prosesMesin(m):
         if conn:
             conn.disconnect()
         return dt
+    
 
+def prosesAbsen(m):
+    print(m)
+    return m
 @login_required
 def pabsen(request):    
     
@@ -822,6 +827,16 @@ def pabsen(request):
                         "userid":a["userid"]
                     })
 
+        keys = obj.keys()
+        dtmultiple = []
+        print(datetime.now())
+        for key in keys:
+            thread = threading.Thread(target=prosesAbsen,kwargs={"m":obj[key]})
+            thread.start()
+        # coba = [datas.get() for datas in dtmultiple]
+        # print("OKOKOK") 
+        print(keys)
+        print(datetime.now())
     # simpan data trans
     for b in dt:
         if b not in ddt:                
