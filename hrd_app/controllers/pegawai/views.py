@@ -980,6 +980,14 @@ def pegawai_json(request, sid):
                     counter = p.counter.counter
                 else:
                     counter = None
+                if p.jabatan:
+                    jabatan = p.jabatan.jabatan
+                else:
+                    jabatan = None
+                if p.divisi:
+                    divisi = p.divisi.divisi
+                else:
+                    counter = None
                 pribadi = pribadi_db.objects.filter(pegawai_id=p.pk)
                 if pribadi.exists():
                     email = pribadi[0].email
@@ -1024,7 +1032,18 @@ def non_aktif_json(request, sid):
                     tmasuk = None
                 else:
                     tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y')   
-                                           
+                if p.counter:
+                    counter = p.counter.counter
+                else:
+                    counter = None
+                if p.jabatan:
+                    jabatan = p.jabatan.jabatan
+                else:
+                    jabatan = None
+                if p.divisi:
+                    divisi = p.divisi.divisi
+                else:
+                    counter = None
                 pg = {
                     'idp':p.id,
                     'nama':p.nama,
@@ -1053,16 +1072,27 @@ def non_aktif_json(request, sid):
                     tmasuk = None
                 else:
                     tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y') 
-                            
+                if p.counter:
+                    counter = p.counter.counter
+                else:
+                    counter = None
+                if p.jabatan:
+                    jabatan = p.jabatan.jabatan
+                else:
+                    jabatan = None
+                if p.divisi:
+                    divisi = p.divisi.divisi
+                else:
+                    counter = None
                 pg = {
                     'idp':p.id,
                     'nama':p.nama,
                     'gender':p.gender,
                     'nik':p.nik,
                     'userid':p.userid,
-                    'divisi':p.divisi.divisi,
-                    'counter':p.counter.counter,
-                    'jabatan':p.jabatan.jabatan,
+                    'divisi':divisi,
+                    'counter':counter,
+                    'jabatan':jabatan,
                     'tgl_masuk':tmasuk,
                     'nbpjs_ks':p.no_bpjs_ks,
                     'nbpjs_tk':p.no_bpjs_tk,
