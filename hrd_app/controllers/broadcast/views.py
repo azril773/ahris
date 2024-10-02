@@ -27,7 +27,10 @@ def broadcast(r,sid):
             sid_lembur = sid_lembur.status_pegawai.pk
         except: 
             sid_lembur = 0
-        pegawai = pegawai_db.objects.filter(status_id=sid)
+        if sid == 0:
+            pegawai = pegawai_db.objects.filter(aktif=1)
+        else:    
+            pegawai = pegawai_db.objects.filter(aktif=1,status_id=sid)
         data = {       
             'akses':akses,
             'sid':sid,
