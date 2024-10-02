@@ -172,6 +172,7 @@ pilihan_pengelola = (("Owner", "Owner"),("HRD", "HRD"), ("Lainnya", "Lainnya"))
 class pegawai_db(models.Model):
     nama = models.CharField(max_length=200, null=True)
     email = models.CharField(max_length=200, null=True)
+    no_telp = models.CharField(max_length=100, null=True)
     userid = models.CharField(max_length=100, unique=True, null=True)
     gender = models.CharField(max_length=10, null=True)
 

@@ -181,7 +181,7 @@ def edit_pegawai(request,idp):
 @login_required
 def epegawai(r,idp):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        user = akses_db.objects.get(pk=r.user.id)
+        user = akses_db.objects.get(user_id=r.user.id)
         sid = user.sid_id
         nama = r.POST.get("nama")
         id = r.POST.get("id")
@@ -235,7 +235,9 @@ def epegawai(r,idp):
         else:
             pegawai = pegawai_db.objects.filter(userid=userid).update(
                 nama=nama,
+                email=email,
                 gender=gender,
+                no_telp=phone,
                 userid=userid,
                 status=status_pegawai,
                 nik=nik,
@@ -463,6 +465,8 @@ def tambah_pegawai(r):
             pegawai = pegawai_db(
                 nama=nama,
                 gender=gender,
+                email=email,
+                no_telp=phone,
                 userid=userid,
                 status=status_pegawai,
                 nik=nik,
@@ -953,11 +957,7 @@ def pegawai_json(request, sid):
                     counter = p.counter.counter
                 else:
                     counter = None     
-                pribadi = pribadi_db.objects.filter(pegawai_id=p.pk)
-                if pribadi.exists():
-                    email = pribadi[0].email
-                else:
-                    email = "" 
+                email = p.email  
                 pg = {
                     'idp':p.id,
                     'nama':p.nama,
@@ -975,6 +975,7 @@ def pegawai_json(request, sid):
                     'tk':p.tk_premi,
                     'payroll':p.payroll_by,
                     'email':email,
+                    "no_telp":p.no_telp,
                     'kkerja':p.kelompok_kerja.kelompok,
                     'sisa_cuti':p.sisa_cuti,
                     'sid':p.status_id,
@@ -1000,12 +1001,8 @@ def pegawai_json(request, sid):
                     divisi = p.divisi.divisi
                 else:
                     counter = None
-                pribadi = pribadi_db.objects.filter(pegawai_id=p.pk)
-                if pribadi.exists():
-                    email = pribadi[0].email
-                else:
-                    email = "" 
-                pg = {
+                email = p.email
+                pg = { 
                     'idp':p.id,
                     'nama':p.nama,
                     'gender':p.gender,
@@ -1022,6 +1019,7 @@ def pegawai_json(request, sid):
                     'tk':p.tk_premi,
                     'payroll':p.payroll_by,
                     "email":email,
+                    "no_telp":p.no_telp,
                     'kkerja':p.kelompok_kerja.kelompok,
                     'sisa_cuti':p.sisa_cuti,
                     'sid':p.status_id,

@@ -73,25 +73,28 @@
                 </tr>
             </thead>
             <tbody>
+                
                 {% for d in data %}
-                <th scope="col">
-                    {% if d.lbr %}
-                        <span class="text-danger"><code class="text-black">{{d.tgl_absen}}</code></span>
-                    {% else %}
-                    <code class="text-black">{{d.tgl_absen}}</code>
-                    {% endif %}
-                </th>
-                <th scope="col"><code class="text-black">{{d.masuk |safe}}</code></th>
-                <th scope="col"><code class="text-black">{{d.keluar |safe}}</code></th>
-                <th scope="col"><code class="text-black">{{d.kembali |safe}}</code></th>
-                <th scope="col"><code class="text-black">{{d.pulang |safe}}</code></th>
-                <th scope="col"><code class="text-black">{{d.masuk_b |safe}}</code></th>
-                <th scope="col"><code class="text-black">{{d.keluar_b |safe}}</code></th>
-                <th scope="col"><code class="text-black">{{d.kembali_b |safe}}</code></th>
-                <th scope="col"><code class="text-black">{{d.pulang_b |safe}}</code></th>
-                <th scope="col"><code class="text-black">{{d.tj |safe}}</code></th>
-                <th scope="col"><code class="text-black">{{d.ket |safe}}</code></th>
-                {% endfor %}
+                <tr>
+                    <th scope="col">
+                        {% if d.lbr %}
+                            <span class="text-danger"><code class="text-black">{{d.tgl_absen}}</code></span>
+                        {% else %}
+                        <code class="text-black">{{d.tgl_absen}}</code>
+                        {% endif %}
+                    </th>
+                    <th scope="col"><code class="text-black">{{d.masuk |safe}}</code></th>
+                    <th scope="col"><code class="text-black">{{d.keluar |safe}}</code></th>
+                    <th scope="col"><code class="text-black">{{d.kembali |safe}}</code></th>
+                    <th scope="col"><code class="text-black">{{d.pulang |safe}}</code></th>
+                    <th scope="col"><code class="text-black">{{d.masuk_b |safe}}</code></th>
+                    <th scope="col"><code class="text-black">{{d.keluar_b |safe}}</code></th>
+                    <th scope="col"><code class="text-black">{{d.kembali_b |safe}}</code></th>
+                    <th scope="col"><code class="text-black">{{d.pulang_b |safe}}</code></th>
+                    <th scope="col"><code class="text-black">{{d.tj |safe}}</code></th>
+                    <th scope="col"><code class="text-black">{{d.ket |safe}}</code></th>
+                </tr>
+                    {% endfor %}
             </tbody>
         </table>
     </div>
