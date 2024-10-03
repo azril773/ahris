@@ -266,7 +266,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: "{% url 'anon' %}",
+                url: "{% url 'nonaktif' %}",
                 data: {
                     'csrfmiddlewaretoken': csrf[0].value,
                     'idp': non_idp.value,

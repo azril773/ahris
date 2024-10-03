@@ -216,7 +216,7 @@
                 { 
                     data: null,
                     "render": function(data, type, row, meta){    
-                        data = '<a href="/hrd/general_data/'+row.idp+'"><button class="btn btn-sm btn-primary mb-1 tx-12">Lebih Detail</button></a> &nbsp; <button data-target="#aktif" data-toggle="modal" class="btn btn-sm btn-success mb-1 tx-12" data-non_idp='+row.idp+' data-modul=Aktif>Aktifkan</button>';
+                        data = '<a href="/hrd/general_data_nonaktif/'+row.idp+'"><button class="btn btn-sm btn-primary mb-1 tx-12">Lebih Detail</button></a> &nbsp; <button data-target="#aktif" data-toggle="modal" class="btn btn-sm btn-success mb-1 tx-12" data-non_idp='+row.idp+' data-modul=Aktif>Aktifkan</button>';
                         
                         return data;
                     } 
@@ -267,7 +267,7 @@
 
             $.ajax({
                 type: 'POST',
-                url: "{% url 'anon' %}",
+                url: "{% url 'aktif' %}",
                 data: {
                     'csrfmiddlewaretoken': csrf[0].value,
                     'idp': non_idp.value,

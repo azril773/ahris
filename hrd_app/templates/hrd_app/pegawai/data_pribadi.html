@@ -53,11 +53,19 @@
             <!-- Button Pegawai Non Aktif -->
             <a href="{% url 'non_aktif' sid %}"><button class="btn btn-danger mg-b-6">Pegawai Non Aktif</button></a> &nbsp; &nbsp; &nbsp; 
 
+            {% if aktif == 0 %}
+            <a href="{% url 'general_data_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">General Data Non Aktif</a>  
+            <a href="{% url 'dapri_nonaktif' idp %}" class="btn btn-info mg-b-8">Data Pribadi Non Aktif</a>
+            <a href="{% url 'pkerja_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">Pengalaman Kerja & Pendidikan Non Aktif</a> 
+            <a href="{% url 'prodemo_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">Promosi / Demosi Non Aktif</a>
+            <a href="{% url 'sangsi_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">Sangsi Non Aktif</a> 
+          {% else %}
             <a href="{% url 'general_data' idp %}" class="btn btn-outline-info mg-b-8">General Data</a>  
             <a href="{% url 'dapri' idp %}" class="btn btn-info mg-b-8">Data Pribadi</a>
             <a href="{% url 'pkerja' idp %}" class="btn btn-outline-info mg-b-8">Pengalaman Kerja & Pendidikan</a> 
-            <a href="{% url 'prodemo' idp %}" class="btn btn-outline-info mg-b-8">Promosi / Demosi</a> 
+            <a href="{% url 'prodemo' idp %}" class="btn btn-outline-info mg-b-8">Promosi / Demosi</a>
             <a href="{% url 'sangsi' idp %}" class="btn btn-outline-info mg-b-8">Sangsi</a> 
+          {% endif %}
 
             </div>          
         </div>

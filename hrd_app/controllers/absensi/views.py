@@ -628,7 +628,8 @@ def prosesMesin(m):
                     pass                
         conn.enable_device()
     except Exception as e:
-        # messages.error(m[4], "Process terminate : {}".format(e))
+        messages.error(m[4], "Process terminate : {}".format(e))
+        # return redirect("absensi",sid=)
         return e
     finally:
         if conn:
@@ -660,7 +661,7 @@ def pabsen(request):
     
     # buat tabel absen
     if int(sid) == 0:
-        for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=1):
+        for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
             if p.jabatan_id is None:
                 jabatan = None
             else:
@@ -705,7 +706,7 @@ def pabsen(request):
                     )
                     tabsen.save()
     else:
-        for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=1,status__id=sid):
+        for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(status__id=sid):
             if p.jabatan_id is None:
                 jabatan = None
             else:
@@ -753,16 +754,19 @@ def pabsen(request):
     
     dmesin = []
     # ambil data mesin simpan di att dan dmesin array
-    for m in mesin_db.objects.filter(status='Active'):
-        pool = Pool(processes=4)
-        res = pool.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
-        dmesin.append(res)
-    [mesin.wait() for mesin in dmesin] 
-    data = [dt for dt in [dataMesin.get() for dataMesin in dmesin] if len(dt) > 0] 
-    dmesin = []
-    for dm in data:
-        for d in dm:
-            dmesin.append(d)
+    try:
+        for m in mesin_db.objects.filter(status='Active'):
+            pool = Pool(processes=4)
+            res = pool.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
+            dmesin.append(res)
+        [mesin.wait() for mesin in dmesin] 
+        data = [dt for dt in [dataMesin.get() for dataMesin in dmesin] if len(dt) > 0] 
+        dmesin = []
+        for dm in data:
+            for d in dm:    
+                dmesin.append(d)
+    except:
+        return redirect("absensi",sid=sid)
 
     # return render(request,'hrd_app/example/ex.html')
     # reordering (ascending)
@@ -2818,9 +2822,9 @@ def pabsen(request):
         
     # data absensi
     if int(sid) == 0:
-        data = absensi_db.objects.select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()),pegawai__aktif=1)
+        data = absensi_db.objects.select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()))
     elif int(sid) > 0:
-        data = absensi_db.objects.select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()),pegawai__aktif=1,pegawai__status_id=sid)
+        data = absensi_db.objects.select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()),pegawai__status_id=sid)
     for a in data:
         day = a.tgl_absen.strftime("%A")
         nh = nama_hari(day)        

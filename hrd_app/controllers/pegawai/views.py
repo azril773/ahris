@@ -1,5 +1,5 @@
 from hrd_app.controllers.lib import *
-
+from django.db import transaction
 @login_required
 def pegawai(request,sid):
     iduser = request.user.id
@@ -181,175 +181,181 @@ def edit_pegawai(request,idp):
 @login_required
 def epegawai(r,idp):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        user = akses_db.objects.get(user_id=r.user.id)
-        sid = user.sid_id
-        nama = r.POST.get("nama")
-        id = r.POST.get("id")
-        gender = r.POST.get("gender")
-        tgl_masuk = r.POST.get("tgl_masuk")
-        nik = r.POST.get("nik")
-        userid = r.POST.get("userid")
-        status = r.POST.get("status")
-        div = r.POST.get("div")
-        counter = r.POST.get("counter")
-        jabatan = r.POST.get("jabatan")
-        kk = r.POST.get("kk")
-        hr = r.POST.get("hr")
-        ca = r.POST.get("ca")
-        rek = r.POST.get("rek")
-        payroll = r.POST.get("payroll")
-        nks = r.POST.get("nks")
-        ntk = r.POST.get("ntk")
-        pks = r.POST.get("pks")
-        ptk = r.POST.get("ptk")
-
-        # Data Pribadi
-        alamat = r.POST.get("alamat")
-        phone = r.POST.get("phone")
-        email = r.POST.get("email")
-        kota_lahir = r.POST.get("kota_lahir")
-        tgl_lahir = r.POST.get("tgl_lahir")
-        tinggi = r.POST.get("tinggi")
-        berat = r.POST.get("berat")
-        goldarah = r.POST.get("goldarah")
-        agama = r.POST.get("agama")
-        if alamat == '' or phone == '' or email == '' or kota_lahir == '' or tgl_lahir == '' or tinggi == '' or berat == '' or goldarah == '' or agama == '':
-            return JsonResponse({"status":"error","msg":"data pribadi tidak boleh kosong"},status=400)
-        keluarga = r.POST.get("keluarga")
-        pihak = r.POST.get("pihak")
-        pengalaman = r.POST.get("pengalaman")
-        pendidikan = r.POST.get("pendidikan")
-        keluarga = json.loads(keluarga)
-        pihak = json.loads(pihak)
-        pengalaman = json.loads(pengalaman)
-        pendidikan = json.loads(pendidikan)
         try:
-            pgw = pegawai_db.objects.get(pk=int(id))
-        except:
-            return JsonResponse({"status":"error"},status=400)
-        status_pegawai = status_pegawai_db.objects.get(pk=status)
-        if pribadi_db.objects.filter(~Q(pegawai__userid=userid),email=email).exists():
-            return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
-        if pegawai_db.objects.filter(~Q(pk=int(idp)),userid=userid).exists():
-            return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
-        else:
-            pegawai = pegawai_db.objects.filter(userid=userid).update(
-                nama=nama,
-                email=email,
-                gender=gender,
-                no_telp=phone,
-                userid=userid,
-                status=status_pegawai,
-                nik=nik,
-                divisi_id=div,
-                jabatan_id=jabatan,
-                no_rekening=rek,
-                no_bpjs_ks=nks,
-                no_bpjs_tk=ntk,
-                payroll_by=payroll,
-                ks_premi=pks,
-                tk_premi=ptk,
-                aktif=1,
-                tgl_masuk=tgl_masuk,
-                tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
-                hari_off_id=hr,
-                kelompok_kerja_id=kk,
-                sisa_cuti=12,
-                counter_id=counter,
-                add_by=r.user.username,
-                edit_by=r.user.username
+            user = akses_db.objects.get(user_id=r.user.id)
+            sid = user.sid_id
+            nama = r.POST.get("nama")
+            id = r.POST.get("id")
+            gender = r.POST.get("gender")
+            tgl_masuk = r.POST.get("tgl_masuk")
+            nik = r.POST.get("nik")
+            userid = r.POST.get("userid")
+            status = r.POST.get("status")
+            div = r.POST.get("div")
+            counter = r.POST.get("counter")
+            jabatan = r.POST.get("jabatan")
+            kk = r.POST.get("kk")
+            hr = r.POST.get("hr")
+            ca = r.POST.get("ca")
+            rek = r.POST.get("rek")
+            payroll = r.POST.get("payroll")
+            nks = r.POST.get("nks")
+            ntk = r.POST.get("ntk")
+            pks = r.POST.get("pks")
+            ptk = r.POST.get("ptk")
 
-                # status
-            )   
+            # Data Pribadi
+            alamat = r.POST.get("alamat")
+            phone = r.POST.get("phone")
+            email = r.POST.get("email")
+            kota_lahir = r.POST.get("kota_lahir")
+            tgl_lahir = r.POST.get("tgl_lahir")
+            tinggi = r.POST.get("tinggi")
+            berat = r.POST.get("berat")
+            goldarah = r.POST.get("goldarah")
+            agama = r.POST.get("agama")
+            if alamat == '' or phone == '' or email == '' or kota_lahir == '' or tgl_lahir == '' or tinggi == '' or berat == '' or goldarah == '' or agama == '':
+                return JsonResponse({"status":"error","msg":"data pribadi tidak boleh kosong"},status=400)
+            keluarga = r.POST.get("keluarga")
+            pihak = r.POST.get("pihak")
+            pengalaman = r.POST.get("pengalaman")
+            pendidikan = r.POST.get("pendidikan")
+            keluarga = json.loads(keluarga)
+            pihak = json.loads(pihak)
+            pengalaman = json.loads(pengalaman)
+            pendidikan = json.loads(pendidikan)
+            try:
+                pgw = pegawai_db.objects.get(pk=int(id))
+            except:
+                return JsonResponse({"status":"error"},status=400)
+            status_pegawai = status_pegawai_db.objects.get(pk=status)
+            if pribadi_db.objects.filter(~Q(pegawai__userid=userid),email=email).exists():
+                return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
+            if pegawai_db.objects.filter(~Q(pk=int(idp)),userid=userid).exists():
+                return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
+            elif pegawai_db_arsip.objects.filter(~Q(pk=int(idp)),userid=userid).exists():
+                return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
+            else:
+                print(tgl_masuk)
+                pegawai = pegawai_db.objects.filter(userid=userid).update(
+                    nama=nama,
+                    email=email,
+                    gender=gender,
+                    no_telp=phone,
+                    userid=userid,
+                    status=status_pegawai,
+                    nik=nik,
+                    divisi_id=div,
+                    jabatan_id=jabatan,
+                    no_rekening=rek,
+                    no_bpjs_ks=nks,
+                    no_bpjs_tk=ntk,
+                    payroll_by=payroll,
+                    ks_premi=pks,
+                    tk_premi=ptk,
+                    aktif=1,
+                    tgl_masuk=tgl_masuk,
+                    tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
+                    hari_off_id=hr,
+                    kelompok_kerja_id=kk,
+                    sisa_cuti=12,
+                    counter_id=counter,
+                    add_by=r.user.username,
+                    edit_by=r.user.username
 
-            
+                    # status
+                )   
 
-            # Pengalaman
-            pengalaman_db.objects.filter(pegawai__userid=int(userid)).delete()
-            for pgl in pengalaman:
-                pengalaman_db(
-                    pegawai_id=int(idp),
-                    perusahaan=pgl['perusahaan'],
-                    kota_id=pgl['kota'],
-                    dari_tahun=datetime.strptime(pgl['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                    sampai_tahun=datetime.strptime(pgl['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                    jabatan=pgl['jabatan']
-                ).save()
+                
 
-
-            # Pendidikan
-            pendidikan_db.objects.filter(pegawai__userid=int(userid)).delete()
-            for pdk in pendidikan:
-                pendidikan_db(
-                    pegawai_id=int(idp),
-                    pendidikan=pdk['pendidikan'],
-                    nama=pdk['nama'],
-                    kota_id=pdk['kota'],
-                    dari_tahun=datetime.strptime(pdk['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                    sampai_tahun=datetime.strptime(pdk['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                    jurusan=pdk['jurusan'],
-                    gelar=pdk['gelar']
-                ).save()
-
-
-            # Tambah Pihak Lain
-            pgw = pegawai_db.objects.get(userid=userid)
-            kontak_lain_db.objects.filter(pegawai__userid=int(userid)).delete()
-            for p in pihak:
-                kontak_lain_db(
-                pegawai_id=int(pgw.pk),
-                hubungan = p['hubungan'],
-                nama = p['nama'],
-                gender = p['gender'],
-                phone = p['phone']
-                ).save()
-            
-
-            # Tambah Keluarga
-            keluarga_db.objects.filter(pegawai__userid=int(userid)).delete()
-            for k in keluarga:
-                if k["hubungan"] != "" and k["nama"] != "" and k["tgl_lahir"] != "Invalid date" and k["tgl_lahir"] != "" and "gender" != "" and k["gol_darah"] != "":
-                    keluarga_db(
-                        pegawai_id=int(pgw.pk),
-                        hubungan = k['hubungan'],
-                        nama = k["nama"],
-                        tgl_lahir = datetime.strptime(k['tgl_lahir'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                        gender = k['gender'],
-                        gol_darah = k['gol_darah']
+                # Pengalaman
+                pengalaman_db.objects.filter(pegawai__userid=int(userid)).delete()
+                for pgl in pengalaman:
+                    pengalaman_db(
+                        pegawai_id=int(idp),
+                        perusahaan=pgl['perusahaan'],
+                        kota_id=pgl['kota'],
+                        dari_tahun=datetime.strptime(pgl['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        sampai_tahun=datetime.strptime(pgl['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        jabatan=pgl['jabatan']
                     ).save()
-                else:
-                    pass
 
-            # Tambah Data Pribadi
-            pribadi = pribadi_db.objects.filter(pegawai_id=id)
-            if len(pribadi) > 0:
-                pribadi_db.objects.filter(pegawai_id=id).update(
-                    pegawai_id=int(pgw.pk),
-                    alamat=alamat,
-                    phone=phone,
-                    email=email,
-                    kota_lahir=kota_lahir,
-                    tgl_lahir=tgl_lahir,
-                    tinggi_badan=tinggi,
-                    berat_badan=berat,
-                    gol_darah=goldarah,
-                    agama=agama
-                )
-            else: 
-                pribadi_db(
-                    pegawai_id=int(pgw.pk),
-                    alamat=alamat,
-                    phone=phone,
-                    email=email,
-                    kota_lahir=kota_lahir,
-                    tgl_lahir=tgl_lahir,
-                    tinggi_badan=tinggi,
-                    berat_badan=berat,
-                    gol_darah=goldarah,
-                    agama=agama
-                ).save()
 
-            status= 'OK'
+                # Pendidikan
+                pendidikan_db.objects.filter(pegawai__userid=int(userid)).delete()
+                for pdk in pendidikan:
+                    pendidikan_db(
+                        pegawai_id=int(idp),
+                        pendidikan=pdk['pendidikan'],
+                        nama=pdk['nama'],
+                        kota_id=pdk['kota'],
+                        dari_tahun=datetime.strptime(pdk['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        sampai_tahun=datetime.strptime(pdk['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        jurusan=pdk['jurusan'],
+                        gelar=pdk['gelar']
+                    ).save()
+
+
+                # Tambah Pihak Lain
+                pgw = pegawai_db.objects.get(userid=userid)
+                kontak_lain_db.objects.filter(pegawai__userid=int(userid)).delete()
+                for p in pihak:
+                    kontak_lain_db(
+                    pegawai_id=int(pgw.pk),
+                    hubungan = p['hubungan'],
+                    nama = p['nama'],
+                    gender = p['gender'],
+                    phone = p['phone']
+                    ).save()
+                
+
+                # Tambah Keluarga
+                keluarga_db.objects.filter(pegawai__userid=int(userid)).delete()
+                for k in keluarga:
+                    if k["hubungan"] != "" and k["nama"] != "" and k["tgl_lahir"] != "Invalid date" and k["tgl_lahir"] != "" and "gender" != "" and k["gol_darah"] != "":
+                        keluarga_db(
+                            pegawai_id=int(pgw.pk),
+                            hubungan = k['hubungan'],
+                            nama = k["nama"],
+                            tgl_lahir = datetime.strptime(k['tgl_lahir'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                            gender = k['gender'],
+                            gol_darah = k['gol_darah']
+                        ).save()
+                    else:
+                        pass
+
+                # Tambah Data Pribadi
+                pribadi = pribadi_db.objects.filter(pegawai_id=id)
+                if len(pribadi) > 0:
+                    pribadi_db.objects.filter(pegawai_id=id).update(
+                        pegawai_id=int(pgw.pk),
+                        alamat=alamat,
+                        phone=phone,
+                        email=email,
+                        kota_lahir=kota_lahir,
+                        tgl_lahir=tgl_lahir,
+                        tinggi_badan=tinggi,
+                        berat_badan=berat,
+                        gol_darah=goldarah,
+                        agama=agama
+                    )
+                else: 
+                    pribadi_db(
+                        pegawai_id=int(pgw.pk),
+                        alamat=alamat,
+                        phone=phone,
+                        email=email,
+                        kota_lahir=kota_lahir,
+                        tgl_lahir=tgl_lahir,
+                        tinggi_badan=tinggi,
+                        berat_badan=berat,
+                        gol_darah=goldarah,
+                        agama=agama
+                    ).save()
+
+                status= 'OK'
+        except Exception as e:
+            return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
 
 @login_required
@@ -387,173 +393,178 @@ def tpegawai(r):
 @login_required
 def tambah_pegawai(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        user = akses_db.objects.get(pk=r.user.id)
-        sid = user.sid_id
-        nama = r.POST.get("nama")
-        gender = r.POST.get("gender")
-        tgl_masuk = r.POST.get("tgl_masuk")
-        nik = r.POST.get("nik")
-        userid = r.POST.get("userid")
-        status = r.POST.get("status")
-        div = r.POST.get("div")
-        counter = r.POST.get("counter")
-        jabatan = r.POST.get("jabatan")
-        kk = r.POST.get("kk")
-        hr = r.POST.get("hr")
-        ca = r.POST.get("ca")
-        rek = r.POST.get("rek")
-        payroll = r.POST.get("payroll")
-        nks = r.POST.get("nks")
-        ntk = r.POST.get("ntk")
-        pks = r.POST.get("pks")
-        ptk = r.POST.get("ptk")
-
-        if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '':
-            return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
-
-        # Data Pribadi
-        alamat = r.POST.get("alamat")
-        phone = r.POST.get("phone")
-        email = r.POST.get("email")
-        kota_lahir = r.POST.get("kota_lahir")
-        tgl_lahir = r.POST.get("tgl_lahir")
-        tinggi = r.POST.get("tinggi")
-        berat = r.POST.get("berat")
-        goldarah = r.POST.get("goldarah")
-        agama = r.POST.get("agama")
-
-
-        keluarga = r.POST.get("keluarga")
-        pihak = r.POST.get("pihak")
-        pengalaman = r.POST.get("pengalaman")
-        pendidikan = r.POST.get("pendidikan")
-        if keluarga:
-            keluarga = json.loads(keluarga)
-        else:
-            keluarga = []
-        
-
-        if pihak:
-            pihak = json.loads(pihak)
-        else:
-            pihak = []
-
-
-        if pengalaman:
-            pengalaman = json.loads(pengalaman)
-        else:
-            pengalaman = []
-        
-
-        if pendidikan:
-            pendidikan = json.loads(pendidikan)
-        else:
-            pendidikan = []
         try:
-            status_pegawai = status_pegawai_db.objects.get(pk=status)
-        except:
-            status_pegawai = None
-        if email == '' or alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or tinggi == '' or berat == '' or goldarah == '' or agama == '':
-            return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
+            user = akses_db.objects.get(pk=r.user.id)
+            sid = user.sid_id
+            nama = r.POST.get("nama")
+            gender = r.POST.get("gender")
+            tgl_masuk = r.POST.get("tgl_masuk")
+            nik = r.POST.get("nik")
+            userid = r.POST.get("userid")
+            status = r.POST.get("status")
+            div = r.POST.get("div")
+            counter = r.POST.get("counter")
+            jabatan = r.POST.get("jabatan")
+            kk = r.POST.get("kk")
+            hr = r.POST.get("hr")
+            ca = r.POST.get("ca")
+            rek = r.POST.get("rek")
+            payroll = r.POST.get("payroll")
+            nks = r.POST.get("nks")
+            ntk = r.POST.get("ntk")
+            pks = r.POST.get("pks")
+            ptk = r.POST.get("ptk")
 
-        if pribadi_db.objects.filter(email=email).exists():
-            return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
+            if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '':
+                return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
 
-        if pegawai_db.objects.filter(userid=userid).exists():
-            return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
-        else:
-            pegawai = pegawai_db(
-                nama=nama,
-                gender=gender,
-                email=email,
-                no_telp=phone,
-                userid=userid,
-                status=status_pegawai,
-                nik=nik,
-                divisi_id=div,
-                jabatan_id=jabatan,
-                no_rekening=rek,
-                no_bpjs_ks=nks,
-                no_bpjs_tk=ntk,
-                payroll_by=payroll,
-                ks_premi=pks,
-                tk_premi=ptk,
-                aktif=1,
-                tgl_masuk=datetime.strptime(str(tgl_masuk),'%d-%m-%Y').strftime("%Y-%m-%d"),
-                tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
-                hari_off_id=hr,
-                kelompok_kerja_id=kk,
-                sisa_cuti=12,
-                counter_id=counter,
-                add_by=r.user.username,
-                edit_by=r.user.username
-
-                # status
-            )            
-            pegawai.save()
+            # Data Pribadi
+            alamat = r.POST.get("alamat")
+            phone = r.POST.get("phone")
+            email = r.POST.get("email")
+            kota_lahir = r.POST.get("kota_lahir")
+            tgl_lahir = r.POST.get("tgl_lahir")
+            tinggi = r.POST.get("tinggi")
+            berat = r.POST.get("berat")
+            goldarah = r.POST.get("goldarah")
+            agama = r.POST.get("agama")
 
 
-            # Tambah Pihak Lain
-            pgw = pegawai_db.objects.get(userid=userid)
-            for p in pihak:
-                tkl = kontak_lain_db(
-                pegawai_id=int(pgw.pk),
-                hubungan = p['hubungan'],
-                nama = p['nama'],
-                gender = p['gender'],
-                phone = p['phone']
-                )
-                tkl.save()
+            keluarga = r.POST.get("keluarga")
+            pihak = r.POST.get("pihak")
+            pengalaman = r.POST.get("pengalaman")
+            pendidikan = r.POST.get("pendidikan")
+            if keluarga:
+                keluarga = json.loads(keluarga)
+            else:
+                keluarga = []
             
 
-            # Tambah Keluarga
-            for k in keluarga:
-                tkeluarga = keluarga_db(
-                    pegawai_id=int(pgw.pk),
-                    hubungan = k['hubungan'],
-                    nama = k["nama_keluarga"],
-                    tgl_lahir = datetime.strptime(k['tgl_lahir_keluarga'],'%d-%m-%Y'),
-                    gender = k['gender'],
-                    gol_darah = k['goldarah']
-                )
-                tkeluarga.save()
+            if pihak:
+                pihak = json.loads(pihak)
+            else:
+                pihak = []
 
-            # Tambah Data Pribadi
-            pribadi = pribadi_db(
-                pegawai_id=int(pgw.pk),
-                alamat=alamat,
-                phone=phone,
-                email=email,
-                kota_lahir=kota_lahir,
-                tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
-                tinggi_badan=tinggi,
-                berat_badan=berat,
-                gol_darah=goldarah,
-                agama=agama
-            )
-            for pgl in pengalaman:
-                pengalaman_db(
-                    pegawai_id=int(pgw.pk),
-                    perusahaan=pgl['perusahaan'],
-                    kota_id=pgl['kota'],
-                    dari_tahun=datetime.strptime(pgl['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                    sampai_tahun=datetime.strptime(pgl['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                    jabatan=pgl['jabatan']
-                ).save()
+
+            if pengalaman:
+                pengalaman = json.loads(pengalaman)
+            else:
+                pengalaman = []
             
-            for pdk in pendidikan:
-                pendidikan_db(
+
+            if pendidikan:
+                pendidikan = json.loads(pendidikan)
+            else:
+                pendidikan = []
+            try:
+                status_pegawai = status_pegawai_db.objects.get(pk=status)
+            except:
+                status_pegawai = None
+            if email == '' or alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or tinggi == '' or berat == '' or goldarah == '' or agama == '':
+                return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
+
+            if pribadi_db.objects.filter(email=email).exists():
+                return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
+
+            if pegawai_db.objects.filter(userid=userid).exists():
+                return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
+            elif pegawai_db_arsip.objects.filter(userid=userid).exists():
+                return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
+            else:
+                pegawai = pegawai_db(
+                    nama=nama,
+                    gender=gender,
+                    email=email,
+                    no_telp=phone,
+                    userid=userid,
+                    status=status_pegawai,
+                    nik=nik,
+                    divisi_id=div,
+                    jabatan_id=jabatan,
+                    no_rekening=rek,
+                    no_bpjs_ks=nks,
+                    no_bpjs_tk=ntk,
+                    payroll_by=payroll,
+                    ks_premi=pks,
+                    tk_premi=ptk,
+                    aktif=1,
+                    tgl_masuk=datetime.strptime(str(tgl_masuk),'%d-%m-%Y').strftime("%Y-%m-%d"),
+                    tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
+                    hari_off_id=hr,
+                    kelompok_kerja_id=kk,
+                    sisa_cuti=12,
+                    counter_id=counter,
+                    add_by=r.user.username,
+                    edit_by=r.user.username
+
+                    # status
+                )            
+                pegawai.save()
+
+
+                # Tambah Pihak Lain
+                pgw = pegawai_db.objects.get(userid=userid)
+                for p in pihak:
+                    tkl = kontak_lain_db(
                     pegawai_id=int(pgw.pk),
-                    pendidikan=pdk['pendidikan'],
-                    nama=pdk['nama'],
-                    kota_id=pdk['kota'],
-                    dari_tahun=datetime.strptime(pdk['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                    sampai_tahun=datetime.strptime(pdk['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                    jurusan=pdk['jurusan'],
-                    gelar=pdk['gelar']
-                ).save()
-            pribadi.save()
-            status = "ok"
+                    hubungan = p['hubungan'],
+                    nama = p['nama'],
+                    gender = p['gender'],
+                    phone = p['phone']
+                    )
+                    tkl.save()
+                
+
+                # Tambah Keluarga
+                for k in keluarga:
+                    tkeluarga = keluarga_db(
+                        pegawai_id=int(pgw.pk),
+                        hubungan = k['hubungan'],
+                        nama = k["nama_keluarga"],
+                        tgl_lahir = datetime.strptime(k['tgl_lahir_keluarga'],'%d-%m-%Y'),
+                        gender = k['gender'],
+                        gol_darah = k['goldarah']
+                    )
+                    tkeluarga.save()
+
+                # Tambah Data Pribadi
+                pribadi = pribadi_db(
+                    pegawai_id=int(pgw.pk),
+                    alamat=alamat,
+                    phone=phone,
+                    email=email,
+                    kota_lahir=kota_lahir,
+                    tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
+                    tinggi_badan=tinggi,
+                    berat_badan=berat,
+                    gol_darah=goldarah,
+                    agama=agama
+                )
+                for pgl in pengalaman:
+                    pengalaman_db(
+                        pegawai_id=int(pgw.pk),
+                        perusahaan=pgl['perusahaan'],
+                        kota_id=pgl['kota'],
+                        dari_tahun=datetime.strptime(pgl['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        sampai_tahun=datetime.strptime(pgl['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        jabatan=pgl['jabatan']
+                    ).save()
+                
+                for pdk in pendidikan:
+                    pendidikan_db(
+                        pegawai_id=int(pgw.pk),
+                        pendidikan=pdk['pendidikan'],
+                        nama=pdk['nama'],
+                        kota_id=pdk['kota'],
+                        dari_tahun=datetime.strptime(pdk['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        sampai_tahun=datetime.strptime(pdk['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        jurusan=pdk['jurusan'],
+                        gelar=pdk['gelar']
+                    ).save()
+                pribadi.save()
+                status = "ok"
+        except Exception as e:
+            return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
 
 
@@ -659,7 +670,54 @@ def general_data(request,idp):
             'ntk':pg.no_bpjs_tk,
             'pks':pg.ks_premi,
             'ptk':pg.tk_premi,
-            'modul_aktif' : 'Pegawai'
+            'modul_aktif' : 'Pegawai',
+            "aktif":1,
+        }
+        
+        return render(request,'hrd_app/pegawai/general_data.html', data)
+        
+    else:    
+        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+    
+
+@login_required
+def general_data_nonaktif(request,idp):
+    iduser = request.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+           
+        dsid = dakses.sid_id   
+        
+        pg =pegawai_db_arsip.objects.get(id=int(idp))
+        sid = pg.status_id          
+                
+        data = {
+            'akses' : akses,
+            'dsid': dsid,
+            'sid': int(sid),
+            'idp': idp,
+            'nama':pg.nama,
+            'gender':pg.gender,
+            'nik':pg.nik,
+            'userid':pg.userid,
+            'divisi':pg.divisi,
+            'counter':pg.counter,
+            'jabatan':pg.jabatan.jabatan,
+            'tgl_masuk':pg.tgl_masuk,
+            'off':pg.hari_off.hari,
+            'kkerja':pg.kelompok_kerja,
+            'shift':pg.shift,
+            'rekening':pg.rekening,
+            'payroll':pg.payroll_by,
+            'nks':pg.no_bpjs_ks,
+            'ntk':pg.no_bpjs_tk,
+            'pks':pg.ks_premi,
+            'ptk':pg.tk_premi,
+            'modul_aktif' : 'Pegawai',
+            "aktif":0,
         }
         
         return render(request,'hrd_app/pegawai/general_data.html', data)
@@ -687,12 +745,12 @@ def data_pribadi(request,idp):
             pribadi = None
         kontak_lain = kontak_lain_db.objects.filter(pegawai_id=pg.pk)
         if kontak_lain.exists():
-            kontak_lain = kontak_lain[0]
+            kontak_lain = kontak_lain
         else:
             kontak_lain = None
         keluarga = keluarga_db.objects.filter(pegawai_id=pg.pk)
         if keluarga.exists():
-            keluarga = keluarga[0]
+            keluarga = keluarga
         else:
             keluarga = None
         sid = pg.status_id          
@@ -705,7 +763,8 @@ def data_pribadi(request,idp):
             "pribadi":pribadi,
             "keluarga":keluarga,
             "kontak_lain":kontak_lain,
-            'modul_aktif' : 'Pegawai'
+            'modul_aktif' : 'Pegawai',
+            "aktif":1,
         }
         
         return render(request,'hrd_app/pegawai/data_pribadi.html', data)
@@ -713,6 +772,56 @@ def data_pribadi(request,idp):
     else:    
         messages.info(request, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
+
+
+
+@login_required
+def data_pribadi_nonaktif(r,idp):
+    iduser = r.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+           
+        dsid = dakses.sid_id   
+        
+        pg =pegawai_db_arsip.objects.get(id=int(idp))
+        pribadi = pribadi_db_arsip.objects.filter(pegawai_id=pg.pk)
+        if pribadi.exists():
+            pribadi = pribadi[0]
+        else:
+            pribadi = None
+        kontak_lain = kontak_lain_db_arsip.objects.filter(pegawai_id=pg.pk)
+        if kontak_lain.exists():
+            kontak_lain = kontak_lain
+        else:
+            kontak_lain = None
+        keluarga = keluarga_db_arsip.objects.filter(pegawai_id=pg.pk)
+        if keluarga.exists():
+            keluarga = keluarga
+        else:
+            keluarga = None
+        sid = pg.status_id          
+                
+        data = {
+            'akses' : akses,
+            'dsid': dsid,
+            'sid': int(sid),
+            'idp': idp,
+            "pribadi":pribadi,
+            "keluarga":keluarga,
+            "kontak_lain":kontak_lain,
+            'modul_aktif' : 'Pegawai',
+            "aktif":0,
+        }
+        
+        return render(r,'hrd_app/pegawai/data_pribadi.html', data)
+        
+    else:    
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+
+
 
 
 @login_required
@@ -741,7 +850,46 @@ def pendidikan_kerja(request,idp):
             'idp': idp,
             'pengalaman':pengalaman,
             'pendidikan':pendidikan,
-            'modul_aktif' : 'Pegawai'
+            'modul_aktif' : 'Pegawai',
+            "aktif":1,
+    }
+        
+        return render(request,'hrd_app/pegawai/pendidikan_pkerja.html', data)
+        
+    else:    
+        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+
+
+
+@login_required
+def pendidikan_kerja_nonaktif(request,idp):
+    iduser = request.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+           
+        dsid = dakses.sid_id   
+        
+        pg =pegawai_db_arsip.objects.get(id=int(idp))
+        sid = pg.status_id          
+        pendidikan = pendidikan_db_arsip.objects.filter(pegawai_id=pg.pk)
+        pdk = []
+        for p in pendidikan:
+            obj = p
+            obj.kota = p.kota
+            pdk.append(obj)
+        pengalaman = pengalaman_db_arsip.objects.filter(pegawai_id=pg.pk)
+        data = {
+            'akses' : akses,
+            'dsid': dsid,
+            'sid': int(sid),
+            'idp': idp,
+            'pengalaman':pengalaman,
+            'pendidikan':pendidikan,
+            'modul_aktif' : 'Pegawai',
+            "aktif":0,
     }
         
         return render(request,'hrd_app/pegawai/pendidikan_pkerja.html', data)
@@ -772,7 +920,106 @@ def promosi_demosi(request,idp):
             'jabatan_sebelum':pg.jabatan_id,
             'jabatan':jabatan,
             'pegawai':pegawai,
-            'modul_aktif' : 'Pegawai'
+            'modul_aktif' : 'Pegawai',
+            "aktif":1,
+        }
+        
+        return render(request,'hrd_app/pegawai/promosi_demosi.html', data)
+        
+    else:    
+        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+    
+
+
+@login_required
+def promosi_demosi(request,idp):
+    iduser = request.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+           
+        dsid = dakses.sid_id   
+        
+        pg =pegawai_db.objects.select_related("jabatan").get(id=int(idp))
+        sid = pg.status_id          
+        jabatan = jabatan_db.objects.all()
+        data = {
+            'akses' : akses,
+            'dsid': dsid,
+            'sid': int(sid),
+            'idp': idp,
+            'jabatan_sebelum':pg.jabatan_id,
+            'jabatan':jabatan,
+            'pegawai':pegawai,
+            'modul_aktif' : 'Pegawai',
+            "aktif":1,
+        }
+        
+        return render(request,'hrd_app/pegawai/promosi_demosi.html', data)
+        
+    else:    
+        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+
+
+@login_required
+def promosi_demosi_nonaktif(request,idp):
+    iduser = request.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+           
+        dsid = dakses.sid_id   
+        
+        pg =pegawai_db.objects.select_related("jabatan").get(id=int(idp))
+        sid = pg.status_id          
+        jabatan = jabatan_db.objects.all()
+        data = {
+            'akses' : akses,
+            'dsid': dsid,
+            'sid': int(sid),
+            'idp': idp,
+            'jabatan_sebelum':pg.jabatan_id,
+            'jabatan':jabatan,
+            'pegawai':pegawai,
+            'modul_aktif' : 'Pegawai',
+            "aktif":0,
+        }
+        
+        return render(request,'hrd_app/pegawai/promosi_demosi.html', data)
+        
+    else:    
+        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+    
+
+
+@login_required
+def promosi_demosi_nonaktif(request,idp):
+    iduser = request.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+           
+        dsid = dakses.sid_id   
+        
+        pg =pegawai_db_arsip.objects.select_related("jabatan").get(id=int(idp))
+        sid = pg.status_id          
+        jabatan = jabatan_db.objects.all()
+        data = {
+            'akses' : akses,
+            'dsid': dsid,
+            'sid': int(sid),
+            'idp': idp,
+            'jabatan_sebelum':pg.jabatan_id,
+            'jabatan':jabatan,
+            'pegawai':pegawai,
+            'modul_aktif' : 'Pegawai',
+            "aktif":0,
         }
         
         return render(request,'hrd_app/pegawai/promosi_demosi.html', data)
@@ -804,6 +1051,7 @@ def tambah_prodemo(r):
             status = "Promosi"
         
         pgw = pegawai_db.objects.get(pk=int(idp))
+        print(pgw)
         if not pgw:
             res['status'] = 'Pegawai tidak ada'
             return JsonResponse(res,status=400,safe=False)
@@ -818,16 +1066,24 @@ def tambah_prodemo(r):
 
         
 
-def promodemo_json(r,idp):
+def promodemo_json(r,idp,aktif):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         status = r.POST.get("status")
-        if status == "0":
-            result = promosi_demosi_db.objects.filter(pegawai_id=int(idp),status="demosi")
+        print(idp)
+        if aktif == 1:
+            if status == "0":
+                result = promosi_demosi_db.objects.filter(pegawai_id=int(idp),status__regex=r"(?i)demosi")
+            else:
+                result = promosi_demosi_db.objects.filter(pegawai_id=int(idp),status__regex=r"(?i)promosi")
         else:
-            result = promosi_demosi_db.objects.filter(pegawai_id=int(idp),status="promosi")
-        
+            if status == "0":
+                result = promosi_demosi_db_arsip.objects.filter(pegawai_id=int(idp),status__regex=r"(?i)demosi")
+            else:
+                result = promosi_demosi_db_arsip.objects.filter(pegawai_id=int(idp),status__regex=r"(?i)promosi")
+
         rslt = []
+        print(result)
         for r in result:
             obj = {
                 "tgl":r.tgl,
@@ -857,7 +1113,36 @@ def sangsi(request,idp):
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
-            'modul_aktif' : 'Pegawai'
+            'modul_aktif' : 'Pegawai',
+            "aktif":1,
+        }
+        
+        return render(request,'hrd_app/pegawai/sangsi.html', data)
+        
+    else:    
+        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+
+@login_required
+def sangsi_nonaktif(request,idp):
+    iduser = request.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+           
+        dsid = dakses.sid_id   
+        
+        pg =pegawai_db_arsip.objects.get(id=int(idp))
+        sid = pg.status_id          
+                
+        data = {
+            'akses' : akses,
+            'dsid': dsid,
+            'sid': int(sid),
+            'idp': idp,
+            'modul_aktif' : 'Pegawai',
+            "aktif":0,
         }
         
         return render(request,'hrd_app/pegawai/sangsi.html', data)
@@ -877,8 +1162,11 @@ def get_sangsi_pegawai(r,idp):
     return JsonResponse({"data":sangsi},status=200,safe=False)
 
 @login_required
-def sangsi_json(r,idp):
-    sangsi = sangsi_db.objects.filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now())
+def sangsi_json(r,idp,aktif):
+    if aktif == 0:
+        sangsi = sangsi_db_arsip.objects.filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now())
+    else:
+        sangsi = sangsi_db.objects.filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now())
     result = []
     for s in sangsi:
         obj = {
@@ -904,7 +1192,7 @@ def tambah_sangsi(r,idp):
         #      return JsonResponse({"status":"XIXIIX"},safe=False,status=400)
         # cek jika sp tersebut masih ada
         if sangsi_db.objects.filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now(),status_sangsi="SP3").exists():
-            return JsonResponse({"status":"Kudunya dipecat ga si!"},safe=False,status=400)
+            return JsonResponse({"status":"Pegawai memiliki SP 3 yang masih berlaku!"},safe=False,status=400)
         if sangsi_db.objects.filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now(),status_sangsi=status).exists():
             return JsonResponse({"status":"Sangsi "+ status+" Sudah ada!"},safe=False,status=400)
 
@@ -941,6 +1229,376 @@ def aktif_nonaktif(request):
 
 
 @login_required
+def nonaktif(r):
+    idp = r.POST.get('idp')
+    pegawai = pegawai_db.objects.filter(pk=int(idp))
+    nama_user = r.user.username
+    if not pegawai.exists():
+        return JsonResponse({"status":"error","msg":"Pegawai tidak ada"})
+    p = pegawai[0]
+    with transaction.atomic():
+        pegawai_db_arsip(
+            nama=p.nama,
+            email=p.email,
+            no_telp=p.no_telp,
+            userid=p.userid,
+            gender=p.gender,
+            status=p.status,
+            nik=p.nik,
+            divisi=p.divisi,
+            jabatan=p.jabatan,
+            no_rekening=p.no_rekening,
+            no_bpjs_ks=p.no_bpjs_ks,
+            no_bpjs_tk=p.no_bpjs_tk,
+            payroll_by=p.payroll_by,
+            ks_premi=p.ks_premi,
+            tk_premi=p.tk_premi,
+
+            aktif=p.aktif,
+            tgl_masuk=p.tgl_masuk,
+            tgl_aktif=p.tgl_aktif,
+            tgl_nonaktif=p.tgl_nonaktif,
+            hari_off=p.hari_off,
+            hari_off2=p.hari_off2,
+            kelompok_kerja=p.kelompok_kerja,
+            sisa_cuti=p.sisa_cuti,
+            cuti_awal=p.cuti_awal,
+            shift=p.shift,
+            counter=p.counter,
+
+            rekening=p.rekening,
+
+            add_by=nama_user,
+            edit_by=nama_user,
+            add_date=datetime.now(),
+            edit_date=datetime.now(),
+            item_edit=p.item_edit
+        ).save()
+
+        parsip = pegawai_db_arsip.objects.filter().last()
+        print("SSDS")
+        pribadi = pribadi_db.objects.filter(pegawai_id=p.pk)
+        if pribadi.exists():
+            pribadi = pribadi[0]
+            pribadi_db_arsip(
+                pegawai_id=parsip.pk,
+                alamat=pribadi.alamat,
+                phone=pribadi.phone,
+                email=pribadi.email,
+                kota_lahir=pribadi.kota_lahir,
+                tgl_lahir=pribadi.tgl_lahir,
+                tinggi_badan=pribadi.tinggi_badan,
+                berat_badan=pribadi.berat_badan,
+                gol_darah=pribadi.gol_darah,
+                agama=pribadi.agama
+            ).save()
+            pribadi.delete()
+        # else:
+        #     return JsonResponse({"status":"error","msg":"Data pribadi tidak ada"})
+
+
+
+        keluarga = keluarga_db.objects.filter(pegawai_id=p.pk)
+        if keluarga.exists():
+            for k in keluarga:
+                keluarga_db_arsip(
+                    pegawai_id=parsip.pk,
+                    hubungan=k.hubungan,
+                    nama=k.nama,
+                    tgl_lahir=k.tgl_lahir,
+                    gender=k.gender,
+                    gol_darah=k.gol_darah
+                ).save()
+            keluarga.delete()
+            # return JsonResponse({"status":"error","msg":"Data keluarga tidak ada"})
+
+
+        kontak_lain = kontak_lain_db.objects.filter(pegawai_id=p.pk)
+        if kontak_lain.exists():
+            for k in kontak_lain:
+                kontak_lain_db_arsip(
+                    pegawai_id=parsip.pk,
+                    hubungan=k.hubungan,
+                    nama=k.nama,
+                    gender=k.gender,
+                    phone=k.phone
+                ).save()
+            kontak_lain.delete()
+            # return JsonResponse({"status":"error","msg":"Data kontak lain tidak ada"})
+
+
+        pendidikan = pendidikan_db.objects.filter(pegawai_id=p.pk)
+        if pendidikan.exists():
+            for pdk in pendidikan:
+                pendidikan_db_arsip(
+                    pegawai_id=parsip.pk,
+                    pendidikan=pdk.pendidikan,
+                    nama=pdk.nama,
+                    kota=pdk.kota,
+                    dari_tahun=pdk.dari_tahun,
+                    sampai_tahun=pdk.sampai_tahun,
+                    jurusan=pdk.jurusan,
+                    gelar=pdk.gelar
+                ).save()
+            pendidikan.delete()
+            # return JsonResponse({"status":"error","msg":"Data pendidikan tidak ada"})
+
+
+        pengalaman = pengalaman_db.objects.filter(pegawai_id=p.pk)
+        if pengalaman.exists():
+            for pgl in pengalaman:
+                pengalaman_db_arsip(
+                    pegawai_id=parsip.pk,
+                    perusahaan=pgl.perusahaan,
+                    kota=pgl.kota,
+                    dari_tahun=pgl.dari_tahun,
+                    sampai_tahun=pgl.sampai_tahun,
+                    jabatan=pgl.jabatan
+                ).save()
+            pengalaman.delete()
+            # return JsonResponse({"status":"error","msg":"Data pengalaman tidak ada"})
+
+
+        promodemo = promosi_demosi_db.objects.filter(pegawai_id=p.pk)
+        if promodemo.exists():
+            for pdm in promodemo:
+
+                promosi_demosi_db_arsip(
+                    tgl=pdm.tgl,
+                    pegawai_id=parsip.pk,
+                    status=pdm.status,
+                    jabatan_sebelum=pdm.jabatan_sebelum,
+                    jabatan_sekarang=pdm.jabatan_sekarang
+                ).save()
+            promodemo.delete()
+
+        sangsi = sangsi_db.objects.filter(pegawai_id=p.pk)
+        print(sangsi,"SDSDDS")
+        if sangsi.exists():
+            print(sangsi,"SANGSI")
+            for s in sangsi:
+                sangsi_db_arsip(
+                    pegawai_id=parsip.pk,
+                    tgl_berlaku=s.tgl_berlaku,
+                    tgl_berakhir=s.tgl_berakhir,
+                    status_sangsi=s.status_sangsi,
+                    deskripsi_pelanggaran=s.deskripsi_pelanggaran
+                ).save()
+            sangsi.delete()
+
+
+
+        # pegawai_db.objects.filter(pk=pegawai.pk).delete()
+        absensi = absensi_db.objects.filter(pegawai_id=p.pk)
+        if absensi.exists():
+            for b in absensi:
+                absensi_db_arsip(
+                    pegawai=parsip.nama,
+                    tgl_absen=b.tgl_absen,
+                    masuk=b.masuk,
+                    istirahat=b.istirahat,
+                    kembali=b.kembali,
+                    istirahat2=b.istirahat2,
+                    kembali2=b.kembali2,
+                    pulang=b.pulang,
+                    masuk_b=b.masuk_b,
+                    istirahat_b=b.istirahat,
+                    kembali_b=b.kembali_b,
+                    istirahat2_b=b.istirahat2_b,
+                    kembali2_b=b.kembali2_b,
+                    pulang_b=b.pulang_b,
+                    keterangan_absensi=b.keterangan_absensi,
+                    keterangan_ijin=b.keterangan_ijin,
+                    keterangan_lain=b.keterangan_lain,
+                    libur_nasional=b.libur_nasional,
+                    insentif=b.insentif,
+                    jam_masuk=b.jam_masuk,
+                    lama_istirahat=b.lama_istirahat,
+                    lama_istirahat2=b.lama_istirahat2,
+                    jam_pulang=b.jam_pulang,
+                    jam_istirahat=b.jam_istirahat,
+                    total_jam_kerja=b.total_jam_kerja,
+                    total_jam_istirahat=b.total_jam_istirahat,
+                    total_jam_istirahat2=b.total_jam_istirahat2,
+                    lebih_jam_kerja=b.lebih_jam_kerja,
+                    add_by=nama_user,
+                    edit_by=nama_user,
+                    add_date=b.add_date,
+                    edit_date=datetime.now()
+                ).save()
+        absensi.delete()
+
+
+        pegawai.delete()
+    status = 'ok'
+    return JsonResponse({"status": status})
+
+
+@login_required
+def aktif(r):
+    idp = r.POST.get('idp')
+    pegawai = pegawai_db_arsip.objects.filter(pk=int(idp))
+    nama_user = r.user.username
+    print("OKSOKOSDKOSKD")
+    if not pegawai.exists():
+        return JsonResponse({"status":"error","msg":"Pegawai tidak ada"})
+    p = pegawai[0]
+    with transaction.atomic():
+        pegawai_db(
+            nama=p.nama,
+            email=p.email,
+            no_telp=p.no_telp,
+            userid=p.userid,
+            gender=p.gender,
+            status=p.status,
+            nik=p.nik,
+            divisi=p.divisi,
+            jabatan=p.jabatan,
+            no_rekening=p.no_rekening,
+            no_bpjs_ks=p.no_bpjs_ks,
+            no_bpjs_tk=p.no_bpjs_tk,
+            payroll_by=p.payroll_by,
+            ks_premi=p.ks_premi,
+            tk_premi=p.tk_premi,
+
+            aktif=p.aktif,
+            tgl_masuk=p.tgl_masuk,
+            tgl_aktif=p.tgl_aktif,
+            tgl_nonaktif=p.tgl_nonaktif,
+            hari_off=p.hari_off,
+            hari_off2=p.hari_off2,
+            kelompok_kerja=p.kelompok_kerja,
+            sisa_cuti=p.sisa_cuti,
+            cuti_awal=p.cuti_awal,
+            shift=p.shift,
+            counter=p.counter,
+
+            rekening=p.rekening,
+
+            add_by=nama_user,
+            edit_by=nama_user,
+            add_date=datetime.now(),
+            edit_date=datetime.now(),
+            item_edit=p.item_edit
+        ).save()
+
+        pga = pegawai_db.objects.filter().last()
+        print("SSDS")
+        pribadi = pribadi_db_arsip.objects.filter(pegawai_id=p.pk)
+        if pribadi.exists():
+            pribadi = pribadi[0]
+            pribadi_db(
+                pegawai_id=pga.pk,
+                alamat=pribadi.alamat,
+                phone=pribadi.phone,
+                email=pribadi.email,
+                kota_lahir=pribadi.kota_lahir,
+                tgl_lahir=pribadi.tgl_lahir,
+                tinggi_badan=pribadi.tinggi_badan,
+                berat_badan=pribadi.berat_badan,
+                gol_darah=pribadi.gol_darah,
+                agama=pribadi.agama
+            ).save()
+            pribadi.delete()
+        # else:
+        #     return JsonResponse({"status":"error","msg":"Data pribadi tidak ada"})
+
+
+
+        keluarga = keluarga_db_arsip.objects.filter(pegawai_id=p.pk)
+        if keluarga.exists():
+            for k in keluarga:
+                keluarga_db(
+                    pegawai_id=pga.pk,
+                    hubungan=k.hubungan,
+                    nama=k.nama,
+                    tgl_lahir=k.tgl_lahir,
+                    gender=k.gender,
+                    gol_darah=k.gol_darah
+                ).save()
+            keluarga.delete()
+            # return JsonResponse({"status":"error","msg":"Data keluarga tidak ada"})
+
+
+        kontak_lain = kontak_lain_db_arsip.objects.filter(pegawai_id=p.pk)
+        if kontak_lain.exists():
+            for k in kontak_lain:
+                kontak_lain_db(
+                    pegawai_id=pga.pk,
+                    hubungan=k.hubungan,
+                    nama=k.nama,
+                    gender=k.gender,
+                    phone=k.phone
+                ).save()
+            kontak_lain.delete()
+            # return JsonResponse({"status":"error","msg":"Data kontak lain tidak ada"})
+
+
+        pendidikan = pendidikan_db_arsip.objects.filter(pegawai_id=p.pk)
+        if pendidikan.exists():
+            for pdk in pendidikan:
+                pendidikan_db(
+                    pegawai_id=pga.pk,
+                    pendidikan=pdk.pendidikan,
+                    nama=pdk.nama,
+                    kota=pdk.kota,
+                    dari_tahun=pdk.dari_tahun,
+                    sampai_tahun=pdk.sampai_tahun,
+                    jurusan=pdk.jurusan,
+                    gelar=pdk.gelar
+                ).save()
+            pendidikan.delete()
+            # return JsonResponse({"status":"error","msg":"Data pendidikan tidak ada"})
+
+
+        pengalaman = pengalaman_db_arsip.objects.filter(pegawai_id=p.pk)
+        if pengalaman.exists():
+            for pgl in pengalaman:
+                pengalaman_db(
+                    pegawai_id=pga.pk,
+                    perusahaan=pgl.perusahaan,
+                    kota=pgl.kota,
+                    dari_tahun=pgl.dari_tahun,
+                    sampai_tahun=pgl.sampai_tahun,
+                    jabatan=pgl.jabatan
+                ).save()
+            pengalaman.delete()
+            # return JsonResponse({"status":"error","msg":"Data pengalaman tidak ada"})
+
+        # pegawai_db.objects.filter(pk=pegawai.pk).delete()
+
+        promodemo = promosi_demosi_db_arsip.objects.filter(pegawai_id=p.pk)
+        if promodemo.exists():
+            for pdm in promodemo:
+                promosi_demosi_db(
+                    tgl=pdm.tgl,
+                    pegawai_id=pga.pk,
+                    status=pdm.status,
+                    jabatan_sebelum=pdm.jabatan_sebelum,
+                    jabatan_sekarang=pdm.jabatan_sekarang
+                ).save()
+            promodemo.delete()
+
+
+        sangsi = sangsi_db_arsip.objects.filter(pegawai_id=p.pk)
+        if sangsi.exists():
+            for s in sangsi:
+                sangsi_db(
+                    pegawai_id=pga.pk,
+                    tgl_berlaku=s.tgl_berlaku,
+                    tgl_berakhir=s.tgl_berakhir,
+                    status_sangsi=s.status_sangsi,
+                    deskripsi_pelanggaran=s.deskripsi_pelanggaran
+                ).save()
+            sangsi.delete()
+
+        pegawai.delete()
+        status = 'ok'
+    return JsonResponse({"status": status})
+
+
+
+@login_required
 def pegawai_json(request, sid):
         
     if request.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -953,147 +1611,23 @@ def pegawai_json(request, sid):
                     tmasuk = None
                 else:
                     tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y')   
-                if p.counter:
+                if p.counter is not None:
                     counter = p.counter.counter
                 else:
                     counter = None     
+                if p.divisi is not None:
+                    divisi = p.divisi.divisi
+                else:
+                    divisi = None     
+                if p.jabatan is not None:
+                    jabatan = p.jabatan.jabatan
+                else:
+                    jabatan = None     
+                if p.kelompok_kerja is not None:
+                    kelompok_kerja = p.kelompok_kerja.kelompok
+                else:
+                    kelompok_kerja = None     
                 email = p.email  
-                pg = {
-                    'idp':p.id,
-                    'nama':p.nama,
-                    'gender':p.gender,
-                    'nik':p.nik,
-                    'userid':p.userid,
-                    'divisi':p.divisi.divisi,
-                    'counter':counter,
-                    'jabatan':p.jabatan.jabatan,
-                    'tgl_masuk':tmasuk,
-                    'nbpjs_ks':p.no_bpjs_ks,
-                    'nbpjs_tk':p.no_bpjs_tk,
-                    'libur':p.hari_off.hari,
-                    'ks':p.ks_premi,
-                    'tk':p.tk_premi,
-                    'payroll':p.payroll_by,
-                    'email':email,
-                    "no_telp":p.no_telp,
-                    'kkerja':p.kelompok_kerja.kelompok,
-                    'sisa_cuti':p.sisa_cuti,
-                    'sid':p.status_id,
-                }
-                data.append(pg)
-        else: 
-            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=1, status_id=int(sid)):
-                
-                if p.tgl_masuk is None:
-                    tmasuk = None
-                else:
-                    tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y') 
-                
-                if p.counter:
-                    counter = p.counter.counter
-                else:
-                    counter = None
-                if p.jabatan:
-                    jabatan = p.jabatan.jabatan
-                else:
-                    jabatan = None
-                if p.divisi:
-                    divisi = p.divisi.divisi
-                else:
-                    counter = None
-                email = p.email
-                pg = { 
-                    'idp':p.id,
-                    'nama':p.nama,
-                    'gender':p.gender,
-                    'nik':p.nik,
-                    'userid':p.userid,
-                    'divisi':p.divisi.divisi,
-                    'counter':counter,
-                    'jabatan':p.jabatan.jabatan,
-                    'tgl_masuk':tmasuk,
-                    'nbpjs_ks':p.no_bpjs_ks,
-                    'nbpjs_tk':p.no_bpjs_tk,
-                    'libur':p.hari_off.hari,
-                    'ks':p.ks_premi,
-                    'tk':p.tk_premi,
-                    'payroll':p.payroll_by,
-                    "email":email,
-                    "no_telp":p.no_telp,
-                    'kkerja':p.kelompok_kerja.kelompok,
-                    'sisa_cuti':p.sisa_cuti,
-                    'sid':p.status_id,
-                }
-                data.append(pg)       
-                               
-        return JsonResponse({"data": data})
-
-
-@login_required
-def non_aktif_json(request, sid):
-        
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
-        
-        data = []
-        if int(sid) == 0:
-            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=0):
-                
-                if p.tgl_masuk is None:
-                    tmasuk = None
-                else:
-                    tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y')   
-                if p.counter:
-                    counter = p.counter.counter
-                else:
-                    counter = None
-                if p.jabatan:
-                    jabatan = p.jabatan.jabatan
-                else:
-                    jabatan = None
-                if p.divisi:
-                    divisi = p.divisi.divisi
-                else:
-                    counter = None
-                pg = {
-                    'idp':p.id,
-                    'nama':p.nama,
-                    'gender':p.gender,
-                    'nik':p.nik,
-                    'userid':p.userid,
-                    'divisi':p.divisi.divisi,
-                    'counter':p.counter.counter,
-                    'jabatan':p.jabatan.jabatan,
-                    'tgl_masuk':tmasuk,
-                    'nbpjs_ks':p.no_bpjs_ks,
-                    'nbpjs_tk':p.no_bpjs_tk,
-                    'libur':p.hari_off.hari,
-                    'ks':p.ks_premi,
-                    'tk':p.tk_premi,
-                    'payroll':p.payroll_by,
-                    'kkerja':p.kelompok_kerja.kelompok,
-                    'sisa_cuti':p.sisa_cuti,
-                    'sid':p.status_id
-                }
-                data.append(pg)
-        else: 
-            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=0, status_id=int(sid)):
-                
-                if p.tgl_masuk is None:
-                    tmasuk = None
-                else:
-                    tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y') 
-                if p.counter:
-                    counter = p.counter.counter
-                else:
-                    counter = None
-                if p.jabatan:
-                    jabatan = p.jabatan.jabatan
-                else:
-                    jabatan = None
-                if p.divisi:
-                    divisi = p.divisi.divisi
-                else:
-                    counter = None
                 pg = {
                     'idp':p.id,
                     'nama':p.nama,
@@ -1110,7 +1644,155 @@ def non_aktif_json(request, sid):
                     'ks':p.ks_premi,
                     'tk':p.tk_premi,
                     'payroll':p.payroll_by,
-                    'kkerja':p.kelompok_kerja.kelompok,
+                    'email':email,
+                    "no_telp":p.no_telp,
+                    'kkerja':kelompok_kerja,
+                    'sisa_cuti':p.sisa_cuti,
+                    'sid':p.status_id,
+                }
+                data.append(pg)
+        else: 
+            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=1, status_id=int(sid)):
+                
+                if p.tgl_masuk is None:
+                    tmasuk = None
+                else:
+                    tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y') 
+                
+                if p.counter is not None:
+                    counter = p.counter.counter
+                else:
+                    counter = None     
+                if p.divisi is not None:
+                    divisi = p.divisi.divisi
+                else:
+                    divisi = None     
+                if p.jabatan is not None:
+                    jabatan = p.jabatan.jabatan
+                else:
+                    jabatan = None     
+                if p.kelompok_kerja is not None:
+                    kelompok_kerja = p.kelompok_kerja.kelompok
+                else:
+                    kelompok_kerja = None  
+                email = p.email
+                pg = { 
+                    'idp':p.id,
+                    'nama':p.nama,
+                    'gender':p.gender,
+                    'nik':p.nik,
+                    'userid':p.userid,
+                    'divisi':divisi,
+                    'counter':counter,
+                    'jabatan':jabatan,
+                    'tgl_masuk':tmasuk,
+                    'nbpjs_ks':p.no_bpjs_ks,
+                    'nbpjs_tk':p.no_bpjs_tk,
+                    'libur':p.hari_off.hari,
+                    'ks':p.ks_premi,
+                    'tk':p.tk_premi,
+                    'payroll':p.payroll_by,
+                    "email":email,
+                    "no_telp":p.no_telp,
+                    'kkerja':kelompok_kerja,
+                    'sisa_cuti':p.sisa_cuti,
+                    'sid':p.status_id,
+                }
+                data.append(pg)       
+                               
+        return JsonResponse({"data": data})
+
+
+@login_required
+def non_aktif_json(request, sid):
+        
+    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+        
+        data = []
+        if int(sid) == 0:
+            for p in pegawai_db_arsip.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
+                
+                if p.tgl_masuk is None:
+                    tmasuk = None
+                else:
+                    tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y')   
+                if p.counter is not None:
+                    counter = p.counter.counter
+                else:
+                    counter = None     
+                if p.divisi is not None:
+                    divisi = p.divisi.divisi
+                else:
+                    divisi = None     
+                if p.jabatan is not None:
+                    jabatan = p.jabatan.jabatan
+                else:
+                    jabatan = None     
+                if p.kelompok_kerja is not None:
+                    kelompok_kerja = p.kelompok_kerja.kelompok
+                else:
+                    kelompok_kerja = None
+                pg = {
+                    'idp':p.id,
+                    'nama':p.nama,
+                    'gender':p.gender,
+                    'nik':p.nik,
+                    'userid':p.userid,
+                    'divisi':divisi,
+                    'counter':counter,
+                    'jabatan':jabatan,
+                    'tgl_masuk':tmasuk,
+                    'nbpjs_ks':p.no_bpjs_ks,
+                    'nbpjs_tk':p.no_bpjs_tk,
+                    'libur':p.hari_off.hari,
+                    'ks':p.ks_premi,
+                    'tk':p.tk_premi,
+                    'payroll':p.payroll_by,
+                    'kkerja':kelompok_kerja,
+                    'sisa_cuti':p.sisa_cuti,
+                    'sid':p.status_id
+                }
+                data.append(pg)
+        else: 
+            for p in pegawai_db_arsip.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(status_id=int(sid)):
+                
+                if p.tgl_masuk is None:
+                    tmasuk = None
+                else:
+                    tmasuk = datetime.strftime(p.tgl_masuk,'%d-%m-%Y') 
+                if p.counter is not None:
+                    counter = p.counter.counter
+                else:
+                    counter = None     
+                if p.divisi is not None:
+                    divisi = p.divisi.divisi
+                else:
+                    divisi = None     
+                if p.jabatan is not None:
+                    jabatan = p.jabatan.jabatan
+                else:
+                    jabatan = None     
+                if p.kelompok_kerja is not None:
+                    kelompok_kerja = p.kelompok_kerja.kelompok
+                else:
+                    kelompok_kerja = None
+                pg = {
+                    'idp':p.id,
+                    'nama':p.nama,
+                    'gender':p.gender,
+                    'nik':p.nik,
+                    'userid':p.userid,
+                    'divisi':divisi,
+                    'counter':counter,
+                    'jabatan':jabatan,
+                    'tgl_masuk':tmasuk,
+                    'nbpjs_ks':p.no_bpjs_ks,
+                    'nbpjs_tk':p.no_bpjs_tk,
+                    'libur':p.hari_off.hari,
+                    'ks':p.ks_premi,
+                    'tk':p.tk_premi,
+                    'payroll':p.payroll_by,
+                    'kkerja':kelompok_kerja,
                     'sisa_cuti':p.sisa_cuti,
                     'sid':p.status_id
                 }

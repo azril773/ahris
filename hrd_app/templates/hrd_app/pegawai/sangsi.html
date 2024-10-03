@@ -36,6 +36,7 @@
             {% endif %}
         </div>
         {% endfor %}
+        <div id="msg"></div>
 
         <!-- Absensi -->
         <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Detail Pegawai - Sangsi</h6>
@@ -54,11 +55,19 @@
             <!-- Button Pegawai Non Aktif -->
             <a href="{% url 'non_aktif' sid %}"><button class="btn btn-danger mg-b-6">Pegawai Non Aktif</button></a> &nbsp; &nbsp; &nbsp; 
 
-            <a href="{% url 'general_data' idp %}" class="btn btn-outline-info mg-b-8">General Data</a>  
-            <a href="{% url 'dapri' idp %}" class="btn btn-outline-info mg-b-8">Data Pribadi</a>
-            <a href="{% url 'pkerja' idp %}" class="btn btn-outline-info mg-b-8">Pengalaman Kerja & Pendidikan</a> 
-            <a href="{% url 'prodemo' idp %}" class="btn btn-outline-info mg-b-8">Promosi / Demosi</a>  
-            <a href="{% url 'sangsi' idp %}" class="btn btn-info mg-b-8">Sangsi</a> 
+            {% if aktif == 0 %}
+            <a href="{% url 'general_data_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">General Data Non Aktif</a>  
+            <a href="{% url 'dapri_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">Data Pribadi Non Aktif</a>
+            <a href="{% url 'pkerja_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">Pengalaman Kerja & Pendidikan Non Aktif</a> 
+            <a href="{% url 'prodemo_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">Promosi / Demosi Non Aktif</a>
+            <a href="{% url 'sangsi_nonaktif' idp %}" class="btn btn-info mg-b-8">Sangsi Non Aktif</a> 
+            {% else %}
+              <a href="{% url 'general_data' idp %}" class="btn btn-outline-info mg-b-8">General Data</a>  
+              <a href="{% url 'dapri' idp %}" class="btn btn-outline-info mg-b-8">Data Pribadi</a>
+              <a href="{% url 'pkerja' idp %}" class="btn btn-outline-info mg-b-8">Pengalaman Kerja & Pendidikan</a> 
+              <a href="{% url 'prodemo' idp %}" class="btn btn-outline-info mg-b-8">Promosi / Demosi</a>
+              <a href="{% url 'sangsi' idp %}" class="btn btn-info mg-b-8">Sangsi</a> 
+            {% endif %}
 
             </div>          
         </div>
@@ -75,7 +84,9 @@
                             <div class="form-group mg-md-l--1">
                                 <div class="flex justify-between">
                                     <label class="form-control-label tx-gray-800">Sangsi:</label>
-                                    <button class="btn btn-primary form-control-label" data-toggle="modal" data-target="#sangsiModal">Tambah Sangsi</button>
+                                    {% if aktif %}
+                                        <button class="btn btn-primary form-control-label" data-toggle="modal" data-target="#sangsiModal">Tambah Sangsi</button>
+                                    {% endif %}
                                 </div>
                                 <table class="table" id="tableSangsi">
                                     <thead>
@@ -99,7 +110,7 @@
     </div>
 
 </div><!-- br-pagebody -->
-
+{% if aktif == 1 %}
 <div class="modal fade" id="sangsiModal" tabindex="-1" aria-labelledby="sangsiModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -137,18 +148,19 @@
       </div>
     </div>
   </div>
+  {% endif %}
 {% endblock breadcrumb %}
 
 {% block hrd_ajax %}
 
 <script>
     $(document).ready(function() {
-
-
+        aktif = "{{aktif}}"
+        console.log(aktif)
         const token = document.querySelector("[name=csrfmiddlewaretoken]").value
         const tableSangsi = $("#tableSangsi").DataTable({
             ajax:{
-                url:"{% url 'sangsi_json' idp %}",
+                url:"{% url 'sangsi_json' idp aktif %}",
                 method:"post",
                 headers:{"X-CSRFToken":token}
             },
@@ -194,31 +206,35 @@
             console.log(e)
         })
 
-        $("#buttonTambahSangsi").on("click",function(e){
-            $("#buttonTambahSangsi").prop("disabled",true)
-            const tgl_berlaku = moment($("#tgl_berlaku_sangsi").val(),"DD-MM-YYYY").format("YYYY-MM-DD")
-            const tgl_berakhir = moment(moment(moment(tgl_berlaku,"YYYY-MM-DD")).add(6, 'months')._d).format("YYYY-MM-DD")
-            console.log(tgl_berakhir)
-            const status = $("#status_sangsi").val()
-            const deskripsi = $("#deskripsi_sangsi").val()
-            $.ajax({
-                url:"{% url 'tambah_sangsi' idp %}",
-                data:{tgl_berlaku,tgl_berakhir,status,deskripsi},
-                method:"post",
-                headers:{"X-CSRFToken":token},
-                success:(e) => {
-                    console.log(e)
-                    $("#sangsiModal").modal("hide")
-                    $("#buttonTambahSangsi").prop("disabled",false)
-                    tableSangsi.ajax.reload()
-                },
-                error:(err) => {
-                    console.log(err)
-                    $("#buttonTambahSangsi").prop("disabled",false)
-                }
+        if(aktif == 1){
+            $("#buttonTambahSangsi").on("click",function(e){
+                $("#buttonTambahSangsi").prop("disabled",true)
+                const tgl_berlaku = moment($("#tgl_berlaku_sangsi").val(),"DD-MM-YYYY").format("YYYY-MM-DD")
+                const tgl_berakhir = moment(moment(moment(tgl_berlaku,"YYYY-MM-DD")).add(6, 'months')._d).format("YYYY-MM-DD")
+                console.log(tgl_berakhir)
+                const status = $("#status_sangsi").val()
+                const deskripsi = $("#deskripsi_sangsi").val()
+                $.ajax({
+                    url:"{% url 'tambah_sangsi' idp %}",
+                    data:{tgl_berlaku,tgl_berakhir,status,deskripsi},
+                    method:"post",
+                    headers:{"X-CSRFToken":token},
+                    success:(e) => {
+                        $("#msg p").remove()
+                        $("#sangsiModal").modal("hide")
+                        $("#buttonTambahSangsi").prop("disabled",false)
+                        tableSangsi.ajax.reload()
+                    },
+                    error:(err) => {
+                        $("#msg p").remove()
+                        console.log(err)
+                        $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.status}</p>`)
+                        $("#buttonTambahSangsi").prop("disabled",false)
+                    }
+                })
+    
             })
-
-        })
+        }
 
 
 

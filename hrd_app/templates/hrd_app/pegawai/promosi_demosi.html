@@ -53,11 +53,19 @@
             <!-- Button Pegawai Non Aktif -->
             <a href="{% url 'non_aktif' sid %}"><button class="btn btn-danger mg-b-6">Pegawai Non Aktif</button></a> &nbsp; &nbsp; &nbsp; 
 
-            <a href="{% url 'general_data' idp %}" class="btn btn-outline-info mg-b-8">General Data</a>  
-            <a href="{% url 'dapri' idp %}" class="btn btn-outline-info mg-b-8">Data Pribadi</a>
-            <a href="{% url 'pkerja' idp %}" class="btn btn-outline-info mg-b-8">Pengalaman Kerja & Pendidikan</a> 
-            <a href="{% url 'prodemo' idp %}" class="btn btn-info mg-b-8">Promosi / Demosi</a>  
-            <a href="{% url 'sangsi' idp %}" class="btn btn-outline-info mg-b-8">Sangsi</a> 
+            {% if aktif == 0 %}
+            <a href="{% url 'general_data_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">General Data Non Aktif</a>  
+            <a href="{% url 'dapri_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">Data Pribadi Non Aktif</a>
+            <a href="{% url 'pkerja_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">Pengalaman Kerja & Pendidikan Non Aktif</a> 
+            <a href="{% url 'prodemo_nonaktif' idp %}" class="btn btn-info mg-b-8">Promosi / Demosi Non Aktif</a>
+            <a href="{% url 'sangsi_nonaktif' idp %}" class="btn btn-outline-info mg-b-8">Sangsi Non Aktif</a>  
+            {% else %}
+              <a href="{% url 'general_data' idp %}" class="btn btn-outline-info mg-b-8">General Data</a>  
+              <a href="{% url 'dapri' idp %}" class="btn btn-outline-info mg-b-8">Data Pribadi</a>
+              <a href="{% url 'pkerja' idp %}" class="btn btn-outline-info mg-b-8">Pengalaman Kerja & Pendidikan</a> 
+              <a href="{% url 'prodemo' idp %}" class="btn btn-info mg-b-8">Promosi / Demosi</a>
+              <a href="{% url 'sangsi' idp %}" class="btn btn-outline-info mg-b-8">Sangsi</a> 
+            {% endif %} 
 
             </div>          
         </div>
@@ -75,7 +83,9 @@
                             <div class="form-group mg-md-l--1">
                                 <div class="flex justify-between">
                                     <label class="form-control-label tx-gray-800">Promosi:</label>
-                                    <button class="form-control-label btn btn-primary" data-toggle="modal" data-target="#promosiModal">Tambah Promosi</button>
+                                    {% if aktif == 1 %}
+                                        <button class="form-control-label btn btn-primary" data-toggle="modal" data-target="#promosiModal">Tambah Promosi</button>
+                                    {% endif %}
                                 </div>
                                 <table class="table" id="tablePromosi">
                                     <thead>
@@ -104,7 +114,9 @@
                             <div class="form-group mg-md-l--1">
                                 <div class="flex justify-between">
                                     <label class="form-control-label tx-gray-800">Demosi:</label>
-                                    <button class="form-control-label btn btn-warning" data-toggle="modal" data-target="#demosiModal">Tambah Demosi</button>
+                                    {% if aktif == 1 %}
+                                        <button class="form-control-label btn btn-warning" data-toggle="modal" data-target="#demosiModal">Tambah Demosi</button>
+                                    {% endif %}
                                 </div>
                                 <table class="table" id="tableDemosi">
                                     <thead>
@@ -129,6 +141,7 @@
 </div><!-- br-pagebody -->
 
 <!-- Modal Promosi -->
+ {% if aktif == 1 %}
 <div class="modal fade" id="promosiModal" tabindex="-1" aria-labelledby="promosiModalLabel" aria-hidden="true">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -220,6 +233,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 {% endblock breadcrumb %}
 
 {% block hrd_ajax %}
@@ -234,7 +248,7 @@
 
     const demosi = $("#tableDemosi").DataTable({
         ajax: {
-            url:"{% url 'promodemo_json' idp %}",
+            url:"{% url 'promodemo_json' idp aktif %}",
             method:"POST",
             data:{status:"0"},
             headers:{"X-CSRFToken":token},
@@ -262,7 +276,7 @@
     })
     const promosi = $("#tablePromosi").DataTable({
         ajax: {
-            url:"{% url 'promodemo_json' idp %}",
+            url:"{% url 'promodemo_json' idp aktif %}",
             method:"POST",
             data:{status:"1"},
             headers:{"X-CSRFToken":token},
