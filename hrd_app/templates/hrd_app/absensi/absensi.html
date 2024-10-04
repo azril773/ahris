@@ -10,6 +10,9 @@
 
     <div class="br-section-wrapper">
         <!-- Pesan Error -->
+        {% if sid == 0 %}
+            <div class="alert alert-danger">Maaf fitur ini sedang dalam perbaikan, silahkan pilih divisi yang ingin diproses</div>
+        {% endif %}
         {% for message in messages %}
         <div class="container-fluid p-0">
             {% if 'safe' in message.tags %}
@@ -45,10 +48,18 @@
             <div class="mg-r-auto">   
                             
             <!-- Button Proses Data -->
+            {% if sid == 0 %}
+            <button class="btn btn-primary mg-b-6" disabled>Proses Data Absensi</button>
+            {% else %}
             <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-primary mg-b-6">Proses Data Absensi</button>
-
+            {% endif %}
+            
+            {% if sid == 0 %}
+            <button class="btn btn-warning mg-b-6" disabled>Cari Data Absensi</button>
+            {% else %}
             <!-- Button Cari Data Absen -->
             <button data-target="#pilih_tgl_cari" data-toggle="modal" class="btn btn-warning mg-b-6">Cari Data Absensi</button>  &nbsp; &nbsp; &nbsp;
+            {% endif %}
 
             <!-- Button lainnya -->
             {% include 'hrd_app/master/modul_absensi.html' %} 

@@ -662,17 +662,27 @@ def pabsen(request):
     # buat tabel absen
     if int(sid) == 0:
         for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
-            if p.jabatan_id is None:
+            if p.jabatan is None:
                 jabatan = None
             else:
                 jabatan = p.jabatan.jabatan
-
-            if p.counter_id is None:
+            
+            if p.counter is None:
                 counter = None
             else:
                 counter = p.counter.counter
 
-            if p.hari_off2_id is None:
+            if p.divisi is None:
+                divisi = None
+            else:
+                divisi = p.divisi.divisi
+
+            if p.kelompok_kerja is None:
+                kelompok_kerja = None
+            else:
+                kelompok_kerja = p.kelompok_kerja.kelompok
+                
+            if p.hari_off2 is None:
                 ho = None
             else:
                 ho = p.hari_off2.hari        
@@ -685,11 +695,11 @@ def pabsen(request):
                 'status' : p.status.status,
                 'status_id' : p.status_id,
                 'nik' : p.nik,
-                'divisi' : p.divisi.divisi,
+                'divisi' : divisi,
                 'jabatan' : jabatan,                
                 'hari_off' : p.hari_off.hari,
                 'hari_off2' : ho,
-                'kelompok_kerja' : p.kelompok_kerja.kelompok,
+                'kelompok_kerja' : kelompok_kerja,
                 'sisa_cuti' : p.sisa_cuti,
                 'shift' : p.shift,
                 'counter' : counter
@@ -707,17 +717,27 @@ def pabsen(request):
                     tabsen.save()
     else:
         for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(status__id=sid):
-            if p.jabatan_id is None:
+            if p.jabatan is None:
                 jabatan = None
             else:
                 jabatan = p.jabatan.jabatan
             
-            if p.counter_id is None:
+            if p.counter is None:
                 counter = None
             else:
                 counter = p.counter.counter
+
+            if p.divisi is None:
+                divisi = None
+            else:
+                divisi = p.divisi.divisi
+
+            if p.kelompok_kerja is None:
+                kelompok_kerja = None
+            else:
+                kelompok_kerja = p.kelompok_kerja.kelompok
                 
-            if p.hari_off2_id is None:
+            if p.hari_off2 is None:
                 ho = None
             else:
                 ho = p.hari_off2.hari        
@@ -731,11 +751,11 @@ def pabsen(request):
                 'status_id' : p.status_id,
                 "status":p.status.status,
                 'nik' : p.nik,
-                'divisi' : p.divisi.divisi,
+                'divisi' : divisi,
                 'jabatan' : jabatan,                
                 'hari_off' : p.hari_off.hari,
                 'hari_off2' : ho,
-                'kelompok_kerja' : p.kelompok_kerja.kelompok,
+                'kelompok_kerja' : kelompok_kerja,
                 'sisa_cuti' : p.sisa_cuti,
                 'shift' : p.shift,
                 'counter' : counter
@@ -844,44 +864,45 @@ def pabsen(request):
                         bb_msk = jam_absen - timedelta(hours=4)
                         ba_msk = jam_absen + timedelta(hours=4)
                         jk = None
-                        if a["punch"] == 0:
-                            jkm = jamkerja_db.objects.values("jam_masuk","jam_pulang","jam_istirahat","jam_kembali_istirahat","jam_istirahat2","jam_kembali_istirahat2").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk.time(),jam_masuk__lte=ba_msk.time())
-                            data = []
-                            ds = []
-                            for j in jkm:
-                                if(j in data):
-                                    continue
-                                data.append(j)
-                                selisih = abs(datetime.combine(ab.tgl_absen, j["jam_masuk"]) - datetime.combine(ab.tgl_absen,jam_absen.time()))
-                                ds.append(selisih)
-                                getMin = min(ds)
-                                jam = data[ds.index(getMin)]
-                                ab.jam_masuk = jam["jam_masuk"]
-                                ab.jam_pulang = jam["jam_pulang"]
-                                ab.jam_istirahat = jam["jam_istirahat"]
-                                ls = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat"])
-                                ls2 = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat2"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat2"])
-                                ab.lama_istirahat = ls.total_seconds() / 3600
-                                ab.lama_istirahat2 = ls2.total_seconds() / 3600
-                        elif a['punch'] == 1:
-                            jkp = jamkerja_db.objects.values("jam_masuk","jam_pulang","jam_istirahat","jam_kembali_istirahat","jam_istirahat2","jam_kembali_istirahat2").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_pulang__gte=bb_msk.time(),jam_pulang__lte=ba_msk.time())
-                            data = []
-                            ds = []
-                            for j in jkp:
-                                if(j in data):
-                                    continue
-                                data.append(j)
-                                selisih = abs(datetime.combine(ab.tgl_absen, j["jam_pulang"]) - datetime.combine(ab.tgl_absen,jam_absen.time()))
-                                ds.append(selisih)
-                                getMin = min(ds)
-                                jam = data[ds.index(getMin)]
-                                ab.jam_masuk = jam["jam_masuk"]
-                                ab.jam_pulang = jam["jam_pulang"]
-                                ab.jam_istirahat = jam["jam_istirahat"]
-                                ls = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat"])
-                                ls2 = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat2"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat2"])
-                                ab.lama_istirahat = ls.total_seconds() / 3600
-                                ab.lama_istirahat2 = ls2.total_seconds() / 3600
+                        if ab.pegawai.kelompok_kerja is not None:
+                            if a["punch"] == 0:
+                                jkm = jamkerja_db.objects.values("jam_masuk","jam_pulang","jam_istirahat","jam_kembali_istirahat","jam_istirahat2","jam_kembali_istirahat2").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk.time(),jam_masuk__lte=ba_msk.time())
+                                data = []
+                                ds = []
+                                for j in jkm:
+                                    if(j in data):
+                                        continue
+                                    data.append(j)
+                                    selisih = abs(datetime.combine(ab.tgl_absen, j["jam_masuk"]) - datetime.combine(ab.tgl_absen,jam_absen.time()))
+                                    ds.append(selisih)
+                                    getMin = min(ds)
+                                    jam = data[ds.index(getMin)]
+                                    ab.jam_masuk = jam["jam_masuk"]
+                                    ab.jam_pulang = jam["jam_pulang"]
+                                    ab.jam_istirahat = jam["jam_istirahat"]
+                                    ls = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat"])
+                                    ls2 = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat2"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat2"])
+                                    ab.lama_istirahat = ls.total_seconds() / 3600
+                                    ab.lama_istirahat2 = ls2.total_seconds() / 3600
+                            elif a['punch'] == 1:
+                                jkp = jamkerja_db.objects.values("jam_masuk","jam_pulang","jam_istirahat","jam_kembali_istirahat","jam_istirahat2","jam_kembali_istirahat2").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_pulang__gte=bb_msk.time(),jam_pulang__lte=ba_msk.time())
+                                data = []
+                                ds = []
+                                for j in jkp:
+                                    if(j in data):
+                                        continue
+                                    data.append(j)
+                                    selisih = abs(datetime.combine(ab.tgl_absen, j["jam_pulang"]) - datetime.combine(ab.tgl_absen,jam_absen.time()))
+                                    ds.append(selisih)
+                                    getMin = min(ds)
+                                    jam = data[ds.index(getMin)]
+                                    ab.jam_masuk = jam["jam_masuk"]
+                                    ab.jam_pulang = jam["jam_pulang"]
+                                    ab.jam_istirahat = jam["jam_istirahat"]
+                                    ls = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat"])
+                                    ls2 = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat2"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat2"])
+                                    ab.lama_istirahat = ls.total_seconds() / 3600
+                                    ab.lama_istirahat2 = ls2.total_seconds() / 3600
                                 
                                 
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
