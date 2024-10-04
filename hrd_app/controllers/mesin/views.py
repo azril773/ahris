@@ -900,6 +900,9 @@ def tmesin(r):
     ip = r.POST.get("ipaddress")
     status = r.POST.get("status")
     if akses == "admin" or akses == "root":
+        if nama == "" or ip == '' or status == '':
+            messages.error(r,"Form tidak boleh kosong")
+            return redirect("amesin")
         mesin = mesin_db.objects.filter(Q(nama=nama) | Q(ipaddress=ip))
         if mesin.exists():
             messages.error(r,"Mesin sudah ada" + mesin.nama)
@@ -939,9 +942,13 @@ def emesin(r):
     status = r.POST.get("editstatus")
     idmesin = r.POST.get("idmesin")
     if akses == "admin" or akses == "root":
+        if nama == '' or ip == '' or status == '' or idmesin == '':
+            messages.error(r,"Form tidak boleh kosong")
+            return redirect("amesin")
         mesin = mesin_db.objects.filter(pk=int(idmesin))
         if not mesin.exists():
             messages.error(r,"Mesin tidak ada")
+            return redirect("amesin")
 
         mesin_db.objects.filter(pk=int(idmesin)).update(
             nama=nama,
