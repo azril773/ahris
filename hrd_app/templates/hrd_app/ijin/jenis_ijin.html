@@ -117,7 +117,7 @@
                         </div>
         
                         <div class="modal-footer">
-                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
+                        <button type="submit" id="buttontambahjenisijin" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
                         <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
                         </div>              
         
@@ -259,7 +259,17 @@
             })
         })
 
+        $("#tambah").on("show.bs.modal",function(e){
+            $("#jenis_ijin").val(" ")
+            setTimeout((e) => {
+                $("#jenis_ijin").focus()
+            },300)
+        })
+
         $("#edit").on("show.bs.modal",function(e){
+            setTimeout((e) => {
+                $("#ejenis_ijin").focus()
+            },300)
             const id = $(e.relatedTarget).data("eid")
             const jenis_ijin = $(e.relatedTarget).data("jijin")
             $("#edit_id").val(id)
@@ -273,5 +283,7 @@
             $("#jenis_ijin").val(jenis_ijin)
             console.log(jenis_ijin)
         })
+
+
     </script>
 {% endblock hrd_ajax %}

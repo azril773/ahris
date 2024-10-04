@@ -69,10 +69,14 @@ def laporan_json(r):
             sb = 0
             sdl = 0
             nkh = 0
+            ma = 0
+            ktn = 0
             im = 0
             cm = 0
             wft = 0
-            snt = 0
+            kwft = 0
+            urh = 0
+            bs = 0
             ijin = 0
             af = 0
             ct = 0 #keterangan absensi
@@ -92,36 +96,46 @@ def laporan_json(r):
                             else:
                                 terlambat += 1
                     if a.keterangan_ijin is not None:
-                        if re.search("sdp",a.keterangan_ijin,re.I):
+                        if re.search("(sdp)",a.keterangan_ijin,re.I):
                             sdp += 1
-                        elif re.search("sb",a.keterangan_ijin,re.I):
+                        elif re.search("(sb)",a.keterangan_ijin,re.I):
                             sb += 1
-                        elif re.search("sdl",a.keterangan_ijin,re.I):
+                        elif re.search("(cm)",a.keterangan_ijin,re.I):
+                            cm += 1
+                        elif re.search("(sdl)",a.keterangan_ijin,re.I):
                             sdl += 1
-                        elif re.search("skh",a.keterangan_ijin,re.I):
+                        elif re.search("(nkh)",a.keterangan_ijin,re.I):
                             nkh += 1
-                        elif re.search("im",a.keterangan_ijin,re.I):
+                        elif re.search("(ma)",a.keterangan_ijin,re.I):
+                            ma += 1
+                        elif re.search("(ktn)",a.keterangan_ijin,re.I):
+                            ktn += 1
+                        elif re.search("(im)",a.keterangan_ijin,re.I):
                             im += 1
-                        elif re.search("wft",a.keterangan_ijin,re.I):
+                        elif re.search("(kwft)",a.keterangan_ijin,re.I):
+                            kwft += 1
+                        elif re.search("(wft)",a.keterangan_ijin,re.I):
                             wft += 1
-                        elif re.search("snt",a.keterangan_ijin,re.I):
-                            snt += 1
-                        elif re.search("ijin",a.keterangan_ijin,re.I):
+                        elif re.search("(urh)",a.keterangan_ijin,re.I):
+                            urh += 1
+                        elif re.search("(bs)",a.keterangan_ijin,re.I):
+                            bs += 1
+                        elif re.search("(ijin)",a.keterangan_ijin,re.I):
                             ijin += 1
-                        elif re.search("dl",a.keterangan_ijin,re.I):
+                        elif re.search("(dl)",a.keterangan_ijin,re.I):
                             dl += 1
                     if a.keterangan_absensi is not None:
                         if re.search("cuti",a.keterangan_absensi,re.I):
                             ct += 1
-                        elif re.search("af",a.keterangan_absensi,re.I):
-                            af += 1
                         elif re.search("opg",a.keterangan_absensi,re.I):
                             opg += 1
+                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and (a.masuk is None and a.pulang is None or a.masuk_b is None and a.pulang_b is None):
+                        af += 1
             
             obj = {
                 "id" : pgw.id,
                 "nik":pgw.nik,
-                "jk":pgw.gender,
+                "jk":pgw.gender[0],
                 "nama": pgw.nama,
                 "divisi":pgw.divisi.divisi,
                 "off": off if off > 0 else "",
@@ -136,10 +150,14 @@ def laporan_json(r):
                 "im":im if im > 0 else "",
                 "cm":cm if cm > 0 else "",
                 "wft":wft if wft > 0 else "",
-                "snt":snt if snt > 0 else "",
+                "ktn":ktn if ktn > 0 else "",
                 "ijin":ijin if ijin > 0 else "",
                 "af":af if af > 0 else "",
                 "ct":ct if ct > 0 else "",
+                "ma":ma if ma > 0 else "",
+                "kwft":kwft if kwft > 0 else "",
+                "urh":urh if urh > 0 else "",
+                "bs":bs if bs > 0 else "",
                 "opg":opg if opg > 0 else "",
                 "dl":dl if dl > 0 else ""
             }
@@ -157,10 +175,14 @@ def laporan_json(r):
             sb = 0
             sdl = 0
             nkh = 0
+            ma = 0
+            ktn = 0
             im = 0
             cm = 0
             wft = 0
-            snt = 0
+            kwft = 0
+            urh = 0
+            bs = 0
             ijin = 0
             af = 0
             ct = 0 #keterangan absensi
@@ -183,31 +205,41 @@ def laporan_json(r):
                             else:
                                 terlambat += 1
                     if a.keterangan_ijin is not None:
-                        if re.search("sdp",a.keterangan_ijin,re.I):
+                        if re.search("(sdp)",a.keterangan_ijin,re.I):
                             sdp += 1
-                        elif re.search("sb",a.keterangan_ijin,re.I):
+                        elif re.search("(sb)",a.keterangan_ijin,re.I):
                             sb += 1
-                        elif re.search("sdl",a.keterangan_ijin,re.I):
+                        elif re.search("(cm)",a.keterangan_ijin,re.I):
+                            cm += 1
+                        elif re.search("(sdl)",a.keterangan_ijin,re.I):
                             sdl += 1
-                        elif re.search("skh",a.keterangan_ijin,re.I):
+                        elif re.search("(nkh)",a.keterangan_ijin,re.I):
                             nkh += 1
-                        elif re.search("im",a.keterangan_ijin,re.I):
+                        elif re.search("(ma)",a.keterangan_ijin,re.I):
+                            ma += 1
+                        elif re.search("(ktn)",a.keterangan_ijin,re.I):
+                            ktn += 1
+                        elif re.search("(im)",a.keterangan_ijin,re.I):
                             im += 1
-                        elif re.search("wft",a.keterangan_ijin,re.I):
+                        elif re.search("(kwft)",a.keterangan_ijin,re.I):
+                            kwft += 1
+                        elif re.search("(wft)",a.keterangan_ijin,re.I):
                             wft += 1
-                        elif re.search("snt",a.keterangan_ijin,re.I):
-                            snt += 1
-                        elif re.search("ijin",a.keterangan_ijin,re.I):
+                        elif re.search("(urh)",a.keterangan_ijin,re.I):
+                            urh += 1
+                        elif re.search("(bs)",a.keterangan_ijin,re.I):
+                            bs += 1
+                        elif re.search("(ijin)",a.keterangan_ijin,re.I):
                             ijin += 1
-                        elif re.search("dl",a.keterangan_ijin,re.I):
+                        elif re.search("(dl)",a.keterangan_ijin,re.I):
                             dl += 1
                     if a.keterangan_absensi is not None:
                         if re.search("cuti",a.keterangan_absensi,re.I):
                             ct += 1
-                        elif re.search("af",a.keterangan_absensi,re.I):
-                            af += 1
                         elif re.search("opg",a.keterangan_absensi,re.I):
                             opg += 1
+                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and (a.masuk is None and a.pulang is None or a.masuk_b is None and a.pulang_b is None):
+                        af += 1
             obj = {
                 "id" : pgw.id,
                 "nik":pgw.nik,
@@ -226,10 +258,14 @@ def laporan_json(r):
                 "im":im if im > 0 else "",
                 "cm":cm if cm > 0 else "",
                 "wft":wft if wft > 0 else "",
-                "snt":snt if snt > 0 else "",
+                "ktn":ktn if ktn > 0 else "",
                 "ijin":ijin if ijin > 0 else "",
                 "af":af if af > 0 else "",
                 "ct":ct if ct > 0 else "",
+                "ma":ma if ma > 0 else "",
+                "kwft":kwft if kwft > 0 else "",
+                "urh":urh if urh > 0 else "",
+                "bs":bs if bs > 0 else "",
                 "opg":opg if opg > 0 else "",
                 "dl":dl if dl > 0 else ""
             }
@@ -431,7 +467,7 @@ def print_laporan_pegawai(r):
             dakses = akses_db.objects.get(user_id=iduser)
             sid = dakses.pegawai.status.pk
             data = []
-        for p in pegawais:
+        for p in pegawai:
             dari = datetime.strptime(str(dr),'%d-%m-%Y').date()
             sampai = datetime.strptime(str(sp),'%d-%m-%Y').date()
             obj = {

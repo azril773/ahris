@@ -83,12 +83,12 @@
                 <thead>
                     <tr>
                         <th rowspan="2">NIK</th>
-                        <th rowspan="2">NAMA</th>
+                        <th rowspan="2" class="">NAMA</th>
                         <th rowspan="2">JK</th>
                         <th rowspan="2">DIVISI</th>
                         <th rowspan="2">OFF DAY</th>
-                        <th colspan="3">SAKIT</th>
-                        <th colspan="5">DISPENSASI</th>
+                        <th colspan="3" >SAKIT</th> &nbsp
+                        <th colspan="9" >DISPENSASI</th>
                         <th rowspan="2">IJIN</th>
                         <th rowspan="2">AF</th>
                         <th rowspan="2">CT</th>
@@ -97,17 +97,20 @@
                         <th rowspan="2">DL</th>
                         <th colspan="2" style="text-align:center;">TERLAMBAT</th>
                         <th rowspan="2">TOTAL HARI KERJA</th>
-                        <th rowspan="2">KET</th>
                     </tr>
                     <tr>
-                        <th>SB</th>
-                        <th>SDL</th>
-                        <th>SDP</th>
-                        <th class="ml-2">NKH</th>
-                        <th>IM</th>
-                        <th>CM</th>
-                        <th>WFT</th>
-                        <th>SNT</th>
+                        <th>Surat Biasa (SB)</th>
+                        <th>Surat Dokter Luar (SDL)</th>
+                        <th>Surat Dokter Perusahaan (SDP)</th>
+                        <th class="ml-2">Nikah (NKH)</th>
+                        <th>Menikahkan Anak (MA)</th>
+                        <th>Khitanan Anak (KTN)</th>
+                        <th>Istri Melahirkan (IM)</th>
+                        <th>Cuti Melahirkan (CM)</th>
+                        <th>Wafat (WFT)</th>
+                        <th>Keluarga Wafat (KWFT)</th>
+                        <th>Umroh (URH)</th>
+                        <th>Baptis (BS)</th>
                         <th>IJIN</th>
                         <th>T.IJIN</th>
                     </tr>
@@ -295,10 +298,14 @@
             {data:"sdl"},
             {data:"sdp"},
             {data:"nkh"},
+            {data:"ma"},
+            {data:"ktn"},
             {data:"im"},
             {data:"cm"},
             {data:"wft"},
-            {data:"snt"},
+            {data:"kwft"},
+            {data:"urh"},
+            {data:"bs"},
             {data:"ijin"},
             {data:"af"},
             {data:"ct"},
@@ -308,12 +315,6 @@
             {data:"terlambat_ijin"},
             {data:"terlambat"},
             {data:"total_hari"},
-            {
-                data: null,
-                render:(e) => {
-                    return "lsd"
-                }
-            },
         ],
         "rowCallback": function (row, data) {
                 if(data.sln == 1){
@@ -343,13 +344,17 @@
                 $('td', row).eq(20).addClass('hitam');
                 $('td', row).eq(21).addClass('hitam');
                 $('td', row).eq(22).addClass('hitam');
+                $('td', row).eq(23).addClass('hitam');
+                $('td', row).eq(24).addClass('hitam');
+                $('td', row).eq(25).addClass('hitam');
             },
 
 
             ordering: false,
             paging: false,
-            scrollY: 300,
             processing: true,
+            scrollY:300,
+            scrollX: '100%',
 
             "language": {
                 searchPlaceholder: 'Cari...',
@@ -407,12 +412,17 @@
                 {data:"im"},
                 {data:"cm"},
                 {data:"wft"},
-                {data:"snt"},
+                {data:"ktn"},
                 {data:"ijin"},
                 {data:"af"},
                 {data:"ct"},
+                {data:"ma"},
+                {data:"kwft"},
+                {data:"urh"},
+                {data:"bs"},
                 {data:"off"},
                 {data:"opg"},
+                {data:"dl"},
                 {data:"terlambat_ijin"},
                 {data:"terlambat"},
                 {data:"total_hari"},
@@ -445,6 +455,9 @@
                     $('td', row).eq(20).addClass('hitam');
                     $('td', row).eq(21).addClass('hitam');
                     $('td', row).eq(22).addClass('hitam');
+                    $('td', row).eq(23).addClass('hitam');
+                    $('td', row).eq(24).addClass('hitam');
+                    $('td', row).eq(25).addClass('hitam');
                 },
     
     
