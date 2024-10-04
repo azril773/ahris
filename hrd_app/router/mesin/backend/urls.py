@@ -17,4 +17,9 @@ urlpatterns = [
     path('hapusabsen/<int:id>', views.hapusabsen, name='hapusabsen'),
     path('sesuaikanjam/<int:id>', views.sesuaikanjam, name='sesuaikanjam'),
     path('clearbuffer/<int:id>', views.clearbuffer, name='clearbuffer'),
+    path('tmesin', views.tmesin, name='tmesin'),
+    path('hmesin', views.hmesin, name='hmesin'),
+    path('emesin', views.emesin, name='emesin'),
+    path('getmesin', views.getmesin, name='getmesin'),
+
 ]

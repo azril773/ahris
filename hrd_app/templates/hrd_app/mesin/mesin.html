@@ -31,11 +31,13 @@
             {% endif %}
         </div>
         {% endfor %}
+        <div id="msg"></div>
 
         <!-- b -->
         <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Ambil Data Mesin</h6>
         <div class="d-flex align-items-center justify-content-start">     
             <div class="mg-r-auto">   
+                <button data-toggle="modal" data-target="#tambahdatamesin" class="btn btn-primary">Tambah Mesin</button>
                 <a href="{% url "cdatamesin" %}" class="btn btn-info">Copy Data Mesin</a>
             <!-- Button Proses Data -->
 
@@ -68,10 +70,128 @@
     </div>
 </div><!-- br-pagebody -->
 
+<div id="tambahdatamesin" class="modal fade">
+    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content bd-0 tx-14">
+        <div class="modal-header pd-y-20 pd-x-25">
+        <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Tambah Mesin</h6>          
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>          
+        </div>
+        
+        <form action="{% url 'tmesin' %}" method="post">
+            {% csrf_token %}
+            <div class="form-layout form-layout-1">
+            <div class="row mg-b-25">
+
+                <div class="col-lg-6 mb-2">
+                    <label for="namamesin" class="form-label text-dark">Nama Mesin</label>
+                    <input type="text" name="namamesin" id="namamesin" class="form-control">
+                </div>
+                <div class="col-lg-6 mb-2">
+                    <label for="ipaddress" class="form-label text-dark">IPAddres Mesin</label>
+                    <input type="text" name="ipaddress" id="ipaddress" class="form-control">
+                </div>
+                <div class="col-lg-12 mb-2">
+                    <label for="status" class="form-label text-dark">Status Mesin</label>
+                    <select name="status" id="status">
+                        <option value="">Pilih status</option>
+                        <option value="Active">Active</option>
+                        <option value="Non Active">Non Active</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                <button type="submit" id="buttontambahmesin" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah Mesin</button>
+                <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                </div>              
+                
+
+            </div>
+            </div>            
+        </form>              
+    </div>
+    </div><!-- modal-dialog -->
+</div>
+<div id="modalhapusmesin" class="modal fade">
+    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content bd-0 tx-14">
+        <div class="modal-header pd-y-20 pd-x-25">
+        <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Hapus Mesin</h6>          
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>          
+        </div>
+        
+        <form action="{% url 'hmesin' %}" method="post">
+            {% csrf_token %}
+            <div class="form-layout form-layout-1">
+            <div class="row mg-b-25">
+                <div class="col-lg-12">
+                    <p class="text-dark">Anda yakin ingin menghapus mesin?</p>
+                </div>
+                <input type="hidden" id="mesinid" name="idmesin">
+                <div class="modal-footer">
+                <button type="submit" id="buttontambahmesin" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Hapus mesin</button>
+                <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                </div>              
+                
+
+            </div>
+            </div>            
+        </form>              
+    </div>
+    </div><!-- modal-dialog -->
+</div>
+<div id="modaleditmesin" class="modal fade">
+    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content bd-0 tx-14">
+        <div class="modal-header pd-y-20 pd-x-25">
+        <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Edit Mesin</h6>          
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>          
+        </div>
+        
+        <form action="{% url 'emesin' %}" method="post">
+            {% csrf_token %}
+            <div class="form-layout form-layout-1">
+            <div class="row mg-b-25">
+                <div class="col-lg-6 mb-2">
+                    <label for="editnamamesin" class="form-label text-dark">Nama Mesin</label>
+                    <input type="text" name="editnamamesin" id="editnamamesin" class="form-control">
+                </div>
+                <div class="col-lg-6 mb-2">
+                    <label for="editipaddress" class="form-label text-dark">IPAddres Mesin</label>
+                    <input type="text" name="editipaddress" id="editipaddress" class="form-control">
+                </div>
+                <div class="col-lg-12 mb-2">
+                    <label for="editstatus" class="form-label text-dark">Status Mesin</label>
+                    <select name="editstatus" id="editstatus">
+                        <option value="">Pilih status</option>
+                        <option value="Active">Active</option>
+                        <option value="Non Active">Non Active</option>
+                    </select>
+                </div>
+                <input type="hidden" id="editmesinid" name="idmesin">
+                <div class="modal-footer">
+                <button type="submit" id="buttontambahmesin" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Edit mesin</button>
+                <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                </div>              
+                
+
+            </div>
+            </div>            
+        </form>              
+    </div>
+    </div><!-- modal-dialog -->
+</div>
 {% endblock breadcrumb %}
 {% block hrd_ajax %}
     <script>
-
+        $("#status").selectize()
+        const editstatus = $("#editstatus").selectize()
         const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
         const table = $("#tableku").DataTable({
             ajax:{
@@ -85,7 +205,7 @@
                 {
                     data:null,
                     render:(data,type,row,meta) => {
-                        return `<a href="/hrd/admesin/${row.id}" class="btn btn-primary">Ambil Data</a>&nbsp<a href="/hrd/tambah_data_mesin/${row.id}" class="btn btn-info">Sinkron</a>`
+                        return `<a href="/hrd/admesin/${row.id}" class="btn btn-primary">Ambil Data</a>&nbsp<a href="/hrd/tambah_data_mesin/${row.id}" class="btn btn-info">Sinkron</a>&nbsp<button data-id="${row.id}" data-target="#modalhapusmesin" data-toggle="modal" class="btn btn-danger">Hapus Mesin</button>&nbsp<button data-target="#modaleditmesin" data-toggle="modal" class="btn btn-warning" data-id="${row.id}">Edit Mesin</button>`
                     }
                 },
                 {
@@ -106,5 +226,32 @@
                 $('td', row).eq(3).addClass('hitam');
             },
         })
+
+        $("#modalhapusmesin").on("show.bs.modal",function(e){
+            $("#mesinid").val($(e.relatedTarget).data("id"))
+        })
+        $("#modaleditmesin").on("show.bs.modal",function(e){
+            $("#editmesinid").val($(e.relatedTarget).data("id"))
+            const id = $(e.relatedTarget).data("id")
+            const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+            $.ajax({
+                url:"{% url 'getmesin' %}",
+                method:"post",
+                data:{idmesin:id},
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    console.log(e)
+                    $("#editnamamesin").val(e.data.nama)
+                    $("#editipaddress").val(e.data.ipaddress)
+                    editstatus[0].selectize.setValue(e.data.status)
+                },
+                error:(err) => {
+                    $("#msg p").remove()
+                    $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    $("#modaleditmesin").modal("hide")
+                }
+            })
+        })
+
     </script>
 {% endblock hrd_ajax %}

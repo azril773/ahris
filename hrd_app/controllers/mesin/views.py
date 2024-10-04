@@ -890,6 +890,89 @@ def clearbuffer(r,id):
 
     return redirect("amesin")
 
+@login_required
+def tmesin(r):
+
+    iduser = r.user.id
+    data_akses = akses_db.objects.get(user=iduser)
+    akses = data_akses.akses 
+    nama = r.POST.get("namamesin")
+    ip = r.POST.get("ipaddress")
+    status = r.POST.get("status")
+    if akses == "admin" or akses == "root":
+        mesin = mesin_db.objects.filter(Q(nama=nama) | Q(ipaddress=ip))
+        if mesin.exists():
+            messages.error(r,"Mesin sudah ada" + mesin.nama)
+            return redirect("amesin")
+        mesin_db(
+            nama=nama,
+            ipaddress=ip,
+            status=status
+        ).save()
+        messages.success(r,"Berhasil menambahkan mesin")
+            
+    return redirect("amesin")
+
+
+@login_required
+def hmesin(r):
+
+    iduser = r.user.id
+    data_akses = akses_db.objects.get(user=iduser)
+    akses = data_akses.akses 
+    idmesin = r.POST.get("idmesin")
+    if akses == "admin" or akses == "root":
+        mesin_db.objects.filter(pk=int(idmesin)).delete()
+        messages.success(r,"Berhasil menghapus mesin")
+            
+    return redirect("amesin")
+
+
+@login_required
+def emesin(r):
+
+    iduser = r.user.id
+    data_akses = akses_db.objects.get(user=iduser)
+    akses = data_akses.akses 
+    nama = r.POST.get("editnamamesin")
+    ip = r.POST.get("editipaddress")
+    status = r.POST.get("editstatus")
+    idmesin = r.POST.get("idmesin")
+    if akses == "admin" or akses == "root":
+        mesin = mesin_db.objects.filter(pk=int(idmesin))
+        if not mesin.exists():
+            messages.error(r,"Mesin tidak ada")
+
+        mesin_db.objects.filter(pk=int(idmesin)).update(
+            nama=nama,
+            ipaddress=ip,
+            status=status
+        )
+        messages.success(r,"Berhasil edit mesin")
+            
+    return redirect("amesin")
+
+
+@login_required
+def getmesin(r):
+
+    iduser = r.user.id
+    data_akses = akses_db.objects.get(user=iduser)
+    akses = data_akses.akses 
+    idmesin = r.POST.get("idmesin")
+    if akses == "admin" or akses == "root":
+        mesin = mesin_db.objects.filter(pk=int(idmesin))
+        if not mesin.exists():
+            return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
+        data = {
+            "nama":mesin[0].nama,
+            "ipaddress":mesin[0].ipaddress,
+            "status":mesin[0].status
+        }
+
+    return JsonResponse({"status":"success","msg":"Berhasil mengambil mesin","data":data},status=200)
+            
+
 
 
 # -------------------------------------------------------------------------------------------------------------------------------
