@@ -901,20 +901,20 @@ def tmesin(r):
     status = r.POST.get("status")
     if akses == "admin" or akses == "root":
         if nama == "" or ip == '' or status == '':
-            messages.error(r,"Form tidak boleh kosong")
-            return redirect("amesin")
+            # messages.error(r,"Form tidak boleh kosong")
+            return JsonResponse({"status":"error","msg":"Form tidak boleh kosong"},status=400)
         mesin = mesin_db.objects.filter(Q(nama=nama) | Q(ipaddress=ip))
+        print(mesin)
         if mesin.exists():
-            messages.error(r,"Mesin sudah ada" + mesin.nama)
-            return redirect("amesin")
+            # messages.error(r,"Mesin sudah ada" + mesin.nama)
+            return JsonResponse({"status":"error","msg":"Mesin sudah ada"},status=400)
         mesin_db(
             nama=nama,
             ipaddress=ip,
             status=status
         ).save()
-        messages.success(r,"Berhasil menambahkan mesin")
+        return JsonResponse({"status":"success","msg":"Berhasil menambahkan mesin"},status=200)
             
-    return redirect("amesin")
 
 
 @login_required
@@ -926,9 +926,9 @@ def hmesin(r):
     idmesin = r.POST.get("idmesin")
     if akses == "admin" or akses == "root":
         mesin_db.objects.filter(pk=int(idmesin)).delete()
-        messages.success(r,"Berhasil menghapus mesin")
+        # messages.success(r,"Berhasil menghapus mesin")
+        return JsonResponse({"status":"success","msg":"Berhasil menghapus mesin"},status=200)
             
-    return redirect("amesin")
 
 
 @login_required
@@ -943,21 +943,19 @@ def emesin(r):
     idmesin = r.POST.get("idmesin")
     if akses == "admin" or akses == "root":
         if nama == '' or ip == '' or status == '' or idmesin == '':
-            messages.error(r,"Form tidak boleh kosong")
-            return redirect("amesin")
+            return JsonResponse({"status":"error","msg":"Form tidak boleh kosong"},status=400)
         mesin = mesin_db.objects.filter(pk=int(idmesin))
         if not mesin.exists():
-            messages.error(r,"Mesin tidak ada")
-            return redirect("amesin")
-
+            return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
+        checkmesin = mesin_db.objects.filter(~Q(pk=int(idmesin)),Q(nama=nama) | Q(ipaddress=ip))
+        if checkmesin.exists():
+            return JsonResponse({"status":"error","msg":"Mesin sudah ada"},status=400)
         mesin_db.objects.filter(pk=int(idmesin)).update(
             nama=nama,
             ipaddress=ip,
             status=status
         )
-        messages.success(r,"Berhasil edit mesin")
-            
-    return redirect("amesin")
+        return JsonResponse({"status":"success","msg":"Berhasil edit mesin"},status=200)
 
 
 @login_required

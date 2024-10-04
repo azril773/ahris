@@ -80,7 +80,6 @@
         </button>          
         </div>
         
-        <form action="{% url 'tmesin' %}" method="post">
             {% csrf_token %}
             <div class="form-layout form-layout-1">
             <div class="row mg-b-25">
@@ -103,14 +102,13 @@
                 </div>
 
                 <div class="modal-footer">
-                <button type="submit" id="buttontambahmesin" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah Mesin</button>
+                <button type="button" id="buttontambahmesin" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah Mesin</button>
                 <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
                 </div>              
                 
 
             </div>
             </div>            
-        </form>              
     </div>
     </div><!-- modal-dialog -->
 </div>
@@ -124,23 +122,21 @@
         </button>          
         </div>
         
-        <form action="{% url 'hmesin' %}" method="post">
             {% csrf_token %}
             <div class="form-layout form-layout-1">
             <div class="row mg-b-25">
                 <div class="col-lg-12">
                     <p class="text-dark">Anda yakin ingin menghapus mesin?</p>
                 </div>
-                <input type="hidden" id="mesinid" name="idmesin">
+                <input type="hidden" id="mesinidhapus" name="idmesin">
                 <div class="modal-footer">
-                <button type="submit" id="buttontambahmesin" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Hapus mesin</button>
+                <button type="button" id="buttonhapusmesin" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Hapus mesin</button>
                 <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
                 </div>              
                 
 
             </div>
             </div>            
-        </form>              
     </div>
     </div><!-- modal-dialog -->
 </div>
@@ -154,7 +150,6 @@
         </button>          
         </div>
         
-        <form action="{% url 'emesin' %}" method="post">
             {% csrf_token %}
             <div class="form-layout form-layout-1">
             <div class="row mg-b-25">
@@ -176,21 +171,26 @@
                 </div>
                 <input type="hidden" id="editmesinid" name="idmesin">
                 <div class="modal-footer">
-                <button type="submit" id="buttontambahmesin" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Edit mesin</button>
+                <button type="button" id="buttoneditmesin" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Edit mesin</button>
                 <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
                 </div>              
                 
 
             </div>
             </div>            
-        </form>              
     </div>
     </div><!-- modal-dialog -->
 </div>
 {% endblock breadcrumb %}
 {% block hrd_ajax %}
     <script>
-        $("#status").selectize()
+        const status = $("#status").selectize({
+            onChange:function(e){
+                if(e !== ""){
+                    $("#buttontambahmesin").click()
+                }
+            }
+        })
         const editstatus = $("#editstatus").selectize()
         const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
         const table = $("#tableku").DataTable({
@@ -227,8 +227,20 @@
             },
         })
 
+        $("#tambahdatamesin").on("show.bs.modal",function(e){
+            setTimeout(() => {
+                $("#namamesin").focus()
+            }, 300);
+        })
+
+        $("#modaleditmesin").on("show.bs.modal",function(e){
+            setTimeout(() => {
+                $("#editnamamesin").focus()
+            }, 300);
+        })
+
         $("#modalhapusmesin").on("show.bs.modal",function(e){
-            $("#mesinid").val($(e.relatedTarget).data("id"))
+            $("#mesinidhapus").val($(e.relatedTarget).data("id"))
         })
         $("#modaleditmesin").on("show.bs.modal",function(e){
             $("#editmesinid").val($(e.relatedTarget).data("id"))
@@ -240,7 +252,6 @@
                 data:{idmesin:id},
                 headers:{"X-CSRFToken":token},
                 success:(e) => {
-                    console.log(e)
                     $("#editnamamesin").val(e.data.nama)
                     $("#editipaddress").val(e.data.ipaddress)
                     editstatus[0].selectize.setValue(e.data.status)
@@ -252,6 +263,118 @@
                 }
             })
         })
+        
+
+        $("#buttontambahmesin").on("click",function(e){
+            const namamesin = $("#namamesin").val()
+            const ipaddress = $("#ipaddress").val()
+            const statusmesin = $("#status").val()
+            const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+            $.ajax({
+                url:"{% url 'tmesin' %}",
+                method:"post",
+                data:{namamesin,ipaddress,status:statusmesin},
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    $("#msg p").remove()
+                    $("#msg").append(`<p class="alert alert-success">${e.msg}</p>`)
+                    $("#tambahdatamesin").modal("hide")
+                    $("#namamesin").val("")
+                    $("#ipaddress").val("")
+                    status[0].selectize.clear()
+                    table.ajax.reload()
+                },
+                error:(err) => {
+                    $("#msg p").remove()
+                    $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    $("#tambahdatamesin").modal("hide")
+                    $("#namamesin").val("")
+                    $("#ipaddress").val("")
+                    status[0].selectize.clear()
+                }
+            })
+        })
+        
+        $("#buttonhapusmesin").on("click",function(e){
+            const id = $("#mesinidhapus").val()
+            console.log(id)
+            const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+            $.ajax({
+                url:"{% url 'hmesin' %}",
+                method:"post",
+                data:{idmesin:id},
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    $("#msg p").remove()
+                    $("#msg").append(`<p class="alert alert-success">${e.msg}</p>`)
+                    $("#modalhapusmesin").modal("hide")
+                    table.ajax.reload()
+                },
+                error:(err) => {
+                    $("#msg p").remove()
+                    $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    $("#modalhapusmesin").modal("hide")
+                }
+            })
+        })
+        $("#buttoneditmesin").on("click",function(e){
+            const editnamamesin = $("#editnamamesin").val()
+            const editipaddress = $("#editipaddress").val()
+            const editstatusmesin = $("#editstatus").val()
+            const idmesin = $("#editmesinid").val()
+            const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+            $.ajax({
+                url:"{% url 'emesin' %}",
+                method:"post",
+                data:{editipaddress,editnamamesin,editstatus:editstatusmesin,idmesin},
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    $("#msg p").remove()
+                    $("#msg").append(`<p class="alert alert-success">${e.msg}</p>`)
+                    $("#modaleditmesin").modal("hide")
+                    $("#editnamamesin").val("")
+                    $("#editipaddress").val("")
+                    editstatus[0].selectize.clear()
+                    $("#editmesinid").val("")
+                    table.ajax.reload()
+                },
+                error:(err) => {
+                    $("#msg p").remove()
+                    $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    $("#editnamamesin").val("")
+                    $("#editipaddress").val("")
+                    editstatus[0].selectize.clear()
+                    $("#editmesinid").val("")
+                    $("#modaleditmesin").modal("hide")
+                }
+            })
+        })
+
+        $("#namamesin").keydown((e) => {
+            if(e.key == "Enter"){
+                $("#ipaddress").focus()
+            }
+        })
+        $("#ipaddress").keydown((e) => {
+            console.log(e.key)
+            if(e.key == "Enter"){
+                status[0].selectize.focus()
+            }
+        })
+
+
+        $("#editnamamesin").keydown((e) => {
+            if(e.key == "Enter"){
+                $("#editipaddress").focus()
+            }
+        })
+        $("#editipaddress").keydown((e) => {
+            console.log(e.key)
+            if(e.key == "Enter"){
+                editstatus[0].selectize.focus()
+            }
+        })
+
 
     </script>
 {% endblock hrd_ajax %}
