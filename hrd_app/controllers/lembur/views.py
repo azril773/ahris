@@ -849,7 +849,7 @@ def proses_ulang_lembur(request, idl):
         ab = absensi_db.objects.select_related('pegawai').get(tgl_absen=tgl, pegawai_id=int(idp))            
         
         # Tanpa istirahat (di jadwal kerja)
-        if (ab.jam_istirahat == 0 and ab.jam_istirahat is not None) or ab.jam_istirahat is None:
+        if (ab.lama_istirahat == 0 and ab.lama_istirahat is not None) or ab.lama_istirahat is None:
             if ab.masuk is not None and ab.pulang is not None:
                 
                 jadwal_masuk = datetime.combine(ab.tgl_absen, ab.jam_masuk)

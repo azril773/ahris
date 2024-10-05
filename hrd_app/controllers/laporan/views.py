@@ -417,8 +417,7 @@ def laporan_json_periode(r,sid,id,dr,sp):
             else:
                 sln = 0          
             if ab.istirahat is not None and ab.lama_istirahat is not None:
-                jmkem = datetime.combine(ab.tgl_absen,ab.jam_istirahat) + timedelta(minutes=float(ab.lama_istirahat) * 60) + timedelta(minutes=5)
-                jmkem = jmkem.time()
+                jmkem = ab.lama_istirahat
             else:
                 jmkem = None
             absen = {

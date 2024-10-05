@@ -1416,7 +1416,6 @@ def nonaktif(r):
                     lama_istirahat=b.lama_istirahat,
                     lama_istirahat2=b.lama_istirahat2,
                     jam_pulang=b.jam_pulang,
-                    jam_istirahat=b.jam_istirahat,
                     total_jam_kerja=b.total_jam_kerja,
                     total_jam_istirahat=b.total_jam_istirahat,
                     total_jam_istirahat2=b.total_jam_istirahat2,
