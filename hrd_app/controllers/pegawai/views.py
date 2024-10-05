@@ -1604,7 +1604,7 @@ def pegawai_json(request, sid):
         
         data = []
         if int(sid) == 0:
-            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=1):
+            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
                 
                 if p.tgl_masuk is None:
                     tmasuk = None
@@ -1651,7 +1651,7 @@ def pegawai_json(request, sid):
                 }
                 data.append(pg)
         else: 
-            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(aktif=1, status_id=int(sid)):
+            for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(status_id=int(sid)):
                 
                 if p.tgl_masuk is None:
                     tmasuk = None
