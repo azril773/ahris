@@ -1,5 +1,5 @@
 from hrd_app.controllers.lib import *
-
+import pandas as pd
 
 # Jam Kerja
 # ++++++++++++++
@@ -7,13 +7,59 @@ from hrd_app.controllers.lib import *
 def jam_kerja(request):
     iduser = request.user.id
     if akses_db.objects.filter(user_id=iduser).exists():
-        
+        # excel = pd.read_excel("static/jam_kerja.xlsx",sheet_name="Sheet1")
+        # data = []
+        # for n in excel.iloc[:,0]:
+        #     if n != "Group":
+        #         obj = {
+        #             "status_pegawai":n,
+        #         }
+        #         data.append(obj)
+        # i = 1
+        # for d in data:
+        #     d["jam_masuk"] = excel.iloc[i,1]
+        #     d["jam_pulang"] = excel.iloc[i,2]
+        #     d["lama_istirahat"] = excel.iloc[i,3]
+        #     d["hari"] = excel.iloc[i,4]
+        #     i+=1
+        # hari = ["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]
+        # for d in data:
+        #     print(d["status_pegawai"])
+        #     sp = str(d["status_pegawai"]).strip()
+        #     kk = kelompok_kerja_db.objects.get(kelompok__iregex=r'^{}$'.format(sp))
+        #     if d["hari"] == "Biasa":
+        #         for i in range(0,6):
+        #             jamkerja = jamkerja_db()
+        #             jamkerja.kk = kk
+        #             jamkerja.jam_masuk = d["jam_masuk"]
+        #             jamkerja.jam_pulang = d["jam_pulang"]
+        #             jamkerja.lama_istirahat = d["lama_istirahat"]
+        #             jamkerja.hari = hari[i]
+        #             jamkerja.save()
+        #     elif d["hari"] == "All":
+        #         for i in range(0,7):
+        #             print(i)
+        #             jamkerja = jamkerja_db()
+        #             jamkerja.kk = kk
+        #             jamkerja.jam_masuk = d["jam_masuk"]
+        #             jamkerja.jam_pulang = d["jam_pulang"]
+        #             jamkerja.lama_istirahat = d["lama_istirahat"]
+        #             jamkerja.hari = hari[i]
+        #             jamkerja.save()
+        #     else:
+        #             jamkerja = jamkerja_db()
+        #             jamkerja.kk = kk
+        #             jamkerja.jam_masuk = d["jam_masuk"]
+        #             jamkerja.jam_pulang = d["jam_pulang"]
+        #             jamkerja.lama_istirahat = d["lama_istirahat"]
+        #             jamkerja.hari = d["hari"]
+        #             jamkerja.save()
+
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
         kk = kelompok_kerja_db.objects.all().order_by('kelompok')
-        print(kk)
         data = {       
             'dsid': dsid,
             'kk': kk,
@@ -88,15 +134,11 @@ def jam_kerja_json(request):
                 'kk': i.kk_id,
                 'kk_nama':i.kk.kelompok,
                 'masuk': i.jam_masuk,
-                'ist': i.jam_istirahat,
-                'k_ist': i.jam_kembali_istirahat,
-                'ist2': i.jam_istirahat2,
-                'k_ist2': i.jam_kembali_istirahat2,
+                'lama_ist': i.lama_istirahat,
                 'pulang': i.jam_pulang,
                 'hari':i.hari
             }
             data.append(jk)
-        print(data)
         return JsonResponse({"data": data})
 
 
@@ -106,10 +148,7 @@ def tambah_jam_kerja(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         kk = r.POST.get("kk")
         jam_masuk = r.POST.get("jam_masuk")
-        jam_istirahat = r.POST.get("jam_istirahat")
-        jam_kistirahat = r.POST.get("jam_kistirahat")
-        jam_istirahat2 = r.POST.get("jam_istirahat2")
-        jam_kistirahat2 = r.POST.get("jam_kistirahat2")
+        lama_istirahat = r.POST.get("lama_istirahat")
         jam_pulang = r.POST.get("jam_pulang")
         hari = r.POST.getlist("hari[]")
 
@@ -141,17 +180,14 @@ def tambah_jam_kerja(r):
                 #     continue
                 
                 if h.lower() == 'semua hari':
-                    if jamkerja_db.objects.filter(~Q(hari='semua hari'),kk_id=int(kk)).exists():
+                    if jamkerja_db.objects.filter(~Q(hari='semua hari'),jam_masuk=jam_masuk,jam_pulang=jam_pulang,kk_id=int(kk)).exists():
                         break
 
                 jamkerja_db(
                     kk_id=kk,
                     jam_masuk=jam_masuk,
                     jam_pulang=jam_pulang,
-                    jam_istirahat=jam_istirahat,
-                    jam_kembali_istirahat=jam_kistirahat,
-                    jam_istirahat2=jam_istirahat2,
-                    jam_kembali_istirahat2=jam_kistirahat2,
+                    lama_istirahat=lama_istirahat,
                     hari=h
                 ).save()
             status = "ok"
@@ -166,10 +202,7 @@ def edit_jam_kerja(r):
         eid = r.POST.get('id')
         jam_masuk = r.POST.get("jam_masuk")
         jam_pulang = r.POST.get("jam_pulang")
-        jam_istirahat = r.POST.get("jam_istirahat")
-        jam_istirahat2 = r.POST.get("jam_istirahat2")
-        jam_kistirahat = r.POST.get("jam_kistirahat")
-        jam_kistirahat2 = r.POST.get("jam_kistirahat2")
+        lama_istirahat = r.POST.get("lama_istirahat")
         kk = r.POST.get("kk")
         hari = r.POST.getlist("hari[]")
         for h in hari:
@@ -194,10 +227,7 @@ def edit_jam_kerja(r):
                 kk_id=kk,
                 jam_masuk=jam_masuk,
                 jam_pulang=jam_pulang,
-                jam_istirahat=jam_istirahat,
-                jam_kembali_istirahat=jam_kistirahat,
-                jam_istirahat2=jam_istirahat2,
-                jam_kembali_istirahat2=jam_kistirahat2,
+                lama_istirahat=lama_istirahat,
                 hari=h
             ).save()
         status = "ok"

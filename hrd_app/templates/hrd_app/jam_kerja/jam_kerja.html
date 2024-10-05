@@ -61,10 +61,7 @@
                 <tr>
                 <th nowrap>Kelompok Kerja</th>
                 <th>Masuk</th>
-                <th>Istirahat</th>
-                <th>Kembali Istirahat</th>
-                <th>Istirahat 2</th>
-                <th>Kembali Istirahat 2</th>
+                <th>Lama Istirahat</th>
                 <th>Pulang</th>
                 <th>Hari</th>
                 <th>Action</th>
@@ -150,26 +147,8 @@
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Jam Istirahat:</label>
-                                <input type="time" name="jam_istirahat" id="jam_istirahat" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat:</label>
-                                <input type="time" name="jam_kistirahat" id="jam_kistirahat" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Jam Istirahat2:</label>
-                                <input type="time" name="jam_istirahat2" id="jam_istirahat2" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat2:</label>
-                                <input type="time" name="jam_kistirahat2" id="jam_kistirahat2" class="form-control">
+                                <label class="form-control-label tx-inverse">Lama Istirahat:</label>
+                                <input type="number" name="lama_istirahat" id="lama_istirahat" class="form-control">
                             </div>
                         </div>
                         <div class="col-lg-6">
@@ -282,26 +261,8 @@
                         </div>
                         <div class="col-lg-6">
                             <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Jam Istirahat:</label>
-                                <input type="time" name="ejam_istirahat" id="ejam_istirahat" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat:</label>
-                                <input type="time" name="ejam_kistirahat" id="ejam_kistirahat" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Jam Istirahat2:</label>
-                                <input type="time" name="ejam_istirahat2" id="ejam_istirahat2" class="form-control">
-                            </div>
-                        </div>
-                        <div class="col-lg-6">
-                            <div class="form-group mg-b-10-force">
-                                <label class="form-control-label tx-inverse">Jam Kembali Istirahat2:</label>
-                                <input type="time" name="ejam_kistirahat2" id="ejam_kistirahat2" class="form-control">
+                                <label class="form-control-label tx-inverse">Lama Istirahat:</label>
+                                <input type="number" name="elama_istirahat" id="elama_istirahat" class="form-control">
                             </div>
                         </div>
                         <div class="col-lg-6">
@@ -426,16 +387,13 @@
 
                 { data: 'kk_nama' },
                 { data: 'masuk' },
-                { data: 'ist' },
-                { data: 'k_ist' },
-                { data: 'ist2' },
-                { data: 'k_ist2' },
+                { data: 'lama_ist' },
                 { data: 'pulang' },
                 { data: 'hari' },
                 { 
                     data: null,
                     "render": function(data, type, row, meta){    
-                        data = `<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-target="#edit" data-toggle="modal" data-emasuk='${row.masuk}' data-epulang='${row.pulang}' data-eist='${row.ist}' data-eist2='${row.ist2}' data-ekist='${row.k_ist}' data-ekist2='${row.k_ist2}' data-ekk='${row.kk}' data-eid='${row.id}' data-ehari='${row.hari}' >Edit</button> &nbsp; <button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-hid='${row.id}' data-toggle="modal">Hapus</button>`;
+                        data = `<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-target="#edit" data-toggle="modal" data-emasuk='${row.masuk}' data-epulang='${row.pulang}' data-elist='${row.list}' data-ekk='${row.kk}' data-eid='${row.id}' data-ehari='${row.hari}' >Edit</button> &nbsp; <button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-hid='${row.id}' data-toggle="modal">Hapus</button>`;
                         return data;
                     } 
                 },
@@ -537,16 +495,13 @@
             e.preventDefault()
             const kk = $("#kk").val()
             const jam_masuk = $("#jam_masuk").val()
-            const jam_istirahat = $("#jam_istirahat").val()
-            const jam_istirahat2 = $("#jam_istirahat2").val()
+            const lama_istirahat = $("#lama_istirahat").val()
             const jam_pulang = $("#jam_pulang").val()
-            const jam_kistirahat = $("#jam_kistirahat").val()
-            const jam_kistirahat2 = $("#jam_kistirahat2").val()
             const hari = $("#hari").val()
             $.ajax({
                 url:"{% url 'tjamkerja' %}",
                 method:"post",
-                data:{kk,jam_masuk,jam_istirahat,jam_istirahat2,jam_pulang,jam_kistirahat,jam_kistirahat2,hari},
+                data:{kk,jam_masuk,lama_istirahat,jam_pulang,hari},
                 headers:{"X-CSRFToken":token},
                 success(e){
                     if(e.status == 'duplikat'){
@@ -568,17 +523,14 @@
             const id = $("#edit_id").val();
             const jam_masuk = $("#ejam_masuk").val();
             const jam_pulang = $("#ejam_pulang").val();
-            const jam_istirahat = $("#ejam_istirahat").val();
-            const jam_istirahat2 = $("#ejam_istirahat2").val();
-            const jam_kistirahat = $("#ejam_kistirahat").val();
-            const jam_kistirahat2 = $("#ejam_kistirahat2").val();
+            const lama_istirahat = $("#elama_istirahat").val();
             const kk = $("#ejkk").val();
             const hari = $("#ejhari").val();    
-            console.log(id,jam_masuk,jam_pulang,jam_istirahat,jam_istirahat2,jam_kistirahat,jam_kistirahat2,kk,hari)
+            console.log(id,jam_masuk,jam_pulang,lama_istirahat,kk,hari)
             $.ajax({
                 url:"{% url 'edit_jkerja' %}",
                 method:'post',
-                data:{id,jam_masuk,jam_pulang,jam_istirahat,jam_istirahat2,jam_kistirahat,jam_kistirahat2,kk,hari},
+                data:{id,jam_masuk,jam_pulang,lama_istirahat,kk,hari},
                 headers:{"X-CSRFToken":token},
                 success(e){
                     ejkkSelect[0].selectize.clear()
@@ -629,21 +581,14 @@ $('#edit').on('show.bs.modal', function (e) {
     var edit_id = $(e.relatedTarget).data('eid');
     var emasuk = $(e.relatedTarget).data('emasuk');
     var epulang = $(e.relatedTarget).data('epulang');
-    var eist = $(e.relatedTarget).data('eist');
-    var eist2 = $(e.relatedTarget).data('eist2');
-    var ekist = $(e.relatedTarget).data('ekist');
-    var ekist2 = $(e.relatedTarget).data('ekist2');
+    var elist = $(e.relatedTarget).data('elist');
     var ekk = $(e.relatedTarget).data('ekk');
     var ehari = $(e.relatedTarget).data('ehari');
-    console.log(edit_id,emasuk,epulang,eist,eist2,ekist,ekist2,ekk)
     //populate the textbox
     $(e.currentTarget).find('input[name="edit_id"]').val(edit_id);
     $(e.currentTarget).find('input[name="ejam_masuk"]').val(emasuk);
     $(e.currentTarget).find('input[name="ejam_pulang"]').val(epulang);
-    $(e.currentTarget).find('input[name="ejam_istirahat"]').val(eist);
-    $(e.currentTarget).find('input[name="ejam_istirahat2"]').val(eist2);
-    $(e.currentTarget).find('input[name="ejam_kistirahat"]').val(ekist);
-    $(e.currentTarget).find('input[name="ejam_kistirahat2"]').val(ekist2);
+    $(e.currentTarget).find('input[name="elama_istirahat"]').val(elist);
     ejkkSelect[0].selectize.setValue(ekk)
     ehariSelect[0].selectize.setValue(ehari)    
 });

@@ -49,9 +49,9 @@
                             
             <!-- Button Proses Data -->
             {% if sid == 0 %}
-            <button class="btn btn-primary mg-b-6" disabled>Proses Data Absensi</button>
-            {% else %}
+            {% comment %} <button class="btn btn-primary mg-b-6" disabled>Proses Data Absensi</button> {% endcomment %}
             <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-primary mg-b-6">Proses Data Absensi</button>
+            {% else %}
             {% endif %}
             
             {% if sid == 0 %}
@@ -298,37 +298,10 @@
                 { data: 'bagian' },
                 {
                     data: 'masuk',
-                    render:(data,type,row,meta) => {
-                        data = data == null ? "" : data
-                        let render = ''
-                        if(data > row.jam_masuk){
-                            render = `<span class="text-danger">${data}</span>`
-                        } else {
-                            render = `${data}`
-                        }
-                        return render
-                    }
                 },
                 { data: 'keluar' },
                 {
                     data: 'kembali',
-                    render:(data,type,row,meta) => {
-                        let render = ""
-                        if(data !==  null){
-                            let str = data.split("/")[0]
-                            if(str > row.jam_kembali){
-                                if(data.split("/")[1] == null){
-                                    render = `<span class="text-danger">${data}</span>`
-                                } else {
-                                    console.log(data)
-                                    render = `<span class="text-danger">${data}</span> / ${data.split("/")[1]}`
-                                }
-                            } else {
-                                render = `${data}`
-                            }
-                        } 
-                        return render   
-                    }
                 },
                 { data: 'pulang'},
                 { data: 'masuk_b' },
@@ -446,37 +419,10 @@
                 { data: 'bagian' },
                 {
                     data: 'masuk',
-                    render:(data,type,row,meta) => {
-                        data = data == null ? "" : data
-                        let render = ''
-                        if(data > row.jam_masuk){
-                            render = `<span class="text-danger">${data}</span>`
-                        } else {
-                            render = `${data}`
-                        }
-                        return render
-                    }
                 },
                 { data: 'keluar' },
                 {
                     data: 'kembali',
-                    render:(data,type,row,meta) => {
-                        let render = ""
-                        if(data !==  null){
-                            let str = data.split("/")[0]
-                            if(str > row.jam_kembali){
-                                if(data.split("/")[1] == null){
-                                    render = `<span class="text-danger">${data}</span>`
-                                } else {
-                                    console.log(data)
-                                    render = `<span class="text-danger">${data.split('/')[0]}</span> / ${data.split("/")[1]}`
-                                }
-                            } else {
-                                render = `${data}`
-                            }
-                        } 
-                        return render   
-                    }
                 },
                 { data: 'pulang'},
                 { data: 'masuk_b' },

@@ -154,8 +154,7 @@ def cari_absensi(request):
                     sln = 0          
 
                 if a.istirahat is not None and a.lama_istirahat is not None:
-                    jmkem = datetime.combine(a.tgl_absen,a.jam_istirahat) + timedelta(minutes=float(a.lama_istirahat) * 60) + timedelta(minutes=5)
-                    jmkem = jmkem.time()
+                    jmkem = a.lama_istirahat
                 else:
                     jmkem = None
                 absen = {
@@ -275,8 +274,7 @@ def cari_absensi(request):
                     sln = 0          
 
                 if a.istirahat is not None and a.lama_istirahat is not None:
-                    jmkem = datetime.combine(a.tgl_absen,a.jam_istirahat) + timedelta(minutes=float(a.lama_istirahat) * 60) + timedelta(minutes=5)
-                    jmkem = jmkem.time()
+                    jmkem = a.lama_istirahat
                 else:
                     jmkem = None
                 absen = {
@@ -372,7 +370,10 @@ def absensi_json(request, dr, sp, sid):
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
                     
                 if a.masuk is not None:
-                    msk = f"{a.masuk}"
+                    if a.jam_masuk is not None and a.masuk > a.jam_masuk:
+                        msk = f"<span class='text-danger'>{a.masuk}</span>"
+                    else:
+                        msk = f"{a.masuk}"
                 else:
                     msk = None
 
@@ -408,12 +409,22 @@ def absensi_json(request, dr, sp, sid):
                     ist_b = f" {a.istirahat2_b}"
                 else:
                     ist_b = ""
-            
-                    
+
+
+                if a.lama_istirahat is not None and a.istirahat is not None:
+                    jkembali = datetime.combine(a.tgl_absen,a.istirahat) + timedelta(hours=float(a.lama_istirahat))
+                else:
+                    jkembali = None
                 if a.kembali is not None and a.kembali2 is not None:
-                    kmb = f'{a.kembali} / {a.kembali2}'
+                    if jkembali is not None and a.kembali > jkembali.time():
+                        kmb = f'<span class="text-danger">{a.kembali}</span> / {a.kembali2}'
+                    else:
+                        kmb = f'{a.kembali} / {a.kembali2}'
                 elif a.kembali is not None and a.kembali2 is None:                  
-                    kmb = f'{a.kembali}'
+                    if jkembali is not None and a.kembali > jkembali.time():
+                        kmb = f'<span class="text-danger">{a.kembali}</span>'
+                    else:
+                        kmb = f'{a.kembali}'
                 elif a.kembali is None and a.kembali2 is not None:                  
                     kmb = f'{a.kembali2}'    
                 else:
@@ -448,8 +459,7 @@ def absensi_json(request, dr, sp, sid):
                     sln = 0          
 
                 if a.istirahat is not None and a.lama_istirahat is not None:
-                    jmkem = datetime.combine(a.tgl_absen,a.jam_istirahat) + timedelta(minutes=float(a.lama_istirahat) * 60) + timedelta(minutes=5)
-                    jmkem = jmkem.time()
+                    jmkem = a.lama_istirahat
                 else:
                     jmkem = None
                 absen = {
@@ -494,7 +504,10 @@ def absensi_json(request, dr, sp, sid):
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
                     
                 if a.masuk is not None:
-                    msk = f"{a.masuk}"
+                    if a.jam_masuk is not None and a.masuk > a.jam_masuk:
+                        msk = f"<span class='text-danger'>{a.masuk}</span>"
+                    else:
+                        msk = f"{a.masuk}"
                 else:
                     msk = None
 
@@ -532,10 +545,20 @@ def absensi_json(request, dr, sp, sid):
                     ist_b = ""
             
                     
+                if a.lama_istirahat is not None and a.istirahat is not None:
+                    jkembali = datetime.combine(a.tgl_absen,a.istirahat) + timedelta(hours=float(a.lama_istirahat))
+                else:
+                    jkembali = None
                 if a.kembali is not None and a.kembali2 is not None:
-                    kmb = f'{a.kembali} / {a.kembali2}'
+                    if jkembali is not None and a.kembali > jkembali.time():
+                        kmb = f'<span class="text-danger">{a.kembali}</span> / {a.kembali2}'
+                    else:
+                        kmb = f'{a.kembali} / {a.kembali2}'
                 elif a.kembali is not None and a.kembali2 is None:                  
-                    kmb = f'{a.kembali}'
+                    if jkembali is not None and a.kembali > jkembali.time():
+                        kmb = f'<span class="text-danger">{a.kembali}</span>'
+                    else:
+                        kmb = f'{a.kembali}'
                 elif a.kembali is None and a.kembali2 is not None:                  
                     kmb = f'{a.kembali2}'    
                 else:
@@ -569,8 +592,7 @@ def absensi_json(request, dr, sp, sid):
                     sln = 0          
 
                 if a.istirahat is not None and a.lama_istirahat is not None:
-                    jmkem = datetime.combine(a.tgl_absen,a.jam_istirahat) + timedelta(minutes=float(a.lama_istirahat) * 60) + timedelta(minutes=5)
-                    jmkem = jmkem.time()
+                    jmkem = a.lama_istirahat
                 else:
                     jmkem = None
                 absen = {
@@ -866,7 +888,7 @@ def pabsen(request):
                         jk = None
                         if ab.pegawai.kelompok_kerja is not None:
                             if a["punch"] == 0:
-                                jkm = jamkerja_db.objects.values("jam_masuk","jam_pulang","jam_istirahat","jam_kembali_istirahat","jam_istirahat2","jam_kembali_istirahat2").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk.time(),jam_masuk__lte=ba_msk.time())
+                                jkm = jamkerja_db.objects.values("jam_masuk","jam_pulang","lama_istirahat").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk.time(),jam_masuk__lte=ba_msk.time())
                                 data = []
                                 ds = []
                                 for j in jkm:
@@ -879,13 +901,9 @@ def pabsen(request):
                                     jam = data[ds.index(getMin)]
                                     ab.jam_masuk = jam["jam_masuk"]
                                     ab.jam_pulang = jam["jam_pulang"]
-                                    ab.jam_istirahat = jam["jam_istirahat"]
-                                    ls = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat"])
-                                    ls2 = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat2"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat2"])
-                                    ab.lama_istirahat = ls.total_seconds() / 3600
-                                    ab.lama_istirahat2 = ls2.total_seconds() / 3600
+                                    ab.lama_istirahat = jam['lama_istirahat']
                             elif a['punch'] == 1:
-                                jkp = jamkerja_db.objects.values("jam_masuk","jam_pulang","jam_istirahat","jam_kembali_istirahat","jam_istirahat2","jam_kembali_istirahat2").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_pulang__gte=bb_msk.time(),jam_pulang__lte=ba_msk.time())
+                                jkp = jamkerja_db.objects.values("jam_masuk","jam_pulang","lama_istirahat").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_pulang__gte=bb_msk.time(),jam_pulang__lte=ba_msk.time())
                                 data = []
                                 ds = []
                                 for j in jkp:
@@ -898,11 +916,7 @@ def pabsen(request):
                                     jam = data[ds.index(getMin)]
                                     ab.jam_masuk = jam["jam_masuk"]
                                     ab.jam_pulang = jam["jam_pulang"]
-                                    ab.jam_istirahat = jam["jam_istirahat"]
-                                    ls = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat"])
-                                    ls2 = datetime.combine(ab.tgl_absen,jam["jam_kembali_istirahat2"]) - datetime.combine(ab.tgl_absen,jam["jam_istirahat2"])
-                                    ab.lama_istirahat = ls.total_seconds() / 3600
-                                    ab.lama_istirahat2 = ls2.total_seconds() / 3600
+                                    ab.lama_istirahat = jam['lama_istirahat']
                                 
                                 
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -3618,16 +3632,9 @@ def detail_absensi(r,userid,tgl,sid):
                 "kk":k.kk.kelompok,
                 "jam_masuk":k.jam_masuk.strftime('%H:%M:%S'),
                 "jam_pulang": k.jam_pulang.strftime('%H:%M:%S'),
-                "jam_istirahat": k.jam_istirahat.strftime('%H:%M:%S'),
-                "jam_kembali_istirahat": k.jam_kembali_istirahat.strftime('%H:%M:%S'),
-                "jam_istirahat2":k.jam_istirahat2.strftime('%H:%M:%S'),
-                "jam_kembali_istirahat2":k.jam_kembali_istirahat2.strftime('%H:%M:%S'),
+                "lama_istirahat":k.lama_istirahat,
                 "hari":k.hari
             }
-            selisih = datetime.combine(date.today(),k.jam_kembali_istirahat) - datetime.combine(date.today(),k.jam_istirahat)
-            obj["lama_istirahat"] = selisih.total_seconds() / 3600
-            selisih2 = datetime.combine(date.today(),k.jam_kembali_istirahat2) - datetime.combine(date.today(),k.jam_istirahat2)
-            obj["lama_istirahat2"] = selisih2.total_seconds() / 3600
             dt_kk.append(obj)
 
         ###
@@ -4127,7 +4134,6 @@ def pu(r,tgl,userid,sid):
         "libur_nasional":str(abs.libur_nasional),
         "lama_istirahat":str(abs.lama_istirahat),
         "lama_istirahat2":str(abs.lama_istirahat2),
-        "jam_istirahat":str(abs.jam_istirahat),
         "jam_masuk":str(abs.jam_masuk),
         "jam_pulang":str(abs.jam_pulang),
         "lebih_jam_kerja":str(abs.lebih_jam_kerja),
@@ -4161,10 +4167,9 @@ def edit_ijin(r):
 def edit_jamkerja(r,userid,tgl,sid):
     masuk = r.POST.get("jam_masuk")
     keluar = r.POST.get("jam_keluar")
-    istirahat = r.POST.get("jam_istirahat")
     lama_ist = r.POST.get("lama_istirahat")
     id = r.POST.get("id")
-    if masuk == '' or keluar == "" or istirahat == '' or lama_ist == "":
+    if masuk == '' or keluar == "" or lama_ist == "":
         messages.add_message(r,messages.ERROR,"Form harus lengkap")
         return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
     
@@ -4172,7 +4177,6 @@ def edit_jamkerja(r,userid,tgl,sid):
         ab = absensi_db.objects.get(pk=int(id))
         ab.jam_masuk = masuk
         ab.jam_pulang = keluar
-        ab.jam_istirahat = istirahat
         ab.lama_istirahat = lama_ist
         ab.save()
     return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)

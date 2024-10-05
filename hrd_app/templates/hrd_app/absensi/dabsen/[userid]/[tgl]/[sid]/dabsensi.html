@@ -43,7 +43,7 @@
                 <p>Jam Kerja : <button data-target="#edit_jamkerja" data-toggle="modal" style="color:#0d6efd;">{{ ab.jam_masuk }} - {{ ab.jam_pulang }} / Istirahat : {{ ab.lama_istirahat }} Jam / Istirahat 2 : {{ ab.lama_istirahat2 }} Jam </button></p>
                 <p>Group kerja : {{ pegawai.kelompok_kerja }}</p>
                 <div class="table mt-5">
-                    <table class="" style="width: 100%;">
+                    <table class="" style="width: 100%;" id="tablejamkerja">
                         <thead>
                             <tr>
                                 <th>Jam</th>
@@ -146,11 +146,7 @@
                                 <label for="jam_keluar">Jam Keluar:</label>
                                 <input type="time" id="jam_keluar" name="jam_keluar" class="form-control" placeholder="Jam Keluar">
                             </div>
-                            <div class="col-lg-6">
-                                <label for="jam_istirahat">Jam Istirahat:</label>
-                                <input type="time" id="jam_istirahat" name="jam_istirahat" class="form-control" placeholder="Jam Istirahat">
-                            </div>
-                            <div class="col-lg-6">
+                            <div class="col-lg-12">
                                 <label for="lama_istirahat">Lama Istirahat:</label>
                                 <input type="number" min="0" step="0.01" id="lama_istirahat" name="lama_istirahat" class="form-control" placeholder="Lama Istirahat">
                             </div>
@@ -242,7 +238,15 @@
 <script>
 
     const token = document.querySelector("[name=csrfmiddlewaretoken]").value;
-
+    const tablejamkerja = $("#tablejamkerja").DataTable({
+        searching: false,
+        destroy: true,
+        ordering: false,
+        scrollY: 300,
+        scrollX:"100%",
+        paging: false,
+        processing: true,
+    })
 
     const tables = $("#table_raw").DataTable({
         ajax: {

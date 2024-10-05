@@ -359,13 +359,7 @@ class jamkerja_db(models.Model):
     
     jam_masuk = models.TimeField(null=True)
     jam_pulang = models.TimeField(null=True)
-    
-    jam_istirahat = models.TimeField(null=True)
-    jam_kembali_istirahat = models.TimeField(null=True)
-    
-    jam_istirahat2 = models.TimeField(null=True)
-    jam_kembali_istirahat2 = models.TimeField(null=True)
-    
+    lama_istirahat = models.FloatField(null=True)
     hari = models.CharField(max_length=50, choices=pilihan_hari)
     
     add_by = models.CharField(max_length=100, null=True)
