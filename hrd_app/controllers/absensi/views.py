@@ -3618,14 +3618,16 @@ def detail_absensi(r,userid,tgl,sid):
         ab = absensi_db.objects.get(pegawai__userid=userid,tgl_absen=tgl)
 
         # get all jam kerja 
-        jk = jamkerja_db.objects.filter(kk_id=pgw.kelompok_kerja.pk)
 
         # dt_raw = sorted(draw,key=lambda i: i["jam_absen"])
         status = status_pegawai_db.objects.all().order_by('id')
         
 
         # get kk 
-        kk = jamkerja_db.objects.filter(kk_id=pgw.kelompok_kerja.pk)
+        if pgw.kelompok_kerja is not None:
+            kk = jamkerja_db.objects.filter(kk_id=pgw.kelompok_kerja.pk)
+        else:
+            kk = []
         dt_kk = []
         for k in kk:
             obj = {
