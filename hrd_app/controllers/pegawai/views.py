@@ -1,5 +1,6 @@
 from hrd_app.controllers.lib import *
 from django.db import transaction
+import pandas as pd
 @login_required
 def pegawai(request,sid):
     iduser = request.user.id
@@ -7,7 +8,18 @@ def pegawai(request,sid):
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
-           
+        excel = pd.read_excel("static/ahris.xlsx")
+        data = []
+        for i in excel.iloc[:,0]:
+            obj = {
+                "id":i
+            }
+            data.append(obj)
+        # for d in data:
+        for d in data:
+            print(d)
+            pegawai_db.objects.get(pk=int(d["id"]))
+
         dsid = dakses.sid_id     
         
         status = status_pegawai_db.objects.all().order_by('id')       
