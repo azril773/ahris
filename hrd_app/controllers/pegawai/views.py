@@ -8,17 +8,21 @@ def pegawai(request,sid):
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
-        excel = pd.read_excel("static/ahris.xlsx")
-        data = []
-        for i in excel.iloc[:,0]:
-            obj = {
-                "id":i
-            }
-            data.append(obj)
+        # excel = pd.read_excel("static/ahris.xlsx")
+        # data = []
+        # for i in excel.iloc[:,0]:
+        #     obj = {
+        #         "id":i
+        #     }
+        #     data.append(obj)
+        # # for d in data:
+        # i = 0
         # for d in data:
-        for d in data:
-            print(d)
-            pegawai_db.objects.get(pk=int(d["id"]))
+        #     kelompok = excel.iloc[i,19]
+        #     print(kelompok)
+        #     pegawai_db.objects.filter(pk=int(d["id"])).update(kelompok_kerja_id=kelompok)
+        #     # continue
+        #     i +=1
 
         dsid = dakses.sid_id     
         

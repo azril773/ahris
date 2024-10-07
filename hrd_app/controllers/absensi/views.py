@@ -797,8 +797,8 @@ def pabsen(request):
     dmesin = []
     # ambil data mesin simpan di att dan dmesin array
     try:
+        pool = Pool(processes=4)
         for m in mesin_db.objects.filter(status='Active'):
-            pool = Pool(processes=4)
             res = pool.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
             dmesin.append(res)
         [mesin.wait() for mesin in dmesin] 
@@ -856,6 +856,7 @@ def pabsen(request):
     dt = []    
     # proses data simpan di dt array
     # obj 
+    jamkerja = jamkerja_db.objects.select_related('kk').all()
     if not att:
         pass
     else:
@@ -888,38 +889,40 @@ def pabsen(request):
                         jk = None
                         if ab.pegawai.kelompok_kerja is not None:
                             if a["punch"] == 0:
-                                jkm = jamkerja_db.objects.values("jam_masuk","jam_pulang","lama_istirahat").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk.time(),jam_masuk__lte=ba_msk.time())
-                                data = []
+                                # jamkerja_db.objects.values("jam_masuk","jam_pulang","lama_istirahat").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk.time(),jam_masuk__lte=ba_msk.time())
+                                jkm = [jk for jk in jamkerja if jk.kk_id == ab.pegawai.kelompok_kerja.pk and jk.jam_masuk >= bb_msk.time() and jk.jam_masuk <= ba_msk.time()]
                                 ds = []
+                                data = []
                                 for j in jkm:
-                                    if(j in data):
+                                    if(j in data): 
                                         continue
                                     data.append(j)
-                                    selisih = abs(datetime.combine(ab.tgl_absen, j["jam_masuk"]) - datetime.combine(ab.tgl_absen,jam_absen.time()))
+                                    selisih = abs(datetime.combine(ab.tgl_absen, j.jam_masuk) - datetime.combine(ab.tgl_absen,jam_absen.time()))
                                     ds.append(selisih)
                                     getMin = min(ds)
                                     jam = data[ds.index(getMin)]
-                                    ab.jam_masuk = jam["jam_masuk"]
-                                    ab.jam_pulang = jam["jam_pulang"]
-                                    ab.lama_istirahat = jam['lama_istirahat']
+                                    ab.jam_masuk = jam.jam_masuk
+                                    ab.jam_pulang = jam.jam_pulang
+                                    ab.lama_istirahat = jam.lama_istirahat
                             elif a['punch'] == 1:
-                                jkp = jamkerja_db.objects.values("jam_masuk","jam_pulang","lama_istirahat").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_pulang__gte=bb_msk.time(),jam_pulang__lte=ba_msk.time())
+                                jkp = [jk for jk in jamkerja if jk.kk_id == ab.pegawai.kelompok_kerja.pk and jk.jam_pulang >= bb_msk.time() and jk.jam_pulang <= ba_msk.time()]
                                 data = []
                                 ds = []
                                 for j in jkp:
                                     if(j in data):
                                         continue
                                     data.append(j)
-                                    selisih = abs(datetime.combine(ab.tgl_absen, j["jam_pulang"]) - datetime.combine(ab.tgl_absen,jam_absen.time()))
+                                    selisih = abs(datetime.combine(ab.tgl_absen, j.jam_pulang) - datetime.combine(ab.tgl_absen,jam_absen.time()))
                                     ds.append(selisih)
                                     getMin = min(ds)
                                     jam = data[ds.index(getMin)]
-                                    ab.jam_masuk = jam["jam_masuk"]
-                                    ab.jam_pulang = jam["jam_pulang"]
-                                    ab.lama_istirahat = jam['lama_istirahat']
+                                    ab.jam_masuk = jam.jam_masuk
+                                    ab.jam_pulang = jam.jam_pulang
+                                    ab.lama_istirahat = jam.lama_istirahat
                                 
                                 
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+                        # print(a)
                         if a["punch"] == 0 and jam_absen.hour > 4 and jam_absen.hour < 18 :
                             if ab.masuk is not None:
                                 if ab.masuk.hour > 18:
