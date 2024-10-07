@@ -877,7 +877,7 @@ def pabsen(request):
                 
                 jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
                 pg = next((pgw for pgw in pegawai if pgw["userid"] == a["userid"]),None)
-                # # Versi Cirebon
+                # # Versi
             
                 for r in rangetgl:
                     tmin = r + timedelta(days=-1)
