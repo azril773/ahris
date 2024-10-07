@@ -455,7 +455,7 @@ def laporan_json_periode(r,sid,id,dr,sp):
 
 @login_required
 def print_laporan_pegawai(r):
-    pegawai = r.POST.getlist("pegawai[]")
+    pgw = r.POST.getlist("pegawai[]")
     dr = r.POST.get("dari")
     sp = r.POST.get("sampai")
     # print(tahun,bulan,pegawai)
@@ -466,6 +466,7 @@ def print_laporan_pegawai(r):
             dakses = akses_db.objects.get(user_id=iduser)
             sid = dakses.pegawai.status.pk
             data = []
+        pegawai = pegawai_db.objects.filter(id__in=pgw)
         for p in pegawai:
             dari = datetime.strptime(str(dr),'%d-%m-%Y').date()
             sampai = datetime.strptime(str(sp),'%d-%m-%Y').date()
@@ -495,7 +496,7 @@ def print_laporan_pegawai(r):
                 elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
                     kehadiran += 2
                 sket = " "
-                
+                msk = ''
                 ab = absensi_db.objects.get(id=a.id)     
                 hari = ab.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
@@ -550,7 +551,7 @@ def print_laporan_pegawai(r):
                     ist_b = f" {ab.istirahat2_b}"
                 else:
                     ist_b = "-"
-            
+                bataskmb = ''
                 if ab.kembali is not None:
                     if ab.lama_istirahat is not None:
                         if datetime.combine(ab.tgl_absen,ab.kembali) > (datetime.combine(ab.tgl_absen,ab.istirahat) + timedelta(hours=int(ab.lama_istirahat),minutes=5)): 
@@ -632,6 +633,6 @@ def print_laporan_pegawai(r):
             obj["selisih"] =f"{tselisih[0]},{tselisih[1][slc]}"
             data.append(obj)
     except Exception as e:
-        messages.error(r,"Terjadi kesalahan hubungi IT")
+        messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))
         return redirect("laporan",sid=sid)
     return render(r,"hrd_app/laporan/print_laporan_pegawai.html",{"data":data})
