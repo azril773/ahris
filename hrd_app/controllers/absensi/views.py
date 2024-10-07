@@ -628,8 +628,9 @@ def absensi_json(request, dr, sp, sid):
 
 def prosesMesin(m):
     ip = m[0].ipaddress
-    conn = None
-    zk = ZK(ip, port=4370, timeout=65)
+    # print(ip)
+    # conn = None
+    zk = ZK(str(ip), port=4370, timeout=65)
     dt = []
     try:
         conn = zk.connect()
@@ -638,13 +639,17 @@ def prosesMesin(m):
         absensi = conn.get_attendance()
         for a in absensi:
             if m[2] <= a.timestamp <= m[3]:   
-                if a.user_id in m[1]:     
+                # print(a.user_id) 
+                # users = conn.get_users()
+                # print([user for user in absensi if user.user_id == "226002"])
+                if str(a.user_id) in m[1]:     
                     data = {
-                        "userid": a.user_id,
+                        "userid": a.user_id, 
                         "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
                         "punch": a.punch,
-                        "mesin": m[0].nama
+                        "mesin": m[0].nama 
                     }
+                    # print(data)
                     dt.append(data)
                 else:
                     pass                
@@ -797,14 +802,19 @@ def pabsen(request):
     dmesin = []
     # ambil data mesin simpan di att dan dmesin array
     try:
-        pool = Pool(processes=4)
+        pools = Pool(processes=2
+                     )
         for m in mesin_db.objects.filter(status='Active'):
-            res = pool.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
-            dmesin.append(res)
-        [mesin.wait() for mesin in dmesin] 
-        data = [dt for dt in [dataMesin.get() for dataMesin in dmesin] if len(dt) > 0] 
+            ress = pools.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
+            # print(ress,"SDS")
+            # time.sleep(1)
+            dmesin.append(ress)
+        msn = [mesin.wait() for mesin in dmesin]
+        # print(dmesin)
+        datas = [dt for dt in [dataMesin.get() for dataMesin in dmesin] if len(dt) > 0] 
+        print(datas)
         dmesin = []
-        for dm in data:
+        for dm in datas:
             for d in dm:    
                 dmesin.append(d)
     except:
@@ -861,6 +871,7 @@ def pabsen(request):
         pass
     else:
         for a in att:
+            print(a)
             if a['userid'] in luserid:
                 
                 # simpan data raw jika belum ada di list ddr
@@ -889,12 +900,13 @@ def pabsen(request):
                         jk = None
                         if ab.pegawai.kelompok_kerja is not None:
                             if a["punch"] == 0:
+                                print(a)
                                 # jamkerja_db.objects.values("jam_masuk","jam_pulang","lama_istirahat").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk.time(),jam_masuk__lte=ba_msk.time())
                                 jkm = [jk for jk in jamkerja if jk.kk_id == ab.pegawai.kelompok_kerja.pk and jk.jam_masuk >= bb_msk.time() and jk.jam_masuk <= ba_msk.time()]
                                 ds = []
                                 data = []
                                 for j in jkm:
-                                    if(j in data): 
+                                    if(j in data):
                                         continue
                                     data.append(j)
                                     selisih = abs(datetime.combine(ab.tgl_absen, j.jam_masuk) - datetime.combine(ab.tgl_absen,jam_absen.time()))
@@ -922,7 +934,6 @@ def pabsen(request):
                                 
                                 
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                        # print(a)
                         if a["punch"] == 0 and jam_absen.hour > 4 and jam_absen.hour < 18 :
                             if ab.masuk is not None:
                                 if ab.masuk.hour > 18:
