@@ -1217,28 +1217,16 @@ def pabsen(request):
                                     }
                                     dt.append(data)
                             elif ab.pulang is not None or ab.kembali is not None or ab.masuk_b is not None:
-                                if ab.istirahat is not None:
-                                    ab.istirahat_b = jam_absen.time()
-                                    ab.save()
-                                    data = {
-                                        "userid": a["userid"],
-                                        "jam_absen": jam_absen,
-                                        "punch": 12,
-                                        "mesin": a["mesin"],
-                                        "ket": "Istirahat B"
-                                    }
-                                    dt.append(data)
-                                else:
-                                    ab.istirahat = jam_absen.time()
-                                    ab.save()
-                                    data = {
-                                        "userid": a["userid"],
-                                        "jam_absen": jam_absen,
-                                        "punch": a["punch"],
-                                        "mesin": a["mesin"],
-                                        "ket": "Istirahat"
-                                    }
-                                    dt.append(data)
+                                ab.istirahat_b = jam_absen.time()
+                                ab.save()
+                                data = {
+                                    "userid": a["userid"],
+                                    "jam_absen": jam_absen,
+                                    "punch": 12,
+                                    "mesin": a["mesin"],
+                                    "ket": "Istirahat B"
+                                }
+                                dt.append(data)
                             else:
                                 ab.istirahat = jam_absen.time()
                                 ab.save()

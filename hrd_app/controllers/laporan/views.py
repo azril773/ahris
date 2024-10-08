@@ -85,6 +85,7 @@ def laporan_json(r):
             ab = absensi_db.objects.filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
             if ab.exists():
                 for a in ab:
+                    print(a.pegawai,a.keterangan_ijin)
                     if a.keterangan_absensi == "OFF":
                         off += 1
                     if a.masuk is not None and a.pulang is not None:
@@ -192,6 +193,7 @@ def laporan_json(r):
             ab = absensi_db.objects.filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
             if ab.exists():
                 for a in ab:
+                    print(a.pegawai,a.keterangan_ijin)
                     if a.keterangan_absensi == "OFF":
                         off += 1
                     if a.masuk is not None and a.pulang is not None:
@@ -346,11 +348,12 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 bagian = ab.pegawai.divisi.divisi
             else:
                 bagian = f'{ab.pegawai.divisi.divisi} - {ab.pegawai.counter.counter}' 
-                
             if ab.masuk is not None:
                 if ab.jam_masuk is not None:
                     if ab.masuk > ab.jam_masuk:
                         msk = f"<span class='text-danger'>{ab.masuk}</span>"
+                    else:
+                        msk = f"{ab.masuk}"
                 else:
                     msk = f"{ab.masuk}"
             else:
@@ -359,6 +362,8 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 if ab.jam_pulang is not None:
                     if ab.pulang < ab.jam_pulang:
                         plg = f"<span class='text-danger'>{ab.pulang}</span>"
+                    else:
+                        plg = f"{ab.pulang}"
                 else:
                     plg = f"{ab.pulang}"
             else:
