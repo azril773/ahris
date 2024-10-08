@@ -10,11 +10,11 @@ class CustomUserAdmin(UserAdmin):
 
 
 admin.site.unregister(User)
-admin.site.register(User, CustomUserAdmin)
+admin.site.register(User, CustomUserAdmin) 
 
 
 @admin.register(akses_db)
-class akses(ImportExportModelAdmin):
+class akses(ImportExportModelAdmin): 
     list_display = ('user','akses','sid')
     list_per_page = 30    
     
