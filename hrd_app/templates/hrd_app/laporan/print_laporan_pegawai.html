@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{% static "img/ahrisicon.png" %}">
     <title>Print Laporan</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -90,24 +91,24 @@
                 </thead>
                 <tbody>
                     {% for ab in d.absensi %}
-                    <tr>
-                        <th scope="col">
+                    <tr class="body">
+                        <td class="dprint">
                             {% if ab.lbr %}
                                 <span class="text-danger">{{ab.tgl_absen}}</span>
                             {% else %}
                                 {{ab.tgl_absen}}
                             {% endif %}
-                        </th>
-                        <th scope="col">{{ab.masuk |safe}}</th>
-                        <th scope="col">{{ab.keluar |safe}}</th>
-                        <th scope="col">{{ab.kembali |safe}}</th>
-                        <th scope="col">{{ab.pulang |safe}}</th>
-                        <th scope="col">{{ab.masuk_b |safe}}</th>
-                        <th scope="col">{{ab.keluar_b |safe}}</th>
-                        <th scope="col">{{ab.kembali_b |safe}}</th>
-                        <th scope="col">{{ab.pulang_b |safe}}</th>
-                        <th scope="col">{{ab.tj |safe}}</th>
-                        <th scope="col">{{ab.ket |safe}}</th>
+                        </td>
+                        <td class="dprint">{{ab.masuk |safe}}</td>
+                        <td class="dprint">{{ab.keluar |safe}}</td>
+                        <td class="dprint">{{ab.kembali |safe}}</td>
+                        <td class="dprint">{{ab.pulang |safe}}</td>
+                        <td class="dprint">{{ab.masuk_b |safe}}</td>
+                        <td class="dprint">{{ab.keluar_b |safe}}</td>
+                        <td class="dprint">{{ab.kembali_b |safe}}</td>
+                        <td class="dprint">{{ab.pulang_b |safe}}</td>
+                        <td class="dprint">{{ab.tj |safe}}</td>
+                        <td class="tx-inverse dprint">{{ab.ket |safe}}</td>
                     </tr>
                     {% endfor %}
                         
