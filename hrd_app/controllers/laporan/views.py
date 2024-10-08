@@ -348,21 +348,35 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 bagian = f'{ab.pegawai.divisi.divisi} - {ab.pegawai.counter.counter}' 
                 
             if ab.masuk is not None:
-                msk = f"{ab.masuk}"
+                if ab.jam_masuk is not None:
+                    if ab.masuk > ab.jam_masuk:
+                        msk = f"<span class='text-danger'>{ab.masuk}</span>"
+                else:
+                    msk = f"{ab.masuk}"
             else:
-                msk = None
+                msk = "-"
             if ab.pulang is not None:
-                plg = f"{ab.pulang}"
+                if ab.jam_pulang is not None:
+                    if ab.pulang < ab.jam_pulang:
+                        plg = f"<span class='text-danger'>{ab.pulang}</span>"
+                else:
+                    plg = f"{ab.pulang}"
             else:
-                plg = None
+                plg = "-"
+
+
             if ab.masuk_b is not None:
                 msk_b = f"{ab.masuk_b}"
             else:
-                msk_b = None
+                msk_b = "-"
             if ab.pulang_b is not None:
-                plg_b = f"{ab.pulang_b}"
+                plg_b = f"{ab.pulang}"
             else:
-                plg_b = None
+                plg_b = "-"
+
+
+
+                
             if ab.istirahat is not None and ab.istirahat2 is not None:
                 ist = f'{ab.istirahat} / {ab.istirahat2}'
             elif ab.istirahat is not None and ab.istirahat2 is None:                  
@@ -370,33 +384,46 @@ def laporan_json_periode(r,sid,id,dr,sp):
             elif ab.istirahat is None and ab.istirahat2 is not None:                  
                 ist = f'{ab.istirahat2}'
             else:
-                ist = ""    
+                ist = "-"   
+
+
             if ab.istirahat_b is not None and ab.istirahat2_b is not None:
-                ist_b = f" {ab.istirahat_b} / {ab.istirahat2_b})"
+                ist_b = f" {ab.istirahat_b} / {ab.istirahat2_b}"
             elif ab.istirahat_b is not None and ab.istirahat2_b is None:
                 ist_b = f" {ab.istirahat_b}"
             elif ab.istirahat_b is None and ab.istirahat2_b is not None:
                 ist_b = f" {ab.istirahat2_b}"
             else:
-                ist_b = ""
+                ist_b = "-"
         
                 
+            bataskmb = ''
+            if ab.kembali is not None:
+                if ab.lama_istirahat is not None:
+                    if datetime.combine(ab.tgl_absen,ab.kembali) > (datetime.combine(ab.tgl_absen,ab.istirahat) + timedelta(hours=int(ab.lama_istirahat))): 
+                        bataskmb = f'<span class="text-danger">{ab.kembali}</span>'
+                    else:
+                        bataskmb = f"{ab.kembali}"
+                else:
+                    bataskmb = f'{ab.kembali}'
+            print(bataskmb)
             if ab.kembali is not None and ab.kembali2 is not None:
-                kmb = f'{ab.kembali} / {ab.kembali2}'
-            elif ab.kembali is not None and ab.kembali2 is None:                  
-                kmb = f'{ab.kembali}'
+                kmb = f'{bataskmb} / {ab.kembali2}'
+            elif ab.kembali is not None and ab.kembali2 is None:    
+                kmb = f'{bataskmb}'
             elif ab.kembali is None and ab.kembali2 is not None:                  
-                kmb = f'{ab.kembali2}'    
+                kmb = f'{bataskmb}'    
             else:
-                kmb = ""        
+                kmb = "-"               
+            
             if ab.kembali_b is not None and ab.kembali2_b is not None:
-                kmb_b = f" {ab.kembali_b} / {ab.kembali2_b})"
+                kmb_b = f" {ab.kembali_b} / {ab.kembali2_b}"
             elif ab.kembali_b is not None and ab.kembali2_b is None:
                 kmb_b = f" {ab.kembali_b}"
             elif ab.kembali_b is None and ab.kembali2_b is not None:
                 kmb_b = f" {ab.kembali2_b}"
             else:
-                kmb_b = "" 
+                kmb_b = "-" 
             
             if ab.keterangan_absensi is not None:
                 sket += f'{ab.keterangan_absensi}, '                 
@@ -415,11 +442,7 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 sket += f'{ab.libur_nasional}, '
                 sln = 1
             else:
-                sln = 0          
-            if ab.istirahat is not None and ab.lama_istirahat is not None:
-                jmkem = ab.lama_istirahat
-            else:
-                jmkem = None
+                sln = 0
             absen = {
                 'id': ab.id,
                 'tgl': datetime.strftime(ab.tgl_absen,'%d-%m-%Y'),
@@ -439,7 +462,6 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 'keluar_b': ist_b,
                 'kembali_b': kmb_b,
                 'pulang_b': plg_b,
-                "jam_kembali":jmkem,
                 "total_jam":ab.total_jam_kerja,
                 'tj': ab.total_jam_kerja,
                 'ket': sket,
@@ -490,14 +512,15 @@ def print_laporan_pegawai(r):
             kehadiran = 0
             tselisih = 0.0
             trlmbt = 0
+            print(dari,sampai,"SDLSJKLJDSDJ")
             for a in absensi_db.objects.select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=p.pk).order_by('tgl_absen','pegawai__divisi__divisi'):
+                ab = absensi_db.objects.get(id=a.id)     
                 if a.masuk is not None and a.pulang is not None and a.masuk_b is None and a.pulang_b is None:
                     kehadiran += 1
                 elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
                     kehadiran += 2
                 sket = " "
                 msk = ''
-                ab = absensi_db.objects.get(id=a.id)     
                 hari = ab.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
                 print(ab.masuk is not None)
@@ -554,13 +577,15 @@ def print_laporan_pegawai(r):
                 bataskmb = ''
                 if ab.kembali is not None:
                     if ab.lama_istirahat is not None:
-                        if datetime.combine(ab.tgl_absen,ab.kembali) > (datetime.combine(ab.tgl_absen,ab.istirahat) + timedelta(hours=int(ab.lama_istirahat),minutes=5)): 
+                        if datetime.combine(ab.tgl_absen,ab.kembali) > (datetime.combine(ab.tgl_absen,ab.istirahat) + timedelta(hours=int(ab.lama_istirahat))): 
                             bataskmb = f'<span class="text-danger">{ab.kembali}</span>'
+                        else:
+                            bataskmb = f"{ab.kembali}"
                     else:
                         bataskmb = f'{ab.kembali}'
                 if ab.kembali is not None and ab.kembali2 is not None:
-                        kmb = f'{bataskmb} / {ab.kembali2}'
-                elif ab.kembali is not None and ab.kembali2 is None:                  
+                    kmb = f'{bataskmb} / {ab.kembali2}'
+                elif ab.kembali is not None and ab.kembali2 is None:    
                     kmb = f'{bataskmb}'
                 elif ab.kembali is None and ab.kembali2 is not None:                  
                     kmb = f'{bataskmb}'    
@@ -598,6 +623,7 @@ def print_laporan_pegawai(r):
                     tgl_absen = True
                 else:
                     tgl_absen = False
+                print(kmb,"KEMBALI")
                 absen = {
                     'id': ab.id,
                     'tgl': datetime.strftime(ab.tgl_absen,'%d-%m-%Y'),

@@ -128,77 +128,24 @@
                 $("#terlambat").html(`${e.trlmbt} Kali - (${e.tselisih} Menit)`)
                 let str = `<tr class="body">`
                 e.data.map((el) => {
-                    if(el.sln == 1){
-                        str += `<td><span class="text-danger">${el.tgl}</span></td>`
-                    }else{
-                        str += `<td>${el.tgl}</td>`
-                    }
-                    if(el.masuk == null || el.masuk == "" || el.masuk == "undefined"){
-                        str += `<td>-</td>`
-                    }else{
-                        if(el.masuk > el.jam_masuk){
-                            str += `<td><span class="text-danger">${el.masuk}</span></td>`
-                        } else {
-                            str += `<td>${el.masuk}</td>`
-                        }
-                    }
-                    if(el.keluar == null || el.keluar == "" || el.keluar == "undefined"){
-                        str += `<td>-</td>`
-                    }else{
-                        str += `<td>${el.keluar}</td>`
-                    }
+                    str += `<td>${el.tgl}</td>`
+                    str += `<td>${el.masuk}</td>`
+                    str += `<td>${el.keluar}</td>`
 
 
-                    if(el.kembali ==  null || el.kembali == "" || el.kembali == "undefined"){
-                        str += `<td>-</td>`
-                    }else{
-                        let strs = el.kembali.split("/")[0]
-                        if(strs > el.jam_kembali){
-                            if(el.kembali.split("/")[1] == null){
-                                str += `<td><span class="text-danger">${el.kembali}</span></td>`
-                            } else {
-                                str += `<td><span class="text-danger">${el.kembali}</span> / ${el.kembali.split("/")[1]}</td>`
-                            }
-                        } else {
-                            str += `<td>${el.kembali}</td>`
-                        }
-                    }
+                    str += `<td>${el.kembali}</td>`
 
-                    if(el.pulang == null || el.pulang == "" || el.pulang == "undefined"){
-                        str += `<td>-</td>`
-                    }else{
-                        str += `<td>${el.pulang}</td>`
-                    }
+                    str += `<td>${el.pulang}</td>`
 
-                    if(el.masuk_b == null || el.masuk_b == "" || el.masuk_b == "undefined"){
-                        str += `<td>-</td>`
-                    }else{
-                        str += `<td>${el.masuk_b}</td>`
-                    }
-                    if(el.keluar_b == null || el.keluar_b == "" || el.keluar_b == "undefined"){
-                        str += `<td>-</td>`
-                    }else{
-                        str += `<td>${el.keluar_b}</td>`
-                    }
+                    str += `<td>${el.masuk_b}</td>`
+                    str += `<td>${el.keluar_b}</td>`
 
-                    if(el.kembali_b == null || el.kembali_b == "" || el.kembali_b == "undefined"){
-                        str += `<td>-</td>`
-                    }else{
-                        str += `<td>${el.kembali_b}</td>`
-                    }
+                    str += `<td>${el.kembali_b}</td>`
 
 
-                    if(el.pulang_b == null || el.pulang_b == "" || el.pulang_b == "undefined"){
-                        str += `<td>-</td>`
-                    }else{
-                        str += `<td>${el.pulang_b}</td>`
-                    }
+                    str += `<td>${el.pulang_b}</td>`
 
-                    if(el.total_jam == null || el.total_jam == "" || el.total_jam == "undefined"){
-                        str += `<td>-</td>`
-                    }else{
-                        str += `<td>${el.total_jam}</td>`
-                    }
+                    str += `<td>${el.total_jam}</td>`
 
                     
                     if(el.ket == null || el.ket == "undefined"){
