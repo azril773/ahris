@@ -871,7 +871,6 @@ def pabsen(request):
         pass
     else:
         for a in att:
-            print(a)
             if a['userid'] in luserid:
                 
                 # simpan data raw jika belum ada di list ddr
@@ -900,7 +899,6 @@ def pabsen(request):
                         jk = None
                         if ab.pegawai.kelompok_kerja is not None:
                             if a["punch"] == 0:
-                                print(a)
                                 # jamkerja_db.objects.values("jam_masuk","jam_pulang","lama_istirahat").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk.time(),jam_masuk__lte=ba_msk.time())
                                 jkm = [jk for jk in jamkerja if jk.kk_id == ab.pegawai.kelompok_kerja.pk and jk.jam_masuk >= bb_msk.time() and jk.jam_masuk <= ba_msk.time()]
                                 ds = []
@@ -1219,28 +1217,16 @@ def pabsen(request):
                                     }
                                     dt.append(data)
                             elif ab.pulang is not None or ab.kembali is not None or ab.masuk_b is not None:
-                                if ab.istirahat is not None:
-                                    ab.istirahat_b = jam_absen.time()
-                                    ab.save()
-                                    data = {
-                                        "userid": a["userid"],
-                                        "jam_absen": jam_absen,
-                                        "punch": 12,
-                                        "mesin": a["mesin"],
-                                        "ket": "Istirahat B"
-                                    }
-                                    dt.append(data)
-                                else:
-                                    ab.istirahat = jam_absen.time()
-                                    ab.save()
-                                    data = {
-                                        "userid": a["userid"],
-                                        "jam_absen": jam_absen,
-                                        "punch": a["punch"],
-                                        "mesin": a["mesin"],
-                                        "ket": "Istirahat"
-                                    }
-                                    dt.append(data)
+                                ab.istirahat_b = jam_absen.time()
+                                ab.save()
+                                data = {
+                                    "userid": a["userid"],
+                                    "jam_absen": jam_absen,
+                                    "punch": 12,
+                                    "mesin": a["mesin"],
+                                    "ket": "Istirahat B"
+                                }
+                                dt.append(data)
                             else:
                                 ab.istirahat = jam_absen.time()
                                 ab.save()
