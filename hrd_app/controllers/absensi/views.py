@@ -812,7 +812,6 @@ def pabsen(request):
         msn = [mesin.wait() for mesin in dmesin]
         # print(dmesin)
         datas = [dt for dt in [dataMesin.get() for dataMesin in dmesin] if len(dt) > 0] 
-        print(datas)
         dmesin = []
         for dm in datas:
             for d in dm:    
