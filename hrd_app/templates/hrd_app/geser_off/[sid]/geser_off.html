@@ -343,7 +343,7 @@
                       
             },
             error: function (error) {
-                alert('Terjadi kesalahan sistem, hubungi IT.')
+                alert(error.responseJSON.msg)
             }
         });
 
@@ -378,10 +378,6 @@
 
     });
 
-    {% comment %} $("#submit_button").on("click", function() {
-        var $this = $(this);
-        $this.attr('disabled', true);
-    }); {% endcomment %}
     const pgw = $('#pegawai').selectize()
     pgw[0].selectize.clear()
     

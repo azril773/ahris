@@ -547,7 +547,7 @@ def print_laporan_pegawai(r):
                     plg_b = f"{ab.pulang}"
                 else:
                     plg_b = "-"
-
+		plg = ""
                 if ab.pulang is not None:
                     if ab.jam_pulang is not None:
                         if ab.pulang < ab.jam_pulang:

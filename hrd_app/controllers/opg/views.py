@@ -340,7 +340,7 @@ def pakai_opg(request):
     
     opg = opg_db.objects.get(id=int(idopg))
     idp = opg.pegawai_id
-    opg_tgl = datetime.strftime(opg.opg_tgl,'%d-%m-%Y')   
+    opg_tgl = datetime.strftime(opg.opg_tgl,'%d-%m-%Y')
     
     pg = pegawai_db.objects.get(id=int(idp))  
     off = pg.hari_off.hari
@@ -358,6 +358,9 @@ def pakai_opg(request):
                 if geseroff_db.objects.filter(pegawai_id=int(idp), ke_tgl=diambil_tgl).exists():
                     status = 'ada geseroff'
                 else:        
+                    
+                    if diambil_tgl < datetime.strptime(opg_tgl,"%d-%m-%Y").date():
+                        return JsonResponse({"status":"error","msg":"'diambil tanggal' harus lebih besar dari tanggal opg. Silahkan gunakan geser off"},status=400)
                     ab.keterangan_absensi = f"OPG-({opg_tgl})"
                     ab.save()
                     

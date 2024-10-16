@@ -443,7 +443,8 @@
                       
             },
             error: function (error) {
-                alert('Terjadi kesalahan sistem, hubungi IT.')
+                console.log(error)
+                alert(error.responseJSON.msg)
             }
         });
 

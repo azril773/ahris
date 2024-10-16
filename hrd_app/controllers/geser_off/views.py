@@ -268,7 +268,8 @@ def tambah_geseroff(request):
         tln = ln.tgl_libur
     else:
         tln = None    
-    
+    if dari < ke:
+        return JsonResponse({"status":"error","msg":"'dari tanggal' tidak boleh lebih kecil dari 'ke tanggal'. Silahkan gunakan opg"},status=400)
     day = dari.strftime("%A")
     nh = nama_hari(day) 
             
