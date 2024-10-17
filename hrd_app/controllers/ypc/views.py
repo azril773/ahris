@@ -90,3 +90,4 @@ def terlambat(r):
 def tlengkap_json(r):
     if re.headers["X-Requested_With"] == "XMLHttpRequest":
         today = datetime.now()
+        tmin = today - timedelta(days=1)
