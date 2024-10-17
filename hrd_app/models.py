@@ -515,7 +515,7 @@ class opg_db(models.Model):
     edit_date = models.DateTimeField(auto_now=True, null=True)
     
     def __str__(self):
-        return self.pegawai__nama
+        return self.keterangan
 
     class Meta:
         verbose_name = 'OPG'

@@ -866,6 +866,9 @@ def pabsen(request):
     # proses data simpan di dt array
     # obj 
     jamkerja = jamkerja_db.objects.select_related('kk').all()
+    now = datetime.now()
+    hari = now.strftime("%A")
+    hari = nama_hari(hari)
     if not att:
         pass
     else:
@@ -899,7 +902,8 @@ def pabsen(request):
                         if ab.pegawai.kelompok_kerja is not None:
                             if a["punch"] == 0:
                                 # jamkerja_db.objects.values("jam_masuk","jam_pulang","lama_istirahat").filter(kk_id=ab.pegawai.kelompok_kerja.pk,jam_masuk__gte=bb_msk.time(),jam_masuk__lte=ba_msk.time())
-                                jkm = [jk for jk in jamkerja if jk.kk_id == ab.pegawai.kelompok_kerja.pk and jk.jam_masuk >= bb_msk.time() and jk.jam_masuk <= ba_msk.time()]
+                                
+                                jkm = [jk for jk in jamkerja if jk.kk_id == ab.pegawai.kelompok_kerja.pk and jk.jam_masuk >= bb_msk.time() and jk.jam_masuk <= ba_msk.time() and jk.hari == hari]
                                 ds = []
                                 data = []
                                 for j in jkm:
@@ -914,7 +918,7 @@ def pabsen(request):
                                     ab.jam_pulang = jam.jam_pulang
                                     ab.lama_istirahat = jam.lama_istirahat
                             elif a['punch'] == 1:
-                                jkp = [jk for jk in jamkerja if jk.kk_id == ab.pegawai.kelompok_kerja.pk and jk.jam_pulang >= bb_msk.time() and jk.jam_pulang <= ba_msk.time()]
+                                jkp = [jk for jk in jamkerja if jk.kk_id == ab.pegawai.kelompok_kerja.pk and jk.jam_pulang >= bb_msk.time() and jk.jam_pulang <= ba_msk.time() and jk.hari == hari]
                                 data = []
                                 ds = []
                                 for j in jkp:

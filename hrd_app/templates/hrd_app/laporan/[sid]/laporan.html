@@ -180,7 +180,7 @@
                             <select name="pegawai[]" id="pegawai">
                                 <option value="">Pilih Pegawai</option>
                                 {% for p in pegawai %}
-                                    <option value="{{p.pk}}">{{p.nama}}</option>
+                                    <option value="{{p.pk}}">{{p.nama}} / {{p.nik}}</option>
                                 {% endfor %}
                             </select>
                         </div>

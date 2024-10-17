@@ -125,3 +125,5 @@ from hrd_app.controllers.mesin.views import *
 
 
 from hrd_app.controllers.login.views import *
+
+from hrd_app.controllers.ypc.views import *

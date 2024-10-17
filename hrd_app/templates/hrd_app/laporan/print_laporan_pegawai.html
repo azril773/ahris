@@ -92,40 +92,23 @@
                 <tbody>
                     {% for ab in d.absensi %}
                     <tr class="body">
-<<<<<<< HEAD
-                        <td class="dprint">
-=======
-                        <td scope="col">
->>>>>>> 7fa35070120037e03244346143e783fd7fe16a1a
+                        <td>
                             {% if ab.lbr %}
                                 <span class="text-danger">{{ab.tgl_absen}}</span>
                             {% else %}
                                 {{ab.tgl_absen}}
                             {% endif %}
                         </td>
-<<<<<<< HEAD
-                        <td class="dprint">{{ab.masuk |safe}}</td>
-                        <td class="dprint">{{ab.keluar |safe}}</td>
-                        <td class="dprint">{{ab.kembali |safe}}</td>
-                        <td class="dprint">{{ab.pulang |safe}}</td>
-                        <td class="dprint">{{ab.masuk_b |safe}}</td>
-                        <td class="dprint">{{ab.keluar_b |safe}}</td>
-                        <td class="dprint">{{ab.kembali_b |safe}}</td>
-                        <td class="dprint">{{ab.pulang_b |safe}}</td>
-                        <td class="dprint">{{ab.tj |safe}}</td>
-                        <td class="tx-inverse dprint">{{ab.ket |safe}}</td>
-=======
-                        <td scope="col">{{ab.masuk |safe}}</td>
-                        <td scope="col">{{ab.keluar |safe}}</td>
-                        <td scope="col">{{ab.kembali |safe}}</td>
-                        <td scope="col">{{ab.pulang |safe}}</td>
-                        <td scope="col">{{ab.masuk_b |safe}}</td>
-                        <td scope="col">{{ab.keluar_b |safe}}</td>
-                        <td scope="col">{{ab.kembali_b |safe}}</td>
-                        <td scope="col">{{ab.pulang_b |safe}}</td>
-                        <td scope="col">{{ab.tj |safe}}</td>
-                        <td scope="col">{{ab.ket |safe}}</td>
->>>>>>> 7fa35070120037e03244346143e783fd7fe16a1a
+                        <td>{{ab.masuk |safe}}</td>
+                        <td>{{ab.keluar |safe}}</td>
+                        <td>{{ab.kembali |safe}}</td>
+                        <td>{{ab.pulang |safe}}</td>
+                        <td>{{ab.masuk_b |safe}}</td>
+                        <td>{{ab.keluar_b |safe}}</td>
+                        <td>{{ab.kembali_b |safe}}</td>
+                        <td>{{ab.pulang_b |safe}}</td>
+                        <td>{{ab.tj |safe}}</td>
+                        <td class="tx-inverse whitespace-nowrap">{{ab.ket |safe}}</td>
                     </tr>
                     {% endfor %}
                         

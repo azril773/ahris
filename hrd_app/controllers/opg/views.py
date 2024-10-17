@@ -373,7 +373,14 @@ def pakai_opg(request):
         else:
             status = 'pegawai masuk'    
     else:
-        status = "data absensi tidak ada"     
+        if diambil_tgl < datetime.strptime(opg_tgl,"%d-%m-%Y").date():
+            return JsonResponse({"status":"error","msg":"'diambil tanggal' harus lebih besar dari tanggal opg. Silahkan gunakan geser off"},status=400)
+        opg.diambil_tgl = diambil_tgl
+        opg.status = 1
+        opg.edit_by = nama_user
+        opg.save()
+        status = 'ok'
+        # status = "data absensi tidak ada"     
     return JsonResponse({"status": status})
 
 
@@ -388,9 +395,10 @@ def batal_opg(request):
     idp = opg.pegawai_id
     tgl = opg.diambil_tgl
     
-    ab = absensi_db.objects.get(pegawai_id=int(idp), tgl_absen=tgl)
-    ab.keterangan_absensi = None
-    ab.save()
+    ab = absensi_db.objects.filter(pegawai_id=int(idp), tgl_absen=tgl)
+    if ab.exists():
+        ab.keterangan_absensi = None
+        ab.save()
     
     opg.diambil_tgl = None
     opg.status = 0

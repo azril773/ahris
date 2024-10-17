@@ -85,7 +85,6 @@ def laporan_json(r):
             ab = absensi_db.objects.filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
             if ab.exists():
                 for a in ab:
-                    print(a.pegawai,a.keterangan_ijin)
                     if a.keterangan_absensi == "OFF":
                         off += 1
                     if a.masuk is not None and a.pulang is not None:
@@ -193,7 +192,6 @@ def laporan_json(r):
             ab = absensi_db.objects.filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
             if ab.exists():
                 for a in ab:
-                    print(a.pegawai,a.keterangan_ijin)
                     if a.keterangan_absensi == "OFF":
                         off += 1
                     if a.masuk is not None and a.pulang is not None:
@@ -404,7 +402,7 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 
             bataskmb = ''
             if ab.kembali is not None:
-                if ab.lama_istirahat is not None:
+                if ab.lama_istirahat is not None and ab.istirahat is not None:
                     if datetime.combine(ab.tgl_absen,ab.kembali) > (datetime.combine(ab.tgl_absen,ab.istirahat) + timedelta(hours=int(ab.lama_istirahat))): 
                         bataskmb = f'<span class="text-danger">{ab.kembali}</span>'
                     else:
@@ -492,7 +490,7 @@ def print_laporan_pegawai(r):
         if akses_db.objects.filter(user_id=iduser).exists():
             dakses = akses_db.objects.get(user_id=iduser)
             sid = dakses.pegawai.status.pk
-            data = []
+            data = [] 
         pegawai = pegawai_db.objects.filter(id__in=pgw)
         for p in pegawai:
             dari = datetime.strptime(str(dr),'%d-%m-%Y').date()
@@ -517,7 +515,6 @@ def print_laporan_pegawai(r):
             kehadiran = 0
             tselisih = 0.0
             trlmbt = 0
-            print(dari,sampai,"SDLSJKLJDSDJ")
             for a in absensi_db.objects.select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=p.pk).order_by('tgl_absen','pegawai__divisi__divisi'):
                 ab = absensi_db.objects.get(id=a.id)     
                 if a.masuk is not None and a.pulang is not None and a.masuk_b is None and a.pulang_b is None:
@@ -528,11 +525,12 @@ def print_laporan_pegawai(r):
                 msk = ''
                 hari = ab.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
-                print(ab.masuk is not None)
                 if ab.masuk is not None:
                     if ab.jam_masuk is not None:
                         if ab.masuk > ab.jam_masuk:
                             msk = f"<span class='text-danger'>{ab.masuk}</span>"
+                        else:
+                            msk = f"{ab.masuk}"
                     else:
                         msk = f"{ab.masuk}"
                 else:
@@ -547,11 +545,13 @@ def print_laporan_pegawai(r):
                     plg_b = f"{ab.pulang}"
                 else:
                     plg_b = "-"
-		plg = ""
+                plg = ""
                 if ab.pulang is not None:
                     if ab.jam_pulang is not None:
                         if ab.pulang < ab.jam_pulang:
                             plg = f"<span class='text-danger'>{ab.pulang}</span>"
+                        else:
+                            plg = f'{ab.pulang}'
                     else:
                         plg = f"{ab.pulang}"
                 else:
@@ -581,7 +581,7 @@ def print_laporan_pegawai(r):
                     ist_b = "-"
                 bataskmb = ''
                 if ab.kembali is not None:
-                    if ab.lama_istirahat is not None:
+                    if ab.lama_istirahat is not None and ab.istirahat is not None:
                         if datetime.combine(ab.tgl_absen,ab.kembali) > (datetime.combine(ab.tgl_absen,ab.istirahat) + timedelta(hours=int(ab.lama_istirahat))): 
                             bataskmb = f'<span class="text-danger">{ab.kembali}</span>'
                         else:
