@@ -91,3 +91,27 @@ def tlengkap_json(r):
     if re.headers["X-Requested_With"] == "XMLHttpRequest":
         today = datetime.now()
         tmin = today - timedelta(days=1)
+        
+        data = []
+        for ab in absensi_db.objects.filter(tgl_absen__range=[tmin,today]):
+            if (ab.masuk is not None and ab.pulang is not None and ab.istirahat is not None and ab.kembali is not None) or (ab.masuk_b is not None and ab.pulang_b is not None and ab.istirahat_b is not None and ab.kembali_b is not None):
+                pass
+            else:
+                obj = {
+                    "tanggal":ab.tgl_absen,
+                    "pegawai":ab.pegawai.nama,
+                    "nik":ab.pegawai.nik,
+                    "shift":ab.pegawai.shift,
+                    "divisi":ab.pegawai.divisi,
+                    "masuk":ab.masuk,
+                    "istirahat":ab.istirahat,
+                    "kembali":ab.kembali,
+                    "pulang":ab.pulang,
+                    "masuk_b":ab.masuk_b,
+                    "istirahat_b":ab.istirahat_b,
+                    "kembali_b":ab.kembali_b,
+                    "pulang_b":ab.pulang_b
+                }
+                data.append(obj)
+        return JsonResponse({"status":'success',"msg":"berhasil mengambil data","data":data})
+            

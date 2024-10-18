@@ -45,9 +45,61 @@
             </div>            
         </div>
     </div>
+    {% csrf_token %}
+    <div class="" style="width: 100%">
+        <table id="tabelku" class="table">
+        <thead>
+            <tr>
+            <th nowrap>Tanggal</th>
+            <th>Nik</th>
+            <th>Nama</th>
+            <th>Shift</th>
+            <th>Divisi</th>
+            <th>Masuk</th>
+            <th>Keluar</th>
+            <th>Kembali</th>
+            <th>Pulang</th>
+            <th>Masuk (B)</th>
+            <th>Keluar (B)</th>
+            <th>Kembali (B)</th>
+            <th>Pulang (B)</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+        </table>
+    </div>
 
     
 
 </div><!-- br-pagebody -->
 
 {% endblock breadcrumb %}
+{% block hrd_ajax %}
+<script>
+    const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+    $("#tableku").DataTable({
+        ajax:{
+            url:"{% url "tlengkap_json" %}",
+            method:"post",
+            headers:{
+                "X-CSRFToken":token
+            }
+        },
+        columns:[
+            {data:"tanggal"},
+            {data:"nik"},
+            {data:"pegawai"},
+            {data:"shift"},
+            {data:"divisi"},
+            {data:"masuk"},
+            {data:"istirahat"},
+            {data:"kembali"},
+            {data:"pulang"},
+            {data:"masuk_b"},
+            {data:"istirahat_b"},
+            {data:"kembali_b"},
+            {data:"pulang_b"},
+        ]
+    })
+</script>
+{% endblock hrd_ajax %}
