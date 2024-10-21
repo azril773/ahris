@@ -14,5 +14,11 @@ urlpatterns = [
     path('dapri_nonaktif/<int:idp>', views.data_pribadi_nonaktif, name='dapri_nonaktif'),
     path('pkerja/<int:idp>', views.pendidikan_kerja, name='pkerja'),
     path('pkerja_nonaktif/<int:idp>', views.pendidikan_kerja_nonaktif, name='pkerja_nonaktif'),
+    path('registrasi_pegawai', views.registrasi_pegawai, name='registrasi_pegawai'),
+    path('rp_mesin', views.rp_mesin, name='rp_mesin'),
+    path('rp_form', views.rp_form, name='rp_form'),
+    path('rp_cmesin', views.rp_cmesin, name='rp_cmesin'),
+    path('rpm', views.rpm, name='rpm'),
+
 
 ]

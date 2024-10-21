@@ -134,7 +134,11 @@ def rmesin(r,userid,id,uid):
 @login_required
 def tambah_data_pegawai(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        user = akses_db.objects.get(pk=r.user.id)
+        print(r.user.id)
+        user = akses_db.objects.filter(user_id=r.user.id)
+        if not user.exists():
+            return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
+        user = user[0]
         sid = user.sid_id
         nama = r.POST.get("nama")
         gender = r.POST.get("gender")
@@ -252,11 +256,11 @@ def tambah_data_pegawai(r):
         finally:
             if conn:
                 conn.disconnect()
-        if email == '' or alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or tinggi == '' or berat == '' or goldarah == '' or agama == '':
+        if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
             return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
-
-        if pribadi_db.objects.filter(email=email).exists():
-            return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
+        if email != "":
+            if pribadi_db.objects.filter(email=email).exists():
+                return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
 
         if pegawai_db.objects.filter(userid=userid).exists():
             return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
@@ -323,8 +327,8 @@ def tambah_data_pegawai(r):
                 email=email,
                 kota_lahir=kota_lahir,
                 tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
-                tinggi_badan=tinggi,
-                berat_badan=berat,
+                tinggi_badan=tinggi if tinggi != "" else 0,
+                berat_badan=berat if berat != "" else 0,
                 gol_darah=goldarah,
                 agama=agama
             )
@@ -976,6 +980,24 @@ def getmesin(r):
         }
 
     return JsonResponse({"status":"success","msg":"Berhasil mengambil mesin","data":data},status=200)
+            
+# @login_required
+# def get_mesin(r,mesin):
+
+#     iduser = r.user.id
+#     data_akses = akses_db.objects.get(user=iduser)
+#     akses = data_akses.akses 
+#     if akses == "admin" or akses == "root":
+#         mesin = mesin_db.objects.filter(pk=int(mesin))
+#         if not mesin.exists():
+#             return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
+#         data = {
+#             "nama":mesin[0].nama,
+#             "ipaddress":mesin[0].ipaddress,
+#             "status":mesin[0].status
+#         }
+
+#     return JsonResponse({"status":"success","msg":"Berhasil mengambil mesin","data":data},status=200)
             
 
 

@@ -6,6 +6,7 @@ from django.contrib.auth import views as auth_views
 urlpatterns = [
     path("getPegawai/<int:idp>",views.getPegawai,name="getPegawai"),
     path('tambah_pegawai/', views.tambah_pegawai, name='tambah_pegawai'),
+    path('tambah_pegawai_non_validasi/', views.tambah_pegawai_non_validasi, name='tambah_pegawai_non_validasi'),
     path('edit_pegawai/<int:idp>', views.epegawai, name='edit_pegawai'),
     path('pegawai_json/<int:sid>', views.pegawai_json, name='pegawai_json'),
     path('non_aktif_json/<int:sid>', views.non_aktif_json, name='non_aktif_json'),
@@ -14,4 +15,5 @@ urlpatterns = [
     path('aktif', views.aktif, name='aktif'),
     path('tkeluarga/<int:idp>', views.tambah_keluarga, name='tkeluarga'),
     path('tkl/<int:idp>', views.tambah_kl, name='tkl'),
+    path('ambil_mesin/', views.ambil_mesin, name='ambil_mesin'),
 ]

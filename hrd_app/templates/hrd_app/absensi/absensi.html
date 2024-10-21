@@ -48,7 +48,8 @@
             <div class="mg-r-auto">   
                             
                 <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-primary mg-b-6">Proses Data Absensi</button>
-                <button data-target="#pilih_tgl_cari" data-toggle="modal" class="btn btn-warning mg-b-6">Cari Data Absensi</button>  &nbsp; &nbsp; &nbsp;
+                <button data-target="#pilih_tgl_cari" data-toggle="modal" class="btn btn-warning mg-b-6">Cari Data Absensi</button> 
+                <a href="{% url "tlengkap" %}" class="btn btn-success mg-b-6">Yang Perlu Dicek</a>  &nbsp; &nbsp; &nbsp;
             <!-- Button Proses Data -->
             <!-- {% if sid == 0 %} -->
             <!-- <button class="btn btn-primary mg-b-6" disabled>Proses Data Absensi</button> -->
@@ -100,7 +101,7 @@
 
         <!-- Table -->
         <div class="" style="width: 100%">
-            <table id="tabelku" class="table">
+            <table id="tabelku"  style="width: 100%" class="table">
             <thead>
                 <tr>
                 <th nowrap>Tanggal</th>
@@ -276,7 +277,7 @@
 
         var table = $('#tabelku').DataTable({
             ajax:{
-                url:"{% url 'absensi_json' dr sp sid %}"
+                url:"{% url 'absensi_json' dr sp sid %}",
             } ,
 
             columns: [

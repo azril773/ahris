@@ -5,6 +5,9 @@
 <div class="br-pagebody">  
 
     <div class="br-section-wrapper">
+        <div id="msg">
+
+        </div>
         {% for message in messages %}
         <div class="container-fluid p-0">
             {% if 'safe' in message.tags %}
@@ -37,24 +40,32 @@
         {% comment %} </div> {% endcomment %}
 
         <br>        
+        <div class="d-flex row">
+            <div class="col-6">
+                <select name="mesin" id="mesin">
+                    <option value="">Pilih Mesin</option>
+                    {% for m in mesin %}
+                        <option value="{{m.pk}}">{{m.nama}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-warning" id="buttonambil">Ambil Data Mesin</button>
+            </div>
+        </div>
 
         {% csrf_token %}
-        <table class="table" id="tableku">
-            <thead>
-                <tr>
-                    <th>UID</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for u in userid %}
-                    <tr>
-                        <td>{{u.userid}}</td>
-                        <td><a href="{% url "rmesin" u.userid id u.uid  %}" class="btn btn-primary">Proses</a></td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                <table class="table tableku" id="tableku">
+                    <thead>
+                        <tr>
+                            <th>UID</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                    </table>
+                    
     <!-- alert berhasil -->
     </div>
 </div><!-- br-pagebody -->
@@ -62,10 +73,61 @@
 {% endblock breadcrumb %}
 {% block hrd_ajax %}
 <script>
-    $("#tableku").DataTable({
-        "rowCallback": function (row, data) {
-            $('td', row).eq(0).addClass('hitam');
-        }
+    let table = $("#tableku").DataTable({
+        
+    })
+    $("#mesin").selectize()
+
+    $("#buttonambil").click(function(e){
+        const mesin = $("#mesin").val()
+        const token = document.querySelector("input[name=csrfmiddlewaretoken]").value    
+        table.destroy()
+        table = $("#tableku").DataTable({
+            ajax:{
+                url:"{% url 'ambil_mesin' %}",
+                method:"POST",
+                data:{
+                    mesin
+                },
+                headers:{
+                    "X-CSRFToken":token
+                },
+            },
+            columns:[
+                {data:"userid"},
+                {
+                    data:"uid",
+                    render:(data,type,row,meta) => {
+                        return `
+                        <form action="{% url "rp_form" %}" method="post">
+                            <input type="hidden" name="csrfmiddlewaretoken" value="${token}">
+                            <input type="hidden" name="userid" value="${row.userid}">
+                            <input type="hidden" name="tipe" value="rp_mesin">
+                            <input type="hidden" name="mesin" value="${row.mesin}">
+                            <button type="submit" class="btn btn-primary">Proses</button>
+                        </form>
+                        `
+                    }
+                },
+            ],
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+            },   
+            error:(err) => {
+                $("#msg p").remove()
+                $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+            }
+
+        })
     })
 </script>
 {% endblock hrd_ajax %}
+
+
+
+
+
+
+
+{% comment %}  {% endcomment %}

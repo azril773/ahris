@@ -1,0 +1,122 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- b -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Registrasi Pegawai Dengan Mesin</h6>
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">   
+            <!-- Button Proses Data -->
+
+            <!-- Button Cari Data Absen -->
+
+            <!-- Button lainnya -->
+            {% include 'hrd_app/master/modul_absensi.html' %} 
+
+            </div>          
+        </div>
+        {% comment %} </div> {% endcomment %}
+
+        <br>        
+
+        {% csrf_token %}
+
+        <!-- SEMUA -->
+        <hr>
+        <h5 class="hitam"> # Tambah Data Pegawai Ke Mesin</h5>
+        <form action="{% url "rp_form" %}" method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-start" style="width: 100%;">
+                <div class="" style="width: 100%;">
+                    <label for="mesin" class="hitam">Mesin</label>
+                    <select name="mesin" class="mesin" id="mesin" >
+                        <option value="">Pilih Mesin</option>
+                        {% for m in mesin %}
+                            <option value="{{m.pk}}">{{m.nama}} - {{m.ipaddress}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                &nbsp
+                <div class="" style="width: 100%;">
+                    <label for="nama" class="hitam">Nama</label>
+                    <input type="text" name="nama" id="nama" class="form-control">
+                </div>
+                &nbsp
+                <div class="" style="width: 100%;">
+                    <label for="userid" class="hitam">Userid</label>
+                    <input type="text" name="userid" id="userid" class="form-control">
+                </div>
+                &nbsp
+                <div class="" style="width: 100%;">
+                    <label for="level" class="hitam">Pilih User Level</label>
+                    <select name="level" id="level" class="level">
+                        <option value="">Pilih Level</option>
+                        <option value="1">Admin</option>
+                        <option value="0">User</option>
+                    </select>
+                </div>
+                &nbsp
+                <div class="" style="width: 100%;">
+                    <label for="password" class="hitam">Password</label>
+                    <input type="text" name="password" id="password" class="form-control">
+                </div>
+                &nbsp
+                &nbsp
+                <div class="d-flex align-items-end" style="width: 100%;">
+                    <button type="submit" class="btn btn-primary">Proses</button>
+                </div>
+            </div>
+            <hr>
+        </form>
+        <!-- BY DIVISI -->
+    <!-- alert berhasil -->
+    </div>
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+{% block hrd_ajax %}
+    <script>
+        $(".mesin").selectize()
+        $(".mesint").selectize({
+            maxItems:null
+        })
+        $(".pegawai").selectize({
+            maxItems:null,
+        })
+        $(".pegawais").selectize()
+        $(".divisi").selectize({
+            maxItems:null,
+        })
+        $(".level").selectize()
+    </script>
+{% endblock hrd_ajax %}

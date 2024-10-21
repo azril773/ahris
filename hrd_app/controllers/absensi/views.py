@@ -64,9 +64,12 @@ def cari_absensi(request):
         sid = request.POST.get('sid')
         dari = datetime.strptime(request.POST.get('ctgl1'),'%d-%m-%Y').date()
         sampai = datetime.strptime(request.POST.get('ctgl2'),'%d-%m-%Y').date()
+        userid = request.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        divisi = [div.divisi for div in aksesdivisi]
         
         if int(sid) == 0:
-            for a in absensi_db.objects.select_related('pegawai','pegawai__counter','pegawai__divisi').filter(tgl_absen__range=(dari,sampai)).order_by('tgl_absen','pegawai__divisi__divisi'):
+            for a in absensi_db.objects.select_related('pegawai','pegawai__counter','pegawai__divisi').filter(tgl_absen__range=(dari,sampai),pegawai__divisi__in=divisi).order_by('tgl_absen','pegawai__divisi__divisi'):
                             
                 sket = " "
                 
@@ -186,7 +189,7 @@ def cari_absensi(request):
                 data.append(absen)
             
         else:                        
-            for a in absensi_db.objects.select_related('pegawai','pegawai__counter','pegawai__divisi').filter(tgl_absen__range=(dari,sampai), pegawai__status_id=sid).order_by('tgl_absen','pegawai__divisi__divisi'):
+            for a in absensi_db.objects.select_related('pegawai','pegawai__counter','pegawai__divisi').filter(tgl_absen__range=(dari,sampai), pegawai__status_id=sid,pegawai__divisi__in=divisi).order_by('tgl_absen','pegawai__divisi__divisi'):
                             
                 sket = " "
                 
@@ -351,14 +354,16 @@ def cari_absensi_sid(request,dr, sp, sid):
 @login_required
 def absensi_json(request, dr, sp, sid):
     if request.headers["X-Requested-With"] == "XMLHttpRequest":
-        
+        userid = request.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        divisi = [div.divisi for div in aksesdivisi]
         data = []
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
         
         if int(sid) == 0:
-            for a in absensi_db.objects.select_related('pegawai','pegawai__counter','pegawai__divisi').filter(tgl_absen__range=(dari,sampai)).order_by('tgl_absen','pegawai__divisi__divisi'):
+            for a in absensi_db.objects.select_related('pegawai','pegawai__counter','pegawai__divisi').filter(pegawai__divisi__in=divisi,tgl_absen__range=(dari,sampai)).order_by('tgl_absen','pegawai__divisi__divisi'):
                 sket = " "
                 
                 hari = a.tgl_absen.strftime("%A")
@@ -491,7 +496,7 @@ def absensi_json(request, dr, sp, sid):
                 data.append(absen)
             
         else:                        
-            for a in absensi_db.objects.select_related('pegawai','pegawai__counter','pegawai__divisi').filter(tgl_absen__range=(dari,sampai), pegawai__status_id=sid).order_by('tgl_absen','pegawai__divisi__divisi'):
+            for a in absensi_db.objects.select_related('pegawai','pegawai__counter','pegawai__divisi').filter(pegawai__divisi__in=divisi,tgl_absen__range=(dari,sampai), pegawai__status_id=sid).order_by('tgl_absen','pegawai__divisi__divisi'):
                             
                 sket = " "
                 
@@ -687,8 +692,11 @@ def pabsen(request):
     luserid = []  
     
     # buat tabel absen
+    userid = request.user.id
+    aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+    divisi = [div.divisi for div in aksesdivisi]
     if int(sid) == 0:
-        for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
+        for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi):
             if p.jabatan is None:
                 jabatan = None
             else:
@@ -743,7 +751,7 @@ def pabsen(request):
                     )
                     tabsen.save()
     else:
-        for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(status__id=sid):
+        for p in pegawai_db.objects.select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi,status__id=sid):
             if p.jabatan is None:
                 jabatan = None
             else:
@@ -3612,11 +3620,18 @@ def detail_absensi(r,userid,tgl,sid):
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
 
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=iduser)
+        divisi = [div.divisi for div in aksesdivisi]
 
         dsid = dakses.sid_id  
 
-        pgw = pegawai_db.objects.get(userid=userid)
-
+        pgw = pegawai_db.objects.filter(userid=userid,divisi__in=divisi)
+        if not pgw.exists():
+            messages.error(r,"Anda tidak memiliki akses")
+            print("OSKOKSDOKDOSKSODK")
+            return redirect("pegawai",sid=dsid)
+        else:
+            pgw = pgw[0]
         # get absensi
         ab = absensi_db.objects.get(pegawai__userid=userid,tgl_absen=tgl)
 
@@ -3766,7 +3781,15 @@ def ubah_absen(r):
 @login_required
 def pu(r,tgl,userid,sid):
     dt = data_trans_db.objects.filter(jam_absen__date=tgl,userid=userid).order_by('jam_absen')
-    abs = absensi_db.objects.get(tgl_absen=tgl,pegawai__userid=userid)
+    userid = r.user.id
+    aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+    divisi = [div.divisi for div in aksesdivisi]
+    abs = absensi_db.objects.select_related("pegawai__divisi").filter(tgl_absen=tgl,pegawai__userid=userid,pegawai__divisi__in=divisi)
+    if not abs.exists():
+        messages.error(r,"Anda tidak memiliki akses")
+        return redirect("absensi",sid=sid)
+    else:
+        abs = abs[0]
     abs.masuk = None
     abs.pulang = None
     abs.istirahat = None
@@ -4152,9 +4175,11 @@ def edit_ijin(r):
     ket = r.POST.get("ket")
     id = r.POST.get("id")
     sid = r.POST.get("sid")
-
+    userid = r.user.id
+    aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+    divisi = [div.divisi for div in aksesdivisi]
     if jenis_ijin_db.objects.filter(pk=int(jenis_ijin)).exists():
-        if absensi_db.objects.filter(pk=int(id)).exists():
+        if absensi_db.objects.select_related("pegawai__divisi").filter(pk=int(id),pegawai__divisi__in=divisi).exists():
             ji = jenis_ijin_db.objects.get(pk=int(jenis_ijin))
             ab = absensi_db.objects.get(pk=int(id))
             ab.keterangan_ijin = f'{ji.jenis_ijin}-({ket})'
@@ -4166,6 +4191,9 @@ def edit_ijin(r):
                 keterangan = ket,
                 add_by = 'Program'
             ).save()
+        else:
+            messages.error(r,"Anda tidak memiliki akses")
+            return redirect("absensi",sid=sid)
     return JsonResponse({"ok":"ok"})
 
 @login_required
@@ -4177,13 +4205,18 @@ def edit_jamkerja(r,userid,tgl,sid):
     if masuk == '' or keluar == "" or lama_ist == "":
         messages.add_message(r,messages.ERROR,"Form harus lengkap")
         return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
-    
-    if absensi_db.objects.filter(pk=int(id)).exists():
+    userid = r.user.id
+    aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+    divisi = [div.divisi for div in aksesdivisi]
+    if absensi_db.objects.select_related("pegawai__divisi").filter(pk=int(id),pegawai__divisi__in=divisi).exists():
         ab = absensi_db.objects.get(pk=int(id))
         ab.jam_masuk = masuk
         ab.jam_pulang = keluar
         ab.lama_istirahat = lama_ist
         ab.save()
+    else:
+        messages.error(r,"Anda tidak memiliki akses")
+        return redirect("absensi",sid=sid)
     return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
 
 

@@ -284,52 +284,13 @@ def tambah_geseroff(request):
             # cek jika absen di tanggal dari tgl tidak ada absen masuk atau absen pulangnya, batalkan
             if absensi_db.objects.select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=dari).exists():
                 ab = absensi_db.objects.select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=dari)
-                
-                if ab.masuk is not None or ab.pulang is not None:
-                    
+                                    
                     # cek jika absen di tanggal ke tgl ada absen masuk atau absen pulangnya, batalakan
-                    if absensi_db.objects.select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=ke).exists():
-                        ab2 = absensi_db.objects.select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=ke)
-                        
-                        if ab2.masuk is not None and ab.pulang is not None:
-                            status = 'pegawai masuk'
-                        else:
-                            if off == nh:
-                                tambahgf = geseroff_db(
-                                    pegawai_id = int(dpegawai),
-                                    dari_tgl = dari,
-                                    ke_tgl = ke,
-                                    keterangan = dket,
-                                    add_by = nama_user,
-                                    edit_by = nama_user
-                                )
-                                tambahgf.save()
-                                
-                                ab2.keterangan_absensi = f"Geser OFF-({fdari})"
-                                ab2.save()
-                                
-                                status = 'ok'
-                            else:
-                                if tln is not None:
-                                    if dari == tln:
-                                        tambahgf = geseroff_db(
-                                            pegawai_id = int(dpegawai),
-                                            dari_tgl = dari,
-                                            ke_tgl = ke,
-                                            keterangan = dket,
-                                            add_by = nama_user,
-                                            edit_by = nama_user
-                                        )
-                                        tambahgf.save()
-                                        
-                                        ab2.keterangan_absensi = f"Geser OFF-({fdari})"
-                                        ab2.save()
-                                        
-                                        status = 'ok'
-                                    else:
-                                        status = 'bukan tgl merah'    
-                                else:
-                                    status = 'bukan hari off'
+                if absensi_db.objects.select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=ke).exists():
+                    ab2 = absensi_db.objects.select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=ke)
+                    
+                    if ab2.masuk is not None and ab2.pulang is not None:
+                        status = 'pegawai masuk'
                     else:
                         if off == nh:
                             tambahgf = geseroff_db(
@@ -341,6 +302,9 @@ def tambah_geseroff(request):
                                 edit_by = nama_user
                             )
                             tambahgf.save()
+                            
+                            ab2.keterangan_absensi = f"Geser OFF-({fdari})"
+                            ab2.save()
                             
                             status = 'ok'
                         else:
@@ -356,14 +320,48 @@ def tambah_geseroff(request):
                                     )
                                     tambahgf.save()
                                     
+                                    ab2.keterangan_absensi = f"Geser OFF-({fdari})"
+                                    ab2.save()
+                                    
                                     status = 'ok'
                                 else:
-                                    status = 'bukan tgl merah'
+                                    status = 'bukan tgl merah'    
                             else:
-                                status = 'bukan hari off'   
-                    
+                                status = 'bukan hari off'
                 else:
-                    status = 'pegawai tidak masuk'  
+                    if off == nh:
+                        tambahgf = geseroff_db(
+                            pegawai_id = int(dpegawai),
+                            dari_tgl = dari,
+                            ke_tgl = ke,
+                            keterangan = dket,
+                            add_by = nama_user,
+                            edit_by = nama_user
+                        )
+                        tambahgf.save()
+                        
+                        status = 'ok'
+                    else:
+                        if tln is not None:
+                            if dari == tln:
+                                tambahgf = geseroff_db(
+                                    pegawai_id = int(dpegawai),
+                                    dari_tgl = dari,
+                                    ke_tgl = ke,
+                                    keterangan = dket,
+                                    add_by = nama_user,
+                                    edit_by = nama_user
+                                )
+                                tambahgf.save()
+                                
+                                status = 'ok'
+                            else:
+                                status = 'bukan tgl merah'
+                        else:
+                            status = 'bukan hari off'   
+                    
+                # else:
+                #     status = 'pegawai tidak masuk'  
 
             else:
                 if off == nh:

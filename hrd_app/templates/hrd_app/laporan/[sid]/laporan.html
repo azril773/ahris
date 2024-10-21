@@ -175,7 +175,7 @@
                     {% csrf_token %}
                     <div class="form-layout form-layout-1">
                     <div class="row mg-b-25">
-                        <div class="col-6">
+                        <div class="col-12 mb-5">
                             <label for="pegawai">Pilih Pegawai</label>
                             <select name="pegawai[]" id="pegawai">
                                 <option value="">Pilih Pegawai</option>
@@ -184,14 +184,13 @@
                                 {% endfor %}
                             </select>
                         </div>
-        
                         <div class="col-6">
                             <label for="dari">Dari</label>
                             <input type="text" name="dari" id="dari" class="form-control tgl1">
                         </div>
                         {% comment %} <br {% endcomment %}
                         {% comment %} &nbsp {% endcomment %}
-                        <div class="col-12">
+                        <div class="col-6">
                             <label for="dari">Sampai</label>
                             <input type="text" name="sampai" id="sampai" class="form-control tgl1">
                         </div>

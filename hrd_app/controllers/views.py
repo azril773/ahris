@@ -66,7 +66,7 @@ def beranda(request):
             'dsid' : dsid,
         }
         
-        return render(request,'hrd_app/beranda.html', data)
+        return redirect("absensi",sid=dsid)
         
     else:    
         messages.info(request, 'Data akses Anda belum di tentukan.')        
