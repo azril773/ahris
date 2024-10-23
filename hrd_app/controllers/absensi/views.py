@@ -870,6 +870,7 @@ def pabsen(request):
 
         ddt.append(data)
         
+    status_lh = [st.pk for st in status_pegawai_lintas_hari_db.objects.all()]
     dt = []    
     # proses data simpan di dt array
     # obj 
@@ -1006,7 +1007,7 @@ def pabsen(request):
                         elif a["punch"] == 0 and jam_absen.hour > 18:
                             # pastikan untuk userid hotel
                             if pg is not None:
-                                if re.search('hotel',pg["status"],re.IGNORECASE) is not None:
+                                if pg["status_id"] in status_lh:
                                     try:
                                         ab2 = absensi_db.objects.get(tgl_absen=tplus.date(),pegawai__userid=a["userid"])
                                         if ab.masuk is not None:
@@ -1299,7 +1300,7 @@ def pabsen(request):
 
                             elif int(jam_absen.hour) < 8:
                                 if pg is not None:
-                                    if re.search('hotel',pg["status"],re.IGNORECASE) is not None:
+                                    if pg["status_id"] in status_lh:
                                         try:
                                             ab2 = absensi_db.objects.get(tgl_absen=tmin.date(),pegawai__userid=a["userid"])
                                             if ab2.istirahat is not None:
@@ -1583,7 +1584,7 @@ def pabsen(request):
 # ++++++++++++++++++++++++++++++++++++++++  ISTIRAHAT MALAM 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 4 and (int(jam_absen.hour) > 21 or int(jam_absen.hour) < 8):
                             if pg is not None:
-                                if re.search('hotel',pg["status"],re.IGNORECASE) is not None:
+                                if pg["status_id"] in status_lh:
                                     if ab.masuk is not None:
                                         if int(ab.masuk.hour) > 18:
                                             ab.istirahat2 = jam_absen.time()
@@ -1930,7 +1931,7 @@ def pabsen(request):
 # ++++++++++++++++++++++++++++++++++++++++  KEMBALI MALAM 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 5 and int(jam_absen.hour) < 9:
                             if pg is not None:
-                                if re.search('hotel',pg["status"],re.IGNORECASE) is not None:
+                                if pg["status_id"] in status_lh:
                                     if ab.masuk is not None:
                                         if int(ab.masuk.hour) > 18:
                                             ab.kembali2 = jam_absen.time()
@@ -2209,7 +2210,7 @@ def pabsen(request):
                                         dt.append(data)
                             elif int(jam_absen.hour) < 9:
                                 if pg is not None:
-                                    if re.search('hotel',pg["status"],re.IGNORECASE) is not None:
+                                    if pg["status_id"] in status_lh:
                                         # hari esok
                                         if ab.masuk is not None:
                                             if int(ab.masuk.hour) > 18:
@@ -2486,7 +2487,7 @@ def pabsen(request):
 # ++++++++++++++++++++++++++++++++++++++++  PULANG MALAM  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 1 and int(jam_absen.hour) < 9:
                             if pg is not None:
-                                if re.search('hotel',pg["status"],re.IGNORECASE) is not None:
+                                if pg["status_id"] in status_lh:
                                     if ab.masuk is not None:
                                         if int(ab.masuk.hour) > 18:
                                             ab.pulang = jam_absen.time()
@@ -2844,7 +2845,7 @@ def pabsen(request):
             'keterangan' : g.keterangan
         } 
         geser.append(data)
-        
+    status_ln = [st.pk for st in list_status_opg_libur_nasional_db.objects.all()]
     # data opg
     for o in opg_db.objects.select_related('pegawai').filter(diambil_tgl__range=(dari.date(),sampai.date()), status=0):
         data = {
@@ -3088,7 +3089,7 @@ def pabsen(request):
                     if a.pegawai.status_id in lsopg:
                                                         
                         # Staff
-                        if str(a.pegawai.status) == 'Staff':
+                        if a.pegawai.status_id in status_ln:
                             if str(a.pegawai.hari_off) == str(nh):
                                 # JIKA DIA MASUK DIHARI MERAH DILIBUR REGULERNYA MAKA AKAN DAPAT 2 OPG
                                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):

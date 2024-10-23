@@ -390,6 +390,21 @@ class list_status_opg_db(models.Model):
         verbose_name = 'Status Pegawai yang dapat OPG'
         verbose_name_plural = 'Status Pegawai yang dapat OPG'
 
+class list_status_opg_libur_nasional_db(models.Model):
+    status = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE, null=True)
+    
+    add_by = models.CharField(max_length=100, null=True)
+    edit_by = models.CharField(max_length=100, null=True)
+    add_date = models.DateTimeField(auto_now_add=True, null=True)
+    edit_date = models.DateTimeField(auto_now=True, null=True)
+
+    def __int__(self):
+        return self.status
+    
+    class Meta:
+        verbose_name = 'Status Pegawai yang dapat OPG Libur Nasional'
+        verbose_name_plural = 'Status Pegawai yang dapat OPG Libur Nasional'
+
 
 class awal_cuti_db(models.Model):
     tgl = models.DateField(null=True)

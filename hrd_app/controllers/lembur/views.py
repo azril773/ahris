@@ -1936,7 +1936,7 @@ def status_pegawai_lembur(request):
         messages.info(request, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-    
+
 @login_required
 def tstatus_pegawai_lembur(r):
     status = r.POST.get("status")
@@ -1984,6 +1984,169 @@ def hstatus_pegawai_lembur(r):
             delete_item = f'hapus status pegawai lembur : {get.status_pegawai.status}'
         )
         status_pegawai_lembur_db.objects.get(pk=int(id)).delete()
+        return JsonResponse({'status':'ok'},safe=False,status=200)
+    except:
+        return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
+    
+
+
+
+# status pegawai libur nasional
+
+
+
+
+@login_required
+def status_pegawai_libur_nasional(request):
+    iduser = request.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        status_pegawai = status_pegawai_db.objects.all()
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+        dsid = dakses.sid_id
+        
+        data = {       
+            'dsid': dsid,
+            "status":status_pegawai,
+            'modul_aktif' : 'Status Pegawai Libur Nasional'     
+        }
+        
+        return render(request,'hrd_app/status_pegawai/status_pegawai_libur_nasional.html', data)
+        
+    else:    
+        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+
+    
+    
+@login_required
+def tstatus_pegawai_libur_nasional(r):
+    status = r.POST.get("status")
+    print(status)
+    if list_status_opg_libur_nasional_db.objects.filter(status_id=status).exists():
+        return JsonResponse({'status':'duplikat'},safe=False,status=400)
+    else:
+        list_status_opg_libur_nasional_db(status_id=int(status)).save()
+        return JsonResponse({'status':'berhasil'},safe=False,status=201)
+
+@login_required
+def status_pegawai_libur_nasional_json(r):
+    result = list_status_opg_libur_nasional_db.objects.all()
+    data = []
+    for r in result:
+        obj = {
+            'status_pegawai':r.status.status,
+            'pk':r.pk,
+            "status_id":r.status_id
+        }
+        data.append(obj)
+    
+    return JsonResponse({"data":data},status=200,safe=False)
+
+@login_required
+def estatus_pegawai_libur_nasional(r):
+    status = r.POST.get("status")
+    id = r.POST.get('id')
+
+    try:
+        get = list_status_opg_libur_nasional_db.objects.get(pk=int(id))
+        list_status_opg_libur_nasional_db.objects.filter(pk=int(id)).update(status_id=int(status))
+        return JsonResponse({'status':'ok'},safe=False,status=200)
+    except Exception as err:
+        print(err)
+        return JsonResponse({"status":"gagal update"},safe=False,status=400)
+
+@login_required
+def hstatus_pegawai_libur_nasional(r):
+    id = r.POST.get('id')
+    nama_user = r.user.username
+    try:
+        get = list_status_opg_libur_nasional_db.objects.get(pk=int(id))
+        histori_hapus_db(
+            delete_by = nama_user,
+            delete_item = f'hapus status pegawai libur nasional : {get.status.status}'
+        )
+        list_status_opg_libur_nasional_db.objects.get(pk=int(id)).delete()
+        return JsonResponse({'status':'ok'},safe=False,status=200)
+    except:
+        return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
+
+
+# status pegawai opg
+
+@login_required
+def status_pegawai_opg(request):
+    iduser = request.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        status_pegawai = status_pegawai_db.objects.all()
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+        dsid = dakses.sid_id
+        
+        data = {       
+            'dsid': dsid,
+            "status":status_pegawai,
+            'modul_aktif' : 'Status Pegawai OPG'     
+        }
+        
+        return render(request,'hrd_app/status_pegawai/status_pegawai_opg.html', data)
+        
+    else:    
+        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+
+    
+    
+@login_required
+def tstatus_pegawai_opg(r):
+    status = r.POST.get("status")
+    print(status)
+    if list_status_opg_db.objects.filter(status_id=status).exists():
+        return JsonResponse({'status':'duplikat'},safe=False,status=400)
+    else:
+        list_status_opg_db(status_id=int(status)).save()
+        return JsonResponse({'status':'berhasil'},safe=False,status=201)
+
+@login_required
+def status_pegawai_opg_json(r):
+    result = list_status_opg_db.objects.all()
+    data = []
+    for r in result:
+        obj = {
+            'status_pegawai':r.status.status,
+            'pk':r.pk,
+            "status_id":r.status_id
+        }
+        data.append(obj)
+    
+    return JsonResponse({"data":data},status=200,safe=False)
+
+@login_required
+def estatus_pegawai_opg(r):
+    status = r.POST.get("status")
+    id = r.POST.get('id')
+
+    try:
+        get = list_status_opg_db.objects.get(pk=int(id))
+        list_status_opg_db.objects.filter(pk=int(id)).update(status_id=int(status))
+        return JsonResponse({'status':'ok'},safe=False,status=200)
+    except Exception as err:
+        print(err)
+        return JsonResponse({"status":"gagal update"},safe=False,status=400)
+
+@login_required
+def hstatus_pegawai_opg(r):
+    id = r.POST.get('id')
+    nama_user = r.user.username
+    try:
+        get = list_status_opg_db.objects.get(pk=int(id))
+        histori_hapus_db(
+            delete_by = nama_user,
+            delete_item = f'hapus status pegawai libur nasional : {get.status.status}'
+        )
+        list_status_opg_db.objects.get(pk=int(id)).delete()
         return JsonResponse({'status':'ok'},safe=False,status=200)
     except:
         return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
