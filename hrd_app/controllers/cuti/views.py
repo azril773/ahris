@@ -1,4 +1,5 @@
 from hrd_app.controllers.lib import *
+from django.db import transaction
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Cuti
 @login_required
@@ -233,227 +234,249 @@ def tambah_cuti(request):
     tac = ac.tgl
         
     for t in ltgl:
-        tgl = datetime.strptime(t,'%d-%m-%Y').date()
-        
-        pg = pegawai_db.objects.get(id=int(idp))
-        sc = pg.sisa_cuti
-        
-        ct = cuti_db.objects.filter(pegawai_id=int(idp), tgl_cuti__gte=tac).aggregate(total=Count('id'))
-        if ct is None:
-            cuti_ke = 1
-        else:
-            cuti_ke = ct['total'] + 1  
+        with transaction.atomic():
+            tgl = datetime.strptime(t,'%d-%m-%Y').date()
             
-        if dket is None:
-            ket = f"Cuti ke {cuti_ke}"
-        else:          
-            ket = f"Cuti ke {cuti_ke}-({dket})"
-   
-        # tidak boleh ada opg, geseroff, atau ijin lainnya di tgl yang akan dipakai cuti
-        if ijin_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_ijin=tgl).exists():
-            status = 'ada ijin'
-        else:
-            if opg_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), diambil_tgl=tgl).exists():
-                status = 'ada opg' 
+            pg = pegawai_db.objects.get(id=int(idp))
+            sc = pg.sisa_cuti
+            
+            ct = cuti_db.objects.filter(pegawai_id=int(idp), tgl_cuti__gte=tac).aggregate(total=Count('id'))
+            if ct is None:
+                cuti_ke = 1
             else:
-                if geseroff_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), ke_tgl=tgl).exists():
-                    status = 'ada geseroff'
+                cuti_ke = ct['total'] + 1  
+                
+            if dket is None:
+                ket = f"Cuti ke {cuti_ke}"
+            else:          
+                ket = f"Cuti ke {cuti_ke}-({dket})"
+    
+            # tidak boleh ada opg, geseroff, atau ijin lainnya di tgl yang akan dipakai cuti
+            if ijin_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_ijin=tgl).exists():
+                status = 'ada ijin'
+            else:
+                if opg_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), diambil_tgl=tgl).exists():
+                    status = 'ada opg' 
                 else:
-                    if cuti_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_cuti=tgl).exists():
-                        status = 'duplikat'
+                    if geseroff_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), ke_tgl=tgl).exists():
+                        status = 'ada geseroff'
                     else:
-                        if absensi_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_absen=tgl).exists():
-                            
-                            ab = absensi_db.objects.select_related('pegawai').get(pegawai_id=int(idp), tgl_absen=tgl)
-                            
-                            if ab.masuk is None and ab.pulang is None:
-                                ab.keterangan_absensi = ket
-                                ab.save()
+                        if cuti_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_cuti=tgl).exists():
+                            status = 'duplikat'
+                        else:
+                            if absensi_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_absen=tgl).exists():
                                 
+                                ab = absensi_db.objects.select_related('pegawai').get(pegawai_id=int(idp), tgl_absen=tgl)
+                                
+                                if ab.masuk is None and ab.pulang is None:
+                                    ab.keterangan_absensi = ket
+                                    ab.save()
+                                    
+                                    tcuti = cuti_db(
+                                        pegawai_id = int(idp),
+                                        tgl_cuti = tgl,
+                                        keterangan = dket,
+                                        cuti_ke = cuti_ke,
+                                        add_by = nama_user,
+                                        edit_by = nama_user
+                                    )               
+                                    tcuti.save()
+                                    sc = sc - 1
+                                    if sc < 0:
+                                        transaction.set_rollback(True)
+                                        return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
+                                    pg.sisa_cuti = sc
+                                    pg.save()
+                                    
+                                    status = 'ok'
+                                else:
+                                    if ab.masuk is not None and ab.pulang is not None:
+                                        if ab.masuk < ab.pulang :
+                                            dmsk = f'{ab.tgl_absen} {ab.masuk}'
+                                            dplg = f'{ab.tgl_absen} {ab.pulang}'
+                                            
+                                            msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+                                            plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+                                            
+                                            dselisih = plg - msk
+                                            djam_selisih = f'{ab.tgl_absen} {dselisih}'
+                                            selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
+                                            
+                                            if int(selisih.hour) <= 4:
+                                                ab.keterangan_absensi = ket
+                                                ab.save()
+                                                
+                                                tcuti = cuti_db(
+                                                    pegawai_id = int(idp),
+                                                    tgl_cuti = tgl,
+                                                    keterangan = ket,
+                                                    cuti_ke = cuti_ke,
+                                                    add_by = nama_user,
+                                                    edit_by = nama_user
+                                                )               
+                                                sc = sc - 1
+                                                if sc < 0:
+                                                    transaction.set_rollback(True)
+                                                    return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
+                                                pg.sisa_cuti = sc
+                                                pg.save()
+                                                
+                                                status = 'ok'
+                                            else:                                
+                                                status = 'pegawai masuk'
+                                        else:
+                                            tplus = ab.tgl_absen         
+                                
+                                            dmsk = f'{ab.tgl_absen} {ab.masuk}'
+                                            dplg = f'{tplus} {ab.pulang}'
+                                            
+                                            msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+                                            plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+                                            
+                                            dselisih = plg - msk
+                                            djam_selisih = f'{ab.tgl_absen} {dselisih}'
+                                            date_part, delta_part, time_part = djam_selisih.split(' ', 2)
+                                            # Parse the date and time
+                                            base_datetime = datetime.strptime(date_part + ' ' + time_part.split(",")[1], '%Y-%m-%d %H:%M:%S')
+
+                                            # Adjust the date based on the delta part
+                                            if delta_part == '-1':
+                                                adjusted_datetime = base_datetime - timedelta(days=1)
+                                            elif delta_part == '+1':
+                                                adjusted_datetime = base_datetime + timedelta(days=1)
+                                            else:
+                                                adjusted_datetime = base_datetime
+                                            selisih = datetime.strptime(str(adjusted_datetime), '%Y-%m-%d %H:%M:%S')
+                                            
+                                            if int(selisih.hour) <= 4: 
+                                                ab.keterangan_absensi = ket
+                                                ab.save()
+                                                
+                                                tcuti = cuti_db(
+                                                    pegawai_id = int(idp),
+                                                    tgl_cuti = tgl,
+                                                    keterangan = ket,
+                                                    cuti_ke = cuti_ke,
+                                                    add_by = nama_user,
+                                                    edit_by = nama_user
+                                                )               
+                                                tcuti.save()
+                                                
+                                                sc = sc - 1
+                                                if sc < 0:
+                                                    transaction.set_rollback(True)
+                                                    return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
+                                                pg.sisa_cuti = sc
+                                                pg.save()
+                                                
+                                                status = 'ok'
+                                            else:
+                                                status = 'pegawai masuk'  
+                                    elif ab.masuk_b is not None and ab.pulang_b is not None:
+                                        if ab.masuk_b < ab.pulang_b :
+                                            dmsk = f'{ab.tgl_absen} {ab.masuk_b}'
+                                            dplg = f'{ab.tgl_absen} {ab.pulang_b}'
+                                            
+                                            msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+                                            plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+                                            
+                                            dselisih = plg - msk
+                                            djam_selisih = f'{ab.tgl_absen} {dselisih}'
+                                            date_part, delta_part, time_part = djam_selisih.split(' ', 2)
+                                            # Parse the date and time
+                                            base_datetime = datetime.strptime(date_part + ' ' + time_part.split(",")[1], '%Y-%m-%d %H:%M:%S')
+
+                                            # Adjust the date based on the delta part
+                                            if delta_part == '-1':
+                                                adjusted_datetime = base_datetime - timedelta(days=1)
+                                            elif delta_part == '+1':
+                                                adjusted_datetime = base_datetime + timedelta(days=1)
+                                            else:
+                                                adjusted_datetime = base_datetime
+                                            selisih = datetime.strptime(str(adjusted_datetime), '%Y-%m-%d %H:%M:%S')
+                                            
+                                            if int(selisih.hour) <= 4:
+                                                ab.keterangan_absensi = ket
+                                                ab.save()
+                                                
+                                                tcuti = cuti_db(
+                                                    pegawai_id = int(idp),
+                                                    tgl_cuti = tgl,
+                                                    keterangan = ket,
+                                                    cuti_ke = cuti_ke,
+                                                    add_by = nama_user,
+                                                    edit_by = nama_user
+                                                )               
+                                                tcuti.save()
+                                                
+                                                sc = sc - 1
+                                                if sc < 0:
+                                                    transaction.set_rollback(True)
+                                                    return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
+                                                pg.sisa_cuti = sc
+                                                pg.save()
+                                                
+                                                status = 'ok'
+                                            else:                                
+                                                status = 'pegawai masuk'
+                                        else:
+                                            tplus = ab.tgl_absen         
+                                
+                                            dmsk = f'{ab.tgl_absen} {ab.masuk_b}'
+                                            dplg = f'{tplus} {ab.pulang_b}'
+                                            
+                                            msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+                                            plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+                                            
+                                            dselisih = plg - msk
+                                            djam_selisih = f'{ab.tgl_absen} {dselisih}'
+                                            selisih = datetime.strptime(str(djam_selisih), '%Y-%m-%d %H:%M:%S')
+                                            
+                                            if int(selisih.hour) <= 4: 
+                                                ab.keterangan_absensi = ket
+                                                ab.save()
+                                                
+                                                tcuti = cuti_db(
+                                                    pegawai_id = int(idp),
+                                                    tgl_cuti = tgl,
+                                                    keterangan = ket,
+                                                    cuti_ke = cuti_ke,
+                                                    add_by = nama_user,
+                                                    edit_by = nama_user
+                                                )               
+                                                tcuti.save()
+                                                
+                                                sc = sc - 1
+                                                if sc < 0:
+                                                    transaction.set_rollback(True)
+                                                    return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
+                                                pg.sisa_cuti = sc
+                                                pg.save()
+                                                
+                                                status = 'ok'
+                                            else:
+                                                status = 'pegawai masuk'  
+                                    else:
+                                        status = 'pegawai masuk'
+                            else:
                                 tcuti = cuti_db(
                                     pegawai_id = int(idp),
                                     tgl_cuti = tgl,
-                                    keterangan = dket,
+                                    keterangan = ket,
                                     cuti_ke = cuti_ke,
                                     add_by = nama_user,
                                     edit_by = nama_user
                                 )               
                                 tcuti.save()
                                 
-                                pg.sisa_cuti = sc - 1
+                                sc = sc - 1
+                                if sc < 0:
+                                    transaction.set_rollback(True)
+                                    return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
+                                pg.sisa_cuti = sc
                                 pg.save()
                                 
                                 status = 'ok'
-                            else:
-                                if ab.masuk is not None and ab.pulang is not None:
-                                    if ab.masuk < ab.pulang :
-                                        dmsk = f'{ab.tgl_absen} {ab.masuk}'
-                                        dplg = f'{ab.tgl_absen} {ab.pulang}'
-                                        
-                                        msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
-                                        plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
-                                        
-                                        dselisih = plg - msk
-                                        djam_selisih = f'{ab.tgl_absen} {dselisih}'
-                                        selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
-                                        
-                                        if int(selisih.hour) <= 4:
-                                            ab.keterangan_absensi = ket
-                                            ab.save()
-                                            
-                                            tcuti = cuti_db(
-                                                pegawai_id = int(idp),
-                                                tgl_cuti = tgl,
-                                                keterangan = ket,
-                                                cuti_ke = cuti_ke,
-                                                add_by = nama_user,
-                                                edit_by = nama_user
-                                            )               
-                                            tcuti.save()
-                                            
-                                            pg.sisa_cuti = sc - 1
-                                            pg.save()
-                                            
-                                            status = 'ok'
-                                        else:                                
-                                            status = 'pegawai masuk'
-                                    else:
-                                        tplus = ab.tgl_absen         
-                            
-                                        dmsk = f'{ab.tgl_absen} {ab.masuk}'
-                                        dplg = f'{tplus} {ab.pulang}'
-                                        
-                                        msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
-                                        plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
-                                        
-                                        dselisih = plg - msk
-                                        djam_selisih = f'{ab.tgl_absen} {dselisih}'
-                                        date_part, delta_part, time_part = djam_selisih.split(' ', 2)
-                                        # Parse the date and time
-                                        base_datetime = datetime.strptime(date_part + ' ' + time_part.split(",")[1], '%Y-%m-%d %H:%M:%S')
-
-                                        # Adjust the date based on the delta part
-                                        if delta_part == '-1':
-                                            adjusted_datetime = base_datetime - timedelta(days=1)
-                                        elif delta_part == '+1':
-                                            adjusted_datetime = base_datetime + timedelta(days=1)
-                                        else:
-                                            adjusted_datetime = base_datetime
-                                        selisih = datetime.strptime(str(adjusted_datetime), '%Y-%m-%d %H:%M:%S')
-                                        
-                                        if int(selisih.hour) <= 4: 
-                                            ab.keterangan_absensi = ket
-                                            ab.save()
-                                            
-                                            tcuti = cuti_db(
-                                                pegawai_id = int(idp),
-                                                tgl_cuti = tgl,
-                                                keterangan = ket,
-                                                cuti_ke = cuti_ke,
-                                                add_by = nama_user,
-                                                edit_by = nama_user
-                                            )               
-                                            tcuti.save()
-                                            
-                                            pg.sisa_cuti = sc - 1
-                                            pg.save()
-                                            
-                                            status = 'ok'
-                                        else:
-                                            status = 'pegawai masuk'  
-                                elif ab.masuk_b is not None and ab.pulang_b is not None:
-                                    if ab.masuk_b < ab.pulang_b :
-                                        dmsk = f'{ab.tgl_absen} {ab.masuk_b}'
-                                        dplg = f'{ab.tgl_absen} {ab.pulang_b}'
-                                        
-                                        msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
-                                        plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
-                                        
-                                        dselisih = plg - msk
-                                        djam_selisih = f'{ab.tgl_absen} {dselisih}'
-                                        date_part, delta_part, time_part = djam_selisih.split(' ', 2)
-                                        # Parse the date and time
-                                        base_datetime = datetime.strptime(date_part + ' ' + time_part.split(",")[1], '%Y-%m-%d %H:%M:%S')
-
-                                        # Adjust the date based on the delta part
-                                        if delta_part == '-1':
-                                            adjusted_datetime = base_datetime - timedelta(days=1)
-                                        elif delta_part == '+1':
-                                            adjusted_datetime = base_datetime + timedelta(days=1)
-                                        else:
-                                            adjusted_datetime = base_datetime
-                                        selisih = datetime.strptime(str(adjusted_datetime), '%Y-%m-%d %H:%M:%S')
-                                        
-                                        if int(selisih.hour) <= 4:
-                                            ab.keterangan_absensi = ket
-                                            ab.save()
-                                            
-                                            tcuti = cuti_db(
-                                                pegawai_id = int(idp),
-                                                tgl_cuti = tgl,
-                                                keterangan = ket,
-                                                cuti_ke = cuti_ke,
-                                                add_by = nama_user,
-                                                edit_by = nama_user
-                                            )               
-                                            tcuti.save()
-                                            
-                                            pg.sisa_cuti = sc - 1
-                                            pg.save()
-                                            
-                                            status = 'ok'
-                                        else:                                
-                                            status = 'pegawai masuk'
-                                    else:
-                                        tplus = ab.tgl_absen         
-                            
-                                        dmsk = f'{ab.tgl_absen} {ab.masuk_b}'
-                                        dplg = f'{tplus} {ab.pulang_b}'
-                                        
-                                        msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
-                                        plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
-                                        
-                                        dselisih = plg - msk
-                                        djam_selisih = f'{ab.tgl_absen} {dselisih}'
-                                        selisih = datetime.strptime(str(djam_selisih), '%Y-%m-%d %H:%M:%S')
-                                        
-                                        if int(selisih.hour) <= 4: 
-                                            ab.keterangan_absensi = ket
-                                            ab.save()
-                                            
-                                            tcuti = cuti_db(
-                                                pegawai_id = int(idp),
-                                                tgl_cuti = tgl,
-                                                keterangan = ket,
-                                                cuti_ke = cuti_ke,
-                                                add_by = nama_user,
-                                                edit_by = nama_user
-                                            )               
-                                            tcuti.save()
-                                            
-                                            pg.sisa_cuti = sc - 1
-                                            pg.save()
-                                            
-                                            status = 'ok'
-                                        else:
-                                            status = 'pegawai masuk'  
-                                else:
-                                    status = 'pegawai masuk'
-                        else:
-                            tcuti = cuti_db(
-                                pegawai_id = int(idp),
-                                tgl_cuti = tgl,
-                                keterangan = ket,
-                                cuti_ke = cuti_ke,
-                                add_by = nama_user,
-                                edit_by = nama_user
-                            )               
-                            tcuti.save()
-                            
-                            pg.sisa_cuti = sc - 1
-                            pg.save()
-                            
-                            status = 'ok'
                                        
     return JsonResponse({"status": status})
 

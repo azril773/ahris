@@ -104,7 +104,7 @@
                                 <div class="col-lg-6">
                                     <div class="form-group mg-b-10-force">
                                         <label class="form-control-label tx-inverse">Tanggal Cuti:</label>
-                                        <input type="text" name="tgl" id="tgl" class="form-control tgl1" placeholder="Tanggal Cuti" required>
+                                        <input type="text" name="tgl" id="tgl" class="form-control tgl1 multis" placeholder="Tanggal Cuti" required>
                                     </div>
                                 </div>
 
@@ -350,7 +350,8 @@
                       
             },
             error: function (error) {
-                alert('Terjadi kesalahan sistem, hubungi IT.')
+                console.log(error)
+                alert(error.responseJSON.msg)
             }
         });
 

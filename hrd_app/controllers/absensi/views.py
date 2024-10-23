@@ -3180,11 +3180,9 @@ def pabsen(request):
             if a.pegawai_id == c['idp']:
                 # jika tgl cuti sama dengan tgl absen
                 if c['tgl_cuti'] == ab.tgl_absen:
+                    print(a.pegawai.nama,"CUTI BOZ")
                     # jika tidak masuk dan pulang
-                    if (ab.masuk is None and ab.pulang is None) or (ab.masuk_b is None and ab.pulang_b is None):
-                        ab.keterangan_absensi = c['keterangan']
-                        ab.save()
-                    else:
+                    if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
                         dmsk = f'{ab.tgl_absen} {ab.masuk}'
                         dplg = f'{ab.tgl_absen} {ab.pulang}'
                         
@@ -3201,11 +3199,15 @@ def pabsen(request):
                         # jika jam kerja lebih dari 4 jam
                         else:
                             cuti_db.objects.get(id=int(c['id'])).delete()
-                            pg = pegawai_db.objects.get(pegawai_id=ab.pegawai_id)
+                            pg = pegawai_db.objects.get(pk=ab.pegawai_id)
                             sc = pg.sisa_cuti
-                            
+                            ab.keterangan_absensi = ""
+                            ab.save()
                             pg.sisa_cuti = sc + 1
                             pg.save()          
+                    else:
+                        ab.keterangan_absensi = c['keterangan']
+                        ab.save()
                 else:
                     pass
             else:
@@ -4178,10 +4180,13 @@ def edit_ijin(r):
     userid = r.user.id
     aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
     divisi = [div.divisi for div in aksesdivisi]
+    print(jenis_ijin,ket,id,sid)
     if jenis_ijin_db.objects.filter(pk=int(jenis_ijin)).exists():
         if absensi_db.objects.select_related("pegawai__divisi").filter(pk=int(id),pegawai__divisi__in=divisi).exists():
+            print("OOKOk")
             ji = jenis_ijin_db.objects.get(pk=int(jenis_ijin))
             ab = absensi_db.objects.get(pk=int(id))
+            print(ab)
             ab.keterangan_ijin = f'{ji.jenis_ijin}-({ket})'
             ab.save()
             ijin_db(

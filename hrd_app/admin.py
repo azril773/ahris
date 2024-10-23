@@ -178,6 +178,9 @@ class sangsi(ImportExportModelAdmin):
 @admin.register(ijin_db)
 class ijin(ImportExportModelAdmin):
     list_display = ("pegawai","ijin")
+@admin.register(geseroff_db)
+class ijin(ImportExportModelAdmin):
+    list_display = ("pegawai","dari_tgl","ke_tgl")
 
 @admin.register(absensi_db)
 class absensi(ImportExportModelAdmin):
