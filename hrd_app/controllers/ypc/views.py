@@ -1,7 +1,7 @@
 from hrd_app.controllers.lib import *
 
 @login_required
-def tlengkap(r):
+def tlengkap(r,sid):
     iduser = r.user.id
         
     if akses_db.objects.filter(user_id=iduser).exists():
@@ -21,6 +21,7 @@ def tlengkap(r):
             'akses' : akses,
             'status' : status,
             'dsid': dsid,
+            'sid': sid,
             # 'sid': sid,
             'sil': sid_lembur,
             # "pegawai":pegawai,
@@ -30,7 +31,7 @@ def tlengkap(r):
 
 
 @login_required
-def tketerangan(r):
+def tketerangan(r,sid):
     iduser = r.user.id
         
     if akses_db.objects.filter(user_id=iduser).exists():
@@ -51,7 +52,7 @@ def tketerangan(r):
             'akses' : akses,
             'status' : status,
             'dsid': dsid,
-            # 'sid': sid,
+            'sid': sid,
             'sil': sid_lembur,
             "jenis_ijin":jenis_ijin,
             # "pegawai":pegawai,
@@ -60,7 +61,7 @@ def tketerangan(r):
         return render(r,"hrd_app/ypc/tketerangan.html",data)
 
 @login_required
-def terlambat(r):
+def terlambat(r,sid):
     iduser = r.user.id
         
     if akses_db.objects.filter(user_id=iduser).exists():
@@ -80,7 +81,7 @@ def terlambat(r):
             'akses' : akses,
             'status' : status,
             'dsid': dsid,
-            # 'sid': sid,
+            'sid': sid,
             'sil': sid_lembur,
             # "pegawai":pegawai,
             'modul_aktif' : 'Laporan'
@@ -89,7 +90,7 @@ def terlambat(r):
     
     
 @login_required
-def tlengkap_json(r):
+def tlengkap_json(r,sid):
     if r.headers["X-Requested_With"] == "XMLHttpRequest":
         today = datetime.now()
         tgl1 = r.POST.get("tgl1")
@@ -104,7 +105,11 @@ def tlengkap_json(r):
         hari = datetime.now().strftime("%A")
         hari = nama_hari(hari)
         data = []
-        for ab in absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2]):
+        if sid == 0:
+            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2])
+        else:
+            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__status_id=int(sid))
+        for ab in result:
             if (ab.masuk is not None and ab.pulang is not None and ab.istirahat is not None and ab.kembali is not None) or (ab.masuk_b is not None and ab.pulang_b is not None and ab.istirahat_b is not None and ab.kembali_b is not None):
                 pass
             else:
@@ -130,7 +135,7 @@ def tlengkap_json(r):
     
     
 @login_required
-def tketerangan_json(r):
+def tketerangan_json(r,sid):
     if r.headers["X-Requested_With"] == "XMLHttpRequest":
         tgl1 = r.POST.get("tgl1")
         tgl2 = r.POST.get("tgl2")
@@ -145,7 +150,11 @@ def tketerangan_json(r):
         hari = nama_hari(hari)
         data = []
          
-        for ab in absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2]):
+        if sid == 0:
+            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2])
+        else:
+            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__status_id=int(sid))
+        for ab in result:
             if (ab.masuk is not None or ab.pulang is not None) or (ab.masuk_b is not None or ab.pulang_b is not None ):
                 pass
             else:
@@ -177,7 +186,7 @@ def tketerangan_json(r):
     
     
 @login_required
-def terlambat_json(r):
+def terlambat_json(r,sid):
     if r.headers["X-Requested_With"] == "XMLHttpRequest":
         tgl1 = r.POST.get("tgl1")
         tgl2 = r.POST.get("tgl2")
@@ -191,7 +200,11 @@ def terlambat_json(r):
         hari = datetime.now().strftime("%A")
         hari = nama_hari(hari)
         data = []
-        for ab in absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2]):
+        if sid == 0:
+            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2])
+        else:
+            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__status_id=int(sid))
+        for ab in result:
             if (ab.masuk is not None or ab.pulang is not None) or (ab.masuk_b is not None or ab.pulang_b is not None ):
                 if ab.jam_masuk is not None and ab.masuk is not None:
                     if ab.masuk > ab.jam_masuk:
