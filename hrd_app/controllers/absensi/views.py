@@ -82,7 +82,10 @@ def cari_absensi(request):
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
                     
                 if a.masuk is not None:
-                    msk = f"{a.masuk}"
+                    if a.jam_masuk is not None and a.masuk > a.jam_masuk:
+                        msk = f"<span class='text-danger'>{a.masuk}</span>"
+                    else:
+                        msk = f"{a.masuk}"
                 else:
                     msk = None
 
@@ -118,12 +121,22 @@ def cari_absensi(request):
                     ist_b = f" {a.istirahat2_b}"
                 else:
                     ist_b = ""
-            
-                    
+
+
+                if a.lama_istirahat is not None and a.istirahat is not None:
+                    jkembali = datetime.combine(a.tgl_absen,a.istirahat) + timedelta(hours=float(a.lama_istirahat))
+                else:
+                    jkembali = None
                 if a.kembali is not None and a.kembali2 is not None:
-                    kmb = f'{a.kembali} / {a.kembali2}'
+                    if jkembali is not None and a.kembali > jkembali.time():
+                        kmb = f'<span class="text-danger">{a.kembali}</span> / {a.kembali2}'
+                    else:
+                        kmb = f'{a.kembali} / {a.kembali2}'
                 elif a.kembali is not None and a.kembali2 is None:                  
-                    kmb = f'{a.kembali}'
+                    if jkembali is not None and a.kembali > jkembali.time():
+                        kmb = f'<span class="text-danger">{a.kembali}</span>'
+                    else:
+                        kmb = f'{a.kembali}'
                 elif a.kembali is None and a.kembali2 is not None:                  
                     kmb = f'{a.kembali2}'    
                 else:
@@ -147,7 +160,8 @@ def cari_absensi(request):
                 else:
                     if a.masuk is not None and a.jam_masuk is not None:
                         if a.masuk > a.jam_masuk:
-                            sket += f"Terlambat masuk tanpa ijin, "                
+                            sket += f"Terlambat masuk tanpa ijin, "
+
                 if a.keterangan_lain is not None:
                     sket += f'{a.keterangan_lain}, '                    
                 if a.libur_nasional is not None:
@@ -202,7 +216,10 @@ def cari_absensi(request):
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
                     
                 if a.masuk is not None:
-                    msk = f"{a.masuk}"
+                    if a.jam_masuk is not None and a.masuk > a.jam_masuk:
+                        msk = f"<span class='text-danger'>{a.masuk}</span>"
+                    else:
+                        msk = f"{a.masuk}"
                 else:
                     msk = None
 
@@ -231,30 +248,40 @@ def cari_absensi(request):
                     ist = ""    
 
                 if a.istirahat_b is not None and a.istirahat2_b is not None:
-                    ist_b += f" {a.istirahat_b} / {a.istirahat2_b})"
+                    ist_b = f" {a.istirahat_b} / {a.istirahat2_b})"
                 elif a.istirahat_b is not None and a.istirahat2_b is None:
-                    ist_b += f" {a.istirahat_b}"
+                    ist_b = f" {a.istirahat_b}"
                 elif a.istirahat_b is None and a.istirahat2_b is not None:
-                    ist_b += f" {a.istirahat2_b}"
+                    ist_b = f" {a.istirahat2_b}"
                 else:
                     ist_b = ""
-            
-                    
+
+
+                if a.lama_istirahat is not None and a.istirahat is not None:
+                    jkembali = datetime.combine(a.tgl_absen,a.istirahat) + timedelta(hours=float(a.lama_istirahat))
+                else:
+                    jkembali = None
                 if a.kembali is not None and a.kembali2 is not None:
-                    kmb = f'{a.kembali} / {a.kembali2}'
+                    if jkembali is not None and a.kembali > jkembali.time():
+                        kmb = f'<span class="text-danger">{a.kembali}</span> / {a.kembali2}'
+                    else:
+                        kmb = f'{a.kembali} / {a.kembali2}'
                 elif a.kembali is not None and a.kembali2 is None:                  
-                    kmb = f'{a.kembali}'
+                    if jkembali is not None and a.kembali > jkembali.time():
+                        kmb = f'<span class="text-danger">{a.kembali}</span>'
+                    else:
+                        kmb = f'{a.kembali}'
                 elif a.kembali is None and a.kembali2 is not None:                  
                     kmb = f'{a.kembali2}'    
                 else:
                     kmb = ""        
 
                 if a.kembali_b is not None and a.kembali2_b is not None:
-                    kmb_b += f" {a.kembali_b} / {a.kembali2_b})"
+                    kmb_b = f" {a.kembali_b} / {a.kembali2_b})"
                 elif a.kembali_b is not None and a.kembali2_b is None:
-                    kmb_b += f" {a.kembali_b}"
+                    kmb_b = f" {a.kembali_b}"
                 elif a.kembali_b is None and a.kembali2_b is not None:
-                    kmb_b += f" {a.kembali2_b}"
+                    kmb_b = f" {a.kembali2_b}"
                 else:
                     kmb_b = "" 
                 
@@ -267,7 +294,8 @@ def cari_absensi(request):
                 else:
                     if a.masuk is not None and a.jam_masuk is not None:
                         if a.masuk > a.jam_masuk:
-                            sket += f"Terlambat masuk tanpa ijin, "                
+                            sket += f"Terlambat masuk tanpa ijin, "
+
                 if a.keterangan_lain is not None:
                     sket += f'{a.keterangan_lain}, '                    
                 if a.libur_nasional is not None:
@@ -2902,7 +2930,7 @@ def pabsen(request):
         """     
         
         # OFF & OFF Pengganti Reguler
-        # jika tidak ada absen masuk dan pulang
+        # jika ada absen masuk dan pulang
         # rencana cronjob jalan
         if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
             if str(a.pegawai.hari_off) == str(nh):
@@ -2950,7 +2978,7 @@ def pabsen(request):
             else:
                 pass
                     
-        # jika ada masuk dan pulang   
+        # jika tidak ada masuk dan pulang   
         else:
             # jika dinas luar
             if ab.pegawai_id in dl_idp:

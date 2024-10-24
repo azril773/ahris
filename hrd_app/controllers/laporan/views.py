@@ -129,8 +129,12 @@ def laporan_json(r):
                             ct += 1
                         elif re.search("opg",a.keterangan_absensi,re.I):
                             opg += 1
-                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and (a.masuk is None and a.pulang is None or a.masuk_b is None and a.pulang_b is None):
+                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and (a.masuk is not None and a.pulang is not None or a.masuk_b is not None and a.pulang_b is not None):
+                        pass
+                        # af += 1
+                    else:
                         af += 1
+
             
             obj = {
                 "id" : pgw.id,
@@ -238,7 +242,10 @@ def laporan_json(r):
                             ct += 1
                         elif re.search("opg",a.keterangan_absensi,re.I):
                             opg += 1
-                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and (a.masuk is None and a.pulang is None or a.masuk_b is None and a.pulang_b is None):
+                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and (a.masuk is not None and a.pulang is not None or a.masuk_b is not None and a.pulang_b is not None):
+                        pass
+                        # af += 1
+                    else:
                         af += 1
             obj = {
                 "id" : pgw.id,
