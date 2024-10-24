@@ -2823,7 +2823,9 @@ def pabsen(request):
     libur = []
     cuti = []
     geser = []
+    geser_all = []
     opg = []
+    opg_all = []
     dl = []
     dl_idp = []
     
@@ -2833,6 +2835,29 @@ def pabsen(request):
     for s in list_status_opg_db.objects.all():
         lsopg.append(s.status_id)
     
+    # geser off all 
+    for ga in geseroff_db.objects.all():
+        data = {
+            'id' : ga.id,
+            'idp' : ga.pegawai_id, 
+            'dari_tgl' : ga.dari_tgl,
+            'ke_tgl' : ga.ke_tgl,
+            'keterangan' : ga.keterangan
+        } 
+        geser_all.append(data)
+
+    # opg all
+    for oa in opg_db.objects.all():
+        data = {
+            'id':oa.id,
+            'idp': oa.pegawai_id,
+            'opg_tgl':oa.opg_tgl,
+            'diambil_tgl':oa.diambil_tgl,
+            'keterangan':oa.keterangan
+        }
+        opg_all.append(data)
+
+
     # data ijin
     for i in ijin_db.objects.select_related('ijin','pegawai').filter(tgl_ijin__range=(dari.date(),sampai.date())):
         data = {
@@ -2937,11 +2962,12 @@ def pabsen(request):
                 # jika dia bisa mendapatkan opg 
                 if a.pegawai.status_id in lsopg:
                     # jika ada geder off dari hari ini ke hari lain
-                    if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+                    if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
                         pass
                     # jika tidak ada
                     else:
-                        if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+                        
+                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                             pass
                         # jika tidak
                         else:
@@ -2960,10 +2986,10 @@ def pabsen(request):
             # sama aja kaya sebelumnya
             if str(a.pegawai.hari_off2) == str(nh):
                 if a.pegawai.status_id in lsopg:
-                    if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+                    if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
                         pass
                     else:
-                        if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                             pass
                         else:
                             tambah_opg = opg_db(
@@ -2988,12 +3014,12 @@ def pabsen(request):
                     # jika dia bisa mendapatkan opg
                     if a.pegawai.status_id in lsopg:
                         # jika dia geser dari hari off ke hari lain
-                        if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+                        if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
                             pass
                         # jika dia tidak geser dari hari off ke hari lain
                         else:
                             # ini rencana jika cronjob jalan
-                            if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+                            if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                 pass
                             else:
                                 # ini kalo tidak jalan
@@ -3016,10 +3042,10 @@ def pabsen(request):
                     
                 if str(a.pegawai.hari_off2) == str(nh):
                     if a.pegawai.status_id in lsopg:
-                        if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+                        if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
                             pass
                         else:
-                            if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+                            if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                 pass
                             else:
                                 tambah_opg = opg_db(
@@ -3066,10 +3092,10 @@ def pabsen(request):
                             # jika hari off nya adalah hari minggu dan masuk maka hanya akan mendapatkan 1 opg
                             if str(a.pegawai.hari_off) == str(nh):
                                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-                                    if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+                                    if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
                                         pass
                                     else:
-                                        if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+                                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                             pass
                                         else:
                                             tambah_opg = opg_db(
@@ -3088,10 +3114,10 @@ def pabsen(request):
                         else:
                             if str(a.pegawai.hari_off) == str(nh):
                                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-                                    if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+                                    if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
                                         pass
                                     else:
-                                        if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+                                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                             pass
                                         else:
                                             tambah_opg = opg_db(
@@ -3121,10 +3147,10 @@ def pabsen(request):
                             if str(a.pegawai.hari_off) == str(nh):
                                 # JIKA DIA MASUK DIHARI MERAH DILIBUR REGULERNYA MAKA AKAN DAPAT 2 OPG
                                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-                                    if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+                                    if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
                                         pass
                                     else:
-                                        if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+                                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                             pass
                                         else:
                                             tambah_opg = opg_db(
@@ -3135,7 +3161,7 @@ def pabsen(request):
                                             )    
                                             tambah_opg.save()
                                             
-                                        if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Tgl Merah').exists():
+                                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
                                             pass
                                         else:    
                                             tambah_opg2 = opg_db(
@@ -3147,7 +3173,7 @@ def pabsen(request):
                                             tambah_opg2.save()
                                 # TAPI JIKA TIDAK MASUK HANYA MENDAPATKAN 1 OPG
                                 else:
-                                    if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Tgl Merah').exists():
+                                    if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
                                         pass
                                     else:    
                                         tambah_opg2 = opg_db(
@@ -3168,7 +3194,8 @@ def pabsen(request):
                                     if geseroff_db.objects.filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
                                         pass
                                     else:
-                                        if opg_db.objects.filter(opg_tgl=ab.tgl_absen,pegawai_id=ab.pegawai_id,keterangan='OFF Pengganti Reguler').exists():
+                                        
+                                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                             pass
                                         else:
                                             tambah_opg = opg_db(
@@ -3209,7 +3236,6 @@ def pabsen(request):
             if a.pegawai_id == c['idp']:
                 # jika tgl cuti sama dengan tgl absen
                 if c['tgl_cuti'] == ab.tgl_absen:
-                    print(a.pegawai.nama,"CUTI BOZ")
                     # jika tidak masuk dan pulang
                     if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
                         dmsk = f'{ab.tgl_absen} {ab.masuk}'
