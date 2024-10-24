@@ -724,6 +724,22 @@ class rekap_lembur_db(models.Model):
         verbose_name_plural = 'Rekap Lembur'
 
 
+
+class rekap_db(models.Model):
+    pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE, null=True)
+    status = models.ForeignKey(status_pegawai_db,on_delete=models.CASCADE, null=True)
+    tharikerja = models.IntegerField(null=True)
+    periode = models.IntegerField(null=True)
+    tahun = models.IntegerField(null=True)
+    sb = models.IntegerField(null=True)
+    sdl = models.IntegerField(null=True)
+    sdp = models.IntegerField(null=True)
+    ijin = models.IntegerField(null=True)
+    af = models.IntegerField(null=True)
+    insentif = models.IntegerField(null=True)
+    cm = models.IntegerField(null=True)
+    keterangan = models.TextField(null=True)
+
 pilihan_kompen = (("Awal", "Awal"),("Akhir", "Akhir"), ("1 Hari", "1 Hari"))
 
 

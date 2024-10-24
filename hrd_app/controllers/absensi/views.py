@@ -901,10 +901,10 @@ def pabsen(request):
                 # # Versi
             
                 for r in rangetgl:
-                    tmin = r + timedelta(days=-1)
-                    tplus = r + timedelta(days=1)
-                    ab = absensi_db.objects.select_related('pegawai','pegawai__kelompok_kerja').get(tgl_absen=r.date(), pegawai__userid=a['userid'])
                     if jam_absen.date() == r.date():
+                        tmin = r + timedelta(days=-1)
+                        tplus = r + timedelta(days=1)
+                        ab = absensi_db.objects.select_related('pegawai','pegawai__kelompok_kerja').get(tgl_absen=r.date(), pegawai__userid=a['userid'])
                         bb_msk = jam_absen - timedelta(hours=4)
                         ba_msk = jam_absen + timedelta(hours=4)
                         jk = None
