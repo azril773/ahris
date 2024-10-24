@@ -4,8 +4,8 @@ from hrd_app.controllers.lib import *
 # Status Pegawai
 # ++++++++++++++
 @login_required
-def status_pegawai(request):
-    iduser = request.user.id
+def status_pegawai(r):
+    iduser = r.user.id
         
     if akses_db.objects.filter(user_id=iduser).exists():
         
@@ -18,21 +18,21 @@ def status_pegawai(request):
             'modul_aktif' : 'Status Pegawai'     
         }
         
-        return render(request,'hrd_app/status_pegawai/status_pegawai.html', data)
+        return render(r,'hrd_app/status_pegawai/status_pegawai.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def status_pegawai_json(request):
+def status_pegawai_json(r):
         
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
                 
-        for i in status_pegawai_db.objects.all().order_by('id'):
+        for i in status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id'):
             
             sp = {
                 'id':i.id,
@@ -44,19 +44,19 @@ def status_pegawai_json(request):
 
 
 @login_required
-def tambah_status_pegawai(request):
+def tambah_status_pegawai(r):
     
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        dstatus = request.POST.get('status')
+        dstatus = r.POST.get('status')
         
-        if status_pegawai_db.objects.filter(status = dstatus).exists():
+        if status_pegawai_db.objects.using(r.session["ccabang"]).filter(status = dstatus).exists():
             status = 'duplikat'
         else:    
             tstatus = status_pegawai_db(
                 status = dstatus
             )
-            tstatus.save()
+            tstatus.save(using=r.session["ccabang"])
             
             status = 'ok'
         
@@ -64,19 +64,19 @@ def tambah_status_pegawai(request):
 
 
 @login_required
-def edit_status_pegawai(request):
+def edit_status_pegawai(r):
     
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        eid = request.POST.get('eid')
-        dstatus = request.POST.get('estatus')
+        eid = r.POST.get('eid')
+        dstatus = r.POST.get('estatus')
         
-        if status_pegawai_db.objects.filter(status = dstatus).exists():
+        if status_pegawai_db.objects.using(r.session["ccabang"]).filter(status = dstatus).exists():
             status = 'duplikat'
         else:    
-            nstatus = status_pegawai_db.objects.get(id=int(eid))
+            nstatus = status_pegawai_db.objects.using(r.session["ccabang"]).get(id=int(eid))
             nstatus.status = dstatus
-            nstatus.save()
+            nstatus.save(using=r.session["ccabang"])
             
             status = 'ok'
         
@@ -84,26 +84,26 @@ def edit_status_pegawai(request):
 
 
 @login_required
-def hapus_status_pegawai(request):
+def hapus_status_pegawai(r):
     
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        nama_user = request.user.username
+        nama_user = r.user.username
         
-        hid = request.POST.get('hid')
+        hid = r.POST.get('hid')
         
-        if pegawai_db.objects.filter(status_id=int(hid), aktif=1).exists():
+        if pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=int(hid), aktif=1).exists():
             status = 'pegawai memiliki status ini'
         else:        
-            nstatus = status_pegawai_db.objects.get(id=int(hid))            
+            nstatus = status_pegawai_db.objects.using(r.session["ccabang"]).get(id=int(hid))            
             
             thapus = histori_hapus_db(
                 delete_by = nama_user,
                 delete_item = f'hapus status pegawai : {nstatus.status}'
             )
-            thapus.save()
+            thapus.save(using=r.session["ccabang"])
             
-            nstatus.delete()
+            nstatus.delete(using=r.session["ccabang"])
             
             status = 'ok'
         

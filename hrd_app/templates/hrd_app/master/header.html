@@ -11,6 +11,11 @@
 
     <div class="br-header-right">
       <nav class="nav">
+        <select name="cabang" id="cabang">
+          {% for c in cabang %}
+            <option value="{{c}}">{{c}}</option>
+          {% endfor %}
+        </select>
         <div class="dropdown">
           <div class="pd-x-25">
               <h4 id="brTime" class="tx-black tx-light mg-b-1"></h4>

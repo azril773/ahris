@@ -781,7 +781,22 @@ class histori_hapus_db(models.Model):
         verbose_name = 'Histori Hapus'
         verbose_name_plural = 'Histori Hapus'        
 
+cabang =  (("tasik","tasik"),("sumedang","sumedang"),("cirebon","cirebon"),("garut","garut"),("cihideung","cihideung"))
 
+class akses_cabang_db(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    cabang = models.CharField(choices=cabang,max_length=50,null=False)
+    add_by = models.CharField(max_length=100, null=True)
+    edit_by = models.CharField(max_length=100, null=True)
+    add_date = models.DateTimeField(auto_now_add=True, null=True)
+    edit_date = models.DateTimeField(auto_now=True, null=True)
+
+    def __str__(self):
+        return self.cabang
+
+    class Meta:
+        verbose_name = 'Akses Cabang'
+        verbose_name_plural = 'Akses Cabang'   
 
 
 

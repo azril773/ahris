@@ -21,18 +21,19 @@ def broadcast(r,sid):
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('id')
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except: 
             sid_lembur = 0
         if sid == 0:
-            pegawai = pegawai_db.objects.filter(aktif=1)
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
         else:    
-            pegawai = pegawai_db.objects.filter(aktif=1,status_id=sid)
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1,status_id=sid)
         data = {       
             'akses':akses,
+            "cabang":r.session["cabang"],
             'sid':sid,
             'status':status,
             "sil":sid_lembur,
@@ -66,7 +67,7 @@ def single_absensi(r):
     channel = connection.channel()
     # channel.basic_publish(exchange="email",routing_key="absensi",body=)
     data = []
-    p = pegawai_db.objects.filter(pk=int(idp))
+    p = pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).filter(pk=int(idp))
     if p.exists():
         if prd == '' or thn == '':
             return JsonResponse({"status":"error","msg":"Silahkan lengkapi form yang ada"},status=400)
@@ -94,7 +95,7 @@ def bpa(r,sid):
         messages.error(r,"Silahkan lengkapi form yang ada")
         return redirect("broadcast",sid=sid)
 
-    for p in pegawai_db.objects.filter(id__in=pegawai):
+    for p in pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pegawai):
 
 
         idp = p.pk

@@ -197,6 +197,9 @@ class lembur(ImportExportModelAdmin):
 @admin.register(opg_db)
 class lembur(ImportExportModelAdmin):
     list_display = ("opg_tgl",)
+@admin.register(akses_cabang_db)
+class lembur(ImportExportModelAdmin):
+    list_display = ("user","cabang")
 admin.site.site_header = "AHRIS"
 admin.site.site_title = "AHRIS"
 admin.site.site_url = "/hrd/pengaturan"    

@@ -4,8 +4,8 @@ import pandas as pd
 # Jam Kerja
 # ++++++++++++++
 @login_required
-def jam_kerja(request):
-    iduser = request.user.id
+def jam_kerja(r):
+    iduser = r.user.id
     if akses_db.objects.filter(user_id=iduser).exists():
         # excel = pd.read_excel("static/jam_kerja.xlsx",sheet_name="Sheet1")
         # data = []
@@ -26,7 +26,7 @@ def jam_kerja(request):
         # for d in data:
         #     print(d["status_pegawai"])
         #     sp = str(d["status_pegawai"]).strip()
-        #     kk = kelompok_kerja_db.objects.get(kelompok__iregex=r'^{}$'.format(sp))
+        #     kk = kelompok_kerja_db.objects.using(r.session["ccabang"]).get(kelompok__iregex=r'^{}$'.format(sp))
         #     if d["hari"] == "Biasa":
         #         for i in range(0,6):
         #             jamkerja = jamkerja_db()
@@ -35,7 +35,7 @@ def jam_kerja(request):
         #             jamkerja.jam_pulang = d["jam_pulang"]
         #             jamkerja.lama_istirahat = d["lama_istirahat"]
         #             jamkerja.hari = hari[i]
-        #             jamkerja.save()
+        #             jamkerja.save(r.session["ccabang"])
         #     elif d["hari"] == "All":
         #         for i in range(0,7):
         #             print(i)
@@ -45,7 +45,7 @@ def jam_kerja(request):
         #             jamkerja.jam_pulang = d["jam_pulang"]
         #             jamkerja.lama_istirahat = d["lama_istirahat"]
         #             jamkerja.hari = hari[i]
-        #             jamkerja.save()
+        #             jamkerja.save(r.session["ccabang"])
         #     else:
         #             jamkerja = jamkerja_db()
         #             jamkerja.kk = kk
@@ -53,45 +53,45 @@ def jam_kerja(request):
         #             jamkerja.jam_pulang = d["jam_pulang"]
         #             jamkerja.lama_istirahat = d["lama_istirahat"]
         #             jamkerja.hari = d["hari"]
-        #             jamkerja.save()
+        #             jamkerja.save(r.session["ccabang"])
 
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        kk = kelompok_kerja_db.objects.all().order_by('kelompok')
+        kk = kelompok_kerja_db.objects.using(r.session["ccabang"]).all().order_by('kelompok')
         data = {       
             'dsid': dsid,
             'kk': kk,
             'modul_aktif' : 'Jam Kerja'     
         }
         
-        return render(request,'hrd_app/jam_kerja/jam_kerja.html', data)
+        return render(r,'hrd_app/jam_kerja/jam_kerja.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def tambah_kk_json(request):
+def tambah_kk_json(r):
         
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        tkk = request.POST.get('tkk')
+        tkk = r.POST.get('tkk')
         
         data = []
                 
-        if kelompok_kerja_db.objects.filter(kelompok=tkk).exists():
+        if kelompok_kerja_db.objects.using(r.session["ccabang"]).filter(kelompok=tkk).exists():
             data = {}
             status = 'duplikat'
         else:
             tk = kelompok_kerja_db(
                 kelompok = tkk
             )    
-            tk.save()
+            tk.save(r.session["ccabang"])
             
-            dkk = kelompok_kerja_db.objects.last()
+            dkk = kelompok_kerja_db.objects.using(r.session["ccabang"]).last()
         
             data = {
                 'id': dkk.id,
@@ -103,17 +103,17 @@ def tambah_kk_json(request):
         return JsonResponse({"status": status, "data":data})
 
 @login_required
-def edit_kk_json(request):
+def edit_kk_json(r):
         
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        ekk = request.POST.get('ekk')
-        new_kk = request.POST.get('new_kk')
+        ekk = r.POST.get('ekk')
+        new_kk = r.POST.get('new_kk')
         try:
-            if kelompok_kerja_db.objects.filter(~Q(pk=int(ekk)),kelompok=new_kk).exists():
+            if kelompok_kerja_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(ekk)),kelompok=new_kk).exists():
                 return JsonResponse({"status": "duplikat"})
             print(ekk)
-            kelompok_kerja_db.objects.filter(pk=int(ekk)).update(kelompok=new_kk)
+            kelompok_kerja_db.objects.using(r.session["ccabang"]).filter(pk=int(ekk)).update(kelompok=new_kk)
             return JsonResponse({"status": "ok"})
         except: 
             return JsonResponse({"status": "gagal update",})
@@ -122,12 +122,12 @@ def edit_kk_json(request):
 
 
 @login_required
-def jam_kerja_json(request):
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+def jam_kerja_json(r):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
                 
-        for i in jamkerja_db.objects.all().order_by('kk_id__kelompok'):            
+        for i in jamkerja_db.objects.using(r.session["ccabang"]).all().order_by('kk_id__kelompok'):            
             
             jk = {
                 'id': i.id,
@@ -171,16 +171,16 @@ def tambah_jam_kerja(r):
             hari = ["Semua Hari"]
 
 
-        if jamkerja_db.objects.filter(kk_id=int(kk),jam_masuk=jam_masuk,jam_pulang=jam_pulang).exists():
+        if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),jam_masuk=jam_masuk,jam_pulang=jam_pulang).exists():
             status = "gagal tambah"
         else:
             print("SSD")
             for h in hari:
-                # if jamkerja_db.objects.filter(kk_id=int(kk),hari=h).exists():
+                # if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),hari=h).exists():
                 #     continue
                 
                 if h.lower() == 'semua hari':
-                    if jamkerja_db.objects.filter(~Q(hari='semua hari'),jam_masuk=jam_masuk,jam_pulang=jam_pulang,kk_id=int(kk)).exists():
+                    if jamkerja_db.objects.using(r.session["ccabang"]).filter(~Q(hari='semua hari'),jam_masuk=jam_masuk,jam_pulang=jam_pulang,kk_id=int(kk)).exists():
                         break
 
                 jamkerja_db(
@@ -189,7 +189,7 @@ def tambah_jam_kerja(r):
                     jam_pulang=jam_pulang,
                     lama_istirahat=lama_istirahat,
                     hari=h
-                ).save()
+                ).save(r.session["ccabang"])
             status = "ok"
         return JsonResponse({"status": status})
 
@@ -214,13 +214,13 @@ def edit_jam_kerja(r):
 
         if len(hari) >= 7:
             hari = ["Semua Hari"]
-        jamkerja_db.objects.filter(id=int(eid)).delete()
+        jamkerja_db.objects.using(r.session["ccabang"]).filter(id=int(eid)).delete(using=r.session["ccabang"])
         for h in hari:
-            # if jamkerja_db.objects.filter(kk_id=int(kk),hari=h).exists():
+            # if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),hari=h).exists():
             #     continue
             
             if h.lower() == 'semua hari':
-                if jamkerja_db.objects.filter(~Q(hari='semua hari'),kk_id=int(kk)).exists():
+                if jamkerja_db.objects.using(r.session["ccabang"]).filter(~Q(hari='semua hari'),kk_id=int(kk)).exists():
                     break
             print("OKOSKD")
             jamkerja_db(
@@ -229,22 +229,22 @@ def edit_jam_kerja(r):
                 jam_pulang=jam_pulang,
                 lama_istirahat=lama_istirahat,
                 hari=h
-            ).save()
+            ).save(r.session["ccabang"])
         status = "ok"
         return JsonResponse({"status": status})
 
 
 @login_required
-def hapus_jam_kerja(request):
+def hapus_jam_kerja(r):
     
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        nama_user = request.user.username
+        nama_user = r.user.username
         
-        hid = request.POST.get('hid')
+        hid = r.POST.get('hid')
         
         try:
-            ln = jamkerja_db.objects.get(id=int(hid))           
+            ln = jamkerja_db.objects.using(r.session["ccabang"]).get(id=int(hid))           
         except:
             return JsonResponse({'status':'gagal hapus'})
 
@@ -252,9 +252,9 @@ def hapus_jam_kerja(request):
             delete_by = nama_user,
             delete_item = f'hapus jam kerja : {ln.kk.kelompok}'
         )
-        thapus.save()
+        thapus.save(r.session["ccabang"])
         
-        ln.delete()
+        ln.delete(using=r.session["ccabang"])
         
         status = 'ok'
         

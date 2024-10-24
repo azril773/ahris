@@ -44,6 +44,8 @@ def logindispatch(request):
 
 # Logout
 def user_logout(request):
+    request.session["ccabang"] = None
+    request.session["cabang"] = None
     logout(request)
     return redirect("login")
         

@@ -3,8 +3,8 @@ from hrd_app.controllers.lib import *
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ijin
 @login_required
-def ijin(request, sid):
-    iduser = request.user.id
+def ijin(r, sid):
+    iduser = r.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
@@ -19,10 +19,10 @@ def ijin(request, sid):
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')
         
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
@@ -31,7 +31,7 @@ def ijin(request, sid):
         pegawai = []
         pp = []
             
-        for p in pegawai_db.objects.all():
+        for p in pegawai_db.objects.using(r.session["ccabang"]).all():
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -50,7 +50,7 @@ def ijin(request, sid):
                     pegawai.append(data)
             else:
                 pass    
-        for p in pegawai_db.objects.filter(Q(gender__regex=r"(?i)perempuan") | Q(gender__regex=r"(?i)p")):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(Q(gender__regex=r"(?i)perempuan") | Q(gender__regex=r"(?i)p")):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -69,10 +69,11 @@ def ijin(request, sid):
                     pp.append(data)
             else:
                 pass    
-        ijin = jenis_ijin_db.objects.order_by('jenis_ijin')
+        ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).order_by('jenis_ijin')
                         
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -88,40 +89,40 @@ def ijin(request, sid):
             'modul_aktif' : 'Ijin'
         }
         
-        return render(request,'hrd_app/ijin/[sid]/ijin.html', data)
+        return render(r,'hrd_app/ijin/[sid]/ijin.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def cari_ijin(request):
-    iduser = request.user.id
+def cari_ijin(r):
+    iduser = r.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        dr = request.POST.get('ctgl1')
-        sp = request.POST.get('ctgl2')
-        sid = request.POST.get('sid')
+        dr = r.POST.get('ctgl1')
+        sp = r.POST.get('ctgl2')
+        sid = r.POST.get('sid')
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date() 
                 
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
 
         pegawai = []
             
-        for p in pegawai_db.objects.filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -140,10 +141,11 @@ def cari_ijin(request):
                     }    
                     pegawai.append(data)   
 
-        ijin = jenis_ijin_db.objects.order_by('jenis_ijin')
+        ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).order_by('jenis_ijin')
                         
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -157,16 +159,16 @@ def cari_ijin(request):
             'modul_aktif' : 'Ijin'
         }
         
-        return render(request,'hrd_app/ijin/cijin/[dr]/[sp]/[sid]/cijin.html', data)
+        return render(r,'hrd_app/ijin/cijin/[dr]/[sp]/[sid]/cijin.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def cari_ijin_sid(request, dr, sp, sid):
-    iduser = request.user.id
+def cari_ijin_sid(r, dr, sp, sid):
+    iduser = r.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
@@ -176,17 +178,17 @@ def cari_ijin_sid(request, dr, sp, sid):
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
                 
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
 
         pegawai = []
             
-        for p in pegawai_db.objects.filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -205,10 +207,11 @@ def cari_ijin_sid(request, dr, sp, sid):
                     }    
                     pegawai.append(data)   
 
-        ijin = jenis_ijin_db.objects.order_by('jenis_ijin')
+        ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).order_by('jenis_ijin')
                         
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -222,23 +225,23 @@ def cari_ijin_sid(request, dr, sp, sid):
             'modul_aktif' : 'Ijin'
         }
         
-        return render(request,'hrd_app/ijin/cijin/[dr]/[sp]/[sid]/cijin.html', data)
+        return render(r,'hrd_app/ijin/cijin/[dr]/[sp]/[sid]/cijin.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def ijin_json(request, dr, sp, sid):
+def ijin_json(r, dr, sp, sid):
         
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-        for i in ijin_db.objects.select_related('pegawai','ijin').filter(tgl_ijin__range=(dari,sampai)):
+        for i in ijin_db.objects.using(r.session["ccabang"]).select_related('pegawai','ijin').filter(tgl_ijin__range=(dari,sampai)):
             if int(sid) == 0:
                 
                 tijin = i.tgl_ijin.strftime("%A")
@@ -284,28 +287,28 @@ def ijin_json(request, dr, sp, sid):
 
 
 @login_required
-def tambah_ijin(request):
-    nama_user = request.user.username
+def tambah_ijin(r):
+    nama_user = r.user.username
     
-    dtgl = request.POST.get('tgl')
-    dpegawai = request.POST.get('pegawai')
-    dijin = request.POST.get('ijin')
-    dket = request.POST.get('ket')
+    dtgl = r.POST.get('tgl')
+    dpegawai = r.POST.get('pegawai')
+    dijin = r.POST.get('ijin')
+    dket = r.POST.get('ket')
     try:
-       ij = jenis_ijin_db.objects.get(id=int(dijin))
+       ij = jenis_ijin_db.objects.using(r.session["ccabang"]).get(id=int(dijin))
     except: 
         return JsonResponse({"status":"error"})
     ltgl = dtgl.split(', ')
     for t in ltgl:
         tgl = datetime.strptime(t,'%d-%m-%Y')        
               
-        if ijin_db.objects.select_related('pegawai','ijin').filter(pegawai_id=int(dpegawai), tgl_ijin=tgl.date()).exists():
+        if ijin_db.objects.using(r.session["ccabang"]).select_related('pegawai','ijin').filter(pegawai_id=int(dpegawai), tgl_ijin=tgl.date()).exists():
             status = 'duplikat'
         else:
             if absensi_db.objects.select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=tgl.date()).exists():
                 ab = absensi_db.objects.select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=tgl.date())
                 ab.keterangan_ijin = f'{ij.jenis_ijin}-({dket})'
-                ab.save()
+                ab.save(using=r.session["ccabang"])
             else:
                 pass 
                 
@@ -317,7 +320,7 @@ def tambah_ijin(request):
                 add_by = nama_user,
                 edit_by = nama_user
             )
-            tambah.save()
+            tambah.save(using=r.session["ccabang"])
 
             status = 'ok'    
     
@@ -325,12 +328,12 @@ def tambah_ijin(request):
 
 
 @login_required
-def batal_ijin(request):
-    nama_user = request.user.username
+def batal_ijin(r):
+    nama_user = r.user.username
 
-    id_ijin = request.POST.get('id')
+    id_ijin = r.POST.get('id')
     
-    ij = ijin_db.objects.select_related('pegawai','ijin').get(id=int(id_ijin))
+    ij = ijin_db.objects.using(r.session["ccabang"]).select_related('pegawai','ijin').get(id=int(id_ijin))
     tgl = ij.tgl_ijin
     idp = ij.pegawai_id
     nama_pegawai = ij.pegawai.nama
@@ -339,16 +342,16 @@ def batal_ijin(request):
     if abc.exists():
         ab = absensi_db.objects.get(pegawai_id=int(idp), tgl_absen=tgl)
         ab.keterangan_ijin = None
-        ab.save()
+        ab.save(using=r.session["ccabang"])
 
     
     histori = histori_hapus_db(
         delete_by = nama_user,
         delete_item = f"{jenis_ijin}-(a.n {nama_pegawai}, tgl:{tgl})"
     )
-    histori.save()
+    histori.save(using=r.session["ccabang"])
     
-    ij.delete()
+    ij.delete(using=r.session["ccabang"])
     
     status = 'ok'    
     
@@ -360,8 +363,8 @@ def batal_ijin(request):
 # Jenis Ijin
 # ++++++++++++++
 @login_required
-def jenis_ijin(request):
-    iduser = request.user.id
+def jenis_ijin(r):
+    iduser = r.user.id
         
     if akses_db.objects.filter(user_id=iduser).exists():
         
@@ -374,16 +377,16 @@ def jenis_ijin(request):
             'modul_aktif' : 'Jenis Ijin'     
         }
         
-        return render(request,'hrd_app/ijin/jenis_ijin.html', data)
+        return render(r,'hrd_app/ijin/jenis_ijin.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 @login_required
 def jenis_ijin_json(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        jenis_ijin = jenis_ijin_db.objects.all()
+        jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()
         
         data = []
 
@@ -399,12 +402,12 @@ def jenis_ijin_json(r):
 def tjenis_ijin(r):
     jenis_ijin = r.POST.get("jenis_ijin")
 
-    if jenis_ijin_db.objects.filter(jenis_ijin=jenis_ijin).exists():
+    if jenis_ijin_db.objects.using(r.session["ccabang"]).filter(jenis_ijin=jenis_ijin).exists():
         status="duplikat"
     else:
         jenis_ijin_db(
             jenis_ijin=jenis_ijin
-        ).save()
+        ).save(using=r.session["ccabang"])
         status = "ok"
     return JsonResponse({"status":status},safe=False,status=200)
 
@@ -412,10 +415,10 @@ def tjenis_ijin(r):
 def ejenis_ijin(r):
     jenis_ijin = r.POST.get("jenis_ijin")
     id = r.POST.get("id") 
-    if jenis_ijin_db.objects.filter(~Q(id=int(id)),jenis_ijin=jenis_ijin).exists():
+    if jenis_ijin_db.objects.using(r.session["ccabang"]).filter(~Q(id=int(id)),jenis_ijin=jenis_ijin).exists():
         status = "duplikat"
     else:
-        jenis_ijin_db.objects.filter(id=int(id)).update(jenis_ijin=jenis_ijin)
+        jenis_ijin_db.objects.using(r.session["ccabang"]).filter(id=int(id)).update(jenis_ijin=jenis_ijin)
         status = "ok"
     return JsonResponse({"status":status},safe=False,status=200)
 
@@ -425,12 +428,12 @@ def hjenis_ijin(r):
     jenis_ijin = r.POST.get("jenis_ijin")
     nama_user = r.user.username
     try:
-        jenis_ijin_db.objects.get(pk=int(id)).delete()
+        jenis_ijin_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
         thapus = histori_hapus_db(
                 delete_by = nama_user,
                 delete_item = f'hapus jenis ijin : {jenis_ijin}'
         )
-        thapus.save()
+        thapus.save(using=r.session["ccabang"])
         status = 'Ok'
     except:
         status = "gagal menghapus" 
@@ -444,15 +447,15 @@ def tcuti_melahirkan(r):
     pegawai = r.POST.get("pegawai")
 
     try:
-        pgw = pegawai_db.objects.get(pk=int(pegawai))
+        pgw = pegawai_db.objects.using(r.session["ccabang"]).get(pk=int(pegawai))
     except:
         return JsonResponse({"status":400,"msg":"data pegawai tidak ada"},status=400)
     dari = datetime.strptime(dr,'%d-%m-%Y').date()
     sampai = datetime.strptime(sp,"%d-%m-%Y").date()
     data = []
-    if ijin_db.objects.filter(tgl_ijin__range=(dari,sampai),pegawai_id=pgw.pk,ijin__jenis_ijin=r'CM$').exists():
+    if ijin_db.objects.using(r.session["ccabang"]).filter(tgl_ijin__range=(dari,sampai),pegawai_id=pgw.pk,ijin__jenis_ijin=r'CM$').exists():
         return JsonResponse({"status":400,"msg":"Data ijin sudah ada","data":[]},status=400)
-    ijin = jenis_ijin_db.objects.filter(jenis_ijin__iregex=r"CM")
+    ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).filter(jenis_ijin__iregex=r"CM")
     if not ijin.exists():
         return JsonResponse({"status":400,"msg":"Jenis ijin tidak ada","data":[]},status=400)
     for i in range((sampai - dari).days +1 ):
@@ -463,5 +466,5 @@ def tcuti_melahirkan(r):
             "keterangan":f"Dispensasi - Cuti Melahirkan (CM)"
         }
         data.append(obj)
-    ijin_db.objects.bulk_create([ijin_db(**i) for i in data])
+    ijin_db.objects.using(r.session["ccabang"]).bulk_create([ijin_db(**i) for i in data])
     return JsonResponse({"status":"ok"},status=200)

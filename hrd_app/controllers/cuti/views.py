@@ -3,8 +3,8 @@ from django.db import transaction
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Cuti
 @login_required
-def cuti(request, sid):
-    iduser = request.user.id
+def cuti(r, sid):
+    iduser = r.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
@@ -19,15 +19,15 @@ def cuti(request, sid):
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')                 
         
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
         pegawai = []
             
-        for p in pegawai_db.objects.filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -50,6 +50,7 @@ def cuti(request, sid):
                         
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -63,16 +64,16 @@ def cuti(request, sid):
             'modul_aktif' : 'Cuti'
         }
         
-        return render(request,'hrd_app/cuti/[sid]/cuti.html', data)
+        return render(r,'hrd_app/cuti/[sid]/cuti.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def detail_cuti(request, sid, idp):
-    iduser = request.user.id
+def detail_cuti(r, sid, idp):
+    iduser = r.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
@@ -81,19 +82,20 @@ def detail_cuti(request, sid, idp):
         
         today = date.today()
         
-        pg = pegawai_db.objects.get(id=int(idp))
+        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
         
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
         
-        ac = awal_cuti_db.objects.last()
+        ac = awal_cuti_db.objects.using(r.session["ccabang"]).last()
         tac = ac.tgl       
         
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'idp' : idp,
             'dsid': dsid,
             'sid' : int(sid),
@@ -104,39 +106,40 @@ def detail_cuti(request, sid, idp):
             'modul_aktif' : 'Cuti'
         }
         
-        return render(request,'hrd_app/cuti/[sid]/[idp]/detail_cuti.html', data)
+        return render(r,'hrd_app/cuti/[sid]/[idp]/detail_cuti.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def cari_cuti(request):
-    iduser = request.user.id
+def cari_cuti(r):
+    iduser = r.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        dtgl1 = request.POST.get('ctgl1')
-        dtgl2 = request.POST.get('ctgl2')
-        idp = request.POST.get('idp')
+        dtgl1 = r.POST.get('ctgl1')
+        dtgl2 = r.POST.get('ctgl2')
+        idp = r.POST.get('idp')
         
         dari = datetime.strptime(dtgl1,'%d-%m-%Y').date()
         sampai = datetime.strptime(dtgl2,'%d-%m-%Y').date()
         
-        pg = pegawai_db.objects.get(id=int(idp))
+        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
         sid = pg.status_id      
         
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'idp' : idp,
             'dsid': dsid,
             'sid' : int(sid),
@@ -147,17 +150,17 @@ def cari_cuti(request):
             'modul_aktif' : 'Cuti'
         }
         
-        return render(request,'hrd_app/cuti/[sid]/[idp]/detail_cuti.html', data)
+        return render(r,'hrd_app/cuti/[sid]/[idp]/detail_cuti.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def cuti_json(request, dr, sp, sid):
+def cuti_json(r, dr, sp, sid):
         
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         
@@ -165,7 +168,7 @@ def cuti_json(request, dr, sp, sid):
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
                        
         if int(sid) == 0:
-            for i in cuti_db.objects.select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai)):
+            for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai)):
                 
                 ct = {
                     'id':i.id,
@@ -179,7 +182,7 @@ def cuti_json(request, dr, sp, sid):
                 }
                 data.append(ct)
         else:
-            for i in cuti_db.objects.select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai), pegawai__status_id=int(sid)):
+            for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai), pegawai__status_id=int(sid)):
                             
                 ct = {
                     'id':i.id,
@@ -197,16 +200,16 @@ def cuti_json(request, dr, sp, sid):
 
 
 @login_required
-def dcuti_json(request, idp):
+def dcuti_json(r, idp):
         
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         
-        ac = awal_cuti_db.objects.last()
+        ac = awal_cuti_db.objects.using(r.session["ccabang"]).last()
         tac = ac.tgl
         
-        for i in cuti_db.objects.select_related('pegawai').filter(tgl_cuti__gte=tac, pegawai_id=int(idp)):
+        for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_cuti__gte=tac, pegawai_id=int(idp)):
                         
             ct = {
                 'id':i.id,
@@ -222,25 +225,25 @@ def dcuti_json(request, idp):
 
 
 @login_required
-def tambah_cuti(request):
-    nama_user = request.user.username
+def tambah_cuti(r):
+    nama_user = r.user.username
     
-    dtgl = request.POST.get('tgl')
-    idp = request.POST.get('idp')
-    dket = request.POST.get('ket')
+    dtgl = r.POST.get('tgl')
+    idp = r.POST.get('idp')
+    dket = r.POST.get('ket')
     
     ltgl = dtgl.split(', ')   
-    ac = awal_cuti_db.objects.last()
+    ac = awal_cuti_db.objects.using(r.session["ccabang"]).last()
     tac = ac.tgl
         
     for t in ltgl:
         with transaction.atomic():
             tgl = datetime.strptime(t,'%d-%m-%Y').date()
             
-            pg = pegawai_db.objects.get(id=int(idp))
+            pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
             sc = pg.sisa_cuti
             
-            ct = cuti_db.objects.filter(pegawai_id=int(idp), tgl_cuti__gte=tac).aggregate(total=Count('id'))
+            ct = cuti_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_cuti__gte=tac).aggregate(total=Count('id'))
             if ct is None:
                 cuti_ke = 1
             else:
@@ -252,25 +255,25 @@ def tambah_cuti(request):
                 ket = f"Cuti ke {cuti_ke}-({dket})"
     
             # tidak boleh ada opg, geseroff, atau ijin lainnya di tgl yang akan dipakai cuti
-            if ijin_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_ijin=tgl).exists():
+            if ijin_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_ijin=tgl).exists():
                 status = 'ada ijin'
             else:
-                if opg_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), diambil_tgl=tgl).exists():
+                if opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), diambil_tgl=tgl).exists():
                     status = 'ada opg' 
                 else:
-                    if geseroff_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), ke_tgl=tgl).exists():
+                    if geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), ke_tgl=tgl).exists():
                         status = 'ada geseroff'
                     else:
-                        if cuti_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_cuti=tgl).exists():
+                        if cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_cuti=tgl).exists():
                             status = 'duplikat'
                         else:
-                            if absensi_db.objects.select_related('pegawai').filter(pegawai_id=int(idp), tgl_absen=tgl).exists():
+                            if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_absen=tgl).exists():
                                 
-                                ab = absensi_db.objects.select_related('pegawai').get(pegawai_id=int(idp), tgl_absen=tgl)
+                                ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(idp), tgl_absen=tgl)
                                 
                                 if ab.masuk is None and ab.pulang is None:
                                     ab.keterangan_absensi = ket
-                                    ab.save()
+                                    ab.save(using=r.session["ccabang"])
                                     
                                     tcuti = cuti_db(
                                         pegawai_id = int(idp),
@@ -280,13 +283,13 @@ def tambah_cuti(request):
                                         add_by = nama_user,
                                         edit_by = nama_user
                                     )               
-                                    tcuti.save()
+                                    tcuti.save(using=r.session["ccabang"])
                                     sc = sc - 1
                                     if sc < 0:
                                         transaction.set_rollback(True)
                                         return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                     pg.sisa_cuti = sc
-                                    pg.save()
+                                    pg.save(using=r.session["ccabang"])
                                     
                                     status = 'ok'
                                 else:
@@ -304,7 +307,7 @@ def tambah_cuti(request):
                                             
                                             if int(selisih.hour) <= 4:
                                                 ab.keterangan_absensi = ket
-                                                ab.save()
+                                                ab.save(using=r.session["ccabang"])
                                                 
                                                 tcuti = cuti_db(
                                                     pegawai_id = int(idp),
@@ -319,7 +322,7 @@ def tambah_cuti(request):
                                                     transaction.set_rollback(True)
                                                     return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                                 pg.sisa_cuti = sc
-                                                pg.save()
+                                                pg.save(using=r.session["ccabang"])
                                                 
                                                 status = 'ok'
                                             else:                                
@@ -350,7 +353,7 @@ def tambah_cuti(request):
                                             
                                             if int(selisih.hour) <= 4: 
                                                 ab.keterangan_absensi = ket
-                                                ab.save()
+                                                ab.save(using=r.session["ccabang"])
                                                 
                                                 tcuti = cuti_db(
                                                     pegawai_id = int(idp),
@@ -360,14 +363,14 @@ def tambah_cuti(request):
                                                     add_by = nama_user,
                                                     edit_by = nama_user
                                                 )               
-                                                tcuti.save()
+                                                tcuti.save(using=r.session["ccabang"])
                                                 
                                                 sc = sc - 1
                                                 if sc < 0:
                                                     transaction.set_rollback(True)
                                                     return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                                 pg.sisa_cuti = sc
-                                                pg.save()
+                                                pg.save(using=r.session["ccabang"])
                                                 
                                                 status = 'ok'
                                             else:
@@ -397,7 +400,7 @@ def tambah_cuti(request):
                                             
                                             if int(selisih.hour) <= 4:
                                                 ab.keterangan_absensi = ket
-                                                ab.save()
+                                                ab.save(using=r.session["ccabang"])
                                                 
                                                 tcuti = cuti_db(
                                                     pegawai_id = int(idp),
@@ -407,14 +410,14 @@ def tambah_cuti(request):
                                                     add_by = nama_user,
                                                     edit_by = nama_user
                                                 )               
-                                                tcuti.save()
+                                                tcuti.save(using=r.session["ccabang"])
                                                 
                                                 sc = sc - 1
                                                 if sc < 0:
                                                     transaction.set_rollback(True)
                                                     return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                                 pg.sisa_cuti = sc
-                                                pg.save()
+                                                pg.save(using=r.session["ccabang"])
                                                 
                                                 status = 'ok'
                                             else:                                
@@ -434,7 +437,7 @@ def tambah_cuti(request):
                                             
                                             if int(selisih.hour) <= 4: 
                                                 ab.keterangan_absensi = ket
-                                                ab.save()
+                                                ab.save(using=r.session["ccabang"])
                                                 
                                                 tcuti = cuti_db(
                                                     pegawai_id = int(idp),
@@ -444,14 +447,14 @@ def tambah_cuti(request):
                                                     add_by = nama_user,
                                                     edit_by = nama_user
                                                 )               
-                                                tcuti.save()
+                                                tcuti.save(using=r.session["ccabang"])
                                                 
                                                 sc = sc - 1
                                                 if sc < 0:
                                                     transaction.set_rollback(True)
                                                     return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                                 pg.sisa_cuti = sc
-                                                pg.save()
+                                                pg.save(using=r.session["ccabang"])
                                                 
                                                 status = 'ok'
                                             else:
@@ -467,14 +470,14 @@ def tambah_cuti(request):
                                     add_by = nama_user,
                                     edit_by = nama_user
                                 )               
-                                tcuti.save()
+                                tcuti.save(using=r.session["ccabang"])
                                 
                                 sc = sc - 1
                                 if sc < 0:
                                     transaction.set_rollback(True)
                                     return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                 pg.sisa_cuti = sc
-                                pg.save()
+                                pg.save(using=r.session["ccabang"])
                                 
                                 status = 'ok'
                                        
@@ -482,28 +485,28 @@ def tambah_cuti(request):
 
 
 @login_required
-def edit_sisa_cuti(request):
+def edit_sisa_cuti(r):
     
-    nama_user = request.user.username
+    nama_user = r.user.username
     
-    idp = request.POST.get('idp')
-    scuti = request.POST.get('scuti')
-    modul = request.POST.get('modul')
+    idp = r.POST.get('idp')
+    scuti = r.POST.get('scuti')
+    modul = r.POST.get('modul')
     
     if modul == 'ecuti':
-        pg = pegawai_db.objects.get(id=int(idp))
+        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
         pg.sisa_cuti = int(scuti)
-        pg.save()
+        pg.save(using=r.session["ccabang"])
     elif modul == 'reset_cuti':
-        pg = pegawai_db.objects.get(id=int(idp))
+        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
         pg.sisa_cuti = 12
-        pg.save()   
+        pg.save(using=r.session["ccabang"])   
     else:
-        for p in pegawai_db.objects.filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if p.tgl_masuk is None:
                 pass
             else:
-                pg = pegawai_db.objects.get(id=p.id)
+                pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=p.id)
                 
                 today = date.today()
                 tmasuk = pg.tgl_masuk
@@ -513,7 +516,7 @@ def edit_sisa_cuti(request):
                 # jika sudah lebih dari satu tahun
                 if int(mkerja.days) > 360:                
                     pg.sisa_cuti = 12
-                    pg.save()        
+                    pg.save(using=r.session["ccabang"])        
                 else:
                     pass                         
     
@@ -523,33 +526,33 @@ def edit_sisa_cuti(request):
 
 
 @login_required
-def batal_cuti(request):
-    nama_user = request.user.username
+def batal_cuti(r):
+    nama_user = r.user.username
     
-    idc = request.POST.get('idc')
+    idc = r.POST.get('idc')
     
-    ct = cuti_db.objects.get(id=int(idc))
+    ct = cuti_db.objects.using(r.session["ccabang"]).get(id=int(idc))
     tcuti = ct.tgl_cuti
     idp = ct.pegawai_id
     
-    pg = pegawai_db.objects.get(id=idp)
+    pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=idp)
     sc = pg.sisa_cuti
     
     pg.sisa_cuti = sc + 1
-    pg.save() 
+    pg.save(using=r.session["ccabang"]) 
     
-    if absensi_db.objects.filter(pegawai_id=idp, tgl_absen=tcuti).exists():
-        ab = absensi_db.objects.get(pegawai_id=idp, tgl_absen=tcuti)
+    if absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=idp, tgl_absen=tcuti).exists():
+        ab = absensi_db.objects.using(r.session["ccabang"]).get(pegawai_id=idp, tgl_absen=tcuti)
         ab.keterangan_absensi = None
-        ab.save()
+        ab.save(using=r.session["ccabang"])
         
     histori = histori_hapus_db(
         delete_by = nama_user,
         delete_item = f"cuti-(a.n {pg.nama}, tgl:{tcuti})"
     )
-    histori.save()   
+    histori.save(using=r.session["ccabang"])   
     
-    ct.delete()
+    ct.delete(using=r.session["ccabang"])
     status = "ok"
         
     return JsonResponse({"status": status})

@@ -4,8 +4,8 @@ from hrd_app.controllers.lib import *
 # Counter
 # ++++++++++++++
 @login_required
-def counter(request):
-    iduser = request.user.id
+def counter(r):
+    iduser = r.user.id
         
     if akses_db.objects.filter(user_id=iduser).exists():
         
@@ -18,21 +18,21 @@ def counter(request):
             'modul_aktif' : 'Counter'     
         }
         
-        return render(request,'hrd_app/pengaturan/counter.html', data)
+        return render(r,'hrd_app/pengaturan/counter.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def counter_json(request):
+def counter_json(r):
         
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
                 
-        for i in counter_db.objects.all().order_by('counter'):
+        for i in counter_db.objects.using(r.session["ccabang"]).all().order_by('counter'):
             
             ct = {
                 'id':i.id,
@@ -44,19 +44,19 @@ def counter_json(request):
 
 
 @login_required
-def tambah_counter(request):
+def tambah_counter(r):
     
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        dcounter = request.POST.get('counter')
+        dcounter = r.POST.get('counter')
         
-        if counter_db.objects.filter(counter = dcounter).exists():
+        if counter_db.objects.using(r.session["ccabang"]).filter(counter = dcounter).exists():
             status = 'duplikat'
         else:    
             tc = counter_db(
                 counter = dcounter,
             )
-            tc.save()
+            tc.save(using=r.session["ccabang"])
             
             status = 'ok'
         
@@ -64,19 +64,19 @@ def tambah_counter(request):
 
 
 @login_required
-def edit_counter(request):
+def edit_counter(r):
     
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        eid = request.POST.get('eid')
-        dcounter = request.POST.get('ecounter')
+        eid = r.POST.get('eid')
+        dcounter = r.POST.get('ecounter')
         
-        if counter_db.objects.filter(counter = dcounter).exists():
+        if counter_db.objects.using(r.session["ccabang"]).filter(counter = dcounter).exists():
             status = 'duplikat'
         else:    
-            nct = counter_db.objects.get(id=int(eid))
+            nct = counter_db.objects.using(r.session["ccabang"]).get(id=int(eid))
             nct.counter = dcounter
-            nct.save()
+            nct.save(using=r.session["ccabang"])
             
             status = 'ok'
         
@@ -84,24 +84,24 @@ def edit_counter(request):
 
 
 @login_required
-def hapus_counter(request):
+def hapus_counter(r):
     
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        nama_user = request.user.username
+        nama_user = r.user.username
         
-        hid = request.POST.get('hid')
+        hid = r.POST.get('hid')
         
         if pegawai_db.objects.filter(counter_id=int(hid), aktif=1).exists():
             status = 'pegawai memiliki counter ini'
         else:        
-            nct = counter_db.objects.get(id=int(hid))            
+            nct = counter_db.objects.using(r.session["ccabang"]).get(id=int(hid))            
             
             thapus = histori_hapus_db(
                 delete_by = nama_user,
                 delete_item = f'hapus counter : {nct.counter}'
             )
-            thapus.save()
+            thapus.save(using=r.session["ccabang"])
             
             nct.delete()
             

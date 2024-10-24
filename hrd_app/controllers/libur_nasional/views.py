@@ -3,8 +3,8 @@ from hrd_app.controllers.lib import *
 # Libur Nasional
 # ++++++++++++++
 @login_required
-def libur_nasional(request):
-    iduser = request.user.id
+def libur_nasional(r):
+    iduser = r.user.id
         
     if akses_db.objects.filter(user_id=iduser).exists():
         
@@ -17,21 +17,21 @@ def libur_nasional(request):
             'modul_aktif' : 'Libur Nasional'     
         }
         
-        return render(request,'hrd_app/libur_nasional/libur_nasional.html', data)
+        return render(r,'hrd_app/libur_nasional/libur_nasional.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def libur_nasional_json(request):
+def libur_nasional_json(r):
         
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
                 
-        for i in libur_nasional_db.objects.all().order_by('tgl_libur'):
+        for i in libur_nasional_db.objects.using(r.session["ccabang"]).all().order_by('tgl_libur'):
             
             tgl = i.tgl_libur.strftime('%d-%m-%Y')
             insentif = "{:,.0f}".format(i.insentif_karyawan)
@@ -48,18 +48,18 @@ def libur_nasional_json(request):
 
 
 @login_required
-def tambah_libur_nasional(request):
+def tambah_libur_nasional(r):
     
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        dtgl = request.POST.get('tgl')
-        libur = request.POST.get('libur')
-        dinsentif = request.POST.get('insentif')
+        dtgl = r.POST.get('tgl')
+        libur = r.POST.get('libur')
+        dinsentif = r.POST.get('insentif')
         
         tgl = datetime.strptime(dtgl, '%d-%m-%Y').date()
         insentif = dinsentif.replace('.', '')
         
-        if libur_nasional_db.objects.filter(tgl_libur = tgl).exists():
+        if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur = tgl).exists():
             status = 'duplikat'
         else:    
             ln = libur_nasional_db(
@@ -67,7 +67,7 @@ def tambah_libur_nasional(request):
                 libur = libur,
                 insentif_karyawan = insentif,
             )
-            ln.save()
+            ln.save(using=r.session["ccabang"])
             
             status = 'ok'
         
@@ -75,26 +75,26 @@ def tambah_libur_nasional(request):
 
 
 @login_required
-def edit_libur_nasional(request):
+def edit_libur_nasional(r):
     
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        eid = request.POST.get('eid')
-        dtgl = request.POST.get('etgl')
-        libur = request.POST.get('elibur')
-        dinsentif = request.POST.get('einsentif')
+        eid = r.POST.get('eid')
+        dtgl = r.POST.get('etgl')
+        libur = r.POST.get('elibur')
+        dinsentif = r.POST.get('einsentif')
         
         tgl = datetime.strptime(dtgl, '%d-%m-%Y').date()
         insentif = dinsentif.replace('.', '')
         
-        if libur_nasional_db.objects.filter(tgl_libur = tgl, libur = libur, insentif_karyawan = insentif).exists():
+        if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur = tgl, libur = libur, insentif_karyawan = insentif).exists():
             status = 'duplikat'
         else:    
-            ln = libur_nasional_db.objects.get(id=int(eid))
+            ln = libur_nasional_db.objects.using(r.session["ccabang"]).get(id=int(eid))
             ln.tgl_libur = tgl
             ln.libur = libur
             ln.insentif_karyawan = insentif
-            ln.save()
+            ln.save(using=r.session["ccabang"])
             
             status = 'ok'
         
@@ -102,23 +102,23 @@ def edit_libur_nasional(request):
 
 
 @login_required
-def hapus_libur_nasional(request):
+def hapus_libur_nasional(r):
     
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        nama_user = request.user.username
+        nama_user = r.user.username
         
-        hid = request.POST.get('hid')
+        hid = r.POST.get('hid')
               
-        ln = libur_nasional_db.objects.get(id=int(hid))            
+        ln = libur_nasional_db.objects.using(r.session["ccabang"]).get(id=int(hid))            
         
         thapus = histori_hapus_db(
             delete_by = nama_user,
             delete_item = f'hapus libur nasional : {ln.libur}'
         )
-        thapus.save()
+        thapus.save(using=r.session["ccabang"])
         
-        ln.delete()
+        ln.delete(using=r.session["ccabang"])
         
         status = 'ok'
         

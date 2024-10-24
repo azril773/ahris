@@ -6,5 +6,6 @@ urlpatterns = [
     path('adminnya/', admin.site.urls),
     path('', auth_views.LoginView.as_view(template_name='hrd_app/login.html'), name='login'),
     path("__debug__/",include(debug_toolbar.urls)),
+    path("login/",include("hrd_app.router.login.urls")),
     path('hrd/', include('hrd_app.router.urls')),
 ] 

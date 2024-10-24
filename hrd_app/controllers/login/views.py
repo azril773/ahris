@@ -1,5 +1,40 @@
 from hrd_app.controllers.lib import *
 from django.db import transaction
+from django.contrib.auth import views as auth_views,models, authenticate,login,logout
+
+
+
+def auth_login(r):
+    username = r.POST.get("username")
+    user = models.User.objects.filter(username=username)
+    if user.exists():
+        akses = akses_db.objects.filter(user_id=user[0].pk)
+        if akses.exists():     
+            akses_cabang = akses_cabang_db.objects.filter(user_id=user[0].pk)
+            if akses_cabang.exists():
+                auth = authenticate(username=r.POST.get("username"),password=r.POST.get("password"))
+                if auth is not None:
+                    r.session["ccabang"] = akses_cabang[0].cabang
+                    r.session["cabang"] = [akses.cabang for akses in akses_cabang]
+                    login(r,user[0])
+                    return redirect("beranda")
+                else:
+                    messages.error(r, 'Username atau password salah.')        
+                    return redirect('login')
+            else:
+                messages.error(r, 'Data akses Cabang Anda belum di tentukan.')        
+                return redirect("login")
+
+        else:    
+            messages.error(r, 'Data akses Anda belum di tentukan.')        
+            return redirect('login')
+    else:
+        messages.error(r, 'Username atau password salah.')        
+        return redirect('login')
+        
+
+
+
 @login_required
 def registrasi(r):
     iduser = r.user.id

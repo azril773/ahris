@@ -14,19 +14,20 @@ def laporan(r,sid):
             list_year.append(i)
         dsid = dakses.sid_id     
         
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         ###
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
-        jenis_ijin = jenis_ijin_db.objects.all()  
-        sall = status_pegawai_db.objects.all()
-        pegawai = pegawai_db.objects.filter(aktif=1)
+        jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()  
+        sall = status_pegawai_db.objects.using(r.session["ccabang"]).all()
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'status' : status,
             'dsid': dsid,
             'sid': sid,
@@ -59,7 +60,7 @@ def laporan_json(r):
     data = []
 
     if int(sid) == 0:
-        pegawai = pegawai_db.objects.all()
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
         for pgw in pegawai:
             off = 0
             terlambat = 0
@@ -82,7 +83,7 @@ def laporan_json(r):
             ct = 0 #keterangan absensi
             opg = 0
             dl = 0
-            ab = absensi_db.objects.filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
+            ab = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
             if ab.exists():
                 for a in ab:
                     if a.keterangan_absensi == "OFF":
@@ -167,7 +168,7 @@ def laporan_json(r):
             }
             data.append(obj)
     else:
-        pegawai = pegawai_db.objects.filter(status_id = sid)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id = sid)
         for pgw in pegawai:
             off = 0
             terlambat = 0
@@ -193,7 +194,7 @@ def laporan_json(r):
             opg = 0
             dl = 0
 
-            ab = absensi_db.objects.filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
+            ab = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
             if ab.exists():
                 for a in ab:
                     if a.keterangan_absensi == "OFF":
@@ -289,21 +290,22 @@ def print_laporan(r,sid,id,bulan,tahun):
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id     
-        pegawai = pegawai_db.objects.get(id=id)
-        status = status_pegawai_db.objects.all().order_by('id')
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).get(id=id)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         ###
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
-        jenis_ijin = jenis_ijin_db.objects.all()   
+        jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()   
         date = tahun+"-"+bulan+"-25"
         sp = datetime.strptime(date,"%Y-%m-%d")
         dr = sp - timedelta(days=30)
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'status' : status,
             'dsid': dsid,
             "dari":dr.date(),
@@ -338,14 +340,14 @@ def laporan_json_periode(r,sid,id,dr,sp):
         kehadiran = 0
         tselisih = 0.0
         trlmbt = 0
-        for a in absensi_db.objects.select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=id).order_by('tgl_absen','pegawai__divisi__divisi'):
+        for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=id).order_by('tgl_absen','pegawai__divisi__divisi'):
             if a.masuk is not None and a.pulang is not None:
                 kehadiran += 1
             elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
                 kehadiran += 2
             sket = " "
             
-            ab = absensi_db.objects.get(id=a.id)     
+            ab = absensi_db.objects.using(r.session["ccabang"]).get(id=a.id)     
             hari = ab.tgl_absen.strftime("%A")
             hari_ini = nama_hari(hari) 
             
@@ -416,7 +418,6 @@ def laporan_json_periode(r,sid,id,dr,sp):
                         bataskmb = f"{ab.kembali}"
                 else:
                     bataskmb = f'{ab.kembali}'
-            print(bataskmb)
             if ab.kembali is not None and ab.kembali2 is not None:
                 kmb = f'{bataskmb} / {ab.kembali2}'
             elif ab.kembali is not None and ab.kembali2 is None:    
@@ -498,7 +499,7 @@ def print_laporan_pegawai(r):
             dakses = akses_db.objects.get(user_id=iduser)
             sid = dakses.pegawai.status.pk
             data = [] 
-        pegawai = pegawai_db.objects.filter(id__in=pgw)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pgw)
         for p in pegawai:
             dari = datetime.strptime(str(dr),'%d-%m-%Y').date()
             sampai = datetime.strptime(str(sp),'%d-%m-%Y').date()
@@ -522,8 +523,8 @@ def print_laporan_pegawai(r):
             kehadiran = 0
             tselisih = 0.0
             trlmbt = 0
-            for a in absensi_db.objects.select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=p.pk).order_by('tgl_absen','pegawai__divisi__divisi'):
-                ab = absensi_db.objects.get(id=a.id)     
+            for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=p.pk).order_by('tgl_absen','pegawai__divisi__divisi'):
+                ab = absensi_db.objects.using(r.session["ccabang"]).get(id=a.id)     
                 if a.masuk is not None and a.pulang is not None and a.masuk_b is None and a.pulang_b is None:
                     kehadiran += 1
                 elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
@@ -631,7 +632,7 @@ def print_laporan_pegawai(r):
                 else:
                     sln = 0          
 
-                if libur_nasional_db.objects.filter(tgl_libur=ab.tgl_absen).exists():
+                if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur=ab.tgl_absen).exists():
                     tgl_absen = True
                 else:
                     tgl_absen = False

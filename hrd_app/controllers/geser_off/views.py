@@ -3,8 +3,8 @@ from hrd_app.controllers.lib import *
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Geser Off
 @login_required
-def geser_off(request, sid):
-    iduser = request.user.id
+def geser_off(r, sid):
+    iduser = r.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
@@ -19,17 +19,17 @@ def geser_off(request, sid):
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')                 
         
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
 
         pegawai = []
             
-        for p in pegawai_db.objects.filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -52,6 +52,7 @@ def geser_off(request, sid):
                         
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -65,39 +66,39 @@ def geser_off(request, sid):
             'modul_aktif' : 'Geser OFF'
         }
         
-        return render(request,'hrd_app/geser_off/[sid]/geser_off.html', data)
+        return render(r,'hrd_app/geser_off/[sid]/geser_off.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def cari_geser_off(request):
-    iduser = request.user.id
+def cari_geser_off(r):
+    iduser = r.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        dr = request.POST.get('ctgl1')
-        sp = request.POST.get('ctgl2')
-        sid = request.POST.get('sid')
+        dr = r.POST.get('ctgl1')
+        sp = r.POST.get('ctgl2')
+        sid = r.POST.get('sid')
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()               
         
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
 
         pegawai = []
             
-        for p in pegawai_db.objects.filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -120,6 +121,7 @@ def cari_geser_off(request):
                         
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -132,16 +134,16 @@ def cari_geser_off(request):
             'modul_aktif' : 'Geser OFF'
         }
         
-        return render(request,'hrd_app/geser_off/[dr]/[sp]/[sid]/cgeser_off.html', data)
+        return render(r,'hrd_app/geser_off/[dr]/[sp]/[sid]/cgeser_off.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def cari_geser_off_sid(request, dr, sp, sid):
-    iduser = request.user.id
+def cari_geser_off_sid(r, dr, sp, sid):
+    iduser = r.user.id
     
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
@@ -151,17 +153,17 @@ def cari_geser_off_sid(request, dr, sp, sid):
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()               
         
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
 
         pegawai = []
             
-        for p in pegawai_db.objects.filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -184,6 +186,7 @@ def cari_geser_off_sid(request, dr, sp, sid):
                         
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -196,17 +199,17 @@ def cari_geser_off_sid(request, dr, sp, sid):
             'modul_aktif' : 'Geser OFF'
         }
         
-        return render(request,'hrd_app/geser_off/[dr]/[sp]/[sid]/cgeser_off.html', data)
+        return render(r,'hrd_app/geser_off/[dr]/[sp]/[sid]/cgeser_off.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
 @login_required
-def geseroff_json(request, dr, sp, sid):
+def geseroff_json(r, dr, sp, sid):
         
-    if request.headers["X-Requested-With"] == "XMLHttpRequest":
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
         
@@ -214,7 +217,7 @@ def geseroff_json(request, dr, sp, sid):
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
                 
         if int(sid) == 0:
-            for i in geseroff_db.objects.filter(dari_tgl__range=(dari,sampai)):
+            for i in geseroff_db.objects.using(r.session["ccabang"]).filter(dari_tgl__range=(dari,sampai)):
                             
                 gf = {
                     'id':i.id,
@@ -229,7 +232,7 @@ def geseroff_json(request, dr, sp, sid):
                 }
                 data.append(gf)
         else:
-            for i in geseroff_db.objects.select_related('pegawai').filter(dari_tgl__range=(dari,sampai), pegawai__status_id=int(sid)):
+            for i in geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(dari_tgl__range=(dari,sampai), pegawai__status_id=int(sid)):
                             
                 gf = {
                     'id':i.id,
@@ -248,23 +251,23 @@ def geseroff_json(request, dr, sp, sid):
 
 
 @login_required
-def tambah_geseroff(request):
-    nama_user = request.user.username
+def tambah_geseroff(r):
+    nama_user = r.user.username
     
-    dtgl = request.POST.get('tgl')
-    dtgl2 = request.POST.get('tgl2')
-    dpegawai = request.POST.get('pegawai')
-    dket = request.POST.get('ket')
+    dtgl = r.POST.get('tgl')
+    dtgl2 = r.POST.get('tgl2')
+    dpegawai = r.POST.get('pegawai')
+    dket = r.POST.get('ket')
     
     dari = datetime.strptime(dtgl,'%d-%m-%Y').date()
     ke = datetime.strptime(dtgl2,'%d-%m-%Y').date()   
     
     fdari = datetime.strftime(dari,'%d-%m-%Y')  
     
-    pg = pegawai_db.objects.get(id=int(dpegawai))  
+    pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(dpegawai))  
     off = pg.hari_off.hari
-    if libur_nasional_db.objects.filter(tgl_libur=dari).exists():
-        ln = libur_nasional_db.objects.get(tgl_libur=dari)
+    if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur=dari).exists():
+        ln = libur_nasional_db.objects.using(r.session["ccabang"]).get(tgl_libur=dari)
         tln = ln.tgl_libur
     else:
         tln = None    
@@ -273,21 +276,21 @@ def tambah_geseroff(request):
     day = dari.strftime("%A")
     nh = nama_hari(day) 
             
-    if geseroff_db.objects.select_related('pegawai').filter(Q(dari_tgl=dari)|Q(ke_tgl=ke),pegawai_id=int(dpegawai)).exists():
+    if geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(Q(dari_tgl=dari)|Q(ke_tgl=ke),pegawai_id=int(dpegawai)).exists():
         status = 'duplikat'
     else:        
         
         # cek jika sudah terdapat opg, batalkan
-        if opg_db.objects.select_related('pegawai').filter(pegawai_id=int(dpegawai), opg_tgl=dari).exists():
+        if opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(dpegawai), opg_tgl=dari).exists():
             status = 'ada opg'
         else:
             # cek jika absen di tanggal dari tgl tidak ada absen masuk atau absen pulangnya, batalkan
-            if absensi_db.objects.select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=dari).exists():
-                ab = absensi_db.objects.select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=dari)
+            if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=dari).exists():
+                ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=dari)
                                     
                     # cek jika absen di tanggal ke tgl ada absen masuk atau absen pulangnya, batalakan
-                if absensi_db.objects.select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=ke).exists():
-                    ab2 = absensi_db.objects.select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=ke)
+                if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=ke).exists():
+                    ab2 = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=ke)
                     
                     if ab2.masuk is not None and ab2.pulang is not None:
                         status = 'pegawai masuk'
@@ -301,10 +304,10 @@ def tambah_geseroff(request):
                                 add_by = nama_user,
                                 edit_by = nama_user
                             )
-                            tambahgf.save()
+                            tambahgf.save(using=r.session["ccabang"])
                             
                             ab2.keterangan_absensi = f"Geser OFF-({fdari})"
-                            ab2.save()
+                            ab2.save(using=r.session["ccabang"])
                             
                             status = 'ok'
                         else:
@@ -318,10 +321,10 @@ def tambah_geseroff(request):
                                         add_by = nama_user,
                                         edit_by = nama_user
                                     )
-                                    tambahgf.save()
+                                    tambahgf.save(using=r.session["ccabang"])
                                     
                                     ab2.keterangan_absensi = f"Geser OFF-({fdari})"
-                                    ab2.save()
+                                    ab2.save(using=r.session["ccabang"])
                                     
                                     status = 'ok'
                                 else:
@@ -338,7 +341,7 @@ def tambah_geseroff(request):
                             add_by = nama_user,
                             edit_by = nama_user
                         )
-                        tambahgf.save()
+                        tambahgf.save(using=r.session["ccabang"])
                         
                         status = 'ok'
                     else:
@@ -352,7 +355,7 @@ def tambah_geseroff(request):
                                     add_by = nama_user,
                                     edit_by = nama_user
                                 )
-                                tambahgf.save()
+                                tambahgf.save(using=r.session["ccabang"])
                                 
                                 status = 'ok'
                             else:
@@ -373,7 +376,7 @@ def tambah_geseroff(request):
                         add_by = nama_user,
                         edit_by = nama_user
                     )
-                    tambahgf.save()
+                    tambahgf.save(using=r.session["ccabang"])
                     
                     status = 'ok'
                 else:
@@ -387,7 +390,7 @@ def tambah_geseroff(request):
                                 add_by = nama_user,
                                 edit_by = nama_user
                             )
-                            tambahgf.save()
+                            tambahgf.save(using=r.session["ccabang"])
                             
                             status = 'ok'
                         else:
@@ -400,31 +403,31 @@ def tambah_geseroff(request):
 
 
 @login_required
-def batal_geseroff(request):
-    nama_user = request.user.username
+def batal_geseroff(r):
+    nama_user = r.user.username
 
-    id_batal = request.POST.get('id_batal')
+    id_batal = r.POST.get('id_batal')
     
-    gf = geseroff_db.objects.select_related('pegawai').get(id=int(id_batal))
+    gf = geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(id=int(id_batal))
     
     ke_tgl = gf.ke_tgl
     dari_tgl = gf.dari_tgl
     idp = gf.pegawai_id
     nama_pegawai = gf.pegawai.nama
         
-    if libur_nasional_db.objects.filter(tgl_libur=dari_tgl).exists():
-        ln = libur_nasional_db.objects.get(tgl_libur=dari_tgl)
+    if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur=dari_tgl).exists():
+        ln = libur_nasional_db.objects.using(r.session["ccabang"]).get(tgl_libur=dari_tgl)
         tln = ln.tgl_libur
         kopg = 'OFF Pengganti Tgl Merah'
     else:
         tln = None 
         kopg = 'OFF Pengganti Reguler'
     
-    ab = absensi_db.objects.get(pegawai_id=int(idp), tgl_absen=ke_tgl)
+    ab = absensi_db.objects.using(r.session["ccabang"]).get(pegawai_id=int(idp), tgl_absen=ke_tgl)
     ab.keterangan_absensi = None
-    ab.save()
+    ab.save(using=r.session["ccabang"])
     
-    if opg_db.objects.filter(pegawai_id=int(idp), opg_tgl=dari_tgl).exists():
+    if opg_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), opg_tgl=dari_tgl).exists():
         pass
     else:
         tambah_opg = opg_db(
@@ -434,15 +437,15 @@ def batal_geseroff(request):
             add_by = 'Program',
             edit_by = 'Program'
         )
-        tambah_opg.save()
+        tambah_opg.save(using=r.session["ccabang"])
        
     histori = histori_hapus_db(
         delete_by = nama_user,
         delete_item = f"Geser OFF-(a.n {nama_pegawai}, tgl:{dari_tgl})"
     )
-    histori.save()
+    histori.save(using=r.session["ccabang"])
     
-    gf.delete()    
+    gf.delete(using=r.session["ccabang"])    
     
     status = 'ok'    
     

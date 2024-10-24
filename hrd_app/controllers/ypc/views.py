@@ -9,16 +9,17 @@ def tlengkap(r,sid):
         akses = dakses.akses
         dsid = dakses.sid_id     
         
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         ###
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'status' : status,
             'dsid': dsid,
             'sid': sid,
@@ -39,17 +40,18 @@ def tketerangan(r,sid):
         akses = dakses.akses
         dsid = dakses.sid_id     
         
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         ###
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
-        jenis_ijin = jenis_ijin_db.objects.all()  
+        jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()  
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'status' : status,
             'dsid': dsid,
             'sid': sid,
@@ -69,16 +71,17 @@ def terlambat(r,sid):
         akses = dakses.akses
         dsid = dakses.sid_id     
         
-        status = status_pegawai_db.objects.all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         ###
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
         data = {
             'akses' : akses,
+            "cabang":r.session["cabang"],
             'status' : status,
             'dsid': dsid,
             'sid': sid,
@@ -106,9 +109,9 @@ def tlengkap_json(r,sid):
         hari = nama_hari(hari)
         data = []
         if sid == 0:
-            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2])
+            result = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2])
         else:
-            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__status_id=int(sid))
+            result = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__status_id=int(sid))
         for ab in result:
             if (ab.masuk is not None and ab.pulang is not None and ab.istirahat is not None and ab.kembali is not None) or (ab.masuk_b is not None and ab.pulang_b is not None and ab.istirahat_b is not None and ab.kembali_b is not None):
                 pass
@@ -151,9 +154,9 @@ def tketerangan_json(r,sid):
         data = []
          
         if sid == 0:
-            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2])
+            result = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2])
         else:
-            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__status_id=int(sid))
+            result = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__status_id=int(sid))
         for ab in result:
             if (ab.masuk is not None or ab.pulang is not None) or (ab.masuk_b is not None or ab.pulang_b is not None ):
                 pass
@@ -201,9 +204,9 @@ def terlambat_json(r,sid):
         hari = nama_hari(hari)
         data = []
         if sid == 0:
-            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2])
+            result = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2])
         else:
-            result = absensi_db.objects.select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__status_id=int(sid))
+            result = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__hari_off","pegawai__hari_off2","pegawai").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__status_id=int(sid))
         for ab in result:
             if (ab.masuk is not None or ab.pulang is not None) or (ab.masuk_b is not None or ab.pulang_b is not None ):
                 if ab.jam_masuk is not None and ab.masuk is not None:
