@@ -15,6 +15,10 @@ def divisi(r):
         
         data = {       
             'dsid': dsid,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'modul_aktif' : 'Divisi'     
         }
         

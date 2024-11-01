@@ -14,6 +14,10 @@ def amesin(r):
         data = {       
             'dsid': dsid,
             "mesin":mesin,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'modul_aktif' : 'Counter'     
         }
         
@@ -79,6 +83,10 @@ def admesin(r,id):
         data = {       
             'dsid': dsid,
             "mesin":mesin,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'id':id,
             'userid':userid,
             'modul_aktif' : 'Counter'
@@ -377,6 +385,10 @@ def datamesin(r):
         
         data = {       
             'dsid': dsid,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'id':id,
             'modul_aktif' : 'Counter'
         }
@@ -453,6 +465,10 @@ def cdatamesin(r):
             'dsid': dsid,
             "mesin":mesin,
             "pegawai":pegawai,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             "divisi":divisi,
             'modul_aktif' : 'Mesin'     
         }

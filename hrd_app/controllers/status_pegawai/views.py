@@ -15,6 +15,9 @@ def status_pegawai(r):
         
         data = {       
             'dsid': dsid,
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'modul_aktif' : 'Status Pegawai'     
         }
         

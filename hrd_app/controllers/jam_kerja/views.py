@@ -62,6 +62,10 @@ def jam_kerja(r):
         kk = kelompok_kerja_db.objects.using(r.session["ccabang"]).all().order_by('kelompok')
         data = {       
             'dsid': dsid,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'kk': kk,
             'modul_aktif' : 'Jam Kerja'     
         }

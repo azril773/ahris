@@ -52,6 +52,10 @@ def registrasi(r):
             data = {       
                 'dsid': dsid,
                 'modul_aktif' : 'Divisi',
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
                 "users":users, 
                 "divisi":divisi,
                 "pegawai":pegawai,

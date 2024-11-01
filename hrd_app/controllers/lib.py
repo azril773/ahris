@@ -290,6 +290,10 @@ def pengaturan(request):
         dsid = dakses.sid_id
         
         data = {       
+
+            'akses' : akses,
+            "cabang":request.session["cabang"],
+            "ccabang":request.session["ccabang"],
             'dsid': dsid,  
             'modul_aktif' : 'Admin Panel'   
         }

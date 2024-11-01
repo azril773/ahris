@@ -14,6 +14,10 @@ def libur_nasional(r):
         
         data = {       
             'dsid': dsid,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'modul_aktif' : 'Libur Nasional'     
         }
         

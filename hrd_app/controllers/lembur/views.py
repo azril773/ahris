@@ -1934,6 +1934,10 @@ def status_pegawai_lembur(r):
         
         data = {       
             'dsid': dsid,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai Lembur'     
         }
@@ -2016,6 +2020,10 @@ def status_pegawai_libur_nasional(r):
         
         data = {       
             'dsid': dsid,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai Libur Nasional'     
         }
@@ -2095,6 +2103,10 @@ def status_pegawai_opg(r):
         
         data = {       
             'dsid': dsid,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai OPG'     
         }

@@ -15,6 +15,10 @@ def counter(r):
         
         data = {       
             'dsid': dsid,
+
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'modul_aktif' : 'Counter'     
         }
         
@@ -92,7 +96,7 @@ def hapus_counter(r):
         
         hid = r.POST.get('hid')
         
-        if pegawai_db.objects.filter(counter_id=int(hid), aktif=1).exists():
+        if pegawai_db.objects.using(r.session["ccabang"]).filter(counter_id=int(hid), aktif=1).exists():
             status = 'pegawai memiliki counter ini'
         else:        
             nct = counter_db.objects.using(r.session["ccabang"]).get(id=int(hid))            
@@ -103,7 +107,7 @@ def hapus_counter(r):
             )
             thapus.save(using=r.session["ccabang"])
             
-            nct.delete()
+            nct.delete(using=r.session["ccabang"])
             
             status = 'ok'
         

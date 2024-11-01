@@ -4,8 +4,8 @@ from hrd_app.controllers.lib import *
 def laporan(r,sid):
     iduser = r.user.id
         
-    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dr = datetime.strptime("2015","%Y")
         sp = datetime.today()
@@ -289,8 +289,8 @@ def laporan_json(r):
 def print_laporan(r,sid,id,bulan,tahun):
     iduser = r.user.id
         
-    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id     
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(id=id)
@@ -714,8 +714,8 @@ def print_laporan_pegawai(r):
     try:
         iduser = r.user.id
         
-        if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-            dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+        if akses_db.objects.filter(user_id=iduser).exists():
+            dakses = akses_db.objects.get(user_id=iduser)
             sid = dakses.pegawai.status.pk
             data = [] 
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pgw)
@@ -904,8 +904,8 @@ def print_laporan_divisi(r):
     try:
         iduser = r.user.id
         
-        if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-            dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+        if akses_db.objects.filter(user_id=iduser).exists():
+            dakses = akses_db.objects.get(user_id=iduser)
             sid = dakses.pegawai.status.pk
             data = [] 
         divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=dvs)
@@ -1121,8 +1121,8 @@ def print_laporan_divisi_excel(r):
     try:
         iduser = r.user.id
         
-        if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-            dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+        if akses_db.objects.filter(user_id=iduser).exists():
+            dakses = akses_db.objects.get(user_id=iduser)
             sid = dakses.pegawai.status.pk
             data = [] 
         divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=dvs)
