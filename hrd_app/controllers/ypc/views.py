@@ -20,6 +20,7 @@ def tlengkap(r,sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'dsid': dsid,
             'sid': sid,
@@ -52,6 +53,7 @@ def tketerangan(r,sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'dsid': dsid,
             'sid': sid,
@@ -82,6 +84,7 @@ def terlambat(r,sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'dsid': dsid,
             'sid': sid,

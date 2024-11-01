@@ -43,7 +43,9 @@
                             
             <!-- Button Cari Data Absen -->
             <button data-target="#pilih_tgl_cari" data-toggle="modal" class="btn btn-primary mg-b-6">Cari Data Laporan</button>  &nbsp; 
-            <button data-target="#multiplepegawai" data-toggle="modal" class="btn btn-info mg-b-6">Per Pegawai</button>  &nbsp; &nbsp; &nbsp;
+            <button data-target="#multiplepegawai" data-toggle="modal" class="btn btn-info mg-b-6">Per Pegawai</button>  &nbsp;
+            <button data-target="#divisimodal" data-toggle="modal" class="btn btn-warning mg-b-6">Per Divisi PDF</button>  &nbsp; &nbsp; &nbsp;
+            <button data-target="#divisiexcelmodal" data-toggle="modal" class="btn btn-warning mg-b-6">Per Divisi Excel</button>  &nbsp; &nbsp; &nbsp;
 
             <!-- Button lainnya -->
             {% include 'hrd_app/master/modul_absensi.html' %} 
@@ -97,6 +99,7 @@
                         <th rowspan="2">DL</th>
                         <th colspan="2" style="text-align:center;">TERLAMBAT</th>
                         <th rowspan="2">TOTAL HARI KERJA</th>
+                        <th rowspan="2">Print</th>
                     </tr>
                     <tr>
                         <th>Surat Biasa (SB)</th>
@@ -197,7 +200,93 @@
                         <input type="hidden" name="sid" id="sid" class="form-control" value="{{sid}}">
         
                         <div class="modal-footer">
-                        <button type="submit" id="submit_buttonCari" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
+                        <button type="submit" id="" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+        <div id="divisimodal" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Print Per Divisi</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                <form action="{% url "print_laporan_divisi" %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+                        <div class="col-12 mb-5">
+                            <label for="divisi">Pilih Divisi</label>
+                            <select name="divisi[]" id="divisi">
+                                <option value="">Pilih Divisi</option>
+                                {% for p in divisi %}
+                                    <option value="{{p.pk}}">{{p.divisi}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="dari">Dari</label>
+                            <input type="text" name="dari" id="daridivisi" class="form-control tgl1">
+                        </div>
+                        <div class="col-6">
+                            <label for="dari">Sampai</label>
+                            <input type="text" name="sampai" id="sampaidivisi" class="form-control tgl1">
+                        </div>
+                        <input type="hidden" name="sid" id="sid" class="form-control" value="{{sid}}">
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+        <div id="divisiexcelmodal" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Print Per Divisi Excel</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                <form action="{% url "print_laporan_divisi_excel" %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+                        <div class="col-12 mb-5">
+                            <label for="divisiexcel">Pilih Divisi Excel</label>
+                            <select name="divisi[]" id="divisiexcel">
+                                <option value="">Pilih Divisi Excel</option>
+                                {% for p in divisi %}
+                                    <option value="{{p.pk}}">{{p.divisi}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="dari">Dari</label>
+                            <input type="text" name="dari" id="daridivisiexcel" class="form-control tgl1">
+                        </div>
+                        <div class="col-6">
+                            <label for="dari">Sampai</label>
+                            <input type="text" name="sampai" id="sampaidivisiexcel" class="form-control tgl1">
+                        </div>
+                        <input type="hidden" name="sid" id="sid" class="form-control" value="{{sid}}">
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
                         <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
                         </div>              
         
@@ -245,6 +334,8 @@
         ],
     })
     const tahunp = $("#tahunp").selectize()
+    const divisi = $("#divisi").selectize()
+    const divisiexcel = $("#divisiexcel").selectize()
     const tahunSelectize = $("#tahun").selectize()
     const bulanSelectize = $("#bulan").selectize({
         valueField: "bulan",
@@ -314,6 +405,12 @@
             {data:"terlambat_ijin"},
             {data:"terlambat"},
             {data:"total_hari"},
+            {
+                data:null,
+                render:(data,type,row,meta) => {
+                    return `<a class="btn btn-primary" target="_blank" href="/hrd/print_laporan/${sid}/${row.id}/${bulan}/${tahun}">Print Pdf</a> &nbsp<a target="_blank" class="btn btn-warning" href="/hrd/laporan_periode_excel/${sid}/${row.id}/${bulan}/${tahun}">Print Excel</a>`
+                }
+            }
         ],
         "rowCallback": function (row, data) {
                 if(data.sln == 1){
@@ -375,7 +472,7 @@
         const bulan = $("#bulan").val()
         const sid = $("#sid").val()
         $("#tableku").DataTable().destroy()
-        $("#tableku tbody").empty()
+        console.log(bulan,tahun)
         $("#tableku").DataTable({
             ajax:{
                 url:"{% url 'laporan_json'%}",
@@ -390,41 +487,44 @@
                 },
             },
             columns:[
-                {data:"nik"},
-                {
-                    data:"nama",
-                    render:(data,type,row,meta) => {
-                        const id = row.id
-                        const sid = "{{sid}}"
-                        return `<a style="color:#0d6efd;" target="_blank" href="/hrd/print_laporan/${sid}/${id}/${bulan}/${tahun}">${data}</a>`
-                    }
-                },
-                {data:"jk"},
-                {data:"divisi"},
-                {data:"hari_off"},
-                {data:"hari_off"},
-                {data:"hari_off"},
-                {data:"sb"},
-                {data:"sdl"},
-                {data:"sdp"},
-                {data:"nkh"},
-                {data:"im"},
-                {data:"cm"},
-                {data:"wft"},
-                {data:"ktn"},
-                {data:"ijin"},
-                {data:"af"},
-                {data:"ct"},
-                {data:"ma"},
-                {data:"kwft"},
-                {data:"urh"},
-                {data:"bs"},
-                {data:"off"},
-                {data:"opg"},
-                {data:"dl"},
-                {data:"terlambat_ijin"},
-                {data:"terlambat"},
-                {data:"total_hari"},
+            {data:"nik"},
+            {
+                data:"nama",
+                render:(data,type,row,meta) => {
+                    const id = row.id
+                    return `<a style="color:#0d6efd;" target="_blank" href="/hrd/print_laporan/${sid}/${id}/${bulan}/${tahun}">${data}</a>`
+                }
+            },
+            {data:"jk"},
+            {data:"divisi"},
+            {data:"hari_off"},
+            {data:"sb"},
+            {data:"sdl"},
+            {data:"sdp"},
+            {data:"nkh"},
+            {data:"ma"},
+            {data:"ktn"},
+            {data:"im"},
+            {data:"cm"},
+            {data:"wft"},
+            {data:"kwft"},
+            {data:"urh"},
+            {data:"bs"},
+            {data:"ijin"},
+            {data:"af"},
+            {data:"ct"},
+            {data:"off"},
+            {data:"opg"},
+            {data:"dl"},
+            {data:"terlambat_ijin"},
+            {data:"terlambat"},
+            {data:"total_hari"},
+            {
+                data:null,
+                render:(data,type,row,meta) => {
+                    return `<a class="btn btn-primary" target="_blank" href="/hrd/print_laporan/${sid}/${row.id}/${bulan}/${tahun}">Print Pdf</a> &nbsp<a target="_blank" class="btn btn-warning" href="/hrd/laporan_periode_excel/${sid}/${row.id}/${bulan}/${tahun}">Print Excel</a>`
+                }
+            }
             ],
             "rowCallback": function (row, data) {
                     if(data.sln == 1){

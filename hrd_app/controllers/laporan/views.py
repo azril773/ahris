@@ -4,8 +4,8 @@ from hrd_app.controllers.lib import *
 def laporan(r,sid):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dr = datetime.strptime("2015","%Y")
         sp = datetime.today()
@@ -14,20 +14,22 @@ def laporan(r,sid):
             list_year.append(i)
         dsid = dakses.sid_id     
         
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('id')
         
         ###
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
-        jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()  
-        sall = status_pegawai_db.objects.using(r.session["ccabang"]).all()
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
+        jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all()  
+        sall = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all()
+        divisi = divisi_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all()
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).filter(aktif=1)
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'dsid': dsid,
             'sid': sid,
@@ -36,6 +38,7 @@ def laporan(r,sid):
             "list_year":list_year,
             "bulan":sp.month,
             "pegawai":pegawai,
+            "divisi":divisi,
             "nama_bulan":nama_bulan(sp.month),
             "tahun":sp.year,
             "sall":sall,
@@ -60,7 +63,7 @@ def laporan_json(r):
     data = []
 
     if int(sid) == 0:
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all()
         for pgw in pegawai:
             off = 0
             terlambat = 0
@@ -83,7 +86,7 @@ def laporan_json(r):
             ct = 0 #keterangan absensi
             opg = 0
             dl = 0
-            ab = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
+            ab = absensi_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
             if ab.exists():
                 for a in ab:
                     if a.keterangan_absensi == "OFF":
@@ -168,7 +171,7 @@ def laporan_json(r):
             }
             data.append(obj)
     else:
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id = sid)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).filter(status_id = sid)
         for pgw in pegawai:
             off = 0
             terlambat = 0
@@ -194,7 +197,7 @@ def laporan_json(r):
             opg = 0
             dl = 0
 
-            ab = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
+            ab = absensi_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).filter(pegawai_id = pgw.id, tgl_absen__range=[dr,sp])
             if ab.exists():
                 for a in ab:
                     if a.keterangan_absensi == "OFF":
@@ -286,26 +289,27 @@ def laporan_json(r):
 def print_laporan(r,sid,id,bulan,tahun):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id     
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).get(id=id)
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(id=id)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('id')
         
         ###
         try:
-            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
+            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
-        jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()   
+        jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all()   
         date = tahun+"-"+bulan+"-25"
         sp = datetime.strptime(date,"%Y-%m-%d")
         dr = sp - timedelta(days=30)
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'dsid': dsid,
             "dari":dr.date(),
@@ -340,14 +344,14 @@ def laporan_json_periode(r,sid,id,dr,sp):
         kehadiran = 0
         tselisih = 0.0
         trlmbt = 0
-        for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=id).order_by('tgl_absen','pegawai__divisi__divisi'):
+        for a in absensi_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=id).order_by('tgl_absen','pegawai__divisi__divisi'):
             if a.masuk is not None and a.pulang is not None:
                 kehadiran += 1
             elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
                 kehadiran += 2
             sket = " "
             
-            ab = absensi_db.objects.using(r.session["ccabang"]).get(id=a.id)     
+            ab = absensi_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(id=a.id)     
             hari = ab.tgl_absen.strftime("%A")
             hari_ini = nama_hari(hari) 
             
@@ -382,7 +386,7 @@ def laporan_json_periode(r,sid,id,dr,sp):
             else:
                 msk_b = "-"
             if ab.pulang_b is not None:
-                plg_b = f"{ab.pulang}"
+                plg_b = f"{ab.pulang_b}"
             else:
                 plg_b = "-"
 
@@ -486,6 +490,221 @@ def laporan_json_periode(r,sid,id,dr,sp):
         return JsonResponse({"data": data,"kehadiran":kehadiran,"hari":hari_count,"tselisih":f"{tselisih[0]},{tselisih[1][slc]}","trlmbt":trlmbt })
     
 
+def laporan_json_periode_excel(r,sid,id,bulan,tahun):        
+        data = []
+        sampai = datetime.strptime(f'{tahun}-{bulan}-26',"%Y-%m-%d").date()
+        dari = sampai - timedelta(days=30)
+        print(dari,sampai)
+        kehadiran = 0
+        tselisih = 0.0
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(id))
+        trlmbt = 0
+        obj = {
+            'tgl':[],
+            'hari': [],
+            "tgl_absen":[],
+            'nama': [],
+            'nik': [],
+            'userid': [],
+            'bagian': [],
+            "jam_masuk":[],
+            "jam_pulang":[],
+            'masuk': [],
+            'keluar': [],
+            'kembali': [],
+            'pulang': [],
+            'masuk_b': [],
+            'keluar_b': [],
+            'kembali_b': [],
+            'pulang_b': [],
+            "total_jam":[],
+            'tj': [],
+            'ket': [],
+            'sln': [],
+            'kehadiran': [],
+            'ln': []
+        }
+        for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=id).order_by('tgl_absen','pegawai__divisi__divisi'):
+            if a.masuk is not None and a.pulang is not None:
+                kehadiran += 1
+            elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
+                kehadiran += 2
+            sket = " "
+            
+            ab = absensi_db.objects.using(r.session["ccabang"]).get(id=a.id)     
+            hari = ab.tgl_absen.strftime("%A")
+            hari_ini = nama_hari(hari) 
+            
+            if ab.pegawai.counter_id is None:
+                bagian = ab.pegawai.divisi.divisi
+            else:
+                bagian = f'{ab.pegawai.divisi.divisi} - {ab.pegawai.counter.counter}' 
+            if ab.masuk is not None:
+                if ab.jam_masuk is not None:
+                    if ab.masuk > ab.jam_masuk:
+                        msk = f"{ab.masuk}"
+                    else:
+                        msk = f"{ab.masuk}"
+                else:
+                    msk = f"{ab.masuk}"
+            else:
+                msk = "-"
+            if ab.pulang is not None:
+                if ab.jam_pulang is not None:
+                    if ab.pulang < ab.jam_pulang:
+                        plg = f"{ab.pulang}"
+                    else:
+                        plg = f"{ab.pulang}"
+                else:
+                    plg = f"{ab.pulang}"
+            else:
+                plg = "-"
+
+
+            if ab.masuk_b is not None:
+                msk_b = f"{ab.masuk_b}"
+            else:
+                msk_b = "-"
+            if ab.pulang_b is not None:
+                plg_b = f"{ab.pulang_b}"
+            else:
+                plg_b = "-"
+
+
+
+                
+            if ab.istirahat is not None and ab.istirahat2 is not None:
+                ist = f'{ab.istirahat} / {ab.istirahat2}'
+            elif ab.istirahat is not None and ab.istirahat2 is None:                  
+                ist = f'{ab.istirahat}'
+            elif ab.istirahat is None and ab.istirahat2 is not None:                  
+                ist = f'{ab.istirahat2}'
+            else:
+                ist = "-"   
+
+
+            if ab.istirahat_b is not None and ab.istirahat2_b is not None:
+                ist_b = f" {ab.istirahat_b} / {ab.istirahat2_b}"
+            elif ab.istirahat_b is not None and ab.istirahat2_b is None:
+                ist_b = f" {ab.istirahat_b}"
+            elif ab.istirahat_b is None and ab.istirahat2_b is not None:
+                ist_b = f" {ab.istirahat2_b}"
+            else:
+                ist_b = "-"
+        
+                
+            bataskmb = ''
+            if ab.kembali is not None:
+                if ab.lama_istirahat is not None and ab.istirahat is not None:
+                    if datetime.combine(ab.tgl_absen,ab.kembali) > (datetime.combine(ab.tgl_absen,ab.istirahat) + timedelta(hours=int(ab.lama_istirahat))): 
+                        bataskmb = f'{ab.kembali}'
+                    else:
+                        bataskmb = f"{ab.kembali}"
+                else:
+                    bataskmb = f'{ab.kembali}'
+            print(bataskmb)
+            if ab.kembali is not None and ab.kembali2 is not None:
+                kmb = f'{bataskmb} / {ab.kembali2}'
+            elif ab.kembali is not None and ab.kembali2 is None:    
+                kmb = f'{bataskmb}'
+            elif ab.kembali is None and ab.kembali2 is not None:                  
+                kmb = f'{bataskmb}'    
+            else:
+                kmb = "-"               
+            
+            if ab.kembali_b is not None and ab.kembali2_b is not None:
+                kmb_b = f" {ab.kembali_b} / {ab.kembali2_b}"
+            elif ab.kembali_b is not None and ab.kembali2_b is None:
+                kmb_b = f" {ab.kembali_b}"
+            elif ab.kembali_b is None and ab.kembali2_b is not None:
+                kmb_b = f" {ab.kembali2_b}"
+            else:
+                kmb_b = "-" 
+            
+            if ab.keterangan_absensi is not None:
+                sket += f'{ab.keterangan_absensi}, '                 
+            if ab.keterangan_ijin is not None:
+                sket += f'{ab.keterangan_ijin}, '
+                kijin = ''
+            else:
+                if ab.masuk is not None and ab.jam_masuk is not None:
+                    if ab.masuk > ab.jam_masuk:
+                        tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
+                        trlmbt += 1
+                        sket += f"Terlambat masuk tanpa ijin, "
+            if ab.keterangan_lain is not None:
+                sket += f'{ab.keterangan_lain}, '                    
+            if ab.libur_nasional is not None:
+                sket += f'{ab.libur_nasional}, '
+                sln = 1
+            else:
+                sln = 0
+            obj["tgl"].append(datetime.strftime(ab.tgl_absen,'%d-%m-%Y'))
+            obj["hari"].append(hari_ini)
+            obj["tgl_absen"].append(ab.tgl_absen)
+            obj["nama"].append(ab.pegawai.nama)
+            obj["nik"].append(ab.pegawai.nik)
+            obj["userid"].append(ab.pegawai.userid)
+            obj["bagian"].append(bagian)
+            obj["jam_masuk"].append(ab.jam_masuk)
+            obj["jam_pulang"].append(ab.jam_pulang)
+            obj["masuk"].append(msk)
+            obj["keluar"].append(ist)
+            obj["kembali"].append(kmb)
+            obj["pulang"].append(plg)
+            obj["masuk_b"].append(msk_b)
+            obj["keluar_b"].append(ist_b)
+            obj["kembali_b"].append(kmb_b)
+            obj["pulang_b"].append(plg_b)
+            obj["total_jam"].append(ab.total_jam_kerja)
+            obj["tj"].append(ab.total_jam_kerja)
+            obj["ket"].append(sket)
+            obj["sln"].append(sln)
+            obj["kehadiran"].append(kehadiran)
+            obj["ln"].append(ab.libur_nasional)
+            # absen = {
+            #     'id': ab.id,
+            #     'tgl': ,
+            #     'hari': hari_ini,
+            #     "tgl_absen":ab.tgl_absen,
+            #     'nama': ab.pegawai.nama,
+            #     'nik': ab.pegawai.nik,
+            #     'userid': ab.pegawai.userid,
+            #     'bagian': bagian,
+            #     "jam_masuk":ab.jam_masuk,
+            #     "jam_pulang":ab.jam_pulang,
+            #     'masuk': msk,
+            #     'keluar': ist,
+            #     'kembali': kmb,
+            #     'pulang': plg,
+            #     'masuk_b': msk_b,
+            #     'keluar_b': ist_b,
+            #     'kembali_b': kmb_b,
+            #     'pulang_b': plg_b,
+            #     "total_jam":ab.total_jam_kerja,
+            #     'tj': ab.total_jam_kerja,
+            #     'ket': sket,
+            #     'sln': sln,
+            #     'kehadiran': kehadiran,
+            #     'ln': ab.libur_nasional
+            # }
+            # dat  a.append(absen)
+        print(obj)
+        tselisih = str(tselisih).split(".")
+        slc = slice(0,2)
+        df = pd.DataFrame(obj)
+        if pegawai.exists():
+            df.to_excel(f"static/excel/{pegawai[0].nama}-{pegawai[0].divisi.divisi}-{dari}-{sampai}.xlsx")
+            with open(f"static/excel/{pegawai[0].nama}-{pegawai[0].divisi.divisi}-{dari}-{sampai}.xlsx","rb") as file:
+                http = HttpResponse(file.read(),content_type="application/vnd.ms-excel")
+                http["Content-Disposition"] = f"attachment; filename={pegawai[0].nama}-{pegawai[0].divisi.divisi}-{dari}-{sampai}.xlsx"
+                return http
+        else:
+            df.to_excel(f"static/excel/{dari}-{sampai}-dummy.xlsx")
+        # with open("static/excel/")
+        # return JsonResponse({"data": data,"kehadiran":kehadiran,"hari":hari_count,"tselisih":f"{tselisih[0]},{tselisih[1][slc]}","trlmbt":trlmbt })
+        # return redirect("laporan",sid=sid)
+
 @login_required
 def print_laporan_pegawai(r):
     pgw = r.POST.getlist("pegawai[]")
@@ -495,8 +714,8 @@ def print_laporan_pegawai(r):
     try:
         iduser = r.user.id
         
-        if akses_db.objects.filter(user_id=iduser).exists():
-            dakses = akses_db.objects.get(user_id=iduser)
+        if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+            dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
             sid = dakses.pegawai.status.pk
             data = [] 
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pgw)
@@ -550,7 +769,7 @@ def print_laporan_pegawai(r):
                 else:
                     msk_b = "-"
                 if ab.pulang_b is not None:
-                    plg_b = f"{ab.pulang}"
+                    plg_b = f"{ab.pulang_b}"
                 else:
                     plg_b = "-"
                 plg = ""
@@ -671,6 +890,399 @@ def print_laporan_pegawai(r):
             slc = slice(0,2)
             obj["selisih"] =f"{tselisih[0]},{tselisih[1][slc]}"
             data.append(obj)
+    except Exception as e:
+        messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))
+        return redirect("laporan",sid=sid)
+    return render(r,"hrd_app/laporan/print_laporan_pegawai.html",{"data":data})
+
+@login_required
+def print_laporan_divisi(r):
+    dvs = r.POST.getlist("divisi[]")
+    dr = r.POST.get("dari")
+    sp = r.POST.get("sampai")
+    # print(tahun,bulan,pegawai)
+    try:
+        iduser = r.user.id
+        
+        if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+            dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+            sid = dakses.pegawai.status.pk
+            data = [] 
+        divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=dvs)
+        for p in divisi:
+            for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=p.pk):
+                dari = datetime.strptime(str(dr),'%d-%m-%Y').date()
+                sampai = datetime.strptime(str(sp),'%d-%m-%Y').date()
+                obj = {
+                    "nama":p.nama,
+                    "nik":p.nik,
+                    "divisi":p.divisi,
+                    "dari":dari,
+                    "sampai":sampai,
+                    "kehadiran":0,
+                    "selisih":0,
+                    "terlambat":0,
+                    "absensi":[]
+                }
+                dari_loop = datetime.strptime(str(dr),'%d-%m-%Y').date()
+                delta = timedelta(days=1)
+                hari_count = 0
+                while dari_loop <= sampai:
+                    dari_loop += delta
+                    hari_count += 1
+                kehadiran = 0
+                tselisih = 0.0
+                trlmbt = 0
+                for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=p.pk).order_by('tgl_absen','pegawai__divisi__divisi'):
+                    ab = absensi_db.objects.using(r.session["ccabang"]).get(id=a.id)     
+                    if a.masuk is not None and a.pulang is not None and a.masuk_b is None and a.pulang_b is None:
+                        kehadiran += 1
+                    elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
+                        kehadiran += 2
+                    sket = " "
+                    msk = ''
+                    hari = ab.tgl_absen.strftime("%A")
+                    hari_ini = nama_hari(hari) 
+                    if ab.masuk is not None:
+                        if ab.jam_masuk is not None:
+                            if ab.masuk > ab.jam_masuk:
+                                msk = f"<span class='text-danger'>{ab.masuk}</span>"
+                            else:
+                                msk = f"{ab.masuk}"
+                        else:
+                            msk = f"{ab.masuk}"
+                    else:
+                        msk = "-"
+
+
+                    if ab.masuk_b is not None:
+                        msk_b = f"{ab.masuk_b}"
+                    else:
+                        msk_b = "-"
+                    if ab.pulang_b is not None:
+                        plg_b = f"{ab.pulang_b}"
+                    else:
+                        plg_b = "-"
+                    plg = ""
+                    if ab.pulang is not None:
+                        if ab.jam_pulang is not None:
+                            if ab.pulang < ab.jam_pulang:
+                                plg = f"<span class='text-danger'>{ab.pulang}</span>"
+                            else:
+                                plg = f'{ab.pulang}'
+                        else:
+                            plg = f"{ab.pulang}"
+                    else:
+                        plg = "-"
+
+                    
+                    if ab.pegawai.counter_id is None:
+                        bagian = ab.pegawai.divisi.divisi
+                    else:
+                        bagian = f'{ab.pegawai.divisi.divisi} - {ab.pegawai.counter.counter}' 
+                        
+                    if ab.istirahat is not None and ab.istirahat2 is not None:
+                        ist = f'{ab.istirahat} / {ab.istirahat2}'
+                    elif ab.istirahat is not None and ab.istirahat2 is None:                  
+                        ist = f'{ab.istirahat}'
+                    elif ab.istirahat is None and ab.istirahat2 is not None:                  
+                        ist = f'{ab.istirahat2}'
+                    else:
+                        ist = "-"    
+                    if ab.istirahat_b is not None and ab.istirahat2_b is not None:
+                        ist_b = f" {ab.istirahat_b} / {ab.istirahat2_b}"
+                    elif ab.istirahat_b is not None and ab.istirahat2_b is None:
+                        ist_b = f" {ab.istirahat_b}"
+                    elif ab.istirahat_b is None and ab.istirahat2_b is not None:
+                        ist_b = f" {ab.istirahat2_b}"
+                    else:
+                        ist_b = "-"
+                    bataskmb = ''
+                    if ab.kembali is not None:
+                        if ab.lama_istirahat is not None and ab.istirahat is not None:
+                            if datetime.combine(ab.tgl_absen,ab.kembali) > (datetime.combine(ab.tgl_absen,ab.istirahat) + timedelta(hours=int(ab.lama_istirahat))): 
+                                bataskmb = f'<span class="text-danger">{ab.kembali}</span>'
+                            else:
+                                bataskmb = f"{ab.kembali}"
+                        else:
+                            bataskmb = f'{ab.kembali}'
+                    if ab.kembali is not None and ab.kembali2 is not None:
+                        kmb = f'{bataskmb} / {ab.kembali2}'
+                    elif ab.kembali is not None and ab.kembali2 is None:    
+                        kmb = f'{bataskmb}'
+                    elif ab.kembali is None and ab.kembali2 is not None:                  
+                        kmb = f'{bataskmb}'    
+                    else:
+                        kmb = "-"        
+                    if ab.kembali_b is not None and ab.kembali2_b is not None:
+                        kmb_b = f" {ab.kembali_b} / {ab.kembali2_b}"
+                    elif ab.kembali_b is not None and ab.kembali2_b is None:
+                        kmb_b = f" {ab.kembali_b}"
+                    elif ab.kembali_b is None and ab.kembali2_b is not None:
+                        kmb_b = f" {ab.kembali2_b}"
+                    else:
+                        kmb_b = "-" 
+                    
+                    if ab.keterangan_absensi is not None:
+                        sket += f'{ab.keterangan_absensi}, '                 
+                    if ab.keterangan_ijin is not None:
+                        sket += f'{ab.keterangan_ijin}, '
+                        kijin = ''
+                    else:
+                        if ab.masuk is not None and ab.jam_masuk is not None:
+                            if ab.masuk > ab.jam_masuk:
+                                tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
+                                trlmbt += 1
+                                sket += f"Terlambat masuk tanpa ijin, "
+                    if ab.keterangan_lain is not None:
+                        sket += f'{ab.keterangan_lain}, '                    
+                    if ab.libur_nasional is not None:
+                        sket += f'{ab.libur_nasional}, '
+                        sln = 1
+                    else:
+                        sln = 0          
+
+                    if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur=ab.tgl_absen).exists():
+                        tgl_absen = True
+                    else:
+                        tgl_absen = False
+                    print(kmb,"KEMBALI")
+                    absen = {
+                        'id': ab.id,
+                        'tgl': datetime.strftime(ab.tgl_absen,'%d-%m-%Y'),
+                        'hari': hari_ini,
+                        "tgl_absen":ab.tgl_absen,
+                        "lbr":tgl_absen,
+                        'nama': ab.pegawai.nama,
+                        'nik': ab.pegawai.nik,
+                        'userid': ab.pegawai.userid,
+                        'bagian': bagian,
+                        "jam_masuk":ab.jam_masuk,
+                        "jam_pulang":ab.jam_pulang,
+                        'masuk': msk,
+                        'keluar': ist,
+                        'kembali': kmb,
+                        'pulang': plg,
+                        'masuk_b': msk_b,
+                        'keluar_b': ist_b,
+                        'kembali_b': kmb_b,
+                        'pulang_b': plg_b,
+                        "total_jam":ab.total_jam_kerja,
+                        'tj': ab.total_jam_kerja,
+                        'ket': sket,
+                        'sln': sln,
+                        'kehadiran': kehadiran,
+                        'ln': ab.libur_nasional
+                    }
+                    obj["absensi"].append(absen)
+                obj["kehadiran"] = kehadiran
+                obj["terlambat"] = trlmbt
+                tselisih = str(tselisih).split(".")
+                slc = slice(0,2)
+                obj["selisih"] =f"{tselisih[0]},{tselisih[1][slc]}"
+                data.append(obj)
+    except Exception as e:
+        messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))
+        return redirect("laporan",sid=sid)
+    return render(r,"hrd_app/laporan/print_laporan_pegawai.html",{"data":data})
+
+@login_required
+def print_laporan_divisi_excel(r):
+    dvs = r.POST.getlist("divisi[]")
+    dr = r.POST.get("dari")
+    sp = r.POST.get("sampai")
+    # print(tahun,bulan,pegawai)
+    obj = {
+                    'pegawai':[],
+                    'tgl':[],
+                    'hari': [],
+                    "tgl_absen":[],
+                    'nama': [],
+                    'nik': [],
+                    'userid': [],
+                    'bagian': [],
+                    "jam_masuk":[],
+                    "jam_pulang":[],
+                    'masuk': [],
+                    'keluar': [],
+                    'kembali': [],
+                    'pulang': [],
+                    'masuk_b': [],
+                    'keluar_b': [],
+                    'kembali_b': [],
+                    'pulang_b': [],
+                    "total_jam":[],
+                    'tj': [],
+                    'ket': [],
+                    'sln': [],
+                    'kehadiran': [],
+                    'ln': []
+                }
+    try:
+        iduser = r.user.id
+        
+        if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+            dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+            sid = dakses.pegawai.status.pk
+            data = [] 
+        divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=dvs)
+        for p in divisi:
+            for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=p.pk):
+                dari = datetime.strptime(str(dr),'%d-%m-%Y').date()
+                sampai = datetime.strptime(str(sp),'%d-%m-%Y').date()
+                kehadiran = 0
+                tselisih = 0.0
+                trlmbt = 0
+                for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=p.pk).order_by('tgl_absen','pegawai__divisi__divisi'):
+                    ab = absensi_db.objects.using(r.session["ccabang"]).get(id=a.id)     
+                    if a.masuk is not None and a.pulang is not None and a.masuk_b is None and a.pulang_b is None:
+                        kehadiran += 1
+                    elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
+                        kehadiran += 2
+                    sket = " "
+                    msk = ''
+                    hari = ab.tgl_absen.strftime("%A")
+                    hari_ini = nama_hari(hari) 
+                    if ab.masuk is not None:
+                        if ab.jam_masuk is not None:
+                            if ab.masuk > ab.jam_masuk:
+                                msk = f"{ab.masuk}"
+                            else:
+                                msk = f"{ab.masuk}"
+                        else:
+                            msk = f"{ab.masuk}"
+                    else:
+                        msk = "-"
+
+
+                    if ab.masuk_b is not None:
+                        msk_b = f"{ab.masuk_b}"
+                    else:
+                        msk_b = "-"
+                    if ab.pulang_b is not None:
+                        plg_b = f"{ab.pulang_b}"
+                    else:
+                        plg_b = "-"
+                    plg = ""
+                    if ab.pulang is not None:
+                        if ab.jam_pulang is not None:
+                            if ab.pulang < ab.jam_pulang:
+                                plg = f"{ab.pulang}"
+                            else:
+                                plg = f'{ab.pulang}'
+                        else:
+                            plg = f"{ab.pulang}"
+                    else:
+                        plg = "-"
+
+                    
+                    if ab.pegawai.counter_id is None:
+                        bagian = ab.pegawai.divisi.divisi
+                    else:
+                        bagian = f'{ab.pegawai.divisi.divisi} - {ab.pegawai.counter.counter}' 
+                        
+                    if ab.istirahat is not None and ab.istirahat2 is not None:
+                        ist = f'{ab.istirahat} / {ab.istirahat2}'
+                    elif ab.istirahat is not None and ab.istirahat2 is None:                  
+                        ist = f'{ab.istirahat}'
+                    elif ab.istirahat is None and ab.istirahat2 is not None:                  
+                        ist = f'{ab.istirahat2}'
+                    else:
+                        ist = "-"    
+                    if ab.istirahat_b is not None and ab.istirahat2_b is not None:
+                        ist_b = f" {ab.istirahat_b} / {ab.istirahat2_b}"
+                    elif ab.istirahat_b is not None and ab.istirahat2_b is None:
+                        ist_b = f" {ab.istirahat_b}"
+                    elif ab.istirahat_b is None and ab.istirahat2_b is not None:
+                        ist_b = f" {ab.istirahat2_b}"
+                    else:
+                        ist_b = "-"
+                    bataskmb = ''
+                    if ab.kembali is not None:
+                        if ab.lama_istirahat is not None and ab.istirahat is not None:
+                            if datetime.combine(ab.tgl_absen,ab.kembali) > (datetime.combine(ab.tgl_absen,ab.istirahat) + timedelta(hours=int(ab.lama_istirahat))): 
+                                bataskmb = f'{ab.kembali}'
+                            else:
+                                bataskmb = f"{ab.kembali}"
+                        else:
+                            bataskmb = f'{ab.kembali}'
+                    if ab.kembali is not None and ab.kembali2 is not None:
+                        kmb = f'{bataskmb} / {ab.kembali2}'
+                    elif ab.kembali is not None and ab.kembali2 is None:    
+                        kmb = f'{bataskmb}'
+                    elif ab.kembali is None and ab.kembali2 is not None:                  
+                        kmb = f'{bataskmb}'    
+                    else:
+                        kmb = "-"        
+                    if ab.kembali_b is not None and ab.kembali2_b is not None:
+                        kmb_b = f" {ab.kembali_b} / {ab.kembali2_b}"
+                    elif ab.kembali_b is not None and ab.kembali2_b is None:
+                        kmb_b = f" {ab.kembali_b}"
+                    elif ab.kembali_b is None and ab.kembali2_b is not None:
+                        kmb_b = f" {ab.kembali2_b}"
+                    else:
+                        kmb_b = "-" 
+                    
+                    if ab.keterangan_absensi is not None:
+                        sket += f'{ab.keterangan_absensi}, '                 
+                    if ab.keterangan_ijin is not None:
+                        sket += f'{ab.keterangan_ijin}, '
+                        kijin = ''
+                    else:
+                        if ab.masuk is not None and ab.jam_masuk is not None:
+                            if ab.masuk > ab.jam_masuk:
+                                tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
+                                trlmbt += 1
+                                sket += f"Terlambat masuk tanpa ijin, "
+                    if ab.keterangan_lain is not None:
+                        sket += f'{ab.keterangan_lain}, '                    
+                    if ab.libur_nasional is not None:
+                        sket += f'{ab.libur_nasional}, '
+                        sln = 1
+                    else:
+                        sln = 0          
+
+                    if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur=ab.tgl_absen).exists():
+                        tgl_absen = True
+                    else:
+                        tgl_absen = False
+                    print(kmb,"KEMBALI")
+                    obj["tgl"].append(datetime.strftime(ab.tgl_absen,'%d-%m-%Y'))
+                    obj["pegawai"].append(p.nama)
+                    obj["hari"].append(hari_ini)
+                    obj["tgl_absen"].append(ab.tgl_absen)
+                    obj["nama"].append(ab.pegawai.nama)
+                    obj["nik"].append(ab.pegawai.nik)
+                    obj["userid"].append(ab.pegawai.userid)
+                    obj["bagian"].append(bagian)
+                    obj["jam_masuk"].append(ab.jam_masuk)
+                    obj["jam_pulang"].append(ab.jam_pulang)
+                    obj["masuk"].append(msk)
+                    obj["keluar"].append(ist)
+                    obj["kembali"].append(kmb)
+                    obj["pulang"].append(plg)
+                    obj["masuk_b"].append(msk_b)
+                    obj["keluar_b"].append(ist_b)
+                    obj["kembali_b"].append(kmb_b)
+                    obj["pulang_b"].append(plg_b)
+                    obj["total_jam"].append(ab.total_jam_kerja)
+                    obj["tj"].append(ab.total_jam_kerja)
+                    obj["ket"].append(sket)
+                    obj["sln"].append(sln)
+                    obj["kehadiran"].append(kehadiran)
+                    obj["ln"].append(ab.libur_nasional)
+        print(obj)
+        tselisih = str(tselisih).split(".")
+        slc = slice(0,2)
+        df = pd.DataFrame(obj)
+        if divisi.exists():
+            df.to_excel(f"static/excel/{divisi[0].divisi}-{dr}-{sp}.xlsx")
+            with open(f"static/excel/{divisi[0].divisi}-{dr}-{sp}.xlsx","rb") as file:
+                http = HttpResponse(file.read(),content_type="application/vnd.ms-excel")
+                http["Content-Disposition"] = f"attachment; filename={divisi[0].divisi}-{dr}-{sp}.xlsx"
+                return http
+        else:
+            df.to_excel(f"static/excel/{dr}-{sp}-dummy.xlsx")
     except Exception as e:
         messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))
         return redirect("laporan",sid=sid)

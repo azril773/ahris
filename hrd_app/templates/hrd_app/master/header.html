@@ -11,14 +11,22 @@
 
     <div class="br-header-right">
       <nav class="nav">
-        <select name="cabang" id="cabang">
-          {% for c in cabang %}
-            <option value="{{c}}">{{c}}</option>
-          {% endfor %}
-        </select>
         <div class="dropdown">
-          <div class="pd-x-25">
-              <h4 id="brTime" class="tx-black tx-light mg-b-1"></h4>
+          <div class="pd-x-25 row">
+            <div class="col-6">
+              <select name="cabang" style="width: 100%;" id="opsi_cabang">
+                {% for c in cabang %}
+                {% if ccabang == c %}
+                    <option selected value="{{c}}">{{c}}</option>
+                  {% else %}
+                    <option value="{{c}}">{{c}}</option>
+                {% endif %}
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-6">
+              <h4 id="brTime" style="width: 100%;" class="tx-black tx-light mg-b-1"></h4>
+            </div>
           </div>
         </div>
       </nav>

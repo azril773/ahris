@@ -82,6 +82,17 @@ def beranda_no_akses(request):
     return redirect('beranda')
 
 
+
+
+@login_required
+def ganti_cabang(r):
+    cabang = r.POST.get("cabang")
+    if akses_cabang_db.objects.filter(cabang=cabang).exists():
+        r.session["ccabang"] = cabang
+        return JsonResponse({"status":"success","msg":"Berhasil mengganti cabang"},status=200)
+    else:
+        return JsonResponse({"status":"error","msg":"Gagal mengganti cabang"},status=401)
+
 # +++++++++++++++++++++++++++ PEGAWAI ++++++++++++++++++++++++++++++++
 from hrd_app.controllers.pegawai.views import *
 

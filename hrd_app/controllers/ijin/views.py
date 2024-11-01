@@ -74,6 +74,7 @@ def ijin(r, sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -146,6 +147,7 @@ def cari_ijin(r):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -212,6 +214,7 @@ def cari_ijin_sid(r, dr, sp, sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,

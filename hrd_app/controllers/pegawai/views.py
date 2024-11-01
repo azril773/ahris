@@ -235,6 +235,7 @@ def pegawai(r,sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'status' : status,
@@ -263,6 +264,7 @@ def pegawai_non_aktif(r,sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'status' : status,
@@ -369,6 +371,7 @@ def edit_pegawai(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'id':idp,
             'dsid': dsid,
             'sid': pg.status_id,
@@ -450,8 +453,8 @@ def epegawai(r,idp):
             pihak = json.loads(pihak)
             pengalaman = json.loads(pengalaman)
             pendidikan = json.loads(pendidikan)
-            userid = r.user.id
-            aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+            id_user = r.user.id
+            aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
             divisi = [div.divisi for div in aksesdivisi]
             try:
                 pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(id),divisi__in=divisi)
@@ -612,6 +615,7 @@ def tpegawai(r):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             "counter":counter,
             "divisi":divisi,
@@ -672,8 +676,8 @@ def tambah_pegawai(r):
             pihak = r.POST.get("pihak")
             pengalaman = r.POST.get("pengalaman")
             pendidikan = r.POST.get("pendidikan")
-            userid = r.user.id
-            aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+            id_user = r.user.id
+            aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
             divisi = [div.divisi for div in aksesdivisi]
             pg = pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid,divisi__in=divisi)
             if not pg.exists():
@@ -815,8 +819,8 @@ def tambah_pegawai(r):
 
 @login_required
 def getPegawai(r,idp):
-    userid = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+    id_user = r.user.id
+    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     result = serialize("json",[pegawai_db.objects.using(r.session["ccabang"]).get(pk=int(idp),divisi__in=divisi)])
     result = json.loads(result)
@@ -890,8 +894,8 @@ def general_data(r,idp):
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         dsid = dakses.sid_id
         pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -905,6 +909,7 @@ def general_data(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -946,8 +951,8 @@ def general_data_nonaktif(r,idp):
            
         dsid = dakses.sid_id   
         
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -961,6 +966,7 @@ def general_data_nonaktif(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1001,8 +1007,8 @@ def data_pribadi(r,idp):
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1037,6 +1043,7 @@ def data_pribadi(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1064,8 +1071,8 @@ def data_pribadi_nonaktif(r,idp):
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         dsid = dakses.sid_id   
         
@@ -1098,6 +1105,7 @@ def data_pribadi_nonaktif(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1126,8 +1134,8 @@ def pendidikan_kerja(r,idp):
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1148,6 +1156,7 @@ def pendidikan_kerja(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1174,8 +1183,8 @@ def pendidikan_kerja_nonaktif(r,idp):
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1197,6 +1206,7 @@ def pendidikan_kerja_nonaktif(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1222,8 +1232,8 @@ def promosi_demosi(r,idp):
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db.objects.using(r.session["ccabang"]).select_related("jabatan").filter(id=int(idp),divisi__in=divisi)
@@ -1238,6 +1248,7 @@ def promosi_demosi(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1297,8 +1308,8 @@ def promosi_demosi_nonaktif(r,idp):
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).select_related("jabatan").filter(id=int(idp),divisi__in=divisi)
@@ -1313,6 +1324,7 @@ def promosi_demosi_nonaktif(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1372,8 +1384,8 @@ def tambah_prodemo(r):
         status = r.POST.get("status")
         jabatan_seb = r.POST.get("jabatan_seb")
         jabatan_sek = r.POST.get("jabatan_sek")
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         idp = r.POST.get("id")
@@ -1447,8 +1459,8 @@ def sangsi(r,idp):
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1462,6 +1474,7 @@ def sangsi(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1484,8 +1497,8 @@ def sangsi_nonaktif(r,idp):
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1502,6 +1515,7 @@ def sangsi_nonaktif(r,idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1576,8 +1590,8 @@ def aktif_nonaktif(r):
     nama_user = r.user.username
     idp = r.POST.get('idp')
     nama_modul = r.POST.get('nama_modul')
-    userid = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+    id_user = r.user.id
+    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     
     pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1602,8 +1616,8 @@ def aktif_nonaktif(r):
 @login_required
 def nonaktif(r):
     idp = r.POST.get('idp')
-    userid = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+    id_user = r.user.id
+    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     
     pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1813,8 +1827,8 @@ def nonaktif(r):
 def aktif(r):
     idp = r.POST.get('idp')
     nama_user = r.user.username
-    userid = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+    id_user = r.user.id
+    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     
     pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1863,7 +1877,6 @@ def aktif(r):
         ).save(using=r.session["ccabang"])
 
         pga = pegawai_db.objects.using(r.session["ccabang"]).filter().last()
-        print("SSDS")
         pribadi = pribadi_db_arsip.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk)
         if pribadi.exists():
             pribadi = pribadi[0]
@@ -1972,7 +1985,7 @@ def aktif(r):
                 ).save(using=r.session["ccabang"])
             sangsi.delete(using=r.session["ccabang"])
 
-        pegawai.delete(using=r.session["ccabang"])
+        pg.delete(using=r.session["ccabang"])
         status = 'ok'
     return JsonResponse({"status": status})
 
@@ -1984,10 +1997,10 @@ def pegawai_json(r, sid):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
-        
+        print(pegawai_db.objects.using(r.session["ccabang"]).filter(divisi__in=divisi))
         if int(sid) == 0:
             for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi):
                 
@@ -2091,8 +2104,8 @@ def pegawai_json(r, sid):
 def non_aktif_json(r, sid):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         data = []
@@ -2194,8 +2207,8 @@ def detail_pegawai_json(r, idp):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
-        userid = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=userid)
+        id_user = r.user.id
+        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -2246,6 +2259,7 @@ def registrasi_pegawai(r):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'status' : status,
             'modul_aktif' : 'Pegawai'
@@ -2407,6 +2421,7 @@ def rp_form(r):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             "counter":counter,
             "divisi":divisi,

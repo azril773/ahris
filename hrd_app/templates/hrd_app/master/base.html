@@ -85,7 +85,7 @@
     {% include 'hrd_app/master/header.html' %}    
     
     <div class="br-mainpanel">
-
+        {% csrf_token %}
         &nbsp;
 
         <!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
@@ -109,6 +109,23 @@
     {% block hrd_ajax %}
 
     {% endblock hrd_ajax %}
-    
+    <script>
+        $("#opsi_cabang").selectize({
+            onChange:function(e){
+                const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+                $.ajax({
+                    url:"{% url "ganti_cabang" %}",
+                    method:"post",
+                    data:{cabang:e},
+                    headers:{
+                        "X-CSRFToken":token
+                    },
+                    success:(e) => {
+                        window.location.href = "/hrd/"
+                    }
+                })
+            }
+        })
+    </script>
   </body>
 </html>

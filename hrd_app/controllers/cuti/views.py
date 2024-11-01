@@ -51,6 +51,7 @@ def cuti(r, sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -96,6 +97,7 @@ def detail_cuti(r, sid, idp):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'idp' : idp,
             'dsid': dsid,
             'sid' : int(sid),
@@ -140,6 +142,7 @@ def cari_cuti(r):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'idp' : idp,
             'dsid': dsid,
             'sid' : int(sid),

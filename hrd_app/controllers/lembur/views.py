@@ -56,6 +56,7 @@ def lembur(r, sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -130,6 +131,7 @@ def lembur_belum_proses(r, sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -202,6 +204,7 @@ def cari_lembur(r):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             'sid' : int(sid),
             'status' : lstatus,
@@ -1906,6 +1909,7 @@ def kompen(r):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'dsid': dsid,
             'sid': pgw.status_id,

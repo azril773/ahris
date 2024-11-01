@@ -52,6 +52,7 @@ def opg(r, sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -122,6 +123,7 @@ def cari_opg(r):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -187,6 +189,7 @@ def cari_opg_sid(r, dr, sp, sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,

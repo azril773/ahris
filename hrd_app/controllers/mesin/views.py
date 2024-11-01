@@ -116,6 +116,7 @@ def rmesin(r,userid,id,uid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,
             "counter":counter,
             "divisi":divisi,

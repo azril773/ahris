@@ -300,12 +300,12 @@
     /* Tambah Ijin */
     tambahForm.addEventListener('submit', e => {
         e.preventDefault()
-
         const tgl = document.getElementById('tgl')
         const tgl2 = document.getElementById('tgl2')
         const pegawai = document.getElementById('pegawai')
         const ket = document.getElementById('ket')
         const csrf = document.getElementsByName('csrfmiddlewaretoken')       
+        console.log(tgl,tgl2)
         
         $.ajax({
             type: 'POST',
@@ -378,10 +378,10 @@
 
     });
 
-    $("#submit_button").on("click", function() {
+    {% comment %} $("#submit_button").on("click", function() {
         var $this = $(this);
         $this.attr('disabled', true);
-    });
+    }); {% endcomment %}
 
 </script>
 

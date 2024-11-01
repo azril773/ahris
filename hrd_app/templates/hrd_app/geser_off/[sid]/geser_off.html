@@ -306,7 +306,7 @@
         const pegawai = document.getElementById('pegawai')
         const ket = document.getElementById('ket')
         const csrf = document.getElementsByName('csrfmiddlewaretoken')       
-        
+        console.log(tgl,tgl2)
         $.ajax({
             type: 'POST',
             url: "{% url 'tgf' %}",

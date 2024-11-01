@@ -6,6 +6,7 @@ urlpatterns = [
     path('logout', views.user_logout, name='logout'),
     
     path('', views.beranda, name='beranda'),
+    path('ganti_cabang/', views.ganti_cabang, name='ganti_cabang'),
 
     # +++++++++++++++++++ URLS ABSENSI +++++++++++++++++++
     path('', include("hrd_app.router.absensi.ui.urls")),

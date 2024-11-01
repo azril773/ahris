@@ -53,6 +53,7 @@ def geser_off(r, sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -82,8 +83,8 @@ def cari_geser_off(r):
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        dr = r.POST.get('ctgl1')
-        sp = r.POST.get('ctgl2')
+        dr = r.POST['ctgl1']
+        sp = r.POST['ctgl2']
         sid = r.POST.get('sid')
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()               
@@ -122,6 +123,7 @@ def cari_geser_off(r):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -187,6 +189,7 @@ def cari_geser_off_sid(r, dr, sp, sid):
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -423,21 +426,24 @@ def batal_geseroff(r):
         tln = None 
         kopg = 'OFF Pengganti Reguler'
     
-    ab = absensi_db.objects.using(r.session["ccabang"]).get(pegawai_id=int(idp), tgl_absen=ke_tgl)
-    ab.keterangan_absensi = None
-    ab.save(using=r.session["ccabang"])
-    
-    if opg_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), opg_tgl=dari_tgl).exists():
-        pass
+
+    ab = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_absen=ke_tgl)
+    if ab.exists():
+        ab[0].keterangan_absensi = None
+        ab[0].save(using=r.session["ccabang"])
+        if opg_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), opg_tgl=dari_tgl).exists():
+            pass
+        else:
+            tambah_opg = opg_db(
+                pegawai_id = int(idp),
+                opg_tgl = dari_tgl,  
+                keterangan = kopg,          
+                add_by = 'Program',
+                edit_by = 'Program'
+            )
+            tambah_opg.save(using=r.session["ccabang"])
     else:
-        tambah_opg = opg_db(
-            pegawai_id = int(idp),
-            opg_tgl = dari_tgl,  
-            keterangan = kopg,          
-            add_by = 'Program',
-            edit_by = 'Program'
-        )
-        tambah_opg.save(using=r.session["ccabang"])
+        pass
        
     histori = histori_hapus_db(
         delete_by = nama_user,
