@@ -185,6 +185,8 @@ def cari_absensi(r):
                     jmkem = a.lama_istirahat
                 else:
                     jmkem = None
+                if sket == "":
+                    sket = "-"
                 absen = {
                     'id': a.id,
                     'tgl': datetime.strftime(a.tgl_absen,'%d-%m-%Y'),
@@ -321,6 +323,8 @@ def cari_absensi(r):
                     jmkem = a.lama_istirahat
                 else:
                     jmkem = None
+                if sket == "":
+                    sket = "-"
                 absen = {
                     'id': a.id,
                     'tgl': datetime.strftime(a.tgl_absen,'%d-%m-%Y'),
@@ -510,6 +514,8 @@ def absensi_json(r, dr, sp, sid):
                     jmkem = a.lama_istirahat
                 else:
                     jmkem = None
+                if sket == "":
+                    sket = "-"
                 absen = {
                     'id': a.id,
                     'tgl': datetime.strftime(a.tgl_absen,'%d-%m-%Y'),
@@ -541,7 +547,7 @@ def absensi_json(r, dr, sp, sid):
         else:                        
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(pegawai__divisi__in=divisi,tgl_absen__range=(dari,sampai), pegawai__status_id=sid).order_by('tgl_absen','pegawai__divisi__divisi'):
                             
-                sket = " "
+                sket = ""
                 
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
@@ -642,6 +648,8 @@ def absensi_json(r, dr, sp, sid):
                     jmkem = a.lama_istirahat
                 else:
                     jmkem = None
+                if sket == "":
+                    sket = "-"
                 absen = {
                     'id': a.id,
                     'tgl': datetime.strftime(a.tgl_absen,'%d-%m-%Y'),
@@ -1073,7 +1081,6 @@ def pabsen(req):
         # jika ada absen masuk dan pulang
         # rencana cronjob jalan
         if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-            print([True for gsr in geser_all if gsr["dari_tgl"] == ab.tgl_absen and gsr["idp"] == ab.pegawai_id])
             if str(a.pegawai.hari_off) == str(nh):
                 # jika dia bisa mendapatkan opg 
                 if a.pegawai.status_id in lsopg:
