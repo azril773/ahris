@@ -94,22 +94,22 @@ def cari_absensi(r):
                     else:
                         msk = f"{a.masuk}"
                 else:
-                    msk = None
+                    msk = "-"
 
                 if a.pulang is not None:
                     plg = f"{a.pulang}"
                 else:
-                    plg = None
+                    plg = "-"
 
                 if a.masuk_b is not None:
                     msk_b = f"{a.masuk_b}"
                 else:
-                    msk_b = None
+                    msk_b = "-"
 
                 if a.pulang_b is not None:
                     plg_b = f"{a.pulang_b}"
                 else:
-                    plg_b = None
+                    plg_b = "-"
 
                 if a.istirahat is not None and a.istirahat2 is not None:
                     ist = f'{a.istirahat} / {a.istirahat2}'
@@ -118,7 +118,7 @@ def cari_absensi(r):
                 elif a.istirahat is None and a.istirahat2 is not None:                  
                     ist = f'{a.istirahat2}'
                 else:
-                    ist = ""    
+                    ist = "-"    
 
                 if a.istirahat_b is not None and a.istirahat2_b is not None:
                     ist_b = f" {a.istirahat_b} / {a.istirahat2_b})"
@@ -127,7 +127,7 @@ def cari_absensi(r):
                 elif a.istirahat_b is None and a.istirahat2_b is not None:
                     ist_b = f" {a.istirahat2_b}"
                 else:
-                    ist_b = ""
+                    ist_b = "-"
 
 
                 if a.lama_istirahat is not None and a.istirahat is not None:
@@ -147,7 +147,7 @@ def cari_absensi(r):
                 elif a.kembali is None and a.kembali2 is not None:                  
                     kmb = f'{a.kembali2}'    
                 else:
-                    kmb = ""        
+                    kmb = "-"        
 
                 if a.kembali_b is not None and a.kembali2_b is not None:
                     kmb_b = f" {a.kembali_b} / {a.kembali2_b})"
@@ -156,7 +156,7 @@ def cari_absensi(r):
                 elif a.kembali_b is None and a.kembali2_b is not None:
                     kmb_b = f" {a.kembali2_b}"
                 else:
-                    kmb_b = "" 
+                    kmb_b = "-" 
                 
 
                 if a.keterangan_absensi is not None:
@@ -218,7 +218,7 @@ def cari_absensi(r):
                 hari_ini = nama_hari(hari) 
                 
                 if a.pegawai.counter_id is None:
-                    bagian = a.pegawai.divisi.divisi
+                    bagian = f'{a.pegawai.divisi.divisi}'
                 else:
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
                     
@@ -228,22 +228,22 @@ def cari_absensi(r):
                     else:
                         msk = f"{a.masuk}"
                 else:
-                    msk = None
+                    msk = '-'
 
                 if a.pulang is not None:
                     plg = f"{a.pulang}"
                 else:
-                    plg = None
+                    plg = '-'
 
                 if a.masuk_b is not None:
                     msk_b = f"{a.masuk_b}"
                 else:
-                    msk_b = None
+                    msk_b = '-'
 
                 if a.pulang_b is not None:
                     plg_b = f"{a.pulang_b}"
                 else:
-                    plg_b = None
+                    plg_b = '-'
 
                 if a.istirahat is not None and a.istirahat2 is not None:
                     ist = f'{a.istirahat} / {a.istirahat2}'
@@ -252,7 +252,7 @@ def cari_absensi(r):
                 elif a.istirahat is None and a.istirahat2 is not None:                  
                     ist = f'{a.istirahat2}'
                 else:
-                    ist = ""    
+                    ist = "-"    
 
                 if a.istirahat_b is not None and a.istirahat2_b is not None:
                     ist_b = f" {a.istirahat_b} / {a.istirahat2_b})"
@@ -261,7 +261,7 @@ def cari_absensi(r):
                 elif a.istirahat_b is None and a.istirahat2_b is not None:
                     ist_b = f" {a.istirahat2_b}"
                 else:
-                    ist_b = ""
+                    ist_b = "-"
 
 
                 if a.lama_istirahat is not None and a.istirahat is not None:
@@ -281,7 +281,7 @@ def cari_absensi(r):
                 elif a.kembali is None and a.kembali2 is not None:                  
                     kmb = f'{a.kembali2}'    
                 else:
-                    kmb = ""        
+                    kmb = "-"        
 
                 if a.kembali_b is not None and a.kembali2_b is not None:
                     kmb_b = f" {a.kembali_b} / {a.kembali2_b})"
@@ -290,7 +290,7 @@ def cari_absensi(r):
                 elif a.kembali_b is None and a.kembali2_b is not None:
                     kmb_b = f" {a.kembali2_b}"
                 else:
-                    kmb_b = "" 
+                    kmb_b = "-" 
                 
 
                 if a.keterangan_absensi is not None:
