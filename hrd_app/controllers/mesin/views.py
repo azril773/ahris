@@ -415,23 +415,24 @@ def add_data(r,id):
 
 
         datamesin = [i.userid for i in datamesin_db.objects.using(r.session["ccabang"]).all()]
-        userids = [user for user in users if user.user_id not in datamesin]
-        print(userids)
+        userids = [user.user_id for user in users if user.user_id not in datamesin]
+        user = [user for user in users if user.user_id not in datamesin]
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids,aktif=1)
         # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
-
+        print(pegawai)
         # print(userids)
-        for user in userids:
+        for u in user:
             for pgw in pegawai:
-                if pgw.userid == user.user_id:
-                    if user.privilege == const.USER_ADMIN:
+                if pgw.userid == u.user_id:
+                    if u.privilege == const.USER_ADMIN:
                         level = 1
                     else:
                         level = 0
+                    print('ok')
                     datamesin_db(
-                        uid=user.uid,
+                        uid=u.uid,
                         nama=pgw.nama,
-                        userid=user.user_id,
+                        userid=u.user_id,
                         level=level
                     ).save(using=r.session["ccabang"])
         conn.enable_device()
