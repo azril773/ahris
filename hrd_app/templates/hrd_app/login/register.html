@@ -36,6 +36,7 @@
 
 
         <div class="row">
+            {% if akses == "root" or akses == "it" %}
             <div class="col-lg-6">
                 <h5 class="text-dark text-uppercase">Registrasi User Login</h5>
                 <div class="border p-5">
@@ -93,6 +94,18 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                            <div class="col-12 mt-2">
+                                <label for="cabang" class="text-dark">Akses Cabang</label><br>
+                                <select name="cabang[]" id="cabang" class="cabang">
+                                    <option value="">Pilih Cabang</option>
+                                    <option value="all">Semua Cabang</option>
+                                    <option value="tasik">Plaza Asia Tasikmalaya</option>
+                                    <option value="sumedang">Plaza Asia Sumedang</option>
+                                    <option value="cirebon">Asia Toserba Cirebon</option>
+                                    <option value="garut">Asia Toserba Garut</option>
+                                    <option value="cihideung">Asia Toserba Cihideung</option>
+                                </select>
+                            </div>
                         </div>
                         <div class="d-flex justify-content-end mt-2">
                             <button type="submit" class="btn btn-primary">Daftarkan</button>
@@ -100,6 +113,7 @@
                     </form>
                 </div>
             </div>
+            {% endif %}
             <div class="col-lg-6">
                 <h5 class="text-dark text-uppercase">Reset Password Login</h5>
                 <div class="border p-5">
@@ -130,6 +144,7 @@
                     </form>
                 </div>
             </div>
+            {% if akses == "it" or akses == "root" %}
             <div class="col-lg-6 mt-5">
                 <h5 class="text-dark text-uppercase">Akses Divisi User</h5>
                 <div class="border p-5">
@@ -137,7 +152,7 @@
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-6">
-                                <label for="username" class="text-dark">Username</label> <br>
+                                <label for="userd" class="text-dark">Username</label> <br>
                                 <select name="userd" id="userd" class='mb-2'>
                                     <option value="">Pilih User</option>
                                     {% for user in users %}
@@ -169,7 +184,7 @@
                         {% csrf_token %}
                         <div class="row">
                             <div class="col-6">
-                                <label for="username" class="text-dark">Username</label> <br>
+                                <label for="userl" class="text-dark">Username</label> <br>
                                 <select name="userl" id="userl" class='mb-2'>
                                     <option value="">Pilih User</option>
                                     {% for user in users %}
@@ -195,6 +210,43 @@
                     </form>
                 </div>
             </div>
+            {% endif %}
+            {% if staff %}
+            <div class="col-lg-6 mt-5">
+                <h5 class="text-dark text-uppercase">Akses Cabang User</h5>
+                <div class="border p-5">
+                    <form action="{% url "akses_cabang" %}" method="post">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-6">
+                                <label for="userc" class="text-dark">Username</label> <br>
+                                <select name="userc" id="userc" class='mb-2'>
+                                    <option value="">Pilih User</option>
+                                    {% for user in users %}
+                                        <option value="{{user.pk}}">{{user.username}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-6 mt-2">
+                                <label for="aksescabang" class="text-dark">Akses Cabang</label><br>
+                                <select name="cabang[]" id="aksescabang" class="cabang">
+                                    <option value="">Pilih Cabang</option>
+                                    <option value="all">Semua Cabang</option>
+                                    <option value="tasik">Plaza Asia Tasikmalaya</option>
+                                    <option value="sumedang">Plaza Asia Sumedang</option>
+                                    <option value="cirebon">Asia Toserba Cirebon</option>
+                                    <option value="garut">Asia Toserba Garut</option>
+                                    <option value="cihideung">Asia Toserba Cihideung</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Proses</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -209,7 +261,11 @@
     $("#user").selectize()
     $("#userd").selectize()
     $("#userl").selectize()
+    $("#userc").selectize()
     $("#divisi").selectize({
+        maxItems:null
+    })
+    $(".cabang").selectize({
         maxItems:null
     })
     $("#divisid").selectize({
