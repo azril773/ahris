@@ -453,17 +453,17 @@ def epegawai(r,idp):
             pihak = json.loads(pihak)
             pengalaman = json.loads(pengalaman)
             pendidikan = json.loads(pendidikan)
-            # id_user = r.user.id
-            # aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
-            # divisi = [div.divisi for div in aksesdivisi]
-            # try:
-            #     pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(id),divisi__in=divisi)
-            # except:
-            #     return JsonResponse({"status":"error"},status=500)
-            # if not pgw.exists():
-            #     return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses ke pegawai ini"},status=400)
-            # else:
-            #     pgw = pgw[0]
+            id_user = r.user.id
+            aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+            divisi = [div.divisi for div in aksesdivisi]
+            try:
+                pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(id),divisi__in=divisi)
+            except:
+                return JsonResponse({"status":"error"},status=500)
+            if not pgw.exists():
+                return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses ke pegawai ini"},status=400)
+            else:
+                pgw = pgw[0]
             status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(pk=status)
             if pribadi_db.objects.using(r.session["ccabang"]).filter(~Q(pegawai__userid=userid),email=email).exists():
                 return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
@@ -815,7 +815,7 @@ def tambah_pegawai(r):
 @login_required
 def getPegawai(r,idp):
     id_user = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+    aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     result = serialize("json",[pegawai_db.objects.using(r.session["ccabang"]).get(pk=int(idp),divisi__in=divisi)])
     result = json.loads(result)
@@ -890,7 +890,7 @@ def general_data(r,idp):
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         dsid = dakses.sid_id
         pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -947,7 +947,7 @@ def general_data_nonaktif(r,idp):
         dsid = dakses.sid_id   
         
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1003,7 +1003,7 @@ def data_pribadi(r,idp):
            
         dsid = dakses.sid_id   
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1067,7 +1067,7 @@ def data_pribadi_nonaktif(r,idp):
            
         dsid = dakses.sid_id   
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         dsid = dakses.sid_id   
         
@@ -1130,7 +1130,7 @@ def pendidikan_kerja(r,idp):
            
         dsid = dakses.sid_id   
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1179,7 +1179,7 @@ def pendidikan_kerja_nonaktif(r,idp):
            
         dsid = dakses.sid_id   
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1228,7 +1228,7 @@ def promosi_demosi(r,idp):
            
         dsid = dakses.sid_id   
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db.objects.using(r.session["ccabang"]).select_related("jabatan").filter(id=int(idp),divisi__in=divisi)
@@ -1304,7 +1304,7 @@ def promosi_demosi_nonaktif(r,idp):
            
         dsid = dakses.sid_id   
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).select_related("jabatan").filter(id=int(idp),divisi__in=divisi)
@@ -1380,7 +1380,7 @@ def tambah_prodemo(r):
         jabatan_seb = r.POST.get("jabatan_seb")
         jabatan_sek = r.POST.get("jabatan_sek")
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         idp = r.POST.get("id")
@@ -1455,7 +1455,7 @@ def sangsi(r,idp):
            
         dsid = dakses.sid_id   
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1493,7 +1493,7 @@ def sangsi_nonaktif(r,idp):
            
         dsid = dakses.sid_id   
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1586,7 +1586,7 @@ def aktif_nonaktif(r):
     idp = r.POST.get('idp')
     nama_modul = r.POST.get('nama_modul')
     id_user = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+    aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     
     pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1612,7 +1612,7 @@ def aktif_nonaktif(r):
 def nonaktif(r):
     idp = r.POST.get('idp')
     id_user = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+    aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     
     pg =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1826,7 +1826,7 @@ def aktif(r):
     idp = r.POST.get('idp')
     nama_user = r.user.username
     id_user = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+    aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     
     pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -1999,7 +1999,7 @@ def pegawai_json(r, sid):
         
         data = []
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         print(pegawai_db.objects.using(r.session["ccabang"]).filter(divisi__in=divisi))
         if int(sid) == 0:
@@ -2106,7 +2106,7 @@ def non_aktif_json(r, sid):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         data = []
@@ -2209,7 +2209,7 @@ def detail_pegawai_json(r, idp):
         
         data = []
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         pg =pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
@@ -2376,7 +2376,7 @@ def rp_form(r):
 
                 try:
                     dmesin = mesin_db.objects.using(r.session["ccabang"]).get(pk=mesin)
-                    print(dmesin.pk)
+                    print(dmesin.ipaddress)
                     id = dmesin.pk
                     zk = ZK(dmesin.ipaddress,4370)
                     conn = zk.connect()
@@ -2407,7 +2407,8 @@ def rp_form(r):
                     print(e)
                     messages.error(r,"Proccess terminate : {}".format(e))
                 finally:
-                    conn.disconnect()
+                    if conn:
+                        conn.disconnect()
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id

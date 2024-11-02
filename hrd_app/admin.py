@@ -21,8 +21,7 @@ class akses(ImportExportModelAdmin):
     
 @admin.register(akses_divisi_db)
 class akses_divisi(ImportExportModelAdmin):
-    list_display = ('user','divisi')  
-    search_fields = ('user__username',)             
+    list_display = ('user_id','divisi')  
 
 
 @admin.register(mesin_db)

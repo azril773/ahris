@@ -72,7 +72,7 @@ def beranda(request):
         
     else:    
         messages.info(request, 'Data akses Anda belum di tentukan.')        
-        return redirect('noakses')
+        return redirect('login')
 
 
 @login_required

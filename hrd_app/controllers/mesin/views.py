@@ -10,7 +10,7 @@ def amesin(r):
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        mesin = mesin_db.objects.all()
+        mesin = mesin_db.objects.using(r.session["ccabang"]).all()
         data = {       
             'dsid': dsid,
             "mesin":mesin,
@@ -30,7 +30,7 @@ def amesin(r):
 @login_required
 def mesin_json(r):
     if r.headers["X-Requested-With"] == 'XMLHttpRequest':
-        mesin = mesin_db.objects.all()
+        mesin = mesin_db.objects.using(r.session["ccabang"]).all()
         data = []
         for m in mesin:
             obj = {
@@ -53,12 +53,12 @@ def admesin(r,id):
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        mesin = mesin_db.objects.all()
+        mesin = mesin_db.objects.using(r.session["ccabang"]).all()
         id = int(id)
-        mesin = mesin_db.objects.filter(pk=id)
+        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=id)
         dmesin = []
         bmesin = []
-        datamesin = datamesin_db.objects.all()
+        datamesin = datamesin_db.objects.using(r.session["ccabang"]).all()
         dm = []
         for p in datamesin:
             dm.append(p.userid)
@@ -110,14 +110,14 @@ def rmesin(r,userid,id,uid):
         akses = dakses.akses
         dsid = dakses.sid_id
 
-        counter = counter_db.objects.all().order_by('counter')
-        divisi = divisi_db.objects.all().order_by('divisi')
-        jabatan = jabatan_db.objects.all().order_by('jabatan')
-        kk = kelompok_kerja_db.objects.all().order_by('kelompok')
-        status = status_pegawai_db.objects.all().order_by('status')
-        hr = hari_db.objects.all()
+        counter = counter_db.objects.using(r.session["ccabang"]).all().order_by('counter')
+        divisi = divisi_db.objects.using(r.session["ccabang"]).all().order_by('divisi')
+        jabatan = jabatan_db.objects.using(r.session["ccabang"]).all().order_by('jabatan')
+        kk = kelompok_kerja_db.objects.using(r.session["ccabang"]).all().order_by('kelompok')
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('status')
+        hr = hari_db.objects.using(r.session["ccabang"]).all()
 
-        kota_kabupaten = kota_kabupaten_db.objects.all()
+        kota_kabupaten = kota_kabupaten_db.objects.using(r.session["ccabang"]).all()
         userid = userid
         
         
@@ -213,12 +213,12 @@ def tambah_data_pegawai(r):
         else:
             pendidikan = []
         try:
-            status_pegawai = status_pegawai_db.objects.get(pk=status)
+            status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).get(pk=status)
         except:
             status_pegawai = None
 
         try:
-                mesin = mesin_db.objects.filter(id=int(id))
+                mesin = mesin_db.objects.using(r.session["ccabang"]).filter(id=int(id))
                 conn = ZK(mesin[0].ipaddress,port=4370)
                 conn.connect()
                 conn.disable_device()
@@ -231,7 +231,7 @@ def tambah_data_pegawai(r):
                     return JsonResponse({"status":"error","msg":"Userid tidak valid"},status=400)
                     
                 if len(users) > 0:
-                    datamesin = datamesin_db.objects.filter(userid=users[0].user_id)
+                    datamesin = datamesin_db.objects.using(r.session["ccabang"]).filter(userid=users[0].user_id)
                     if datamesin.exists():
                         return JsonResponse({"status":"error","msg":"Userid sudah ada di datamesin"},status=400)
 
@@ -243,7 +243,7 @@ def tambah_data_pegawai(r):
                             fingers.append(ft)                        
 
                     for f in fingers:
-                        sidikjari_db.objects.filter(uid=f.uid,fid=f.fid).delete()
+                        sidikjari_db.objects.using(r.session["ccabang"]).filter(uid=f.uid,fid=f.fid).delete()
                         sidikjari_db(
                             uid=f.uid,
                             nama=nama,
@@ -252,13 +252,13 @@ def tambah_data_pegawai(r):
                             fid=f.fid,
                             valid=f.valid,
                             template=f.template
-                        ).save()
+                        ).save(using=r.session["ccabang"])
                     datamesin_db(
                         uid=users[0].uid,
                         nama=nama,
                         userid=users[0].user_id,
                         level=level
-                    ).save()
+                    ).save(using=r.session["ccabang"])
                 conn.enable_device()
 
         except Exception as e:
@@ -269,13 +269,13 @@ def tambah_data_pegawai(r):
         if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
             return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
         if email != "":
-            if pribadi_db.objects.filter(email=email).exists():
+            if pribadi_db.objects.using(r.session["ccabang"]).filter(email=email).exists():
                 return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
 
-        if pegawai_db.objects.filter(userid=userid).exists():
+        if pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
             return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
         else:
-            pegawai = pegawai_db(
+            pegawai_db(
                 nama=nama,
                 gender=gender,
                 userid=userid,
@@ -300,37 +300,34 @@ def tambah_data_pegawai(r):
                 edit_by=r.user.username
 
                 # status
-            )            
-            pegawai.save()
+            ).save(using=r.session["ccabang"])
 
 
             # Tambah Pihak Lain
             pgw = pegawai_db.objects.get(userid=userid)
             for p in pihak:
-                tkl = kontak_lain_db(
-                pegawai_id=int(pgw.pk),
-                hubungan = p['hubungan'],
-                nama = p['nama'],
-                gender = p['gender'],
-                phone = p['phone']
-                )
-                tkl.save()
+                kontak_lain_db(
+                    pegawai_id=int(pgw.pk),
+                    hubungan = p['hubungan'],
+                    nama = p['nama'],
+                    gender = p['gender'],
+                    phone = p['phone']
+                ).save(using=r.session["ccabang"])
             
 
             # Tambah Keluarga
             for k in keluarga:
-                tkeluarga = keluarga_db(
+                keluarga_db(
                     pegawai_id=int(pgw.pk),
                     hubungan = k['hubungan'],
                     nama = k["nama_keluarga"],
                     tgl_lahir = datetime.strptime(k['tgl_lahir_keluarga'],'%d-%m-%Y'),
                     gender = k['gender'],
                     gol_darah = k['goldarah']
-                )
-                tkeluarga.save()
+                ).save(using=r.session["ccabang"])
 
             # Tambah Data Pribadi
-            pribadi = pribadi_db(
+            pribadi_db(
                 pegawai_id=int(pgw.pk),
                 alamat=alamat,
                 phone=phone,
@@ -341,7 +338,7 @@ def tambah_data_pegawai(r):
                 berat_badan=berat if berat != "" else 0,
                 gol_darah=goldarah,
                 agama=agama
-            )
+            ).save(using=r.session["ccabang"])
             for pgl in pengalaman:
                 pengalaman_db(
                     pegawai_id=int(pgw.pk),
@@ -350,7 +347,7 @@ def tambah_data_pegawai(r):
                     dari_tahun=datetime.strptime(pgl['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
                     sampai_tahun=datetime.strptime(pgl['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
                     jabatan=pgl['jabatan']
-                ).save()
+                ).save(using=r.session["ccabang"])
             
             for pdk in pendidikan:
                 pendidikan_db(
@@ -362,8 +359,7 @@ def tambah_data_pegawai(r):
                     sampai_tahun=datetime.strptime(pdk['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
                     jurusan=pdk['jurusan'],
                     gelar=pdk['gelar']
-                ).save()
-            pribadi.save()
+                ).save(using=r.session["ccabang"])
             status = "ok"
             user = r.user.username
 
@@ -408,7 +404,7 @@ def add_data(r,id):
     data_akses = akses_db.objects.get(user=iduser)
     akses = data_akses.akses   
     try:
-        mesin = mesin_db.objects.filter(id=int(id))
+        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(id=int(id))
         conn = ZK(mesin[0].ipaddress,port=4370)
         conn.connect()
         conn.disable_device()
@@ -418,10 +414,10 @@ def add_data(r,id):
         users = conn.get_users()
 
 
-        datamesin = [i.userid for i in datamesin_db.objects.all()]
+        datamesin = [i.userid for i in datamesin_db.using(r.session["ccabang"]).objects.all()]
         userids = [user for user in users if user.user_id not in datamesin]
 
-        pegawai = pegawai_db.objects.filter(userid__in=userids,aktif=1)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids,aktif=1)
         # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
 
         # print(userids)
@@ -437,7 +433,7 @@ def add_data(r,id):
                         nama=pgw.nama,
                         userid=user.user_id,
                         level=level
-                    ).save()
+                    ).save(using=r.session["ccabang"])
         conn.enable_device()
 
     except Exception as e:
@@ -458,9 +454,9 @@ def cdatamesin(r):
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        mesin = mesin_db.objects.all()
-        pegawai = pegawai_db.objects.filter(aktif=1)
-        divisi = divisi_db.objects.all()
+        mesin = mesin_db.objects.using(r.session["ccabang"]).all()
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
+        divisi = divisi_db.objects.using(r.session["ccabang"]).all()
         data = {       
             'dsid': dsid,
             "mesin":mesin,
@@ -489,12 +485,12 @@ def cpalldata(r):
         master = r.POST.get("mesin")
         # divisi = r.POST.getlist("divisi[]")
         mesin_tujuan = r.POST.getlist("mesint[]")
-        pegawai = pegawai_db.objects.filter(aktif=1)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
         
         datauser = []
 
         try:
-            mesin = mesin_db.objects.get(ipaddress=master)
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=master)
             zk = ZK(mesin.ipaddress,4370)
             conn = zk.connect()
             conn.disable_device()
@@ -523,7 +519,7 @@ def cpalldata(r):
         
         for m in mesin_tujuan:
             try:
-                mesin = mesin_db.objects.get(ipaddress=m)
+                mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
                 zk = ZK(mesin.ipaddress,4370)
                 conn = zk.connect()
                 conn.disable_device()
@@ -553,14 +549,14 @@ def cppegawai(r):
         pegawai = r.POST.getlist("pegawai[]")
         mesin_tujuan = r.POST.getlist("mesint[]")
         if len(pegawai) <= 0:
-            pegawai = pegawai_db.objects.filter(aktif=1)
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
         else:
-            pegawai = pegawai_db.objects.filter(id__in=pegawai,aktif=1)
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pegawai,aktif=1)
         
         datauser = []
 
         try:
-            mesin = mesin_db.objects.get(ipaddress=master)
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=master)
             zk = ZK(mesin.ipaddress,4370)
             conn = zk.connect()
             conn.disable_device()
@@ -589,7 +585,7 @@ def cppegawai(r):
         
         for m in mesin_tujuan:
             try:
-                mesin = mesin_db.objects.get(ipaddress=m)
+                mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
                 zk = ZK(mesin.ipaddress,4370)
                 conn = zk.connect()
 
@@ -627,12 +623,12 @@ def cpdivisi(r):
         master = r.POST.get("mesin")
         divisi = r.POST.getlist("divisi[]")
         mesin_tujuan = r.POST.getlist("mesint[]")
-        pegawai = pegawai_db.objects.filter(divisi_id__in=divisi,aktif=1)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=divisi,aktif=1)
         
         datauser = []
 
         try:
-            mesin = mesin_db.objects.get(ipaddress=master)
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=master)
             zk = ZK(mesin.ipaddress,4370)
             conn = zk.connect()
             conn.disable_device()
@@ -660,7 +656,7 @@ def cpdivisi(r):
 
         for m in mesin_tujuan:
             try:
-                mesin = mesin_db.objects.get(ipaddress=m)
+                mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
                 zk = ZK(mesin_tujuan,4370)
                 conn = zk.connect()
                 conn.disable_device()
@@ -702,7 +698,7 @@ def adduser_machine(r):
         password = r.POST.get("password")
 
         try:
-            mesin = mesin_db.objects.get(ipaddress=mesin)
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=mesin)
             zk = ZK(mesin.ipaddress,4370)
             conn = zk.connect()
             conn.disable_device()
@@ -750,12 +746,12 @@ def edituser_machine(r):
         
 
         try:
-            mesin = mesin_db.objects.get(ipaddress=mesin)
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=mesin)
             zk = ZK(mesin.ipaddress,4370)
             conn = zk.connect()
             conn.disable_device()
 
-            pegawai = pegawai_db.objects.filter(id=pegawai,aktif=1)
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id=pegawai,aktif=1)
             if not pegawai.exists():
                 messages.error(r,'Pegawai tidak ada')
                 return redirect("")
@@ -787,12 +783,12 @@ def deleteuser_machine(r):
         pegawai = r.POST.getlist("pegawai[]")
         mesin = r.POST.getlist("mesint[]")
 
-        pgw = pegawai_db.objects.filter(aktif=1,id__in=pegawai)
+        pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1,id__in=pegawai)
         userids = [ user.userid for user in pgw ]
 
         for m in mesin:
             try:
-                mesin = mesin_db.objects.get(ipaddress=m)
+                mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
                 zk = ZK(mesin.ipaddress,4370)
                 conn = zk.connect()
                 conn.disable_device()
@@ -820,7 +816,7 @@ def deleteuser_machineu(r):
         userids = pegawai.split(",")
         for m in mesin:
             try:
-                mesin = mesin_db.objects.get(ipaddress=m)
+                mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
                 zk = ZK(mesin.ipaddress,4370)
                 conn = zk.connect()
                 conn.disable_device()
@@ -843,7 +839,7 @@ def hapusabsen(r,id):
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         try:
-            mesin = mesin_db.objects.get(id=int(id))
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(id))
             zk = ZK(mesin.ipaddress,4370)
             conn = zk.connect()
             conn.disable_device()
@@ -868,7 +864,7 @@ def sesuaikanjam(r,id):
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         try:
-            mesin = mesin_db.objects.get(id=int(id))
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(id))
             zk = ZK(mesin.ipaddress,4370)
             conn = zk.connect()
             conn.disable_device()
@@ -895,7 +891,7 @@ def clearbuffer(r,id):
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         try:
-            mesin = mesin_db.objects.get(id=int(id))
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(id))
             zk = ZK(mesin.ipaddress,4370)
             conn = zk.connect()
             conn.disable_device()
@@ -925,7 +921,7 @@ def tmesin(r):
         if nama == "" or ip == '' or status == '':
             # messages.error(r,"Form tidak boleh kosong")
             return JsonResponse({"status":"error","msg":"Form tidak boleh kosong"},status=400)
-        mesin = mesin_db.objects.filter(Q(nama=nama) | Q(ipaddress=ip))
+        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(Q(nama=nama) | Q(ipaddress=ip))
         print(mesin)
         if mesin.exists():
             # messages.error(r,"Mesin sudah ada" + mesin.nama)
@@ -934,7 +930,7 @@ def tmesin(r):
             nama=nama,
             ipaddress=ip,
             status=status
-        ).save()
+        ).save(using=r.session["ccabang"])
         return JsonResponse({"status":"success","msg":"Berhasil menambahkan mesin"},status=200)
             
 
@@ -947,7 +943,7 @@ def hmesin(r):
     akses = data_akses.akses 
     idmesin = r.POST.get("idmesin")
     if akses == "admin" or akses == "root":
-        mesin_db.objects.filter(pk=int(idmesin)).delete()
+        mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin)).delete()
         # messages.success(r,"Berhasil menghapus mesin")
         return JsonResponse({"status":"success","msg":"Berhasil menghapus mesin"},status=200)
             
@@ -966,13 +962,13 @@ def emesin(r):
     if akses == "admin" or akses == "root":
         if nama == '' or ip == '' or status == '' or idmesin == '':
             return JsonResponse({"status":"error","msg":"Form tidak boleh kosong"},status=400)
-        mesin = mesin_db.objects.filter(pk=int(idmesin))
+        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin))
         if not mesin.exists():
             return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
-        checkmesin = mesin_db.objects.filter(~Q(pk=int(idmesin)),Q(nama=nama) | Q(ipaddress=ip))
+        checkmesin = mesin_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idmesin)),Q(nama=nama) | Q(ipaddress=ip))
         if checkmesin.exists():
             return JsonResponse({"status":"error","msg":"Mesin sudah ada"},status=400)
-        mesin_db.objects.filter(pk=int(idmesin)).update(
+        mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin)).update(
             nama=nama,
             ipaddress=ip,
             status=status
@@ -988,7 +984,7 @@ def getmesin(r):
     akses = data_akses.akses 
     idmesin = r.POST.get("idmesin")
     if akses == "admin" or akses == "root":
-        mesin = mesin_db.objects.filter(pk=int(idmesin))
+        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin))
         if not mesin.exists():
             return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
         data = {
@@ -1006,7 +1002,7 @@ def getmesin(r):
 #     data_akses = akses_db.objects.get(user=iduser)
 #     akses = data_akses.akses 
 #     if akses == "admin" or akses == "root":
-#         mesin = mesin_db.objects.filter(pk=int(mesin))
+#         mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(mesin))
 #         if not mesin.exists():
 #             return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
 #         data = {
@@ -1076,7 +1072,7 @@ def getmesin(r):
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
 
-#         data_mesin = mesin_db.objects.all()
+#         data_mesin = mesin_db.objects.using(r.session["ccabang"]).all()
 
 #         data = {
 #             'mesin' : data_mesin,
@@ -1103,7 +1099,7 @@ def getmesin(r):
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
 
 #         # untuk dropdown list
-#         data_mesin_all = mesin_db.objects.all().order_by('nama_mesin')
+#         data_mesin_all = mesin_db.objects.using(r.session["ccabang"]).all().order_by('nama_mesin')
 
 #         # -------------------------------------------
 
@@ -1185,7 +1181,7 @@ def getmesin(r):
 
 #         status = status_pegawai_db.objects.all().order_by('id')
 #         divisi = divisi_db.objects.all().order_by('id')
-#         data_mesin_all = mesin_db.objects.all().order_by('nama_mesin')
+#         data_mesin_all = mesin_db.objects.using(r.session["ccabang"]).all().order_by('nama_mesin')
 #         jamkerja = kelompok_kerja_db.objects.all()
 #         hari = hari_db.objects.all()
 #         counter = counter_db.objects.all().order_by('counter')
@@ -1232,7 +1228,7 @@ def getmesin(r):
 
 #         mesin = request.POST.get('mesin')
 
-#         data_mesin = mesin_db.objects.get(id=int(mesin))
+#         data_mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(mesin))
 #         ip = data_mesin.ip_address
 
 #         return redirect ('data_mesin', ip=ip)
@@ -1251,7 +1247,7 @@ def getmesin(r):
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
 
-#         data_mesin = mesin_db.objects.all()               
+#         data_mesin = mesin_db.objects.using(r.session["ccabang"]).all()               
 
 #         data = {
 #             'user' : user,
@@ -1289,16 +1285,16 @@ def getmesin(r):
 #                     ip_address=ip_address,
 #                     status=status
 #                 )
-#                 mesin.save()
+#                 mesin.save(using=r.session["ccabang"])
 
 #                 messages.success(request, 'Mesin finger berhasil ditambahkan ke dalam database.')
 
 #             else:
-#                 mesin = mesin_db.objects.get(id=id_mesin)
+#                 mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=id_mesin)
 #                 mesin.nama_mesin = nama_mesin
 #                 mesin.ip_address = ip_address 
 #                 mesin.status = status   
-#                 mesin.save()
+#                 mesin.save(using=r.session["ccabang"])
 
 #                 messages.success(request, 'Mesin finger berhasil diubah.')
 
@@ -1323,7 +1319,7 @@ def getmesin(r):
 
 #         idm = request.POST.get('id')
 
-#         mesin = mesin_db.objects.get(id=int(idm))
+#         mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(idm))
 #         mesin.delete()
 
 #         messages.success(request, 'Mesin finger berhasil dihapus dari database.')
@@ -1450,12 +1446,12 @@ def getmesin(r):
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin' or akses == 'user':
 
-#         hitung = mesin_db.objects.all().count()
+#         hitung = mesin_db.objects.using(r.session["ccabang"]).all().count()
         
 #         if hitung < 1:
 #             messages.warning(request, 'Anda belum menambahkan mesin finger dalam database, silahkan klik <a href="mesin">"Kelola Mesin"</a> untuk menambahkan Mesin Finger.', extra_tags='safe')
 #         else:    
-#             mesin = mesin_db.objects.all()
+#             mesin = mesin_db.objects.using(r.session["ccabang"]).all()
 
 #             for m in mesin:
 #                 ip = m.ip_address
@@ -1493,7 +1489,7 @@ def getmesin(r):
 #     master = request.POST.get('master')
 #     tujuan = request.POST.getlist('tujuan')
 
-#     mesin = mesin_db.objects.get(id=int(master))
+#     mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(master))
 #     ip_master = mesin.ip_address
     
 #     # ---------------------------------------------------------------------------------------------------------
@@ -1539,7 +1535,7 @@ def getmesin(r):
 
 #     # ------------------------------------------------------------------------------------
 #     # copy data user yang dipilih dari mesin master ke mesin tujuan 
-#     mt = mesin_db.objects.filter(id__in=tujuan)
+#     mt = mesin_db.objects.using(r.session["ccabang"]).filter(id__in=tujuan)
 #     for mesin in mt:
 #         ip_tujuan = mesin.ip_address
 
@@ -1596,7 +1592,7 @@ def getmesin(r):
 #     tujuan = request.POST.getlist('tujuan')
 #     pegawai = request.POST.getlist('pegawai')
 
-#     mesin = mesin_db.objects.get(id=int(master))
+#     mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(master))
 #     ip_master = mesin.ip_address
 
 #     user_mesin = []
@@ -1655,7 +1651,7 @@ def getmesin(r):
     
 #     # ------------------------------------------------------------------------------------
 #     # copy data user yang dipilih dari mesin master ke mesin tujuan 
-#     mt = mesin_db.objects.filter(id__in=tujuan)
+#     mt = mesin_db.objects.using(r.session["ccabang"]).filter(id__in=tujuan)
 #     for mesin in mt:
 #         ip_tujuan = mesin.ip_address
 
@@ -1712,7 +1708,7 @@ def getmesin(r):
 #     tujuan = request.POST.getlist('tujuan')
 #     divisi = request.POST.getlist('divisi')
 
-#     mesin = mesin_db.objects.get(id=int(master))
+#     mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(master))
 #     ip_master = mesin.ip_address
    
 #     user_mesin = []
@@ -1770,7 +1766,7 @@ def getmesin(r):
     
 #     # ------------------------------------------------------------------------------------
 #     # copy data user yang dipilih dari mesin master ke mesin tujuan 
-#     mt = mesin_db.objects.filter(id__in=tujuan)
+#     mt = mesin_db.objects.using(r.session["ccabang"]).filter(id__in=tujuan)
 #     for mesin in mt:
 #         ip_tujuan = mesin.ip_address
 
@@ -1829,7 +1825,7 @@ def getmesin(r):
 #     userid = request.POST.get('userid')
 #     level = request.POST.get('level')
 
-#     mesin = mesin_db.objects.get(id=int(mesin))
+#     mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(mesin))
 #     ip_mesin = mesin.ip_address   
 
 #     # tambah data user 
@@ -1886,7 +1882,7 @@ def getmesin(r):
 #     userid = request.POST.get('userid')
 #     level = request.POST.get('level')
 
-#     mesin = mesin_db.objects.get(id=int(mesin))
+#     mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(mesin))
 #     ip_mesin = mesin.ip_address   
 
 #     pg = pegawai_db.objects.get(id=int(pegawai))
@@ -1929,9 +1925,9 @@ def getmesin(r):
 #     userid_list = [item.userid for item in pegawai_db.objects.filter(id__in=pegawai)]   
     
 #     if 'All' in dmesin:
-#         mesin = mesin_db.objects.all()
+#         mesin = mesin_db.objects.using(r.session["ccabang"]).all()
 #     else:
-#         mesin = mesin_db.objects.filter(id__in=dmesin)
+#         mesin = mesin_db.objects.using(r.session["ccabang"]).filter(id__in=dmesin)
 
 #     for m in mesin:
 #         ip_mesin = m.ip_address
@@ -1965,9 +1961,9 @@ def getmesin(r):
 #     ulist = duserid.split(',')
 
 #     if 'All' in dmesin:
-#         mesin = mesin_db.objects.all()
+#         mesin = mesin_db.objects.using(r.session["ccabang"]).all()
 #     else:
-#         mesin = mesin_db.objects.filter(id__in=dmesin)
+#         mesin = mesin_db.objects.using(r.session["ccabang"]).filter(id__in=dmesin)
 
 #     for m in mesin:
 #         ip_mesin = m.ip_address

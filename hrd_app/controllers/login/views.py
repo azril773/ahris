@@ -44,18 +44,18 @@ def registrasi(r):
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
-        if akses == 'root' or akses == 'it':
+        if akses == 'root' or akses == "it":
             users = User.objects.all()
-            divisi = divisi_db.objects.all()
-            pegawai = pegawai_db.objects.all()
-            status = status_pegawai_db.objects.all()
+            divisi = divisi_db.objects.using(r.session["ccabang"]).all()
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
+            status = status_pegawai_db.objects.using(r.session["ccabang"]).all()
             data = {       
                 'dsid': dsid,
                 'modul_aktif' : 'Divisi',
-
-            'akses' : akses,
-            "cabang":r.session["cabang"],
-            "ccabang":r.session["ccabang"],
+                "staff":r.user.is_staff,
+                'akses' : akses,
+                "cabang":r.session["cabang"],
+                "ccabang":r.session["ccabang"],
                 "users":users, 
                 "divisi":divisi,
                 "pegawai":pegawai,
@@ -79,11 +79,12 @@ def proses_registrasi(r):
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
-        if akses == 'root' or akses == 'it':
+        if akses == 'root':
         
             username = r.POST.get("username")
             password = r.POST.get("password")
             divisi = r.POST.getlist("divisi[]")
+            cabang = r.POST.getlist("cabang[]")
             level_akses = r.POST.get("level_akses")
             pegawai = r.POST.get("pegawai")
             status = r.POST.get("status")
@@ -92,42 +93,72 @@ def proses_registrasi(r):
             if password != kpassword:
                 messages.error(r,"Password tidak cocok")
                 return redirect("registrasi")
-            try:
-                result = [rsl for rsl in divisi if re.match("(?i)all",rsl)]
-                print(result)
-                User.objects.create_user(username=username,password=password).save()
-                user = User.objects.get(username=username)
-                if akses_db.objects.filter(Q(user_id=user.pk) | Q(pegawai_id=int(pegawai))).exists():
-                    messages.error(r,"Akses user sudah ditentukan")
+            with transaction.atomic(using=r.session['ccabang']):
+                try:
+                    # jika divisi ada kata "all"
+                    result = [rsl for rsl in divisi if re.match("(?i)all",rsl)]
+
+                    # jika cabang ada kata "all"
+                    resultcabang = [rslc for rslc in cabang if re.match("(?i)all",rslc)]
+
+                    User.objects.create_user(username=username,password=password).save()
+
+                    user = User.objects.get(username=username)
+
+                    # +++
+                    # tambah akses level
+                    if akses_db.objects.filter(Q(user_id=user.pk) | Q(pegawai_id=int(pegawai))).exists():
+                        messages.error(r,"Akses user sudah ditentukan")
+                        return redirect("registrasi")
+                    aksessimpan = akses_db(
+                        user_id=user.pk,
+                        akses=level_akses,
+                        pegawai_id=int(pegawai),
+                        sid_id=int(status)
+                    )
+                    # +++
+
+
+                    # +++
+                    # tambah akses cabang
+                    if len(resultcabang) > 0:
+                        cabangas = ["tasik","sumedang","cirebon","garut","cihideung"]
+                    else:
+                        cabangas = cabang
+
+                    for cbg in cabangas:
+                        User.objects.using(cbg).filter(id=user.pk).delete()
+                        User.objects.create_user(id=user.pk,username=username,password=password).save(using=cbg)
+                        if akses_cabang_db.objects.filter(user_id=user.pk,cabang=cbg):
+                            continue
+                        else:
+                            akses_cabang_db(
+                                user_id=user.pk,
+                                cabang=cbg
+                            ).save()
+                    # ++=
+
+                    # +++
+                    # tambah akses divisi di masing masing cabang
+                    if len(result) > 0:
+                        divisir = divisi_db.objects.using(r.session["ccabang"]).all()
+                    else:
+                        divisir = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=divisi)
+
+                    for div in divisir:
+                        if akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=user.pk,divisi_id=div.pk).exists():
+                            continue
+                        akses_divisi_db(
+                            user_id=user.pk,
+                            divisi_id=div.pk
+                        ).save(using=r.session["ccabang"])
+                    # +++
+                    aksessimpan.save()
                     return redirect("registrasi")
-                akses_db(
-                    user_id=user.pk,
-                    akses=level_akses,
-                    pegawai_id=int(pegawai),
-                    sid_id=int(status)
-                ).save()
-                if len(result) > 0:
-                    divall = divisi_db.objects.all()
-                    for div in divall:
-                        if akses_divisi_db.objects.filter(user_id=user.pk,divisi_id=div.pk).exists():
-                            continue
-                        akses_divisi_db(
-                            user_id=user.pk,
-                            divisi_id=div.pk
-                        ).save()
-                else:
-                    divfil = divisi_db.objects.filter(id__in=divisi)
-                    for div in divfil:
-                        if akses_divisi_db.objects.filter(user_id=user.pk,divisi_id=div.pk).exists():
-                            continue
-                        akses_divisi_db(
-                            user_id=user.pk,
-                            divisi_id=div.pk
-                        ).save()
-                return redirect("registrasi")
-            except Exception as e:
-                messages.error(r,e)
-                return redirect("registrasi")
+                except Exception as e:
+                    transaction.set_rollback(True,using=r.session["ccabang"])
+                    messages.error(r,e)
+                    return redirect("registrasi")
         else:
             messages.error(r,"Anda tidak memiliki akses")
             return redirect("beranda")
@@ -186,28 +217,26 @@ def akses_divisi(r):
             with transaction.atomic():
                 try:
                     result = [rsl for rsl in divisid if re.match("(?i)all",rsl)]
-                    user = User.objects.get(pk=userid)
-                    print(userid)
-                    akses_divisi_db.objects.filter(user_id=user.pk).delete()
-                    if len(result) > 0:
-                        divall = divisi_db.objects.all()
-                        for div in divall:
-                            if akses_divisi_db.objects.filter(user_id=user.pk,divisi_id=div.pk).exists():
-                                continue
-                            akses_divisi_db(
-                                user_id=user.pk,
-                                divisi_id=div.pk
-                            ).save()
+                    user = User.objects.filter(pk=userid)
+                    if not user.exists():
+                        messages.error(r,"User tidak ada")
                     else:
-                        divfil = divisi_db.objects.filter(id__in=divisid)
-                        for div in divfil:
-                            if akses_divisi_db.objects.filter(user_id=user.pk,divisi_id=div.pk).exists():
+                        user = user[0]
+                        print(user)
+                        akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=user.pk).delete()
+                        if len(result) > 0:
+                            divisir = divisi_db.objects.using(r.session["ccabang"]).all()
+                        else:
+                            divisir = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=divisid)
+
+                        for div in divisir:
+                            if akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=user.pk,divisi_id=div.pk).exists():
                                 continue
                             akses_divisi_db(
                                 user_id=user.pk,
                                 divisi_id=div.pk
-                            ).save()
-                    return redirect("registrasi")
+                            ).save(using=r.session["ccabang"])
+                        return redirect("registrasi")
                 except Exception as e:
                     messages.error(r,e)
                     transaction.set_rollback(True)
@@ -240,16 +269,67 @@ def akses_level(r):
                     messages.error(r,"User belum ada akses")
                     return redirect("registrasi")
                 else:
+                    pegawai_id = aksesdb[0].pegawai_id
+                    sid_id = aksesdb[0].sid_id
+                    aksesdb.delete()
+                    print(level)
                     akses_db(
                         user_id=userid,
-                        akses=level,
-                        pegawai_id=aksesdb[0].pegawai_id,
-                        sid_id=aksesdb[0].sid_id
+                        akses=level[0],
+                        pegawai_id=pegawai_id,
+                        sid_id=sid_id
                     ).save()
                 return redirect("registrasi")
             except Exception as e:
                 messages.error(r,e)
                 return redirect("registrasi")
+        else:
+            messages.error(r,"Anda tidak memiliki akses")
+            return redirect("beranda")
+    else:    
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+    
+@login_required
+def akses_cabang(r):
+    iduser = r.user.id
+    
+    if akses_db.objects.filter(user_id=iduser).exists():
+        
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+        dsid = dakses.sid_id
+        if r.user.is_staff:
+            print("OK")
+            userid = r.POST.get("userc")
+            cabang = r.POST.getlist("cabang[]")
+            # nama_depan = r.POST.get("nama_depan")
+            with transaction.atomic():
+                try:
+                    user = User.objects.filter(pk=userid)
+                    if not user.exists():
+                        messages.error(r,"User tidak ada")
+                        return redirect("registrasi")
+                    else:
+                        result = [c for c in cabang if re.match("(?i)all",c)]
+                        print(result)
+                        akses_cabang_db.objects.filter(user_id=int(user[0].pk)).delete()
+                        if len(result) > 0:
+                            cabangs = ["tasik","sumedang","cirebon","garut","cihideung"]
+                        else:
+                            cabangs = cabang
+                        for cbg in cabangs:
+                            akses_cabang_db(
+                                user_id=user[0].pk,
+                                cabang=cbg,
+                                add_by="prog",
+                                edit_by="prog"
+                            ).save()
+                    return redirect("registrasi")
+                except Exception as e:
+                    messages.error(r,e)
+                    transaction.set_rollback(True)
+                    return redirect("registrasi")
         else:
             messages.error(r,"Anda tidak memiliki akses")
             return redirect("beranda")

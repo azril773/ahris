@@ -72,7 +72,7 @@ def cari_absensi(r):
         dari = datetime.strptime(r.POST.get('ctgl1'),'%d-%m-%Y').date()
         sampai = datetime.strptime(r.POST.get('ctgl2'),'%d-%m-%Y').date()
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
         if int(sid) == 0:
@@ -83,8 +83,8 @@ def cari_absensi(r):
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
                 
-                if a.pegawai.counter_id is None:
-                    bagian = a.pegawai.divisi.divisi
+                if str(a.pegawai.counter.counter) == "None":
+                    bagian = f'{a.pegawai.divisi.divisi}'
                 else:
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
                     
@@ -95,21 +95,25 @@ def cari_absensi(r):
                         msk = f"{a.masuk}"
                 else:
                     msk = "-"
+                    msk = '-'
 
                 if a.pulang is not None:
                     plg = f"{a.pulang}"
                 else:
                     plg = "-"
+                    plg = '-'
 
                 if a.masuk_b is not None:
                     msk_b = f"{a.masuk_b}"
                 else:
                     msk_b = "-"
+                    msk_b = '-'
 
                 if a.pulang_b is not None:
                     plg_b = f"{a.pulang_b}"
                 else:
                     plg_b = "-"
+                    plg_b = '-'
 
                 if a.istirahat is not None and a.istirahat2 is not None:
                     ist = f'{a.istirahat} / {a.istirahat2}'
@@ -218,6 +222,8 @@ def cari_absensi(r):
                 hari_ini = nama_hari(hari) 
                 
                 if a.pegawai.counter_id is None:
+                    bagian = f'{a.pegawai.divisi.divisi}'
+                if str(a.pegawai.counter.counter) == "None":
                     bagian = f'{a.pegawai.divisi.divisi}'
                 else:
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
@@ -392,7 +398,7 @@ def cari_absensi_sid(r,dr, sp, sid):
 def absensi_json(r, dr, sp, sid):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         id_user = r.user.id
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         data = []
         
@@ -406,8 +412,8 @@ def absensi_json(r, dr, sp, sid):
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
                 
-                if a.pegawai.counter_id is None:
-                    bagian = a.pegawai.divisi.divisi
+                if a.pegawai.counter is None:
+                    bagian = f'{a.pegawai.divisi.divisi}'
                 else:
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
                     
@@ -417,22 +423,22 @@ def absensi_json(r, dr, sp, sid):
                     else:
                         msk = f"{a.masuk}"
                 else:
-                    msk = None
+                    msk = '-'
 
                 if a.pulang is not None:
                     plg = f"{a.pulang}"
                 else:
-                    plg = None
+                    plg = '-'
 
                 if a.masuk_b is not None:
                     msk_b = f"{a.masuk_b}"
                 else:
-                    msk_b = None
+                    msk_b = '-'
 
                 if a.pulang_b is not None:
                     plg_b = f"{a.pulang_b}"
                 else:
-                    plg_b = None
+                    plg_b = '-'
 
                 if a.istirahat is not None and a.istirahat2 is not None:
                     ist = f'{a.istirahat} / {a.istirahat2}'
@@ -441,7 +447,7 @@ def absensi_json(r, dr, sp, sid):
                 elif a.istirahat is None and a.istirahat2 is not None:                  
                     ist = f'{a.istirahat2}'
                 else:
-                    ist = ""    
+                    ist = "-"    
 
                 if a.istirahat_b is not None and a.istirahat2_b is not None:
                     ist_b = f" {a.istirahat_b} / {a.istirahat2_b})"
@@ -450,7 +456,7 @@ def absensi_json(r, dr, sp, sid):
                 elif a.istirahat_b is None and a.istirahat2_b is not None:
                     ist_b = f" {a.istirahat2_b}"
                 else:
-                    ist_b = ""
+                    ist_b = "-"
 
 
                 if a.lama_istirahat is not None and a.istirahat is not None:
@@ -470,7 +476,7 @@ def absensi_json(r, dr, sp, sid):
                 elif a.kembali is None and a.kembali2 is not None:                  
                     kmb = f'{a.kembali2}'    
                 else:
-                    kmb = ""        
+                    kmb = "-"        
 
                 if a.kembali_b is not None and a.kembali2_b is not None:
                     kmb_b = f" {a.kembali_b} / {a.kembali2_b})"
@@ -479,7 +485,7 @@ def absensi_json(r, dr, sp, sid):
                 elif a.kembali_b is None and a.kembali2_b is not None:
                     kmb_b = f" {a.kembali2_b}"
                 else:
-                    kmb_b = "" 
+                    kmb_b = "-" 
                 
 
                 if a.keterangan_absensi is not None:
@@ -540,33 +546,32 @@ def absensi_json(r, dr, sp, sid):
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
                 
-                if a.pegawai.counter_id is None:
-                    bagian = a.pegawai.divisi.divisi
+                if str(a.pegawai.counter.counter) == "None":
+                    bagian = f'{a.pegawai.divisi.divisi}'
                 else:
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
-                    
                 if a.masuk is not None:
                     if a.jam_masuk is not None and a.masuk > a.jam_masuk:
                         msk = f"<span class='text-danger'>{a.masuk}</span>"
                     else:
                         msk = f"{a.masuk}"
                 else:
-                    msk = None
+                    msk = '-'
 
                 if a.pulang is not None:
                     plg = f"{a.pulang}"
                 else:
-                    plg = None
+                    plg = '-'
 
                 if a.masuk_b is not None:
                     msk_b = f"{a.masuk_b}"
                 else:
-                    msk_b = None
+                    msk_b = '-'
 
                 if a.pulang_b is not None:
                     plg_b = f"{a.pulang_b}"
                 else:
-                    plg_b = None
+                    plg_b = '-'
 
                 if a.istirahat is not None and a.istirahat2 is not None:
                     ist = f'{a.istirahat} / {a.istirahat2}'
@@ -575,7 +580,7 @@ def absensi_json(r, dr, sp, sid):
                 elif a.istirahat is None and a.istirahat2 is not None:                  
                     ist = f'{a.istirahat2}'
                 else:
-                    ist = ""    
+                    ist = "-"    
 
                 if a.istirahat_b is not None and a.istirahat2_b is not None:
                     ist_b = f" {a.istirahat_b} / {a.istirahat2_b}"
@@ -584,7 +589,7 @@ def absensi_json(r, dr, sp, sid):
                 elif a.istirahat_b is None and a.istirahat2_b is not None:
                     ist_b = f" {a.istirahat2_b}"
                 else:
-                    ist_b = ""
+                    ist_b = "-"
             
                     
                 if a.lama_istirahat is not None and a.istirahat is not None:
@@ -604,7 +609,7 @@ def absensi_json(r, dr, sp, sid):
                 elif a.kembali is None and a.kembali2 is not None:                  
                     kmb = f'{a.kembali2}'    
                 else:
-                    kmb = ""        
+                    kmb = "-"        
 
                 if a.kembali_b is not None and a.kembali2_b is not None:
                     kmb_b = f" {a.kembali_b} / {a.kembali2_b}"
@@ -613,7 +618,7 @@ def absensi_json(r, dr, sp, sid):
                 elif a.kembali_b is None and a.kembali2_b is not None:
                     kmb_b = f" {a.kembali2_b}"
                 else:
-                    kmb_b = "" 
+                    kmb_b = "-" 
                 
 
                 if a.keterangan_absensi is not None:
@@ -697,6 +702,7 @@ def prosesMesin(m):
                     pass                
         conn.enable_device()
     except Exception as e:
+        print(e)
         messages.error(m[4], "Process terminate : {}".format(e))
         # return redirect("absensi",sid=)
         return e
@@ -730,7 +736,7 @@ def pabsen(req):
     
     # buat tabel absen
     id_user = req.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+    aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     if int(sid) == 0:
         for p in pegawai_db.objects.using(req.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi):
@@ -862,6 +868,7 @@ def pabsen(req):
             for d in dm:    
                 dmesin.append(d)
     except Exception as err:
+        print(err)
         messages.error(req,"Terjadi kesalahan pada mesin finger. Silahkan coba lagi")
         return redirect("absensi",sid=sid)
 
@@ -1786,7 +1793,7 @@ def detail_absensi(r,userid,tgl,sid):
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
 
-        aksesdivisi = akses_divisi_db.objects.filter(user_id=iduser)
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)
         divisi = [div.divisi for div in aksesdivisi]
 
         dsid = dakses.sid_id  
@@ -1950,7 +1957,7 @@ def ubah_absen(r):
 def pu(r,tgl,userid,sid):
     dt = data_trans_db.objects.using(r.session["ccabang"]).filter(jam_absen__date=tgl,userid=userid).order_by('jam_absen')
     id_user = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+    aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     abs = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").filter(tgl_absen=tgl,pegawai__userid=userid,pegawai__divisi__in=divisi)
     if not abs.exists():
@@ -2344,7 +2351,7 @@ def edit_ijin(r):
     id = r.POST.get("id")
     sid = r.POST.get("sid")
     id_user = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+    aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     print(jenis_ijin,ket,id,sid)
     if jenis_ijin_db.objects.using(r.session["ccabang"]).filter(pk=int(jenis_ijin)).exists():
@@ -2376,7 +2383,7 @@ def edit_jamkerja(r,userid,tgl,sid):
         messages.add_message(r,messages.ERROR,"Form harus lengkap")
         return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
     id_user = r.user.id
-    aksesdivisi = akses_divisi_db.objects.filter(user_id=id_user)
+    aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     if absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").filter(pk=int(id),pegawai__divisi__in=divisi).exists():
         ab = absensi_db.objects.using(r.session["ccabang"]).get(pk=int(id))
