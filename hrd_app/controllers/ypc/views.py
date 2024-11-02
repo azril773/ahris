@@ -126,14 +126,14 @@ def tlengkap_json(r,sid):
                     "nik":ab.pegawai.nik,
                     "shift":ab.pegawai.shift,
                     "divisi":ab.pegawai.divisi.divisi,
-                    "masuk":ab.masuk,
-                    "istirahat":ab.istirahat,
-                    "kembali":ab.kembali,
-                    "pulang":ab.pulang,
-                    "masuk_b":ab.masuk_b,
-                    "istirahat_b":ab.istirahat_b,
-                    "kembali_b":ab.kembali_b,
-                    "pulang_b":ab.pulang_b
+                    "masuk":ab.masuk if ab.masuk is not None else "-",
+                    "istirahat":ab.istirahat if ab.istirahat is not None else "-",
+                    "kembali":ab.kembali if ab.kembali is not None else "-",
+                    "pulang":ab.pulang if ab.pulang is not None else "-",
+                    "masuk_b":ab.masuk_b if ab.masuk_b is not None else "-",
+                    "istirahat_b":ab.istirahat_b if ab.istirahat_b is not None else "-",
+                    "kembali_b":ab.kembali_b if ab.kembali_b is not None else "-",
+                    "pulang_b":ab.pulang_b if ab.pulang_b is not None else "-"
                 }
                 data.append(obj)
             # print(data)
@@ -226,14 +226,14 @@ def terlambat_json(r,sid):
                             "nik":ab.pegawai.nik,
                             "shift":ab.pegawai.shift,
                             "divisi":ab.pegawai.divisi.divisi,
-                            "masuk":ab.masuk,
-                            "istirahat":ab.istirahat,
-                            "kembali":ab.kembali,
-                            "pulang":ab.pulang,
-                            "masuk_b":ab.masuk_b,
-                            "istirahat_b":ab.istirahat_b,
-                            "kembali_b":ab.kembali_b,
-                            "pulang_b":ab.pulang_b,
+                            "masuk":ab.masuk if ab.masuk is not None else "-",
+                            "istirahat":ab.istirahat if ab.istirahat is not None else "-",
+                            "kembali":ab.kembali if ab.kembali is not None else "-",
+                            "pulang":ab.pulang if ab.pulang is not None else "-",
+                            "masuk_b":ab.masuk_b if ab.masuk_b is not None else "-",
+                            "istirahat_b":ab.istirahat_b if ab.istirahat_b is not None else "-",
+                            "kembali_b":ab.kembali_b if ab.kembali_b is not None else "-",
+                            "pulang_b":ab.pulang_b if ab.pulang_b is not None else "-",
                             "jam_masuk":ab.jam_masuk
                         }
                         data.append(obj)

@@ -414,9 +414,9 @@ def add_data(r,id):
         users = conn.get_users()
 
 
-        datamesin = [i.userid for i in datamesin_db.using(r.session["ccabang"]).objects.all()]
+        datamesin = [i.userid for i in datamesin_db.objects.using(r.session["ccabang"]).all()]
         userids = [user for user in users if user.user_id not in datamesin]
-
+        print(userids)
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids,aktif=1)
         # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
 

@@ -83,7 +83,7 @@ def cari_absensi(r):
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
                 
-                if str(a.pegawai.counter.counter) == "None":
+                if str(a.pegawai.counter) == "None":
                     bagian = f'{a.pegawai.divisi.divisi}'
                 else:
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
@@ -223,7 +223,7 @@ def cari_absensi(r):
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
                 
-                if a.pegawai.counter_id is None:
+                if str(a.pegawai.counter) == "None":
                     bagian = f'{a.pegawai.divisi.divisi}'
                 if str(a.pegawai.counter.counter) == "None":
                     bagian = f'{a.pegawai.divisi.divisi}'
@@ -416,7 +416,7 @@ def absensi_json(r, dr, sp, sid):
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
                 
-                if a.pegawai.counter is None:
+                if str(a.pegawai.counter) == "None":
                     bagian = f'{a.pegawai.divisi.divisi}'
                 else:
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 
@@ -552,7 +552,7 @@ def absensi_json(r, dr, sp, sid):
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
                 
-                if str(a.pegawai.counter.counter) == "None":
+                if str(a.pegawai.counter) == "None":
                     bagian = f'{a.pegawai.divisi.divisi}'
                 else:
                     bagian = f'{a.pegawai.divisi.divisi} - {a.pegawai.counter.counter}' 

@@ -44,8 +44,8 @@
             <!-- Button Cari Data Absen -->
             <button data-target="#pilih_tgl_cari" data-toggle="modal" class="btn btn-primary mg-b-6">Cari Data Laporan</button>  &nbsp; 
             <button data-target="#multiplepegawai" data-toggle="modal" class="btn btn-info mg-b-6">Per Pegawai</button>  &nbsp;
-            <button data-target="#divisimodal" data-toggle="modal" class="btn btn-warning mg-b-6">Per Divisi PDF</button>  &nbsp;
-            <button data-target="#divisiexcelmodal" data-toggle="modal" class="btn btn-warning mg-b-6">Per Divisi Excel</button>  &nbsp; &nbsp; &nbsp;
+            <button data-target="#divisimodal" data-toggle="modal" class="btn btn-outline-danger mg-b-6">Per Divisi PDF</button>  &nbsp;
+            <button data-target="#divisiexcelmodal" data-toggle="modal" class="btn btn-outline-success mg-b-6">Per Divisi Excel</button>  &nbsp; &nbsp; &nbsp;
 
             <!-- Button lainnya -->
             {% include 'hrd_app/master/modul_absensi.html' %} 
@@ -178,7 +178,7 @@
                     {% csrf_token %}
                     <div class="form-layout form-layout-1">
                     <div class="row mg-b-25">
-                        <div class="col-12 mb-5">
+                        <div class="col-12 mb-2">
                             <label for="pegawai">Pilih Pegawai</label>
                             <select name="pegawai[]" id="pegawai">
                                 <option value="">Pilih Pegawai</option>
@@ -223,7 +223,7 @@
                     {% csrf_token %}
                     <div class="form-layout form-layout-1">
                     <div class="row mg-b-25">
-                        <div class="col-12 mb-5">
+                        <div class="col-12 mb-2">
                             <label for="divisi">Pilih Divisi</label>
                             <select name="divisi[]" id="divisi">
                                 <option value="">Pilih Divisi</option>
@@ -266,7 +266,7 @@
                     {% csrf_token %}
                     <div class="form-layout form-layout-1">
                     <div class="row mg-b-25">
-                        <div class="col-12 mb-5">
+                        <div class="col-12 mb-2">
                             <label for="divisiexcel">Pilih Divisi Excel</label>
                             <select name="divisi[]" id="divisiexcel">
                                 <option value="">Pilih Divisi Excel</option>
@@ -408,7 +408,7 @@
             {
                 data:null,
                 render:(data,type,row,meta) => {
-                    return `<a class="btn btn-primary" target="_blank" href="/hrd/print_laporan/${sid}/${row.id}/${bulan}/${tahun}">Print Pdf</a> &nbsp<a target="_blank" class="btn btn-warning" href="/hrd/laporan_periode_excel/${sid}/${row.id}/${bulan}/${tahun}">Print Excel</a>`
+                    return `<a class="btn btn-primary" target="_blank" href="/hrd/print_laporan/${sid}/${row.id}/${bulan}/${tahun}">Print Pdf</a> &nbsp;<a target="_blank" class="btn btn-warning" href="/hrd/laporan_periode_excel/${sid}/${row.id}/${bulan}/${tahun}">Print Excel</a>`
                 }
             }
         ],
@@ -522,7 +522,7 @@
             {
                 data:null,
                 render:(data,type,row,meta) => {
-                    return `<a class="btn btn-primary" target="_blank" href="/hrd/print_laporan/${sid}/${row.id}/${bulan}/${tahun}">Print Pdf</a> &nbsp<a target="_blank" class="btn btn-warning" href="/hrd/laporan_periode_excel/${sid}/${row.id}/${bulan}/${tahun}">Print Excel</a>`
+                    return `<a class="btn btn-primary" target="_blank" href="/hrd/print_laporan/${sid}/${row.id}/${bulan}/${tahun}">Print Pdf</a> &nbsp; <a target="_blank" class="btn btn-warning" href="/hrd/laporan_periode_excel/${sid}/${row.id}/${bulan}/${tahun}">Print Excel</a>`
                 }
             }
             ],
