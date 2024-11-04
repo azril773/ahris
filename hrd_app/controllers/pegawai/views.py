@@ -1663,7 +1663,6 @@ def nonaktif(r):
             ).save(using=r.session["ccabang"])
 
             parsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter().last()
-            print("SSDS")
             pribadi = pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk)
             if pribadi.exists():
                 pribadi = pribadi[0]
@@ -1760,7 +1759,6 @@ def nonaktif(r):
                 promodemo.delete()
 
             sangsi = sangsi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk)
-            print(sangsi,"SDSDDS")
             if sangsi.exists():
                 print(sangsi,"SANGSI")
                 for s in sangsi:

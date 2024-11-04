@@ -1090,17 +1090,16 @@ def pabsen(req):
                     # jika tidak ada
                     else:
                         
-                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                        if next((True for o in opg if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                             pass
                         # jika tidak
                         else:
-                            tambah_opg = opg_db(
+                            opg_db(
                                 pegawai_id = ab.pegawai_id,
                                 opg_tgl = ab.tgl_absen,   
                                 keterangan = 'OFF Pengganti Reguler',                         
                                 add_by = 'Program',
-                            )    
-                            tambah_opg.save(using=req.session["ccabang"])
+                            ).save(using=req.session["ccabang"])
                 else:
                     pass
             else:
@@ -1146,13 +1145,12 @@ def pabsen(req):
                                 pass
                             else:
                                 # ini kalo tidak jalan
-                                tambah_opg = opg_db(
+                                opg_db(
                                     pegawai_id = ab.pegawai_id,
                                     opg_tgl = ab.tgl_absen,   
                                     keterangan = 'OFF Pengganti Reguler',                         
                                     add_by = 'Program',
-                                )    
-                                tambah_opg.save(using=req.session['ccabang'])
+                                ).save(using=req.session['ccabang'])
                     else:
                         pass
                 else:
@@ -1171,13 +1169,12 @@ def pabsen(req):
                             if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                 pass
                             else:
-                                tambah_opg = opg_db(
+                                opg_db(
                                     pegawai_id = ab.pegawai_id,
                                     opg_tgl = ab.tgl_absen,   
                                     keterangan = 'OFF Pengganti Reguler',                         
                                     add_by = 'Program',
-                                )    
-                                tambah_opg.save(using=req.session['ccabang'])
+                                ).save(using=req.session['ccabang'])
                     else:
                         pass
                 else:
@@ -1221,13 +1218,12 @@ def pabsen(req):
                                         if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                             pass
                                         else:
-                                            tambah_opg = opg_db(
+                                            opg_db(
                                                 pegawai_id = ab.pegawai_id,
                                                 opg_tgl = ab.tgl_absen,   
                                                 keterangan = 'OFF Pengganti Reguler',                         
                                                 add_by = 'Program',
-                                            )    
-                                            tambah_opg.save(using=req.session['ccabang'])
+                                            ).save(using=req.session['ccabang'])
                                 else:
                                     pass    
                             else:
@@ -1243,13 +1239,12 @@ def pabsen(req):
                                         if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                             pass
                                         else:
-                                            tambah_opg = opg_db(
+                                            opg_db(
                                                 pegawai_id = ab.pegawai_id,
                                                 opg_tgl = ab.tgl_absen,   
                                                 keterangan = 'OFF Pengganti Reguler',                         
                                                 add_by = 'Program',
-                                            )    
-                                            tambah_opg.save(using=req.session["ccabang"])
+                                            ).save(using=req.session["ccabang"])
                                             
                                             # ditasik tidak ada insentif dihari minggu jika masuk
                                             # ab.insentif = l['insentif_karyawan']
@@ -1276,36 +1271,33 @@ def pabsen(req):
                                         if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                             pass
                                         else:
-                                            tambah_opg = opg_db(
+                                            opg_db(
                                                 pegawai_id = ab.pegawai_id,
                                                 opg_tgl = ab.tgl_absen,   
                                                 keterangan = 'OFF Pengganti Reguler',                         
                                                 add_by = 'Program',
-                                            )    
-                                            tambah_opg.save(using=req.session["ccabang"])
+                                            ).save(using=req.session["ccabang"])
                                             
                                         if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
                                             pass
                                         else:    
-                                            tambah_opg2 = opg_db(
+                                            opg_db(
                                                 pegawai_id = ab.pegawai_id,
                                                 opg_tgl = ab.tgl_absen,   
                                                 keterangan = 'OFF Pengganti Tgl Merah',                         
                                                 add_by = 'Program',
-                                            )    
-                                            tambah_opg2.save(using=req.session["ccabang"])
+                                            ).save(using=req.session["ccabang"])
                                 # TAPI JIKA TIDAK MASUK HANYA MENDAPATKAN 1 OPG
                                 else:
                                     if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
                                         pass
                                     else:    
-                                        tambah_opg2 = opg_db(
+                                        opg_db(
                                             pegawai_id = ab.pegawai_id,
                                             opg_tgl = ab.tgl_absen,   
                                             keterangan = 'OFF Pengganti Tgl Merah',                         
                                             add_by = 'Program',
-                                        )    
-                                        tambah_opg2.save(using=req.session["ccabang"])    
+                                        ).save(using=req.session["ccabang"])    
                             else:
                                 pass
                         
@@ -1321,13 +1313,12 @@ def pabsen(req):
                                         if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                             pass
                                         else:
-                                            tambah_opg = opg_db(
+                                            opg_db(
                                                 pegawai_id = ab.pegawai_id,
                                                 opg_tgl = ab.tgl_absen,   
                                                 keterangan = 'OFF Pengganti Reguler',                         
                                                 add_by = 'Program',
-                                            )    
-                                            tambah_opg.save(using=req.session["ccabang"])
+                                            ).save(using=req.session["ccabang"])
                                             
                                             ab.insentif = l['insentif_karyawan']
                                             ab.save(using=req.session["ccabang"])
