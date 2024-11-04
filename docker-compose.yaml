@@ -19,39 +19,7 @@ services:
       DB_HOST: mysql
       DB_PORT: 3306
     networks:
-      - ahris
-  
-  mysql:
-    container_name: mysql
-    image: mysql:latest
-    environment:
-      # MYSQL_ROOT_PASSWORD: "123"
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-      MYSQL_DATABASE: hrd
-    networks:
-      - ahris
-      
-  nginx:
-    container_name: nginx
-    build:
-      context: ../
-      dockerfile: Dockerfile
-    command: sh -c "sleep 10 && nginx -g 'daemon off;'"
-    ports:
-      - 8000:80
-    depends_on:
-      - hrd_app
-    restart: "always"
-    volumes:
-      - static_volume:/static
-    networks:
-      - ahris
-
-
-networks:
-  ahris:
-    driver: bridge
-
+      - ndb
 
 volumes:
   static_volume:
