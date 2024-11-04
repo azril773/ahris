@@ -308,22 +308,21 @@ def tambah_ijin(r):
         if ijin_db.objects.using(r.session["ccabang"]).select_related('pegawai','ijin').filter(pegawai_id=int(dpegawai), tgl_ijin=tgl.date()).exists():
             status = 'duplikat'
         else:
-            if absensi_db.objects.select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=tgl.date()).exists():
-                ab = absensi_db.objects.select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=tgl.date())
+            if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=tgl.date()).exists():
+                ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=tgl.date())
                 ab.keterangan_ijin = f'{ij.jenis_ijin}-({dket})'
                 ab.save(using=r.session["ccabang"])
             else:
                 pass 
                 
-            tambah = ijin_db(
+            ijin_db(
                 ijin_id = int(dijin),
                 tgl_ijin = tgl.date(),
                 pegawai_id = int(dpegawai),
                 keterangan = dket,        
                 add_by = nama_user,
                 edit_by = nama_user
-            )
-            tambah.save(using=r.session["ccabang"])
+            ).save(using=r.session["ccabang"])
 
             status = 'ok'    
     
@@ -341,18 +340,17 @@ def batal_ijin(r):
     idp = ij.pegawai_id
     nama_pegawai = ij.pegawai.nama
     jenis_ijin = ij.ijin.jenis_ijin
-    abc = absensi_db.objects.filter(pegawai_id=int(idp), tgl_absen=tgl)
+    abc = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_absen=tgl)
     if abc.exists():
-        ab = absensi_db.objects.get(pegawai_id=int(idp), tgl_absen=tgl)
+        ab = absensi_db.objects.using(r.session["ccabang"]).get(pegawai_id=int(idp), tgl_absen=tgl)
         ab.keterangan_ijin = None
         ab.save(using=r.session["ccabang"])
 
     
-    histori = histori_hapus_db(
+    histori_hapus_db(
         delete_by = nama_user,
         delete_item = f"{jenis_ijin}-(a.n {nama_pegawai}, tgl:{tgl})"
-    )
-    histori.save(using=r.session["ccabang"])
+    ).save(using=r.session["ccabang"])
     
     ij.delete(using=r.session["ccabang"])
     

@@ -304,7 +304,7 @@ def tambah_data_pegawai(r):
 
 
             # Tambah Pihak Lain
-            pgw = pegawai_db.objects.get(userid=userid)
+            pgw = pegawai_db.objects.using(r.session["ccabang"]).get(userid=userid)
             for p in pihak:
                 kontak_lain_db(
                     pegawai_id=int(pgw.pk),

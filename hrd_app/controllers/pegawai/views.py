@@ -1622,8 +1622,8 @@ def nonaktif(r):
         pg = pg[0]
     nama_user = r.user.username
     p = pg
-    try:
-        with transaction.atomic(using=r.session["ccabang"]):
+    with transaction.atomic(using=r.session["ccabang"]):
+        try:
             pegawai_db_arsip(
                 nama=p.nama,
                 email=p.email,
@@ -1663,7 +1663,6 @@ def nonaktif(r):
             ).save(using=r.session["ccabang"])
 
             parsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter().last()
-            print("SSDS")
             pribadi = pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk)
             if pribadi.exists():
                 pribadi = pribadi[0]
@@ -1815,8 +1814,8 @@ def nonaktif(r):
 
 
             p.delete()
-    except:
-        transaction.set_rollback(True,using=r.session["ccabang"])
+        except Exception as e:
+            transaction.set_rollback(True,using=r.session["ccabang"])
     status = 'ok'
     return JsonResponse({"status": status})
 
