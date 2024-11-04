@@ -1835,8 +1835,8 @@ def aktif(r):
     else:
         pg = pg[0]
     p = pg
-    try:
-        with transaction.atomic(using=r.session["ccabang"]):
+    with transaction.atomic(using=r.session["ccabang"]):
+        try:
             pegawai_db(
                 nama=p.nama,
                 email=p.email,
@@ -1986,8 +1986,8 @@ def aktif(r):
 
             pg.delete()
             status = 'ok'
-    except:
-        transaction.set_rollback(True,using=r.session["ccabang"])
+        except:
+            transaction.set_rollback(True,using=r.session["ccabang"])
     return JsonResponse({"status": status})
 
 
@@ -2694,7 +2694,7 @@ def ambil_mesin(r):
     if not mesin.exists():
         return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
     try:
-        datamesin = datamesin_db.objects.all()
+        datamesin = datamesin_db.objects.using(r.session["ccabang"]).all()
         dm = []
         for p in datamesin:
             dm.append(p.userid)
