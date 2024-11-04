@@ -247,10 +247,10 @@ def tambah_cuti(r):
             sc = pg.sisa_cuti
             
             ct = cuti_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_cuti__gte=tac).aggregate(total=Count('id'))
-            if ct is None:
-                cuti_ke = 1
-            else:
+            if ct["total"] > 0:
                 cuti_ke = ct['total'] + 1  
+            else:
+                cuti_ke = 1
                 
             if dket is None:
                 ket = f"Cuti ke {cuti_ke}"
