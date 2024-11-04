@@ -78,7 +78,7 @@ def cari_absensi(r):
         if int(sid) == 0:
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(tgl_absen__range=(dari,sampai),pegawai__divisi__in=divisi).order_by('tgl_absen','pegawai__divisi__divisi'):
                             
-                sket = " "
+                sket = ""
                 
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
@@ -218,7 +218,7 @@ def cari_absensi(r):
         else:                        
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(tgl_absen__range=(dari,sampai), pegawai__status_id=sid,pegawai__divisi__in=divisi).order_by('tgl_absen','pegawai__divisi__divisi'):
                             
-                sket = " "
+                sket = ""
                 
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
@@ -1114,13 +1114,12 @@ def pabsen(req):
                         if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                             pass
                         else:
-                            tambah_opg = opg_db(
+                            opg_db(
                                 pegawai_id = ab.pegawai_id,
                                 opg_tgl = ab.tgl_absen,   
                                 keterangan = 'OFF Pengganti Reguler',                         
                                 add_by = 'Program',
-                            )    
-                            tambah_opg.save(using=req.session['ccabang'])
+                            ).save(using=req.session['ccabang'])
                 else:
                     pass
             else:

@@ -304,7 +304,7 @@ def tambah_data_pegawai(r):
 
 
             # Tambah Pihak Lain
-            pgw = pegawai_db.objects.get(userid=userid)
+            pgw = pegawai_db.objects.using(r.session["ccabang"]).get(userid=userid)
             for p in pihak:
                 kontak_lain_db(
                     pegawai_id=int(pgw.pk),
@@ -417,9 +417,9 @@ def add_data(r,id):
         datamesin = [i.userid for i in datamesin_db.objects.using(r.session["ccabang"]).all()]
         userids = [user.user_id for user in users if user.user_id not in datamesin]
         user = [user for user in users if user.user_id not in datamesin]
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids,aktif=1)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids)
+        pegawai_arsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
         # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
-        print(pegawai)
         # print(userids)
         for u in user:
             for pgw in pegawai:
@@ -428,13 +428,25 @@ def add_data(r,id):
                         level = 1
                     else:
                         level = 0
-                    print('ok')
                     datamesin_db(
                         uid=u.uid,
                         nama=pgw.nama,
                         userid=u.user_id,
                         level=level
                     ).save(using=r.session["ccabang"])
+            for pgwa in pegawai_arsip:
+                if pgwa.userid == u.user_id:
+                    if u.privilege == const.USER_ADMIN:
+                        level = 1
+                    else:
+                        level = 0
+                    datamesin_db(
+                        uid=u.uid,
+                        nama=pgwa.nama,
+                        userid=u.user_id,
+                        level=level
+                    ).save(using=r.session["ccabang"])
+
         conn.enable_device()
 
     except Exception as e:

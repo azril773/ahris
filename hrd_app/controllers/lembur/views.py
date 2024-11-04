@@ -2165,7 +2165,7 @@ def hstatus_pegawai_opg(r):
         histori_hapus_db(
             delete_by = nama_user,
             delete_item = f'hapus status pegawai libur nasional : {get.status.status}'
-        )
+        ).save(using=r.session["ccabang"])
         list_status_opg_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
         return JsonResponse({'status':'ok'},safe=False,status=200)
     except:
