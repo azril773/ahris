@@ -310,6 +310,8 @@ def tambah_geseroff(r):
                             tambahgf.save(using=r.session["ccabang"])
                             
                             ab2.keterangan_absensi = f"Geser OFF-({fdari})"
+                            ab.keterangan_absensi = f"Geser OFF-({fdari})"
+                            ab.save(using=r.session["ccabang"])
                             ab2.save(using=r.session["ccabang"])
                             
                             status = 'ok'
@@ -327,6 +329,8 @@ def tambah_geseroff(r):
                                     tambahgf.save(using=r.session["ccabang"])
                                     
                                     ab2.keterangan_absensi = f"Geser OFF-({fdari})"
+                                    ab.keterangan_absensi = f"Geser OFF-({fdari})"
+                                    ab.save(using=r.session["ccabang"])
                                     ab2.save(using=r.session["ccabang"])
                                     
                                     status = 'ok'
