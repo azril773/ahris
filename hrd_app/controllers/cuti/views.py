@@ -281,7 +281,7 @@ def tambah_cuti(r):
                                     tcuti = cuti_db(
                                         pegawai_id = int(idp),
                                         tgl_cuti = tgl,
-                                        keterangan = dket,
+                                        keterangan = ket,
                                         cuti_ke = cuti_ke,
                                         add_by = nama_user,
                                         edit_by = nama_user

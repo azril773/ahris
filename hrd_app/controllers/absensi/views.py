@@ -411,7 +411,7 @@ def absensi_json(r, dr, sp, sid):
         
         if int(sid) == 0:
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(pegawai__divisi__in=divisi,tgl_absen__range=(dari,sampai)).order_by('tgl_absen','pegawai__divisi__divisi'):
-                sket = ""
+                sket = " "
                 
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
@@ -1076,7 +1076,7 @@ def pabsen(req):
                     # jika tidak ada
                     else:
                         
-                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                        if next((True for o in opg if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                             pass
                         # jika tidak
                         else:
@@ -1381,7 +1381,7 @@ def pabsen(req):
                         geseroff_db.objects.using(req.session["ccabang"]).get(id=int(g['id'])).delete()    
                 elif g["dari_tgl"] == ab.tgl_absen:
                     if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-                        ab.keterangan_absensi = None
+                        ab.keterangan_absensi = ""
                         ab.save(using=req.session["ccabang"])
                     else:
                         pass
