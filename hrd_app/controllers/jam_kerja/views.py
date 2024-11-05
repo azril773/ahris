@@ -24,7 +24,7 @@ def jam_kerja(r):
         #     i+=1
         # hari = ["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]
         # for d in data:
-        #     print(d["status_pegawai"])
+        #     
         #     sp = str(d["status_pegawai"]).strip()
         #     kk = kelompok_kerja_db.objects.using(r.session["ccabang"]).get(kelompok__iregex=r'^{}$'.format(sp))
         #     if d["hari"] == "Biasa":
@@ -38,7 +38,7 @@ def jam_kerja(r):
         #             jamkerja.save(r.session["ccabang"])
         #     elif d["hari"] == "All":
         #         for i in range(0,7):
-        #             print(i)
+        #             
         #             jamkerja = jamkerja_db()
         #             jamkerja.kk = kk
         #             jamkerja.jam_masuk = d["jam_masuk"]
@@ -116,7 +116,7 @@ def edit_kk_json(r):
         try:
             if kelompok_kerja_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(ekk)),kelompok=new_kk).exists():
                 return JsonResponse({"status": "duplikat"})
-            print(ekk)
+            
             kelompok_kerja_db.objects.using(r.session["ccabang"]).filter(pk=int(ekk)).update(kelompok=new_kk)
             return JsonResponse({"status": "ok"})
         except: 
@@ -178,7 +178,7 @@ def tambah_jam_kerja(r):
         if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),jam_masuk=jam_masuk,jam_pulang=jam_pulang).exists():
             status = "gagal tambah"
         else:
-            print("SSD")
+            
             for h in hari:
                 # if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),hari=h).exists():
                 #     continue
@@ -214,7 +214,7 @@ def edit_jam_kerja(r):
                 hari = ["Semua Hari"]
                 break
                 
-        print(hari)
+        
 
         if len(hari) >= 7:
             hari = ["Semua Hari"]
@@ -226,7 +226,7 @@ def edit_jam_kerja(r):
             if h.lower() == 'semua hari':
                 if jamkerja_db.objects.using(r.session["ccabang"]).filter(~Q(hari='semua hari'),kk_id=int(kk)).exists():
                     break
-            print("OKOSKD")
+            
             jamkerja_db(
                 kk_id=kk,
                 jam_masuk=jam_masuk,

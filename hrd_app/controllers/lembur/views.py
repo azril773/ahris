@@ -2039,7 +2039,7 @@ def status_pegawai_libur_nasional(r):
 @login_required
 def tstatus_pegawai_libur_nasional(r):
     status = r.POST.get("status")
-    print(status)
+    
     if list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).filter(status_id=status).exists():
         return JsonResponse({'status':'duplikat'},safe=False,status=400)
     else:
@@ -2070,7 +2070,7 @@ def estatus_pegawai_libur_nasional(r):
         list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).filter(pk=int(id)).update(status_id=int(status))
         return JsonResponse({'status':'ok'},safe=False,status=200)
     except Exception as err:
-        print(err)
+        
         return JsonResponse({"status":"gagal update"},safe=False,status=400)
 
 @login_required
@@ -2122,7 +2122,7 @@ def status_pegawai_opg(r):
 @login_required
 def tstatus_pegawai_opg(r):
     status = r.POST.get("status")
-    print(status)
+    
     if list_status_opg_db.objects.using(r.session["ccabang"]).filter(status_id=status).exists():
         return JsonResponse({'status':'duplikat'},safe=False,status=400)
     else:
@@ -2153,7 +2153,7 @@ def estatus_pegawai_opg(r):
         list_status_opg_db.objects.using(r.session["ccabang"]).filter(pk=int(id)).update(status_id=int(status))
         return JsonResponse({'status':'ok'},safe=False,status=200)
     except Exception as err:
-        print(err)
+        
         return JsonResponse({"status":"gagal update"},safe=False,status=400)
 
 @login_required

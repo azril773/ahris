@@ -19,7 +19,7 @@ def pegawai(r,sid):
         # i = 0
         # for d in data:
         #     kelompok = excel.iloc[i,15]
-        #     # print(kelompok)
+        #     # 
         #     i += 1
         #     idp = d["id"]
         #     if kelompok == 0:
@@ -71,7 +71,7 @@ def pegawai(r,sid):
         #         ).save(using=r.session["ccabang"])
 
         #         parsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter().last()
-        #         # print("SSDS")
+        #         # 
         #         pribadi = pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk)
         #         if pribadi.exists():
         #             pribadi = pribadi[0]
@@ -168,9 +168,9 @@ def pegawai(r,sid):
         #             promodemo.delete()
 
         #         sangsi = sangsi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk)
-        #         # print(sangsi,"SDSDDS")
+        #         # 
         #         if sangsi.exists():
-        #             # print(sangsi,"SANGSI")
+        #             # 
         #             for s in sangsi:
         #                 sangsi_db_arsip(
         #                     pegawai_id=parsip.pk,
@@ -472,7 +472,7 @@ def epegawai(r,idp):
             elif pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idp)),userid=userid).exists():
                 return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
             else:
-                print(tgl_masuk)
+                
                 pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid).update(
                     nama=nama,
                     email=email,
@@ -632,7 +632,7 @@ def tpegawai(r):
 def tambah_pegawai(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         try:
-            print(r.user.id)
+            
             user = akses_db.objects.filter(user_id=r.user.id)
             if not user.exists():
                 return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
@@ -679,7 +679,7 @@ def tambah_pegawai(r):
             id_user = r.user.id
             aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
             divisi = [d.pk for d in aksesdivisi]
-            # print(divisi,div)
+            # 
             # return JsonResponse({"msg":"error"},status=400)
             if keluarga:
                 keluarga = json.loads(keluarga)
@@ -807,7 +807,7 @@ def tambah_pegawai(r):
                     ).save(using=r.session["ccabang"])
                 status = "ok"
         except Exception as e:
-            print(e)
+            
             return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
 
@@ -1396,7 +1396,7 @@ def tambah_prodemo(r):
             status = "Promosi"
         
         pgw =pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi__in=divisi)
-        print(pgw,"OK")
+        
         if not pgw.exists():
             return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses ke pegawai ini"},status=400)
         else:
@@ -1433,7 +1433,7 @@ def promodemo_json(r,idp,aktif):
                 result = promosi_demosi_db_arsip.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp),status__regex=r"(?i)promosi")
 
         rslt = []
-        print(result)
+        
         for r in result:
             obj = {
                 "tgl":r.tgl,
@@ -1760,7 +1760,7 @@ def nonaktif(r):
 
             sangsi = sangsi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk)
             if sangsi.exists():
-                print(sangsi,"SANGSI")
+                
                 for s in sangsi:
                     sangsi_db_arsip(
                         pegawai_id=parsip.pk,
@@ -1999,7 +1999,7 @@ def pegawai_json(r, sid):
         id_user = r.user.id
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
-        print(pegawai_db.objects.using(r.session["ccabang"]).filter(divisi__in=divisi))
+        
         if int(sid) == 0:
             for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi):
                 
@@ -2374,7 +2374,7 @@ def rp_form(r):
 
                 try:
                     dmesin = mesin_db.objects.using(r.session["ccabang"]).get(pk=mesin)
-                    print(dmesin.ipaddress)
+                    
                     id = dmesin.pk
                     zk = ZK(dmesin.ipaddress,4370)
                     conn = zk.connect()
@@ -2402,7 +2402,7 @@ def rp_form(r):
 
                     conn.enable_device()
                 except Exception as e:
-                    print(e)
+                    
                     messages.error(r,"Proccess terminate : {}".format(e))
                 finally:
                     if conn:
@@ -2417,7 +2417,7 @@ def rp_form(r):
         status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('status')
         hr = hari_db.objects.using(r.session["ccabang"]).all()
         kota_kabupaten = kota_kabupaten_db.objects.using(r.session["ccabang"]).all()
-        print(mesin,"MEINS")
+        
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
@@ -2518,7 +2518,7 @@ def tambah_pegawai_non_validasi(r):
                     status_pegawai = None
                 try:
                     id = r.POST.get("mesin")
-                    print(id)
+                    
                     mesin = mesin_db.objects.using(r.session["ccabang"]).filter(id=int(id))
                     if not mesin.exists():
                         transaction.set_rollback(True,using=r.session["ccabang"])
@@ -2568,7 +2568,7 @@ def tambah_pegawai_non_validasi(r):
                     conn.enable_device()
 
                 except Exception as e:
-                    print(e)
+                    
                     transaction.set_rollback(True,using=r.session["ccabang"])
                     return JsonResponse({"status":"error","msg":e},status=500)
                 finally:
@@ -2677,7 +2677,7 @@ def tambah_pegawai_non_validasi(r):
                         ).save(using=r.session["ccabang"])
                     status = "ok"
             except Exception as e:
-                print(e)
+                
                 transaction.set_rollback(True,using=r.session["ccabang"])
                 return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
@@ -2687,7 +2687,7 @@ def tambah_pegawai_non_validasi(r):
 @login_required
 def ambil_mesin(r):
     idmesin = r.POST.get("mesin")
-    print(idmesin)
+    
     mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin))
     if not mesin.exists():
         return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)

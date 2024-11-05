@@ -683,7 +683,6 @@ def absensi_json(r, dr, sp, sid):
 
 def prosesMesin(m):
     ip = m[0].ipaddress
-    # print(ip)
     # conn = None
     zk = ZK(str(ip), port=4370, timeout=65)
     dt = []
@@ -694,9 +693,7 @@ def prosesMesin(m):
         absensi = conn.get_attendance()
         for a in absensi:
             if m[2] <= a.timestamp <= m[3]:   
-                # print(a.user_id) 
                 # users = conn.get_users()
-                # print([user for user in absensi if user.user_id == "226002"])
                 if str(a.user_id) in m[1]:     
                     data = {
                         "userid": a.user_id, 
@@ -704,19 +701,15 @@ def prosesMesin(m):
                         "punch": a.punch,
                         "mesin": m[0].nama 
                     }
-                    # print(data)
                     dt.append(data)
                 else:
                     pass                
         conn.enable_device()
+        conn.disconnect()
     except Exception as e:
-        print(e)
-        messages.error(m[4], "Process terminate : {}".format(e))
+        raise Exception("Terjadi kesalahan")
         # return redirect("absensi",sid=)
-        return e
     finally:
-        if conn:
-            conn.disconnect()
         return dt
 
 @login_required
@@ -865,18 +858,15 @@ def pabsen(req):
                      )
         for m in mesin_db.objects.using(req.session["ccabang"]).filter(status='Active'):
             ress = pools.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
-            # print(ress,"SDS")
             # time.sleep(1)
             dmesin.append(ress)
         msn = [mesin.wait() for mesin in dmesin]
-        # print(dmesin)
         datas = [dt for dt in [dataMesin.get() for dataMesin in dmesin] if len(dt) > 0] 
         dmesin = []
         for dm in datas:
             for d in dm:    
                 dmesin.append(d)
     except Exception as err:
-        print(err)
         messages.error(req,"Terjadi kesalahan pada mesin finger. Silahkan coba lagi")
         return redirect("absensi",sid=sid)
 
@@ -888,9 +878,6 @@ def pabsen(req):
     #     "punch":0,
     #     "mesin":"FS"
     # })
-    with open(r"static/data.json","r") as f:
-        att = f.read()
-    att = json.loads(att)
     att = sorted(dmesin, key=lambda i: i['jam_absen'])
 
     # att = sorted(att, key=lambda i: i['jam_absen'])
@@ -931,7 +918,6 @@ def pabsen(req):
     now = datetime.now()
     hari = now.strftime("%A")
     hari = nama_hari(hari)
-
 
     if req.session["ccabang"] != "tasik":
         prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,dt,status_lh,hari,req.session["ccabang"],ddt)
@@ -1803,7 +1789,6 @@ def detail_absensi(r,userid,tgl,sid):
         pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid,divisi__in=divisi)
         if not pgw.exists():
             messages.error(r,"Anda tidak memiliki akses")
-            print("OSKOKSDOKDOSKSODK")
             return redirect("pegawai",sid=dsid)
         else:
             pgw = pgw[0]
@@ -2355,12 +2340,10 @@ def edit_ijin(r):
     id_user = r.user.id
     aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
-    print(jenis_ijin,ket,id,sid)
     if jenis_ijin_db.objects.using(r.session["ccabang"]).filter(pk=int(jenis_ijin)).exists():
         if absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").filter(pk=int(id),pegawai__divisi__in=divisi).exists():
             ji = jenis_ijin_db.objects.using(r.session["ccabang"]).get(pk=int(jenis_ijin))
             ab = absensi_db.objects.using(r.session["ccabang"]).get(pk=int(id))
-            print(ab)
             ab.keterangan_ijin = f'{ji.jenis_ijin}-({ket})'
             ab.save(using=r.session["ccabang"])
             ijin_db(
