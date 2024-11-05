@@ -144,7 +144,7 @@ def rmesin(r,userid,id,uid):
 @login_required
 def tambah_data_pegawai(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        print(r.user.id)
+        
         user = akses_db.objects.filter(user_id=r.user.id)
         if not user.exists():
             return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
@@ -420,7 +420,7 @@ def add_data(r,id):
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids)
         pegawai_arsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
         # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
-        # print(userids)
+        # 
         for u in user:
             for pgw in pegawai:
                 if pgw.userid == u.user_id:
@@ -935,7 +935,7 @@ def tmesin(r):
             # messages.error(r,"Form tidak boleh kosong")
             return JsonResponse({"status":"error","msg":"Form tidak boleh kosong"},status=400)
         mesin = mesin_db.objects.using(r.session["ccabang"]).filter(Q(nama=nama) | Q(ipaddress=ip))
-        print(mesin)
+        
         if mesin.exists():
             # messages.error(r,"Mesin sudah ada" + mesin.nama)
             return JsonResponse({"status":"error","msg":"Mesin sudah ada"},status=400)

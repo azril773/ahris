@@ -136,7 +136,7 @@ def tlengkap_json(r,sid):
                     "pulang_b":ab.pulang_b if ab.pulang_b is not None else "-"
                 }
                 data.append(obj)
-            # print(data)
+            # 
         return JsonResponse({"status":'success',"msg":"berhasil mengambil data","data":data})
             
     
@@ -146,7 +146,7 @@ def tketerangan_json(r,sid):
     if r.headers["X-Requested_With"] == "XMLHttpRequest":
         tgl1 = r.POST.get("tgl1")
         tgl2 = r.POST.get("tgl2")
-        print(tgl2,tgl1 == '',"LIHAT")
+        
         if (tgl1 == "" and tgl2 == "") or (tgl1 is None and tgl2 is None):
             tgl2 = datetime.now()
             tgl1 = tgl2 - timedelta(days=1)
@@ -187,7 +187,7 @@ def tketerangan_json(r,sid):
                         "jam_masuk":ab.jam_masuk
                     }
                     data.append(obj)
-            # print(data)
+            # 
         return JsonResponse({"status":'success',"msg":"berhasil mengambil data","data":data})
             
             
@@ -198,7 +198,7 @@ def terlambat_json(r,sid):
     if r.headers["X-Requested_With"] == "XMLHttpRequest":
         tgl1 = r.POST.get("tgl1")
         tgl2 = r.POST.get("tgl2")
-        print(tgl2,tgl1 == '',"LIHAT")
+        
         if (tgl1 == "" and tgl2 == "") or (tgl1 is None and tgl2 is None):
             tgl2 = datetime.now()
             tgl1 = tgl2 - timedelta(days=1)
@@ -239,6 +239,6 @@ def terlambat_json(r,sid):
                         data.append(obj)
                     else:
                         continue
-            # print(data)
+            # 
         return JsonResponse({"status":'success',"msg":"berhasil mengambil data","data":data})
             

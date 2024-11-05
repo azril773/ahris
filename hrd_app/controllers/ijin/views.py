@@ -27,7 +27,7 @@ def ijin(r, sid):
         except:
             sid_lembur = 0
 
-        # print(sid_lembur.id)
+        # 
         pegawai = []
         pp = []
             

@@ -12,16 +12,16 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt)
             if a['userid'] in luserid:
                 
                 # simpan data raw jika belum ada di list ddr
-                if a not in ddr:                
-                    tambah_data_raw = data_raw_db(
-                        userid = a['userid'],
-                        jam_absen = a['jam_absen'],
-                        punch = a['punch'],
-                        mesin = a['mesin']             
-                    )                
-                    tambah_data_raw.save(using=cabang)
-                else:
-                    pass 
+                for d in ddr:
+                    if d["userid"] == a["userid"] and d["jam_absen"] == a["jam_absen"] == d["punch"] == a["punch"] and d["mesin"] == a["mesin"]:
+                        data_raw_db(
+                            userid = a['userid'],
+                            jam_absen = a['jam_absen'],
+                            punch = a['punch'],
+                            mesin = a['mesin']             
+                        ).save(using=cabang)
+                    else:
+                        pass 
                 
                 jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
                 pg = next((pgw for pgw in pegawai if pgw["userid"] == a["userid"]),None)
@@ -1928,13 +1928,12 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt):
                 
                 # simpan data raw jika belum ada di list ddr
                 if a not in ddr:                
-                    tambah_data_raw = data_raw_db(
+                    data_raw_db(
                         userid = a['userid'],
                         jam_absen = a['jam_absen'],
                         punch = a['punch'],
                         mesin = a['mesin']             
-                    )                
-                    tambah_data_raw.save(using=cabang)
+                    ).save(using=cabang)
                 else:
                     pass 
                 

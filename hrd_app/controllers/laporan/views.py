@@ -494,7 +494,7 @@ def laporan_json_periode_excel(r,sid,id,bulan,tahun):
         data = []
         sampai = datetime.strptime(f'{tahun}-{bulan}-26',"%Y-%m-%d").date()
         dari = sampai - timedelta(days=30)
-        print(dari,sampai)
+        
         kehadiran = 0
         tselisih = 0.0
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(id))
@@ -602,7 +602,7 @@ def laporan_json_periode_excel(r,sid,id,bulan,tahun):
                         bataskmb = f"{ab.kembali}"
                 else:
                     bataskmb = f'{ab.kembali}'
-            print(bataskmb)
+            
             if ab.kembali is not None and ab.kembali2 is not None:
                 kmb = f'{bataskmb} / {ab.kembali2}'
             elif ab.kembali is not None and ab.kembali2 is None:    
@@ -689,7 +689,7 @@ def laporan_json_periode_excel(r,sid,id,bulan,tahun):
             #     'ln': ab.libur_nasional
             # }
             # dat  a.append(absen)
-        print(obj)
+        
         tselisih = str(tselisih).split(".")
         slc = slice(0,2)
         df = pd.DataFrame(obj)
@@ -710,7 +710,7 @@ def print_laporan_pegawai(r):
     pgw = r.POST.getlist("pegawai[]")
     dr = r.POST.get("dari")
     sp = r.POST.get("sampai")
-    # print(tahun,bulan,pegawai)
+    # 
     try:
         iduser = r.user.id
         
@@ -855,7 +855,7 @@ def print_laporan_pegawai(r):
                     tgl_absen = True
                 else:
                     tgl_absen = False
-                print(kmb,"KEMBALI")
+                
                 absen = {
                     'id': ab.id,
                     'tgl': datetime.strftime(ab.tgl_absen,'%d-%m-%Y'),
@@ -900,7 +900,7 @@ def print_laporan_divisi(r):
     dvs = r.POST.getlist("divisi[]")
     dr = r.POST.get("dari")
     sp = r.POST.get("sampai")
-    # print(tahun,bulan,pegawai)
+    # 
     try:
         iduser = r.user.id
         
@@ -1046,7 +1046,7 @@ def print_laporan_divisi(r):
                         tgl_absen = True
                     else:
                         tgl_absen = False
-                    print(kmb,"KEMBALI")
+                    
                     absen = {
                         'id': ab.id,
                         'tgl': datetime.strftime(ab.tgl_absen,'%d-%m-%Y'),
@@ -1091,7 +1091,7 @@ def print_laporan_divisi_excel(r):
     dvs = r.POST.getlist("divisi[]")
     dr = r.POST.get("dari")
     sp = r.POST.get("sampai")
-    # print(tahun,bulan,pegawai)
+    # 
     obj = {
                     'pegawai':[],
                     'tgl':[],
@@ -1101,8 +1101,6 @@ def print_laporan_divisi_excel(r):
                     'nik': [],
                     'userid': [],
                     'bagian': [],
-                    "jam_masuk":[],
-                    "jam_pulang":[],
                     'masuk': [],
                     'keluar': [],
                     'kembali': [],
@@ -1246,32 +1244,30 @@ def print_laporan_divisi_excel(r):
                         tgl_absen = True
                     else:
                         tgl_absen = False
-                    print(kmb,"KEMBALI")
-                    obj["tgl"].append(datetime.strftime(ab.tgl_absen,'%d-%m-%Y'))
-                    obj["pegawai"].append(p.nama)
-                    obj["hari"].append(hari_ini)
-                    obj["tgl_absen"].append(ab.tgl_absen)
-                    obj["nama"].append(ab.pegawai.nama)
-                    obj["nik"].append(ab.pegawai.nik)
-                    obj["userid"].append(ab.pegawai.userid)
-                    obj["bagian"].append(bagian)
-                    obj["jam_masuk"].append(ab.jam_masuk)
-                    obj["jam_pulang"].append(ab.jam_pulang)
-                    obj["masuk"].append(msk)
-                    obj["keluar"].append(ist)
-                    obj["kembali"].append(kmb)
-                    obj["pulang"].append(plg)
-                    obj["masuk_b"].append(msk_b)
-                    obj["keluar_b"].append(ist_b)
-                    obj["kembali_b"].append(kmb_b)
-                    obj["pulang_b"].append(plg_b)
-                    obj["total_jam"].append(ab.total_jam_kerja)
-                    obj["tj"].append(ab.total_jam_kerja)
-                    obj["ket"].append(sket)
-                    obj["sln"].append(sln)
-                    obj["kehadiran"].append(kehadiran)
-                    obj["ln"].append(ab.libur_nasional)
-        print(obj)
+                    if msk != "-" or plg != "-" or kmb != "-" or ist != "-" or msk_b != "-" or plg_b != "-" or kmb_b != "-" or ist_b != "-":
+                        obj["tgl"].append(datetime.strftime(ab.tgl_absen,'%d-%m-%Y'))
+                        obj["pegawai"].append(p.nama)
+                        obj["hari"].append(hari_ini)
+                        obj["tgl_absen"].append(ab.tgl_absen)
+                        obj["nama"].append(ab.pegawai.nama)
+                        obj["nik"].append(ab.pegawai.nik)
+                        obj["userid"].append(ab.pegawai.userid)
+                        obj["bagian"].append(bagian)
+                        obj["masuk"].append(msk)
+                        obj["keluar"].append(ist)
+                        obj["kembali"].append(kmb)
+                        obj["pulang"].append(plg)
+                        obj["masuk_b"].append(msk_b)
+                        obj["keluar_b"].append(ist_b)
+                        obj["kembali_b"].append(kmb_b)
+                        obj["pulang_b"].append(plg_b)
+                        obj["total_jam"].append(ab.total_jam_kerja)
+                        obj["tj"].append(ab.total_jam_kerja)
+                        obj["ket"].append(sket)
+                        obj["sln"].append(sln)
+                        obj["kehadiran"].append(kehadiran)
+                        obj["ln"].append(ab.libur_nasional)
+        
         tselisih = str(tselisih).split(".")
         slc = slice(0,2)
         df = pd.DataFrame(obj)

@@ -222,7 +222,7 @@ def akses_divisi(r):
                         messages.error(r,"User tidak ada")
                     else:
                         user = user[0]
-                        print(user)
+                        
                         akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=user.pk).delete()
                         if len(result) > 0:
                             divisir = divisi_db.objects.using(r.session["ccabang"]).all()
@@ -272,7 +272,7 @@ def akses_level(r):
                     pegawai_id = aksesdb[0].pegawai_id
                     sid_id = aksesdb[0].sid_id
                     aksesdb.delete()
-                    print(level)
+                    
                     akses_db(
                         user_id=userid,
                         akses=level[0],
@@ -300,7 +300,7 @@ def akses_cabang(r):
         akses = dakses.akses
         dsid = dakses.sid_id
         if r.user.is_staff:
-            print("OK")
+            
             userid = r.POST.get("userc")
             cabang = r.POST.getlist("cabang[]")
             # nama_depan = r.POST.get("nama_depan")
@@ -312,7 +312,7 @@ def akses_cabang(r):
                         return redirect("registrasi")
                     else:
                         result = [c for c in cabang if re.match("(?i)all",c)]
-                        print(result)
+                        
                         akses_cabang_db.objects.filter(user_id=int(user[0].pk)).delete()
                         if len(result) > 0:
                             cabangs = ["tasik","sumedang","cirebon","garut","cihideung"]
