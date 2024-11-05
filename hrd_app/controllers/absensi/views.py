@@ -1076,7 +1076,7 @@ def pabsen(req):
                     # jika tidak ada
                     else:
                         
-                        if next((True for o in opg if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                             pass
                         # jika tidak
                         else:

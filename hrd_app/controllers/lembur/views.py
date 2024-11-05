@@ -1994,7 +1994,7 @@ def hstatus_pegawai_lembur(r):
         histori_hapus_db(
             delete_by = nama_user,
             delete_item = f'hapus status pegawai lembur : {get.status_pegawai.status}'
-        )
+        ).save(using=r.session["ccabang"])
         status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
         return JsonResponse({'status':'ok'},safe=False,status=200)
     except:
@@ -2082,7 +2082,7 @@ def hstatus_pegawai_libur_nasional(r):
         histori_hapus_db(
             delete_by = nama_user,
             delete_item = f'hapus status pegawai libur nasional : {get.status.status}'
-        )
+        ).save(using=r.session["ccabang"])
         list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
         return JsonResponse({'status':'ok'},safe=False,status=200)
     except:

@@ -71,7 +71,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt)
                                 
                                 
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                        if a["punch"] == 0 and jam_absen.hour > 4 and jam_absen.hour < 18 :
+                        if a["punch"] == 0 and jam_absen.hour >= 4 and jam_absen.hour < 18 :
                             if ab.masuk is not None:
                                 if ab.masuk.hour > 18:
                                     ab.masuk_b = jam_absen.time()
@@ -1927,15 +1927,16 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt):
             if a['userid'] in luserid:
                 
                 # simpan data raw jika belum ada di list ddr
-                if a not in ddr:                
-                    data_raw_db(
-                        userid = a['userid'],
-                        jam_absen = a['jam_absen'],
-                        punch = a['punch'],
-                        mesin = a['mesin']             
-                    ).save(using=cabang)
-                else:
-                    pass 
+                for d in ddr:
+                    if d["userid"] == a["userid"] and d["jam_absen"] == a["jam_absen"] == d["punch"] == a["punch"] and d["mesin"] == a["mesin"]:
+                        data_raw_db(
+                            userid = a['userid'],
+                            jam_absen = a['jam_absen'],
+                            punch = a['punch'],
+                            mesin = a['mesin']             
+                        ).save(using=cabang)
+                    else:
+                        pass 
                 
                 jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
                 pg = next((pgw for pgw in pegawai if pgw["userid"] == a["userid"]),None)
@@ -1985,7 +1986,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt):
                                 
                                 
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                        if a["punch"] == 0 and jam_absen.hour > 4 and jam_absen.hour < 18 :
+                        if a["punch"] == 0 and jam_absen.hour >= 4 and jam_absen.hour < 18 :
                             try:
                                 ab2 = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai__userid=a["userid"])
                                 if ab.masuk is not None:
@@ -2507,14 +2508,14 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt):
                         pass
                     
     for b in dt:
-        if b not in ddt:                
-            tambah_data_trans = data_trans_db(
-                userid = b['userid'],
-                jam_absen = b['jam_absen'],
-                punch = b['punch'],
-                mesin = b['mesin'],
-                keterangan = b['ket']             
-            )                
-            tambah_data_trans.save(using=cabang)
-        else:
-            pass 
+        for dts in ddt:
+            if dts["userid"] == b["userid"] and dts["jam_absen"] == b["jam_absen"] and dts["punch"] == b["punch"] and dts["mesin"] == b["mesin"] and dts["ket"] == b["ket"]:
+                data_trans_db(
+                    userid = b['userid'],
+                    jam_absen = b['jam_absen'],
+                    punch = b['punch'],
+                    mesin = b['mesin'],
+                    keterangan = b['ket']             
+                ).save(using=cabang)
+            else:
+                pass 

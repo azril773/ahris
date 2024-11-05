@@ -507,8 +507,6 @@ def laporan_json_periode_excel(r,sid,id,bulan,tahun):
             'nik': [],
             'userid': [],
             'bagian': [],
-            "jam_masuk":[],
-            "jam_pulang":[],
             'masuk': [],
             'keluar': [],
             'kembali': [],
@@ -639,29 +637,28 @@ def laporan_json_periode_excel(r,sid,id,bulan,tahun):
                 sln = 1
             else:
                 sln = 0
-            obj["tgl"].append(datetime.strftime(ab.tgl_absen,'%d-%m-%Y'))
-            obj["hari"].append(hari_ini)
-            obj["tgl_absen"].append(ab.tgl_absen)
-            obj["nama"].append(ab.pegawai.nama)
-            obj["nik"].append(ab.pegawai.nik)
-            obj["userid"].append(ab.pegawai.userid)
-            obj["bagian"].append(bagian)
-            obj["jam_masuk"].append(ab.jam_masuk)
-            obj["jam_pulang"].append(ab.jam_pulang)
-            obj["masuk"].append(msk)
-            obj["keluar"].append(ist)
-            obj["kembali"].append(kmb)
-            obj["pulang"].append(plg)
-            obj["masuk_b"].append(msk_b)
-            obj["keluar_b"].append(ist_b)
-            obj["kembali_b"].append(kmb_b)
-            obj["pulang_b"].append(plg_b)
-            obj["total_jam"].append(ab.total_jam_kerja)
-            obj["tj"].append(ab.total_jam_kerja)
-            obj["ket"].append(sket)
-            obj["sln"].append(sln)
-            obj["kehadiran"].append(kehadiran)
-            obj["ln"].append(ab.libur_nasional)
+            if msk != "-" or plg != "-" or kmb != "-" or ist != "-" or msk_b != "-" or plg_b != "-" or kmb_b != "-" or ist_b != "-":
+                obj["tgl"].append(datetime.strftime(ab.tgl_absen,'%d-%m-%Y'))
+                obj["hari"].append(hari_ini)
+                obj["tgl_absen"].append(ab.tgl_absen)
+                obj["nama"].append(ab.pegawai.nama)
+                obj["nik"].append(ab.pegawai.nik)
+                obj["userid"].append(ab.pegawai.userid)
+                obj["bagian"].append(bagian)
+                obj["masuk"].append(msk)
+                obj["keluar"].append(ist)
+                obj["kembali"].append(kmb)
+                obj["pulang"].append(plg)
+                obj["masuk_b"].append(msk_b)
+                obj["keluar_b"].append(ist_b)
+                obj["kembali_b"].append(kmb_b)
+                obj["pulang_b"].append(plg_b)
+                obj["total_jam"].append(ab.total_jam_kerja)
+                obj["tj"].append(ab.total_jam_kerja)
+                obj["ket"].append(sket)
+                obj["sln"].append(sln)
+                obj["kehadiran"].append(kehadiran)
+                obj["ln"].append(ab.libur_nasional)
             # absen = {
             #     'id': ab.id,
             #     'tgl': ,
