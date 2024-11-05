@@ -1386,16 +1386,21 @@ def pabsen(req):
             if a.pegawai_id == g['idp']:
                 if g['ke_tgl'] == ab.tgl_absen:
                     # jika ada geser off dan dia tidak masuk
-                    if ab.masuk is None and ab.pulang is None and ab.masuk_b is None and ab.pulang_b is None:
+                    if (ab.masuk is None and ab.pulang is None) or (ab.masuk_b is None and ab.pulang_b is None):
                         drt = datetime.strftime(g['dari_tgl'], '%d-%m-%Y')
                         ab.keterangan_absensi = f'Geser OFF-({drt})' 
                         ab.save(using=req.session["ccabang"])
                     # jika ada geser off dan dia masuk
                     else:
                         geseroff_db.objects.using(req.session["ccabang"]).get(id=int(g['id'])).delete()    
+                elif g["dari_tgl"] == ab.tgl_absen:
+                    if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
+                        ab.keterangan_absensi = ""
+                        ab.save(using=req.session["ccabang"])
+                    else:
+                        pass
                 else:
                     pass
-        
         # opg
         for o in opg:
             if a.pegawai_id == o['idp']:
