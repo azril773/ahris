@@ -61,7 +61,7 @@ def beranda(request):
         dsid = dakses.sid_id
         
         today = date.today()
-        
+        print("OKK")
         data = {
             'akses' : akses,
             'today' : today,
