@@ -342,8 +342,8 @@
                 $('#pegawai').val('').trigger("change");                   
                       
             },
-            error: function (error) {
-                alert(error.responseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 
@@ -371,8 +371,8 @@
                 $("#batalForm")[0].reset();       
                       
             },
-            error: function (error) {
-                alert(error.responseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 

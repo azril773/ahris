@@ -398,8 +398,8 @@
                 pegawai[0].selectize.clear()                   
                       
             },
-            error: function (error) {
-                alert(error.ResponseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 
@@ -427,8 +427,7 @@
                 $("#batalForm")[0].reset();       
                       
             },
-            error: function (error) {
-                console.log(error)
+            error: function (err) {
                 alert(err.responseJSON.msg)
             }
         });

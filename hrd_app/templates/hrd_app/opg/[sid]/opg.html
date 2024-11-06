@@ -399,8 +399,8 @@
                 $('#pegawai').val('').trigger("change");                   
                       
             },
-            error: function (error) {
-                alert(error.ResponseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 
@@ -442,9 +442,8 @@
                 $("#pakaiForm")[0].reset();             
                       
             },
-            error: function (error) {
-                console.log(error)
-                alert(error.responseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 
@@ -476,8 +475,8 @@
                 $("#batalForm")[0].reset();             
                       
             },
-            error: function (error) {
-                alert(error.ResponseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 
@@ -509,8 +508,8 @@
                 $("#hapusForm")[0].reset();             
                       
             },
-            error: function (error) {
-                alert(error.ResponseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 

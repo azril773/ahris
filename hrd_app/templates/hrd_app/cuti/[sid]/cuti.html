@@ -349,9 +349,8 @@
                 pegawai[0].selectize.clear();                
                       
             },
-            error: function (error) {
-                console.log(error)
-                alert(error.responseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 
@@ -386,8 +385,8 @@
                 $("#editForm")[0].reset();                   
                       
             },
-            error: function (error) {
-                alert(error.ResponseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 
@@ -420,8 +419,8 @@
                 $("#resetForm")[0].reset();                   
                       
             },
-            error: function (error) {
-                alert(error.ResponseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 
@@ -453,8 +452,8 @@
                 $("#resetAllForm")[0].reset();                   
                       
             },
-            error: function (error) {
-                alert(error.ResponseJSON.msg)
+            error: function (err) {
+                alert(err.responseJSON.msg)
             }
         });
 
