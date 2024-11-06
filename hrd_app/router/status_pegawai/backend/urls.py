@@ -25,4 +25,10 @@ urlpatterns = [
     path('tstatus_pegawai_opg', views.tstatus_pegawai_opg, name='tspgopg'),
     path('hstatus_pegawai_opg', views.hstatus_pegawai_opg, name='hspgopg'),
     path('status_pegawai_opg_json', views.status_pegawai_opg_json, name='spgopgjson'),
+
+
+    path('estatus_pegawai_lh', views.estatus_pegawai_lh, name='espglh'),
+    path('tstatus_pegawai_lh', views.tstatus_pegawai_lh, name='tspglh'),
+    path('hstatus_pegawai_lh', views.hstatus_pegawai_lh, name='hspglh'),
+    path('status_pegawai_lh_json', views.status_pegawai_json_lh, name='spglhjson'),
 ]

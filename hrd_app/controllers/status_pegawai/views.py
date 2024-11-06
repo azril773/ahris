@@ -111,3 +111,91 @@ def hapus_status_pegawai(r):
             status = 'ok'
         
         return JsonResponse({"status": status})
+    
+
+# ++++++++++++++
+@login_required
+def status_pegawai_lh(r):
+    iduser = r.user.id
+        
+    if akses_db.objects.filter(user_id=iduser).exists():
+        
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses
+        dsid = dakses.sid_id
+        status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
+        data = {       
+            'dsid': dsid,
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
+            "status":status_pegawai,
+            'modul_aktif' : 'Status Pegawai Lintas Hari'     
+        }
+        
+        return render(r,'hrd_app/status_pegawai/status_pegawai_lintas_hari.html', data)
+        
+    else:    
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+
+
+@login_required
+def status_pegawai_json_lh(r):
+        
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        
+        data = []
+        print(status_pegawai_lintas_hari_db.objects.all())
+        for i in status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all().order_by('id'):
+            
+            sp = {
+                'pk':i.id,
+                'status':i.status_pegawai.status,
+            }
+            data.append(sp)
+        print(data)   
+        return JsonResponse({"data": data})
+
+@login_required
+def tstatus_pegawai_lh(r):
+    status = r.POST.get("status")
+    
+    if status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).filter(status_pegawai_id=status).exists():
+        return JsonResponse({'status':'duplikat'},safe=False,status=400)
+    else:
+        status_pegawai_lintas_hari_db(status_pegawai_id=int(status)).save(using=r.session["ccabang"])
+        return JsonResponse({'status':'berhasil'},safe=False,status=201)
+
+
+@login_required
+def estatus_pegawai_lh(r):
+    status = r.POST.get("status")
+    id = r.POST.get('id')
+
+    try:
+        get = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).get(pk=int(id))
+        status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).filter(pk=int(id)).update(status_pegawai_id=int(status))
+        return JsonResponse({'status':'ok'},safe=False,status=200)
+    except Exception as err:
+        
+        return JsonResponse({"status":"gagal update"},safe=False,status=400)
+
+@login_required
+def hstatus_pegawai_lh(r):
+    id = r.POST.get('id')
+    nama_user = r.user.username
+    print(id)
+
+    try:
+        get = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).get(pk=int(id))
+        print(get)
+        histori_hapus_db(
+            delete_by = nama_user,
+            delete_item = f'hapus status pegawai libur nasional : {get.status_pegawai.status}'
+        ).save(using=r.session["ccabang"])
+        status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
+        return JsonResponse({'status':'ok'},safe=False,status=200)
+    except:
+        return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
+
