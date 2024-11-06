@@ -271,8 +271,10 @@ def tambah_opg(r):
     dpegawai = r.POST.get('pegawai')
     
     tgl = datetime.strptime(dtgl,'%d-%m-%Y').date()   
-    
-    pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(dpegawai))  
+    try:
+        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(dpegawai))  
+    except:
+        return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
     off = pg.hari_off.hari
     
     if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur=tgl).exists():
@@ -343,12 +345,17 @@ def pakai_opg(r):
     dtgl = r.POST.get('ptgl')
     
     diambil_tgl = datetime.strptime(dtgl,'%d-%m-%Y').date()
-    
-    opg = opg_db.objects.using(r.session["ccabang"]).get(id=int(idopg))
+    try:
+        opg = opg_db.objects.using(r.session["ccabang"]).get(id=int(idopg))
+    except:
+        return JsonResponse({"status":"error","msg":"Opg tidak ada"},status=400)
     idp = opg.pegawai_id
     opg_tgl = datetime.strftime(opg.opg_tgl,'%d-%m-%Y')
     
-    pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))  
+    try:
+        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))  
+    except:
+        return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
     off = pg.hari_off.hari
     day = diambil_tgl.strftime("%A")
     nh = nama_hari(day) 
@@ -381,8 +388,8 @@ def pakai_opg(r):
     else:
         if diambil_tgl < datetime.strptime(opg_tgl,"%d-%m-%Y").date():
             return JsonResponse({"status":"error","msg":"'diambil tanggal' harus lebih besar dari tanggal opg. Silahkan gunakan geser off"},status=400)
+        opg.status = 0
         opg.diambil_tgl = diambil_tgl
-        opg.status = 1
         opg.edit_by = nama_user
         opg.save(using=r.session["ccabang"])
         status = 'ok'
@@ -395,9 +402,10 @@ def batal_opg(r):
     nama_user = r.user.username
     
     idopg = r.POST.get('id_batal')
-    
-    opg = opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(id=int(idopg))
-    
+    try:
+        opg = opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(id=int(idopg))
+    except:
+        return JsonResponse({"status":"error","msg":"Opg tidak ada"},status=400)
     idp = opg.pegawai_id
     tgl = opg.diambil_tgl
     
@@ -421,15 +429,20 @@ def hapus_opg(r):
     nama_user = r.user.username
     
     idopg = r.POST.get('id_hapus')
-    
-    opg = opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(id=int(idopg))
+    try:
+        opg = opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(id=int(idopg))
+    except:
+        return JsonResponse({"status":'error',"msg":"Opg tidak ada"},status=400)
     idp = opg.pegawai_id
     nama_pegawai = opg.pegawai.nama
     tgl_ambil = opg.diambil_tgl
     tgl_opg = opg.opg_tgl
     
     if opg.status == 1:
-        ab = absensi_db.objects.using(r.session["ccabang"]).get(pegawai_id=int(idp), tgl_absen=tgl_ambil)
+        try:
+            ab = absensi_db.objects.using(r.session["ccabang"]).get(pegawai_id=int(idp), tgl_absen=tgl_ambil)
+        except:
+            return JsonResponse({"status":'error',"msg":"Tidak ada absensi"},status=400)
         ab.keterangan_absensi = None
         ab.save(using=r.session["ccabang"])       
     else:

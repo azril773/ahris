@@ -429,7 +429,7 @@
             },
             error: function (error) {
                 console.log(error)
-                alert('Terjadi kesalahan sistem, hubungi IT.')
+                alert(err.responseJSON.msg)
             }
         });
 

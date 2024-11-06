@@ -300,7 +300,7 @@ def tambah_ijin(r):
     try:
        ij = jenis_ijin_db.objects.using(r.session["ccabang"]).get(id=int(dijin))
     except: 
-        return JsonResponse({"status":"error"})
+        return JsonResponse({"status":"error","msg":"Jenis ijin tidak ada"},status=400)
     ltgl = dtgl.split(', ')
     for t in ltgl:
         tgl = datetime.strptime(t,'%d-%m-%Y')        
@@ -335,7 +335,10 @@ def batal_ijin(r):
 
     id_ijin = r.POST.get('id')
     
-    ij = ijin_db.objects.using(r.session["ccabang"]).select_related('pegawai','ijin').get(id=int(id_ijin))
+    try:
+        ij = ijin_db.objects.using(r.session["ccabang"]).select_related('pegawai','ijin').get(id=int(id_ijin))
+    except Exception as e:
+        return JsonResponse({"status":"error","msg":"Ijin tidak ada"},status=400)
     tgl = ij.tgl_ijin
     idp = ij.pegawai_id
     nama_pegawai = ij.pegawai.nama
@@ -459,7 +462,7 @@ def tcuti_melahirkan(r):
     sampai = datetime.strptime(sp,"%d-%m-%Y").date()
     data = []
     if ijin_db.objects.using(r.session["ccabang"]).filter(tgl_ijin__range=(dari,sampai),pegawai_id=pgw.pk,ijin__jenis_ijin=r'CM$').exists():
-        return JsonResponse({"status":400,"msg":"Data ijin sudah ada","data":[]},status=400)
+        return JsonResponse({"status":400,"msg":"Cuti melahirkan sudah ada","data":[]},status=400)
     ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).filter(jenis_ijin__iregex=r"CM")
     if not ijin.exists():
         return JsonResponse({"status":400,"msg":"Jenis ijin tidak ada","data":[]},status=400)

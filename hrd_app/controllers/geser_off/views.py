@@ -266,8 +266,10 @@ def tambah_geseroff(r):
     ke = datetime.strptime(dtgl2,'%d-%m-%Y').date()   
     
     fdari = datetime.strftime(dari,'%d-%m-%Y')  
-    
-    pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(dpegawai))  
+    try:
+        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(dpegawai))  
+    except:
+        return JsonResponse({"status":"error","msg":"Data pegawai tidak ada"},status=400)
     off = pg.hari_off.hari
     if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur=dari).exists():
         ln = libur_nasional_db.objects.using(r.session["ccabang"]).get(tgl_libur=dari)
@@ -310,7 +312,7 @@ def tambah_geseroff(r):
                             tambahgf.save(using=r.session["ccabang"])
                             
                             ab2.keterangan_absensi = f"Geser OFF-({fdari})"
-                            ab.keterangan_absensi = f"Geser OFF-({fdari})"
+                            ab.keterangan_absensi = f"-"
                             ab.save(using=r.session["ccabang"])
                             ab2.save(using=r.session["ccabang"])
                             
@@ -329,7 +331,7 @@ def tambah_geseroff(r):
                                     tambahgf.save(using=r.session["ccabang"])
                                     
                                     ab2.keterangan_absensi = f"Geser OFF-({fdari})"
-                                    ab.keterangan_absensi = f"Geser OFF-({fdari})"
+                                    ab.keterangan_absensi = f"-"
                                     ab.save(using=r.session["ccabang"])
                                     ab2.save(using=r.session["ccabang"])
                                     
@@ -414,9 +416,10 @@ def batal_geseroff(r):
     nama_user = r.user.username
 
     id_batal = r.POST.get('id_batal')
-    
-    gf = geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(id=int(id_batal))
-    
+    try:
+        gf = geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(id=int(id_batal))
+    except:
+        return JsonResponse({"status":"error","msg":"Geser off tidak ada"},status=400)
     ke_tgl = gf.ke_tgl
     dari_tgl = gf.dari_tgl
     idp = gf.pegawai_id
@@ -432,20 +435,27 @@ def batal_geseroff(r):
     
 
     ab = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_absen=ke_tgl)
+    ab_dari = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_absen=dari_tgl)
     if ab.exists():
         ab[0].keterangan_absensi = None
         ab[0].save(using=r.session["ccabang"])
-        if opg_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), opg_tgl=dari_tgl).exists():
-            pass
+    if ab_dari.exists():
+        if (ab_dari[0].masuk is not None and ab_dari[0].pulang is not None) or (ab_dari[0].masuk_b is not None and ab_dari[0].pulang_b is not None):
+            if opg_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), opg_tgl=dari_tgl).exists():
+                pass
+            else:
+                tambah_opg = opg_db(
+                    pegawai_id = int(idp),
+                    opg_tgl = dari_tgl,  
+                    keterangan = kopg,          
+                    add_by = 'Program',
+                    edit_by = 'Program'
+                )
+                tambah_opg.save(using=r.session["ccabang"])
         else:
-            tambah_opg = opg_db(
-                pegawai_id = int(idp),
-                opg_tgl = dari_tgl,  
-                keterangan = kopg,          
-                add_by = 'Program',
-                edit_by = 'Program'
-            )
-            tambah_opg.save(using=r.session["ccabang"])
+            pass
+        ab_dari[0].keterangan_absensi = "OFF"
+        ab_dari[0].save(using=r.session["ccabang"])
     else:
         pass
        

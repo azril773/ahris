@@ -237,13 +237,17 @@ def tambah_cuti(r):
     
     ltgl = dtgl.split(', ')   
     ac = awal_cuti_db.objects.using(r.session["ccabang"]).last()
+    if ac is None:
+        return JsonResponse({"status":"error","msg":"Awal cuti tidak ada"})
     tac = ac.tgl
         
     for t in ltgl:
-        with transaction.atomic():
+        with transaction.atomic(using=r.session["ccabang"]):
             tgl = datetime.strptime(t,'%d-%m-%Y').date()
-            
-            pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
+            try:
+                pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
+            except:
+                return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
             sc = pg.sisa_cuti
             
             ct = cuti_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_cuti__gte=tac).aggregate(total=Count('id'))
@@ -289,7 +293,7 @@ def tambah_cuti(r):
                                     tcuti.save(using=r.session["ccabang"])
                                     sc = sc - 1
                                     if sc < 0:
-                                        transaction.set_rollback(True)
+                                        transaction.set_rollback(True,using=r.session["ccabang"])
                                         return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                     pg.sisa_cuti = sc
                                     pg.save(using=r.session["ccabang"])
@@ -322,7 +326,7 @@ def tambah_cuti(r):
                                                 )               
                                                 sc = sc - 1
                                                 if sc < 0:
-                                                    transaction.set_rollback(True)
+                                                    transaction.set_rollback(True,using=r.session["ccabang"])
                                                     return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                                 pg.sisa_cuti = sc
                                                 pg.save(using=r.session["ccabang"])
@@ -370,7 +374,7 @@ def tambah_cuti(r):
                                                 
                                                 sc = sc - 1
                                                 if sc < 0:
-                                                    transaction.set_rollback(True)
+                                                    transaction.set_rollback(True,using=r.session["ccabang"])
                                                     return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                                 pg.sisa_cuti = sc
                                                 pg.save(using=r.session["ccabang"])
@@ -417,7 +421,7 @@ def tambah_cuti(r):
                                                 
                                                 sc = sc - 1
                                                 if sc < 0:
-                                                    transaction.set_rollback(True)
+                                                    transaction.set_rollback(True,using=r.session["ccabang"])
                                                     return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                                 pg.sisa_cuti = sc
                                                 pg.save(using=r.session["ccabang"])
@@ -454,7 +458,7 @@ def tambah_cuti(r):
                                                 
                                                 sc = sc - 1
                                                 if sc < 0:
-                                                    transaction.set_rollback(True)
+                                                    transaction.set_rollback(True,using=r.session["ccabang"])
                                                     return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                                 pg.sisa_cuti = sc
                                                 pg.save(using=r.session["ccabang"])
@@ -477,7 +481,7 @@ def tambah_cuti(r):
                                 
                                 sc = sc - 1
                                 if sc < 0:
-                                    transaction.set_rollback(True)
+                                    transaction.set_rollback(True,using=r.session["ccabang"])
                                     return JsonResponse({"status":"error","msg":"Cuti sudah habis"},status=400)
                                 pg.sisa_cuti = sc
                                 pg.save(using=r.session["ccabang"])
@@ -495,13 +499,15 @@ def edit_sisa_cuti(r):
     idp = r.POST.get('idp')
     scuti = r.POST.get('scuti')
     modul = r.POST.get('modul')
+    try:
+        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
+    except:
+        return JsonResponse({"status":'error',"msg":"Pegawai tidak ada"},status=400)
     
     if modul == 'ecuti':
-        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
         pg.sisa_cuti = int(scuti)
         pg.save(using=r.session["ccabang"])
     elif modul == 'reset_cuti':
-        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
         pg.sisa_cuti = 12
         pg.save(using=r.session["ccabang"])   
     else:
@@ -533,13 +539,21 @@ def batal_cuti(r):
     nama_user = r.user.username
     
     idc = r.POST.get('idc')
-    
-    ct = cuti_db.objects.using(r.session["ccabang"]).get(id=int(idc))
+    try:
+        ct = cuti_db.objects.using(r.session["ccabang"]).get(id=int(idc))
+    except:
+        return JsonResponse({"status":"error","msg":"Cuti tidak ada"},status=400)
     tcuti = ct.tgl_cuti
     idp = ct.pegawai_id
     
-    pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=idp)
-    sc = pg.sisa_cuti
+    try:
+        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=idp)
+    except:
+        return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
+    if pg.sisa_cuti is not None:
+        sc = pg.sisa_cuti
+    else:
+        return JsonResponse({"status":"error","msg":"Cuti pegawai tidak ada"},status=400)
     
     pg.sisa_cuti = sc + 1
     pg.save(using=r.session["ccabang"]) 
