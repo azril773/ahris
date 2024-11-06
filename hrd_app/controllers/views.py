@@ -59,7 +59,7 @@ def beranda(request):
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses        
         dsid = dakses.sid_id
-        df = pd.read_csv("absensi.csv")
+        # df = pd.read_csv("absensi.csv")
         data = []
         userids = []
         for index, row in df.iterrows():
