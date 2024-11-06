@@ -1,0 +1,142 @@
+# DJANGO
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth import logout
+from django.contrib.auth.models import User
+from django.db import IntegrityError 
+from django.db.models import Q, Avg, Max, Min, Sum, Count, F 
+from django.http import HttpResponse, JsonResponse
+from datetime import date, datetime, timedelta
+from django.template.loader import get_template
+from django.contrib import messages 
+from json import dumps
+import requests
+# SUPPORT
+from openpyxl.styles import Alignment, Font
+from collections import namedtuple
+from openpyxl import Workbook
+import math
+import json
+import time
+import pandas as pd
+from decimal import *
+import re
+# PYZK / FINGER MACHINE
+from zk import ZK, const
+from struct import pack
+from zk import user as us
+import codecs  
+
+# MODEL / DATABASE
+from ..models import *
+from django.core.serializers import serialize # Create your views here.
+
+
+# Functions
+
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# Dispatch & Login
+@login_required
+def logindispatch(request):
+    request.POST.get('next')
+
+
+# Logout
+def user_logout(request):
+    request.session["ccabang"] = None
+    request.session["cabang"] = None
+    logout(request)
+    return redirect("login")
+        
+# Home
+@login_required
+def beranda(request):  
+    
+    iduser = request.user.id
+    
+    if akses_db.objects.filter(user_id=iduser).exists():
+        dakses = akses_db.objects.get(user_id=iduser)
+        akses = dakses.akses        
+        dsid = dakses.sid_id
+        
+        today = date.today()
+        print("OKK")
+        data = {
+            'akses' : akses,
+            'today' : today,
+            'dsid' : dsid,
+        }
+        
+        return redirect("absensi",sid=dsid)
+        
+    else:    
+        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        return redirect('login')
+
+
+@login_required
+def beranda_no_akses(request):    
+
+    messages.info(request, 'Data akses Anda belum di tentukan.')        
+    return redirect('beranda')
+
+
+
+
+@login_required
+def ganti_cabang(r):
+    cabang = r.POST.get("cabang")
+    if akses_cabang_db.objects.filter(cabang=cabang).exists():
+        r.session["ccabang"] = cabang
+        return JsonResponse({"status":"success","msg":"Berhasil mengganti cabang"},status=200)
+    else:
+        return JsonResponse({"status":"error","msg":"Gagal mengganti cabang"},status=401)
+
+# +++++++++++++++++++++++++++ PEGAWAI ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.pegawai.views import *
+
+# +++++++++++++++++++++++++++ ABSENSI ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.absensi.views import *
+
+# +++++++++++++++++++++++++++ IJIN ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.ijin.views import *
+
+# +++++++++++++++++++++++++++ CUTI ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.cuti.views import *
+
+# +++++++++++++++++++++++++++ JAM KERJA ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.jam_kerja.views import *
+
+# +++++++++++++++++++++++++++ COUNTER ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.counter.views import *
+
+# +++++++++++++++++++++++++++ DIVISI ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.divisi.views import *
+
+# +++++++++++++++++++++++++++ STATUS PEGAWAI ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.status_pegawai.views import *
+
+# +++++++++++++++++++++++++++ GESER OFF ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.geser_off.views import *
+
+# +++++++++++++++++++++++++++ LEMBUR ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.lembur.views import *
+
+# +++++++++++++++++++++++++++ LIBUR NASIONAL ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.libur_nasional.views import *
+
+# +++++++++++++++++++++++++++ OPG ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.opg.views import *
+
+# +++++++++++++++++++++++++++ LAPORAN ++++++++++++++++++++++++++++++++
+from hrd_app.controllers.laporan.views import *
+
+from hrd_app.controllers.broadcast.views import *
+
+from hrd_app.controllers.mesin.views import *
+
+
+from hrd_app.controllers.login.views import *
+
+from hrd_app.controllers.ypc.views import *
