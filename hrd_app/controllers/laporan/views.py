@@ -442,18 +442,23 @@ def laporan_json_periode(r,sid,id,dr,sp):
             
             if ab.keterangan_absensi is not None:
                 sket += f'{ab.keterangan_absensi}, '                 
+                print("pertama")
             if ab.keterangan_ijin is not None:
+                print("keduas")
                 sket += f'{ab.keterangan_ijin}, '
                 kijin = ''
             else:
                 if ab.masuk is not None and ab.jam_masuk is not None:
                     if ab.masuk > ab.jam_masuk:
+                        print("ketiga")
                         tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
                         trlmbt += 1
                         sket += f"Terlambat masuk tanpa ijin, "
             if ab.keterangan_lain is not None:
+                print("keempat")
                 sket += f'{ab.keterangan_lain}, '                    
             if ab.libur_nasional is not None:
+                print("kelima")
                 sket += f'{ab.libur_nasional}, '
                 sln = 1
             else:

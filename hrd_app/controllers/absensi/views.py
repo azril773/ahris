@@ -1381,7 +1381,7 @@ def pabsen(req):
                         geseroff_db.objects.using(req.session["ccabang"]).get(id=int(g['id'])).delete()    
                 elif g["dari_tgl"] == ab.tgl_absen:
                     if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-                        ab.keterangan_absensi = ""
+                        ab.keterangan_absensi = None
                         ab.save(using=req.session["ccabang"])
                     else:
                         pass

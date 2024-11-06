@@ -1905,17 +1905,17 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt)
                     else:
                         pass
     for b in dt:
-        if b not in ddt:                
-            tambah_data_trans = data_trans_db(
-                userid = b['userid'],
-                jam_absen = b['jam_absen'],
-                punch = b['punch'],
-                mesin = b['mesin'],
-                keterangan = b['ket']             
-            )                
-            tambah_data_trans.save(using=cabang)
-        else:
-            pass 
+        for dts in ddt:
+            if dts["userid"] == b["userid"] and dts["jam_absen"] == b["jam_absen"] and dts["punch"] == b["punch"] and dts["mesin"] == b["mesin"] and dts["ket"] == b["ket"]:
+                data_trans_db(
+                    userid = b['userid'],
+                    jam_absen = b['jam_absen'],
+                    punch = b['punch'],
+                    mesin = b['mesin'],
+                    keterangan = b['ket']             
+                ).save(using=cabang)
+            else:
+                pass  
 
 
 def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt):
