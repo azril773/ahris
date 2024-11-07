@@ -260,7 +260,10 @@ def tambah_cuti(r):
                 pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
             except:
                 return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
-            sc = pg.sisa_cuti
+            if pg.sisa_cuti is not None:
+                sc = pg.sisa_cuti
+            else:
+                return JsonResponse({"status":"error",'msg':"Pegawai tidak memiliki sisa cuti"},status=400)
             
             ct = cuti_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_cuti__gte=tac).aggregate(total=Count('id'))
             if ct["total"] > 0:

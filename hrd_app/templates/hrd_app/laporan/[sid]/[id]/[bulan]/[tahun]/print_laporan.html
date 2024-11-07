@@ -71,49 +71,8 @@
                     </div>
                 </div>
             </section>
-            <section id="body" class="w-full mb-10">
-                {% if lh > 0 %}
-                    <table class=" w-full mt-3" id="tabelku" style="width: 100%;">
-                        {% csrf_token %}
-                        <thead>
-                        <tr class="head">
-                            <th scope="col">Tanggal</th>
-                            <th scope="col">Masuk</th>
-                            <th scope="col">Klr. / Klr. 2</th>
-                            <th scope="col">Kmbl. / Kmbl. 2</th>
-                            <th scope="col">Pulang</th>
-                            <th scope="col">Total Jam</th>
-                            <th scope="col">Keterangan</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            
-                        </tbody>
-                    </table>
-                {% else %}
-                    <table class=" w-full mt-3" id="tabelku" style="width: 100%;">
-                        {% csrf_token %}
-                        <thead>
-                        <tr class="head">
-                            <th scope="col">Tanggal</th>
-                            <th scope="col">Masuk</th>
-                            <th scope="col">Klr. / Klr. 2</th>
-                            <th scope="col">Kmbl. / Kmbl. 2</th>
-                            <th scope="col">Pulang</th>
-                            <th scope="col">Masuk (B)</th>
-                            <th scope="col">Klr. / Klr. 2 (B)</th>
-                            <th scope="col">Kmbl. / Kmbl. 2 (B)</th>
-                            <th scope="col">Pulang (B)</th>
-                            <th scope="col">Total Jam</th>
-                            <th scope="col">Keterangan</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                            
-                        </tbody>
-                    </table>
-                
-                {% endif %}
+            {% csrf_token %}
+            <section id="tablejs" class="w-full mb-10">
             </section>
             {% comment %} 
                 <th>Tanggal</th>
@@ -151,6 +110,22 @@
                 console.log(e)
                 let str = `<tr class="body">`
                 if(e.lh > 0){
+                    $("#tablejs").append(`<table class=" w-full mt-3" id="tabelku" style="width: 100%;">
+                        <thead>
+                        <tr class="head">
+                            <th scope="col">Tanggal</th>
+                            <th scope="col">Masuk</th>
+                            <th scope="col">Klr. / Klr. 2</th>
+                            <th scope="col">Kmbl. / Kmbl. 2</th>
+                            <th scope="col">Pulang</th>
+                            <th scope="col">Total Jam</th>
+                            <th scope="col">Keterangan</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>`)
                     e.data.map((el) => {
                         str += `<td>${el.tgl}</td>`
                         str += `<td>${el.masuk}</td>`
@@ -183,6 +158,26 @@
                         str += `<tr class="body">`
                     })
                 }else{
+                    $("#tablejs").append(`<table class=" w-full mt-3" id="tabelku" style="width: 100%;">
+                        <thead>
+                        <tr class="head">
+                            <th scope="col">Tanggal</th>
+                            <th scope="col">Masuk</th>
+                            <th scope="col">Klr. / Klr. 2</th>
+                            <th scope="col">Kmbl. / Kmbl. 2</th>
+                            <th scope="col">Pulang</th>
+                            <th scope="col">Masuk (B)</th>
+                            <th scope="col">Klr. / Klr. 2 (B)</th>
+                            <th scope="col">Kmbl. / Kmbl. 2 (B)</th>
+                            <th scope="col">Pulang (B)</th>
+                            <th scope="col">Total Jam</th>
+                            <th scope="col">Keterangan</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                            
+                        </tbody>
+                    </table>`)
                     e.data.map((el) => {
                         str += `<td>${el.tgl}</td>`
                         str += `<td>${el.masuk}</td>`
