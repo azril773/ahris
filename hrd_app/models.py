@@ -442,6 +442,15 @@ class status_pegawai_lintas_hari_db(models.Model):
     class Meta:
         verbose_name = 'Status Pegawai yg Lintas Hari'
         verbose_name_plural = 'Status Pegawai yg Lintas Hari'
+class status_pegawai_payroll_db(models.Model):
+    status_pegawai = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE, null=True)    
+    
+    def __int__(self):
+        return self.status_pegawai
+    
+    class Meta:
+        verbose_name = 'Status Pegawai yg Payroll'
+        verbose_name_plural = 'Status Pegawai yg Payroll'
      
 # Akses
 # ==================================================================
