@@ -108,7 +108,7 @@ def tambah_kk_json(r):
 
 @login_required
 def edit_kk_json(r):
-        
+    print(r.headers["X-Requested-With"])
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         ekk = r.POST.get('ekk')
@@ -116,10 +116,11 @@ def edit_kk_json(r):
         try:
             if kelompok_kerja_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(ekk)),kelompok=new_kk).exists():
                 return JsonResponse({"status": "duplikat"})
-            
+            print(ekk,new_kk)
             kelompok_kerja_db.objects.using(r.session["ccabang"]).filter(pk=int(ekk)).update(kelompok=new_kk)
             return JsonResponse({"status": "ok"})
-        except: 
+        except Exception as e:
+            print(e) 
             return JsonResponse({"status": "gagal update",})
                                 
         

@@ -143,7 +143,7 @@ def laporan_json(r):
             obj = {
                 "id" : pgw.id,
                 "nik":pgw.nik,
-                "jk":pgw.gender,
+                "jk":pgw.gender[0] if pgw.gender != "" else "",
                 "nama": pgw.nama,
                 "divisi":pgw.divisi.divisi,
                 "off": off if off > 0 else "",
@@ -254,7 +254,7 @@ def laporan_json(r):
             obj = {
                 "id" : pgw.id,
                 "nik":pgw.nik,
-                "jk":pgw.gender[0],
+                "jk":pgw.gender[0] if pgw.gender != "" else "",
                 "nama": pgw.nama,
                 "divisi":pgw.divisi.divisi,
                 "off": off if off > 0 else "",
@@ -295,7 +295,8 @@ def print_laporan(r,sid,id,bulan,tahun):
         dsid = dakses.sid_id     
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).get(id=id)
         status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
-        
+        statuslh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
+        lh = len([lh for lh in statuslh if lh.status_pegawai.pk == pegawai.status.pk])
         ###
         try:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
@@ -318,6 +319,7 @@ def print_laporan(r,sid,id,bulan,tahun):
             "pegawai":pegawai,
             "id":id,
             "sp":sp,
+            "lh":lh,
             'sid': sid,
             'sil': sid_lembur,
             'jenis_ijin' : jenis_ijin,
@@ -344,6 +346,8 @@ def laporan_json_periode(r,sid,id,dr,sp):
         kehadiran = 0
         tselisih = 0.0
         trlmbt = 0
+        lhstatus = 0
+        lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
         for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=id).order_by('tgl_absen','pegawai__divisi__divisi'):
             if a.masuk is not None and a.pulang is not None:
                 kehadiran += 1
@@ -490,9 +494,13 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 'ln': ab.libur_nasional
             }
             data.append(absen)
+            if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
+                lhstatus = 1
+            else:
+                lhstatus = 0
         tselisih = str(tselisih).split(".")
         slc = slice(0,2)
-        return JsonResponse({"data": data,"kehadiran":kehadiran,"hari":hari_count,"tselisih":f"{tselisih[0]},{tselisih[1][slc]}","trlmbt":trlmbt })
+        return JsonResponse({"data": data,"kehadiran":kehadiran,"hari":hari_count,"tselisih":f"{tselisih[0]},{tselisih[1][slc]}","trlmbt":trlmbt,"lh":lhstatus })
     
 
 def laporan_json_periode_excel(r,sid,id,bulan,tahun):        
@@ -721,6 +729,8 @@ def print_laporan_pegawai(r):
             sid = dakses.pegawai.status.pk
             data = [] 
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pgw)
+        lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
+        print(lh)
         for p in pegawai:
             dari = datetime.strptime(str(dr),'%d-%m-%Y').date()
             sampai = datetime.strptime(str(sp),'%d-%m-%Y').date()
@@ -891,6 +901,10 @@ def print_laporan_pegawai(r):
             tselisih = str(tselisih).split(".")
             slc = slice(0,2)
             obj["selisih"] =f"{tselisih[0]},{tselisih[1][slc]}"
+            if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
+                obj["b"] = 1
+            else:
+                obj["b"] = 0
             data.append(obj)
     except Exception as e:
         messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))

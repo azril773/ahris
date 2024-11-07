@@ -26,7 +26,6 @@ from zk import ZK, const
 from struct import pack
 from zk import user as us
 import codecs  
-
 # MODEL / DATABASE
 from ..models import *
 from django.core.serializers import serialize # Create your views here.
@@ -140,65 +139,67 @@ from hrd_app.controllers.mesin.views import *
 from hrd_app.controllers.login.views import *
 
 from hrd_app.controllers.ypc.views import *
+
 # df = pd.read_csv("absensi.csv")
-#         data = []
-#         userids = []
-#         for index, row in df.iterrows():
-#             ka = None
-#             ki = None
-#             if str(row["keterangan"]) != "nan" or str(row["ubah_keterangan"]) != "nan":
-#                 # print(row)
-#                 if re.match("/(?i)(dispensasi)|(sakit)|(dinas)|(ijin)/",str(row["keterangan"])) is not None or re.match("/(?i)(dispensasi)|(sakit)|(dinas)|(ijin)/",str(row["ubah_keterangan"])) is not None:
-#                     if str(row["keterangan"]) == "nan":
-#                         ki = str(row["ubah_keterangan"])
-#                     elif str(row["ubah_keterangan"]) == "nan":
-#                         ki = str(row["keterangan"])
-#                     else:
-#                         ki = str(row["keterangan"])+str(row["ubah_keterangan"])
+#     data = []
+#     userids = []
+#     for index, row in df.iterrows():
+#         ka = None
+#         ki = None
+#         if str(row["keterangan"]) != "nan" or str(row["ubah_keterangan"]) != "nan":
+#             # print(row)
+#             regex = re.compile(r"(dispensasi)|(sakit)|(dinas)|(ijin)",re.IGNORECASE)
+#             if regex.match(str(row["keterangan"])) is not None or regex.match(str(row["ubah_keterangan"])) is not None:
+#                 if str(row["keterangan"]) == "nan":
+#                     ki = str(row["ubah_keterangan"])
+#                 elif str(row["ubah_keterangan"]) == "nan":
+#                     ki = str(row["keterangan"])
 #                 else:
-#                     if str(row["keterangan"]) == "nan":
-#                         ki = str(row["ubah_keterangan"])
-#                     elif str(row["ubah_keterangan"]) == "nan":
-#                         ki = str(row["keterangan"])
-#                     else:
-#                         ki = str(row["keterangan"])+str(row["ubah_keterangan"])
-#             obj = {
-#                 "userid":row["userid"],
-#                 "tgl_absen":row["tgl_absen"],
-#                 "masuk":str(row["masuk"]).split(" ")[-1] if str(row["masuk"]) != "nan" else None,
-#                 "istirahat":str(row["istirahat"]).split(" ")[-1] if str(row["istirahat"]) != "nan" else None,
-#                 "kembali":str(row["kembali"]).split(" ")[-1] if str(row["kembali"]) != "nan" else None,
-#                 "istirahat2":str(row["istirahat2"]).split(" ")[-1] if str(row["istirahat2"]) != "nan" else None,
-#                 "kembali2":str(row["kembali2"]).split(" ")[-1] if str(row["kembali2"]) != "nan" else None,
-#                 "keterangan_absensi":ka,
-#                 "keterangan_ijin":ki,
-#                 "total_jam_kerja":str(row["lama_kerja"]) if str(row["lama_kerja"]) != "nan" else None,
-#                 "pulang":str(row["pulang"]).split(" ")[-1] if str(row["pulang"]) != "nan" else None,
-#             }
-#             userids.append(row["userid"])
-#             data.append(obj)
-#         dr = sorted(data,key=lambda e: e["tgl_absen"])
-#         pegawai = pegawai_db.objects.using(request.session["ccabang"]).filter(userid__in=userids)
-#         # print(pegawai)
-#         absensi = absensi_db.objects.using(request.session["ccabang"]).all()
-#         for pgw in pegawai:
-#             for dt in dr:
-#                 if int(dt["userid"]) == int(pgw.userid):
-#                     cek = [ab for ab in absensi if ab.tgl_absen == dt["tgl_absen"]]
-#                     if len(cek) > 0:
-#                         continue
-#                     else:
-#                         absensi_db(
-#                             tgl_absen=dt["tgl_absen"],
-#                             masuk=dt["masuk"],
-#                             istirahat=dt["istirahat"],
-#                             kembali=dt["kembali"],
-#                             istirahat2=dt["istirahat2"],
-#                             kembali2=dt["kembali2"],
-#                             keterangan_absensi=dt["keterangan_absensi"],
-#                             keterangan_ijin=dt["keterangan_ijin"],
-#                             total_jam_kerja=dt["total_jam_kerja"],
-#                             pulang=dt["pulang"],
-#                             pegawai_id=pgw.pk
-#                         ).save(using=request.session["ccabang"])
-#                     # print(dt['userid'])
+#                     ki = str(row["keterangan"])+str(row["ubah_keterangan"])
+#             else:
+#                 if str(row["keterangan"]) == "nan":
+#                     ki = str(row["ubah_keterangan"])
+#                 elif str(row["ubah_keterangan"]) == "nan":
+#                     ki = str(row["keterangan"])
+#                 else:
+#                     ki = str(row["keterangan"])+str(row["ubah_keterangan"])
+#         obj = {
+#             "userid":row["userid"],
+#             "tgl_absen":row["tgl_absen"],
+#             "masuk":str(row["masuk"]).split(" ")[-1] if str(row["masuk"]) != "nan" else None,
+#             "istirahat":str(row["istirahat"]).split(" ")[-1] if str(row["istirahat"]) != "nan" else None,
+#             "kembali":str(row["kembali"]).split(" ")[-1] if str(row["kembali"]) != "nan" else None,
+#             "istirahat2":str(row["istirahat2"]).split(" ")[-1] if str(row["istirahat2"]) != "nan" else None,
+#             "kembali2":str(row["kembali2"]).split(" ")[-1] if str(row["kembali2"]) != "nan" else None,
+#             "keterangan_absensi":ka,
+#             "keterangan_ijin":ki,
+#             "total_jam_kerja":str(row["lama_kerja"]) if str(row["lama_kerja"]) != "nan" else None,
+#             "pulang":str(row["pulang"]).split(" ")[-1] if str(row["pulang"]) != "nan" else None,
+#         }
+#         userids.append(row["userid"])
+#         data.append(obj)
+#     dr = sorted(data,key=lambda e: e["tgl_absen"])
+#     pegawai = pegawai_db.objects.using(request.session["ccabang"]).filter(userid__in=userids)
+#     # print(pegawai)
+#     absensi = absensi_db.objects.using(request.session["ccabang"]).all()
+#     for pgw in pegawai:
+#         for dt in dr:
+#             if int(dt["userid"]) == int(pgw.userid):
+#                 cek = [ab for ab in absensi if ab.tgl_absen == dt["tgl_absen"]]
+#                 if len(cek) > 0:
+#                     continue
+#                 else:
+#                     absensi_db(
+#                         tgl_absen=dt["tgl_absen"],
+#                         masuk=dt["masuk"],
+#                         istirahat=dt["istirahat"],
+#                         kembali=dt["kembali"],
+#                         istirahat2=dt["istirahat2"],
+#                         kembali2=dt["kembali2"],
+#                         keterangan_absensi=dt["keterangan_absensi"],
+#                         keterangan_ijin=dt["keterangan_ijin"],
+#                         total_jam_kerja=dt["total_jam_kerja"],
+#                         pulang=dt["pulang"],
+#                         pegawai_id=pgw.pk
+#                     ).save(using=request.session["ccabang"])
+#                 # print(dt['userid'])

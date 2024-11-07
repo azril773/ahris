@@ -353,7 +353,7 @@
             create: false
         });
 
-        $('#ekk').selectize();
+        const selectekk = $('#ekk').selectize();
 
         const ejkkSelect = $('#ejkk').selectize();
 
@@ -433,7 +433,7 @@
                 
         /* Tambah kk*/
         $("#tambahkkForm").on('submit', e => {
-
+            e.preventDefault()
             const tkk = document.getElementById('tkk')
             const csrf = document.getElementsByName('csrfmiddlewaretoken')       
             
@@ -445,12 +445,14 @@
                     'tkk': tkk.value,
                 },
                 success: function (response) { 
-                    
+                    $("#tambahKK").modal("hide")
                     if (response.status == 'ok') { 
                         console.log(response.status)       
                     } else if(response.status == 'duplikat'){
                         alert('Duplikat Data, proses dibatalkan.')
                     } 
+                    $("#tkk").val("")
+                    window.location.reload()
                 },
                 error: function (error) {
                     alert('Terjadi kesalahan sistem, hubungi IT.')
@@ -460,7 +462,7 @@
         });
 
         $("#editkkForm").on('submit', e => {
-
+            e.preventDefault()
             const ekk = document.getElementById('ekk')
             const new_kk = document.getElementById('new_kk').value
             
@@ -473,12 +475,15 @@
                 },
                 headers:{"X-CSRFToken":token},
                 success: function (response) { 
-                    
+                    $("#editKK").modal("hide")
                     if (response.status == 'ok') { 
                         console.log(response.status)       
                     } else if(response.status == 'duplikat'){
                         alert('Duplikat Data, proses dibatalkan.')
                     } 
+                    selectekk[0].selectize.clear()
+                    $("#new_kk").val("")
+                    window.location.reload()
                 },
                 error: function (error) {
                     alert('Terjadi kesalahan sistem, hubungi IT.')

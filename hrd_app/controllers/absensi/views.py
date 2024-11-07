@@ -411,8 +411,8 @@ def absensi_json(r, dr, sp, sid):
         
         if int(sid) == 0:
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(pegawai__divisi__in=divisi,tgl_absen__range=(dari,sampai)).order_by('tgl_absen','pegawai__divisi__divisi'):
-                sket = " "
-                
+                sket = ""
+                print(a.keterangan_absensi,a.pegawai)
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
                 
@@ -548,6 +548,7 @@ def absensi_json(r, dr, sp, sid):
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(pegawai__divisi__in=divisi,tgl_absen__range=(dari,sampai), pegawai__status_id=sid).order_by('tgl_absen','pegawai__divisi__divisi'):
                             
                 sket = ""
+                print(a.keterangan_absensi,a.pegawai)
                 
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
@@ -1076,7 +1077,7 @@ def pabsen(req):
                     # jika tidak ada
                     else:
                         
-                        if next((True for o in opg if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                             pass
                         # jika tidak
                         else:
@@ -1110,6 +1111,10 @@ def pabsen(req):
                     pass
             else:
                 pass
+                
+            if str(a.pegawai.hari_off) == "On Off":
+                ab.keterangan_absensi = None
+                ab.save(using=req.session["ccabang"])
                     
         # jika tidak ada masuk dan pulang   
         else:
@@ -1166,18 +1171,23 @@ def pabsen(req):
                     pass    
             else:
                 # jika dia hari ini off
-                if str(a.pegawai.hari_off) == str(nh):
-                    ab.keterangan_absensi = 'OFF'
-                    ab.save(using=req.session['ccabang'])
-                elif str(a.pegawai.hari_off) == 'On Off':
-                    ab.keterangan_absensi = 'OFF'
-                    ab.save(using=req.session['ccabang'])    
-                            
-                if str(a.pegawai.hari_off2) == str(nh):
-                    ab.keterangan_absensi = 'OFF'
-                    ab.save(using=req.session['ccabang']) 
+                if (a.masuk is not None or a.pulang is not None) or (a.masuk_b is not None or a.pulang_b is not None):
+                    if str(a.pegawai.hari_off) == "On Off":
+                        ab.keterangan_absensi = None
+                        ab.save(using=req.session["ccabang"])
                 else:
-                    pass   
+                    if str(a.pegawai.hari_off) == str(nh):
+                        ab.keterangan_absensi = 'OFF'
+                        ab.save(using=req.session['ccabang'])
+                    elif str(a.pegawai.hari_off) == 'On Off':
+                        ab.keterangan_absensi = 'OFF'
+                        ab.save(using=req.session['ccabang'])    
+                                
+                    if str(a.pegawai.hari_off2) == str(nh):
+                        ab.keterangan_absensi = 'OFF'
+                        ab.save(using=req.session['ccabang']) 
+                    else:
+                        pass   
             # jika hari ini dia adalah off nya
         
         # libur nasional
