@@ -31,4 +31,10 @@ urlpatterns = [
     path('tstatus_pegawai_lh', views.tstatus_pegawai_lh, name='tspglh'),
     path('hstatus_pegawai_lh', views.hstatus_pegawai_lh, name='hspglh'),
     path('status_pegawai_lh_json', views.status_pegawai_json_lh, name='spglhjson'),
+
+
+    path('estatus_pegawai_payroll', views.estatus_pegawai_payroll, name='espgpayroll'),
+    path('tstatus_pegawai_payroll', views.tstatus_pegawai_payroll, name='tspgpayroll'),
+    path('hstatus_pegawai_payroll', views.hstatus_pegawai_payroll, name='hspgpayroll'),
+    path('status_pegawai_payroll_json', views.status_pegawai_json_payroll, name='spgpayrolljson'),
 ]

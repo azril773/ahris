@@ -346,7 +346,7 @@ def laporan_json_periode(r,sid,id,dr,sp):
         kehadiran = 0
         tselisih = 0.0
         trlmbt = 0
-        lhstatus = 0
+        lhstatus = 1
         lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
         for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=id).order_by('tgl_absen','pegawai__divisi__divisi'):
             if a.masuk is not None and a.pulang is not None:
@@ -446,23 +446,18 @@ def laporan_json_periode(r,sid,id,dr,sp):
             
             if ab.keterangan_absensi is not None:
                 sket += f'{ab.keterangan_absensi}, '                 
-                print("pertama")
             if ab.keterangan_ijin is not None:
-                print("keduas")
                 sket += f'{ab.keterangan_ijin}, '
                 kijin = ''
             else:
                 if ab.masuk is not None and ab.jam_masuk is not None:
                     if ab.masuk > ab.jam_masuk:
-                        print("ketiga")
                         tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
                         trlmbt += 1
                         sket += f"Terlambat masuk tanpa ijin, "
             if ab.keterangan_lain is not None:
-                print("keempat")
                 sket += f'{ab.keterangan_lain}, '                    
             if ab.libur_nasional is not None:
-                print("kelima")
                 sket += f'{ab.libur_nasional}, '
                 sln = 1
             else:
@@ -494,10 +489,15 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 'ln': ab.libur_nasional
             }
             data.append(absen)
-            if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
-                lhstatus = 1
-            else:
-                lhstatus = 0
+            print(a.masuk_b,a.pulang_b,a.istirahat2_b,a.istirahat_b,a.kembali_b,a.kembali2_b)
+            if lhstatus > 0:
+                if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
+                    lhstatus = 1
+                else:
+                    if a.masuk_b is not None or a.pulang_b is not None or a.istirahat_b is not None or a.kembali_b is not None or a.istirahat2_b is not None or a.kembali2_b is not None:
+                        lhstatus = 0
+                    else:
+                        lhstatus = 1
         tselisih = str(tselisih).split(".")
         slc = slice(0,2)
         return JsonResponse({"data": data,"kehadiran":kehadiran,"hari":hari_count,"tselisih":f"{tselisih[0]},{tselisih[1][slc]}","trlmbt":trlmbt,"lh":lhstatus })
@@ -730,7 +730,6 @@ def print_laporan_pegawai(r):
             data = [] 
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pgw)
         lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
-        print(lh)
         for p in pegawai:
             dari = datetime.strptime(str(dr),'%d-%m-%Y').date()
             sampai = datetime.strptime(str(sp),'%d-%m-%Y').date()
@@ -741,6 +740,7 @@ def print_laporan_pegawai(r):
                 "dari":dari,
                 "sampai":sampai,
                 "kehadiran":0,
+                "b":1,
                 "selisih":0,
                 "terlambat":0,
                 "absensi":[]
@@ -901,10 +901,14 @@ def print_laporan_pegawai(r):
             tselisih = str(tselisih).split(".")
             slc = slice(0,2)
             obj["selisih"] =f"{tselisih[0]},{tselisih[1][slc]}"
-            if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
-                obj["b"] = 1
-            else:
-                obj["b"] = 0
+            if obj["b"] > 0:
+                if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
+                    obj["b"] = 1
+                else:
+                    if a.masuk_b is not None or a.pulang_b is not None or a.istirahat_b is not None or a.kembali_b is not None or a.istirahat2_b is not None or a.kembali2_b is not None:
+                        obj["b"] = 0
+                    else:
+                        obj["b"] = 1
             data.append(obj)
     except Exception as e:
         messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))

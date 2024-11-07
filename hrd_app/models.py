@@ -452,6 +452,16 @@ class status_pegawai_payroll_db(models.Model):
         verbose_name = 'Status Pegawai yg Payroll'
         verbose_name_plural = 'Status Pegawai yg Payroll'
      
+class status_pegawai_payroll_db(models.Model):
+    status_pegawai = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE, null=True)    
+    
+    def __int__(self):
+        return self.status_pegawai
+    
+    class Meta:
+        verbose_name = 'Status Pegawai yg Payroll'
+        verbose_name_plural = 'Status Pegawai yg Payroll'
+     
 # Akses
 # ==================================================================
 
@@ -806,6 +816,8 @@ class akses_cabang_db(models.Model):
     class Meta:
         verbose_name = 'Akses Cabang'
         verbose_name_plural = 'Akses Cabang'   
+
+
 
 
 
