@@ -3,7 +3,7 @@ from django.db import connection
 from multiprocessing import Pool
 from ..models import *
 from datetime import date, datetime, timedelta
-def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt):
+def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
     dt = []
     if not att:
         pass
@@ -12,17 +12,18 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt)
             if a['userid'] in luserid:
                 
                 # simpan data raw jika belum ada di list ddr
-                for d in ddr:
-                    if d["userid"] == a["userid"] and d["jam_absen"] == a["jam_absen"] == d["punch"] == a["punch"] and d["mesin"] == a["mesin"]:
-                        data_raw_db(
-                            userid = a['userid'],
-                            jam_absen = a['jam_absen'],
-                            punch = a['punch'],
-                            mesin = a['mesin']             
-                        ).save(using=cabang)
-                    else:
-                        pass 
-                
+                # cekdtr = [ddr2 for ddr2 in ddr if ddr2["userid"] == a["userid"] and ddr2["jam_absen"] == a["jam_absen"] and ddr2["punch"] == a["punch"] and ddr2["mesin"] == a["mesin"]]
+                # if len(cekdtr) > 0:
+                #     pass
+                # else:
+                if not a in ddr:
+                    data_raw_db(
+                        userid = a['userid'],
+                        jam_absen = a['jam_absen'],
+                        punch = a['punch'],
+                        mesin = a['mesin']             
+                    ).save(using=cabang)
+                    
                 jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
                 pg = next((pgw for pgw in pegawai if pgw["userid"] == a["userid"]),None)
                 # # Versi
@@ -1904,21 +1905,22 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt)
                             
                     else:
                         pass
-    for b in dt:
-        for dts in ddt:
-            if dts["userid"] == b["userid"] and dts["jam_absen"] == b["jam_absen"] and dts["punch"] == b["punch"] and dts["mesin"] == b["mesin"] and dts["ket"] == b["ket"]:
-                data_trans_db(
-                    userid = b['userid'],
-                    jam_absen = b['jam_absen'],
-                    punch = b['punch'],
-                    mesin = b['mesin'],
-                    keterangan = b['ket']             
-                ).save(using=cabang)
-            else:
-                pass  
+    for dt2 in dt:
+        # cek = [d for d in ddt if str(d["userid"]) == str(dt2["userid"]) and str(d["jam_absen"]) == str(dt2["jam_absen"]) and str(d["punch"]) == str(dt2["punch"]) and str(d["mesin"]) == str(dt2["mesin"]) and str(d["ket"]) == str(dt2["ket"])]
+        # if len(cek) > 0:
+        #     pass
+        # else:
+        if not dt2 in ddt:
+            data_trans_db(
+                userid=dt2["userid"],
+                jam_absen=dt2["jam_absen"],
+                punch=dt2["punch"],
+                mesin=dt2["mesin"], 
+                keterangan=dt2["ket"],
+            ).save(using=cabang)
+            
 
-
-def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt):
+def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
     dt = []
     if not att:
         pass
@@ -1928,15 +1930,15 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt):
                 
                 # simpan data raw jika belum ada di list ddr
                 for d in ddr:
-                    if d["userid"] == a["userid"] and d["jam_absen"] == a["jam_absen"] == d["punch"] == a["punch"] and d["mesin"] == a["mesin"]:
+                    if d["userid"] == a["userid"] and d["jam_absen"] == a["jam_absen"] and d["punch"] == a["punch"] and d["mesin"] == a["mesin"]:
+                        pass 
+                    else:
                         data_raw_db(
                             userid = a['userid'],
                             jam_absen = a['jam_absen'],
                             punch = a['punch'],
                             mesin = a['mesin']             
                         ).save(using=cabang)
-                    else:
-                        pass 
                 
                 jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
                 pg = next((pgw for pgw in pegawai if pgw["userid"] == a["userid"]),None)
@@ -2510,12 +2512,12 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,dt,status_lh,hari,cabang,ddt):
     for b in dt:
         for dts in ddt:
             if dts["userid"] == b["userid"] and dts["jam_absen"] == b["jam_absen"] and dts["punch"] == b["punch"] and dts["mesin"] == b["mesin"] and dts["ket"] == b["ket"]:
+                pass 
+            else:
                 data_trans_db(
                     userid = b['userid'],
                     jam_absen = b['jam_absen'],
                     punch = b['punch'],
                     mesin = b['mesin'],
                     keterangan = b['ket']             
-                ).save(using=cabang)
-            else:
-                pass 
+                ).save(using=cabang) 

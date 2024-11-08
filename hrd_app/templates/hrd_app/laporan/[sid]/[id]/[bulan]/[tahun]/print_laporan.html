@@ -98,6 +98,7 @@
         dr = "{{dr}}"
         sp = "{{sp}}"
         id = "{{id}}"
+        $("#tablejs").html(`<h1 class="text-primary" style="text-align:center;">Proses Data...</h1>`)
         const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
         $.ajax({
             url:"{% url 'laporan_json_periode' sid id dr sp %}",
@@ -218,6 +219,9 @@
                 }
                 console.log(str)
                 $("tbody").html(str)
+            },
+            error:(err) => {
+                $("#tablejs").html(`<h1 class="text-danger" style="text-align:center;">Gagal Memproses Data...</h1>`)
             }
         })
 
