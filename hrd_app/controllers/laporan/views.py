@@ -316,6 +316,7 @@ def print_laporan(r,sid,id,bulan,tahun):
             "dari":dr.date(),
             "sampai":sp.date(),
             "dr":dr,
+            "now":datetime.now().date(),
             "pegawai":pegawai,
             "id":id,
             "sp":sp,
@@ -489,7 +490,6 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 'ln': ab.libur_nasional
             }
             data.append(absen)
-            print(a.masuk_b,a.pulang_b,a.istirahat2_b,a.istirahat_b,a.kembali_b,a.kembali2_b)
             if lhstatus > 0:
                 if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
                     lhstatus = 1
@@ -733,6 +733,12 @@ def print_laporan_pegawai(r):
         for p in pegawai:
             dari = datetime.strptime(str(dr),'%d-%m-%Y').date()
             sampai = datetime.strptime(str(sp),'%d-%m-%Y').date()
+            dari_loop = datetime.strptime(str(dr),'%d-%m-%Y').date()
+            delta = timedelta(days=1)
+            hari_count = 0
+            while dari_loop <= sampai:
+                dari_loop += delta
+                hari_count += 1
             obj = {
                 "nama":p.nama,
                 "nik":p.nik,
@@ -743,14 +749,9 @@ def print_laporan_pegawai(r):
                 "b":1,
                 "selisih":0,
                 "terlambat":0,
+                "hari":hari_count,
                 "absensi":[]
             }
-            dari_loop = datetime.strptime(str(dr),'%d-%m-%Y').date()
-            delta = timedelta(days=1)
-            hari_count = 0
-            while dari_loop <= sampai:
-                dari_loop += delta
-                hari_count += 1
             kehadiran = 0
             tselisih = 0.0
             trlmbt = 0
@@ -909,6 +910,7 @@ def print_laporan_pegawai(r):
             tselisih = str(tselisih).split(".")
             slc = slice(0,2)
             obj["selisih"] =f"{tselisih[0]},{tselisih[1][slc]}"
+            obj["now"] = datetime.now().date()
             data.append(obj)
     except Exception as e:
         messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))

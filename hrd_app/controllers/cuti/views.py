@@ -19,7 +19,6 @@ def cuti(r, sid):
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')                 
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
-        # print(pegawai)
         # for pgw in pegawai:
         #     try:
         #         cuti = cuti_db.objects.using(r.session["ccabang"]).filter(pegawai__userid=1265)
@@ -29,7 +28,6 @@ def cuti(r, sid):
         #             ct.keterangan = f"Cuti ke -{ctke}()"
         #             ct.save(using=r.session["ccabang"])
         #     except Exception as e:
-        #         print(e)
         #         pass
         status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         try:

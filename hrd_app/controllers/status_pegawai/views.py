@@ -146,7 +146,6 @@ def status_pegawai_json_lh(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
-        print(status_pegawai_lintas_hari_db.objects.all())
         for i in status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all().order_by('id'):
             
             sp = {
@@ -154,7 +153,6 @@ def status_pegawai_json_lh(r):
                 'status':i.status_pegawai.status,
             }
             data.append(sp)
-        print(data)   
         return JsonResponse({"data": data})
 
 @login_required
@@ -185,11 +183,9 @@ def estatus_pegawai_lh(r):
 def hstatus_pegawai_lh(r):
     id = r.POST.get('id')
     nama_user = r.user.username
-    print(id)
 
     try:
         get = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).get(pk=int(id))
-        print(get)
         histori_hapus_db(
             delete_by = nama_user,
             delete_item = f'hapus status pegawai lintas hari : {get.status_pegawai.status}'
@@ -239,7 +235,6 @@ def status_pegawai_json_payroll(r):
                 'status':i.status_pegawai.status,
             }
             data.append(sp)
-        print(data)   
         return JsonResponse({"data": data})
 
 @login_required
@@ -270,11 +265,9 @@ def estatus_pegawai_payroll(r):
 def hstatus_pegawai_payroll(r):
     id = r.POST.get('id')
     nama_user = r.user.username
-    print(id)
 
     try:
         get = status_pegawai_payroll_db.objects.using(r.session["ccabang"]).get(pk=int(id))
-        print(get)
         histori_hapus_db(
             delete_by = nama_user,
             delete_item = f'hapus status pegawai payroll : {get.status_pegawai.status}'
