@@ -887,10 +887,10 @@ def pabsen(req):
     
         
     # ambil data raw simpan di ddr
-    for d in data_raw_db.objects.using(req.session["ccabang"]).filter(jam_absen__range=(dari.date(),sampai.date()), userid__in=luserid):
+    for d in data_raw_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid):
         data = {
             "userid": d.userid,
-            "jam_absen": d.jam_absen,
+            "jam_absen": str(d.jam_absen),
             "punch": d.punch,
             "mesin": d.mesin
         }
@@ -900,7 +900,7 @@ def pabsen(req):
     ddt = []
     
     # ambil data trans simpan di ddt
-    for d2 in data_trans_db.objects.using(req.session["ccabang"]).filter(jam_absen__range=(dari.date(),sampai.date()), userid__in=luserid):
+    for d2 in data_trans_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid):
         data = {
             "userid": d2.userid,
             "jam_absen": d2.jam_absen,
@@ -912,7 +912,6 @@ def pabsen(req):
         ddt.append(data)
         
     status_lh = [st.pk for st in status_pegawai_lintas_hari_db.objects.using(req.session["ccabang"]).all()]
-    dt = []    
     # proses data simpan di dt array
     # obj 
     jamkerja = jamkerja_db.objects.using(req.session["ccabang"]).select_related('kk').all()
@@ -921,9 +920,9 @@ def pabsen(req):
     hari = nama_hari(hari)
 
     if req.session["ccabang"] != "tasik":
-        prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,dt,status_lh,hari,req.session["ccabang"],ddt)
+        prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],)
     else:
-        prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,dt,status_lh,hari,req.session["ccabang"],ddt)
+        prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt)
 
     # simpan data trans
     
