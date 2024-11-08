@@ -887,7 +887,7 @@ def pabsen(req):
     
         
     # ambil data raw simpan di ddr
-    for d in data_raw_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid):
+    for d in data_raw_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
         data = {
             "userid": d.userid,
             "jam_absen": str(d.jam_absen),
@@ -900,7 +900,7 @@ def pabsen(req):
     ddt = []
     
     # ambil data trans simpan di ddt
-    for d2 in data_trans_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid):
+    for d2 in data_trans_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
         data = {
             "userid": d2.userid,
             "jam_absen": d2.jam_absen,
