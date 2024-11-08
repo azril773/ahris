@@ -108,10 +108,9 @@
             success:(e) => {
                 $("#kehadiran").html(`${e.kehadiran} Dari ${e.hari}`)
                 $("#terlambat").html(`${e.trlmbt} Kali - (${e.tselisih} Menit)`)
-                console.log(e)
                 let str = `<tr class="body">`
                 if(e.lh > 0){
-                    $("#tablejs").append(`<table class=" w-full mt-3" id="tabelku" style="width: 100%;">
+                    $("#tablejs").html(`<table class=" w-full mt-3" id="tabelku" style="width: 100%;">
                         <thead>
                         <tr class="head">
                             <th scope="col">Tanggal</th>
@@ -159,7 +158,7 @@
                         str += `<tr class="body">`
                     })
                 }else{
-                    $("#tablejs").append(`<table class=" w-full mt-3" id="tabelku" style="width: 100%;">
+                    $("#tablejs").html(`<table class=" w-full mt-3" id="tabelku" style="width: 100%;">
                         <thead>
                         <tr class="head">
                             <th scope="col">Tanggal</th>
