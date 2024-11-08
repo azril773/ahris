@@ -412,7 +412,6 @@ def absensi_json(r, dr, sp, sid):
         if int(sid) == 0:
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(pegawai__divisi__in=divisi,tgl_absen__range=(dari,sampai)).order_by('tgl_absen','pegawai__divisi__divisi'):
                 sket = ""
-                print(a.keterangan_absensi,a.pegawai)
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 
                 
@@ -548,7 +547,6 @@ def absensi_json(r, dr, sp, sid):
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(pegawai__divisi__in=divisi,tgl_absen__range=(dari,sampai), pegawai__status_id=sid).order_by('tgl_absen','pegawai__divisi__divisi'):
                             
                 sket = ""
-                print(a.keterangan_absensi,a.pegawai)
                 
                 hari = a.tgl_absen.strftime("%A")
                 hari_ini = nama_hari(hari) 

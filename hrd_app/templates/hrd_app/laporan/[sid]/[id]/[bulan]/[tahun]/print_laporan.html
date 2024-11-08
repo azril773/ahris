@@ -7,73 +7,100 @@
     <link rel="icon" type="image/x-icon" href="{% static "img/ahrisicon.png" %}">
     <title>Print Laporan</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-    <script src="https://cdn.tailwindcss.com"></script>
+    {% comment %} <script src="https://cdn.tailwindcss.com"></script> {% endcomment %}
     <link rel="stylesheet" href="https://cdn.datatables.net/2.1.4/css/dataTables.dataTables.min.css">
     <link rel="stylesheet" href="{% static "css/print.css" %}">
 </head>
 <body>
-    <div class="br-pagebody">  
+    <div class="br-pagebody container">  
 
         <div class="br-section-wrapper mx-32">
-            <section id="header" class="w-full flex justify-center mt-2">
+            <section id="header" class="d-flex justify-content-center mt-3">
                 <div class="flex-col font-light ">
-                    <div class="flex justify-center">
-                        <h1 class="uppercase mx-auto font-bold">rekap absensi</h1>
+                    <div class="d-flex justify-content-center">
+                        <h6 class="uppercase mx-auto" style="text-transform:uppercase;"><b>rekap absensi</b></h6>
                     </div>
-                    <div class="flex justify-center mt-2">
-                        <p class="uppercase ">PLAZA ASIA TASIKMALAYA</p>
+                    <div class="d-flex justify-content-center">
+                        PLAZA ASIA TASIKMALAYA
                     </div>
-                    <div class="flex justify-center">
-                        <p class="capitalize">Jl. KHZ. Mustofa No.326, Tasikmalaya 46121</p>
+                    <div class="d-flex justify-content-center">
+                        Jl. KHZ. Mustofa No.326, Tasikmalaya 46121
                     </div>
-                    <div class="flex justify-center">
-                        <p class="">PHONE : (0265) 2352215 | FAX : (0265) 2352218</p>
+                    <div class="d-flex justify-content-center">
+                        PHONE : (0265) 2352215 | FAX : (0265) 2352218
                     </div>
                 </div>
             </section>
+            <hr>
             <section id='info' class="font-light  border-b-2 border-b-gray-400 py-2  border-t-2 border-t-gray-400">
-                <div class="w-full">
-                    <div class="grid grid-cols-2 justify-between w-full">
-                        <div class="grid grid-rows-3">
-                            <div class="grid grid-cols-12">
-                                <p>Nama</p>
-                                <p class="ml-4">:</p>
-                                <p class="whitespace-nowrap">{{pegawai.nama}}</p>
-                            </div>
-                            <div class="grid grid-cols-12">
-                                <p>NIK</p>
-                                <p class="ml-4">:</p>
-                                <p class="whitespace-nowrap">{{pegawai.nik}}</p>
-                            </div>
-                            <div class="grid grid-cols-12">
-                                <p>Divisi</p>
-                                <p class="ml-4">:</p>
-                                <p class="whitespace-nowrap">{{pegawai.divisi}}</p>
-                            </div>
+                <div style="width: 100%;">
+                    <div class="row d-flex justify-content-between">
+                        <div class="col-7">
+                            <table>
+                                <tbody>
+                                    <tr style="line-height: 14px;">
+                                        <td>Nama</td>
+                                        <td>&nbsp; :</td>
+                                        <td>&nbsp; {{pegawai.nama}}</td>
+                                    </tr>
+                                    <tr style="line-height: 14px;">
+                                        <td>NIK</td>
+                                        <td>&nbsp; :</td>
+                                        <td>&nbsp; {{pegawai.nik}}</td>
+                                    </tr>
+                                    <tr style="line-height: 14px;">
+                                        <td>Divisi</td>
+                                        <td>&nbsp; :</td>
+                                        <td>&nbsp; {{pegawai.divisi}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
-                        <div class="grid grid-rows-3 ml-32">
-                            <div class="grid grid-cols-12">
-                                <p>Periode</p>
-                                <p class="ml-5">:</p>
-                                <p class="whitespace-nowrap ml-4">{{dari}} s/d {{sampai}}</p>
-                            </div>
-                            <div class="grid grid-cols-12">
-                                <p class="">Kehadiran</p>
-                                <p class="ml-5">:</p>
-                                <p class="whitespace-nowrap ml-4" id="kehadiran"></p>
-                            </div>
-                            <div class="grid grid-cols-12">
-                                <p>Terlambat</p>
-                                <p class="ml-5">:</p>
-                                <p class="ml-4 whitespace-nowrap" id="terlambat"></p>
-                            </div>
+                        <div class="col-5">
+                            <table>
+                                <tbody>
+                                    <tr style="line-height: 14px;">
+                                        <td>Periode</td>
+                                        <td>&nbsp; :</td>
+                                        <td>&nbsp; {{dari}} s/d {{sampai}}</td>
+                                    </tr>
+                                    <tr style="line-height: 14px;">
+                                        <td>Kehadiran</td>
+                                        <td>&nbsp; :</td>
+                                        <td id="kehadiran">&nbsp; </td>
+                                    </tr>
+                                    <tr style="line-height: 14px;">
+                                        <td>Divisi</td>
+                                        <td>&nbsp; :</td>
+                                        <td id="terlambat">&nbsp; </td>
+                                    </tr>
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
             </section>
+            <hr>
             {% csrf_token %}
             <section id="tablejs" class="w-full mb-10">
             </section>
+            <footer class="mt-5">
+                <div class="row d-flex justify-content-between">
+                    <div class="col-6">
+                       <i>*) Jika dicetak, laporan ini berlaku ketika telah di legalisir oleh HRD</i>
+                    </div>
+                    <div class="col-6 d-flex justify-content-end">
+                        <div class="">
+                            Tasikmalaya, {{now}}
+                            <br>
+                            <div class="d-flex justify-content-end">
+
+                                <b>HRD</b>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
             {% comment %} 
                 <th>Tanggal</th>
                 <th>Masuk</th>
@@ -98,7 +125,7 @@
         dr = "{{dr}}"
         sp = "{{sp}}"
         id = "{{id}}"
-        $("#tablejs").html(`<h1 class="text-primary" style="text-align:center;">Proses Data...</h1>`)
+        $("#tablejs").html(`<h6 class="text-primary" style="text-align:center;">Proses Data...</h6>`)
         const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
         $.ajax({
             url:"{% url 'laporan_json_periode' sid id dr sp %}",
@@ -217,7 +244,7 @@
                     })
                 }
                 console.log(str)
-                $("tbody").html(str)
+                $("#tablejs tbody").html(str)
             },
             error:(err) => {
                 $("#tablejs").html(`<h1 class="text-danger" style="text-align:center;">Gagal Memproses Data...</h1>`)
