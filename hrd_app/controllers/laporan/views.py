@@ -896,19 +896,19 @@ def print_laporan_pegawai(r):
                     'ln': ab.libur_nasional
                 }
                 obj["absensi"].append(absen)
+                if obj["b"] > 0:
+                    if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
+                        obj["b"] = 1
+                    else:
+                        if a.masuk_b is not None or a.pulang_b is not None or a.istirahat_b is not None or a.kembali_b is not None or a.istirahat2_b is not None or a.kembali2_b is not None:
+                            obj["b"] = 0
+                        else:
+                            obj["b"] = 1
             obj["kehadiran"] = kehadiran
             obj["terlambat"] = trlmbt
             tselisih = str(tselisih).split(".")
             slc = slice(0,2)
             obj["selisih"] =f"{tselisih[0]},{tselisih[1][slc]}"
-            if obj["b"] > 0:
-                if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
-                    obj["b"] = 1
-                else:
-                    if a.masuk_b is not None or a.pulang_b is not None or a.istirahat_b is not None or a.kembali_b is not None or a.istirahat2_b is not None or a.kembali2_b is not None:
-                        obj["b"] = 0
-                    else:
-                        obj["b"] = 1
             data.append(obj)
     except Exception as e:
         messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))
