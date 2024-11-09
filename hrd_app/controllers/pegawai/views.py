@@ -2704,9 +2704,9 @@ def ambil_mesin(r):
         muserid = [u.user_id for u in users]
         userid = [{"userid":u.user_id,"uid":u.uid,"mesin":mesin[0].pk} for u in users if u.user_id not in dm]
         # userid.append({"userid":99902,"uid":})
+        conn.enable_device()
+        conn.disconnect()
         return JsonResponse({"status":"success","data":userid},status=200)
     except Exception as e:
         messages.error(r,"Proccess terminate : {}".format(e))
         return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
-    finally:
-        conn.disconnect()

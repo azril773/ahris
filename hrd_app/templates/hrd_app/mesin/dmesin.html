@@ -92,32 +92,32 @@
                 headers:{
                     "X-CSRFToken":token
                 },
+                error:(err) => {
+                    window.location.reload()
+                    return
+                }
             },
             columns:[
-                {data:"userid"},
-                {
-                    data:"uid",
-                    render:(data,type,row,meta) => {
-                        return `
-                        <form action="{% url "rp_form" %}" method="post">
-                            <input type="hidden" name="csrfmiddlewaretoken" value="${token}">
-                            <input type="hidden" name="userid" value="${row.userid}">
-                            <input type="hidden" name="tipe" value="rp_mesin">
-                            <input type="hidden" name="mesin" value="${row.mesin}">
-                            <button type="submit" class="btn btn-primary">Proses</button>
+            {data:"userid"},
+            {
+                data:"uid",
+                render:(data,type,row,meta) => {
+                    return `
+                    <form action="{% url "rp_form" %}" method="post">
+                        <input type="hidden" name="csrfmiddlewaretoken" value="${token}">
+                        <input type="hidden" name="userid" value="${row.userid}">
+                        <input type="hidden" name="tipe" value="rp_mesin">
+                        <input type="hidden" name="mesin" value="${row.mesin}">
+                        <button type="submit" class="btn btn-primary">Proses</button>
                         </form>
                         `
                     }
                 },
-            ],
-            "rowCallback": function (row, data) {
-                $('td', row).eq(0).addClass('hitam');
-                $('td', row).eq(1).addClass('hitam');
-            },   
-            error:(err) => {
-                $("#msg p").remove()
-                $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
-            }
+                ],
+                "rowCallback": function (row, data) {
+                    $('td', row).eq(0).addClass('hitam');
+                    $('td', row).eq(1).addClass('hitam');
+                },   
 
         })
     })
