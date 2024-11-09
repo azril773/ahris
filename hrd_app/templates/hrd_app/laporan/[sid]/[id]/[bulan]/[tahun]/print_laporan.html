@@ -67,12 +67,12 @@
                                     <tr style="line-height: 14px;">
                                         <td>Kehadiran</td>
                                         <td>&nbsp; :</td>
-                                        <td id="kehadiran">&nbsp; </td>
+                                        <td id="kehadiran"> </td>
                                     </tr>
                                     <tr style="line-height: 14px;">
                                         <td>Divisi</td>
                                         <td>&nbsp; :</td>
-                                        <td id="terlambat">&nbsp; </td>
+                                        <td id="terlambat"> </td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -133,8 +133,8 @@
                 "X-CSRFToken":token
             },
             success:(e) => {
-                $("#kehadiran").html(`${e.kehadiran} Dari ${e.hari}`)
-                $("#terlambat").html(`${e.trlmbt} Kali - (${e.tselisih} Menit)`)
+                $("#kehadiran").html(`&nbsp;&nbsp;${e.kehadiran} Dari ${e.hari}`)
+                $("#terlambat").html(`&nbsp;&nbsp;${e.trlmbt} Kali - (${e.tselisih} Menit)`)
                 let str = `<tr class="body">`
                 if(e.lh > 0){
                     $("#tablejs").html(`<table class=" w-full mt-3" id="tabelku" style="width: 100%;">
