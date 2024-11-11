@@ -925,7 +925,7 @@ def general_data(r,idp):
             'off':pg.hari_off.hari,
             'kkerja':pg.kelompok_kerja,
             'shift':pg.shift,
-            'rekening':pg.rekening,
+            'rekening':pg.no_rekening,
             'payroll':pg.payroll_by,
             'nks':pg.no_bpjs_ks,
             'ntk':pg.no_bpjs_tk,
@@ -982,7 +982,7 @@ def general_data_nonaktif(r,idp):
             'off':pg.hari_off.hari,
             'kkerja':pg.kelompok_kerja,
             'shift':pg.shift,
-            'rekening':pg.rekening,
+            'rekening':pg.no_rekening,
             'payroll':pg.payroll_by,
             'nks':pg.no_bpjs_ks,
             'ntk':pg.no_bpjs_tk,
@@ -2222,7 +2222,6 @@ def detail_pegawai_json(r, idp):
         else:
             pg = pg[0]
         p = pg
-                        
         pg = {
             'idp':p.id,
             'nama':p.nama,
@@ -2240,7 +2239,7 @@ def detail_pegawai_json(r, idp):
             'ks':p.ks_premi,
             'tk':p.tk_premi,
             'payroll':p.payroll_by,
-            'rekening':p.rekening,
+            'rekening':p.no_rekening,
             'kkerja':p.kelompok_kerja.kelompok,
             'sisa_cuti':p.sisa_cuti
         }
