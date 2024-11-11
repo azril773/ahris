@@ -163,7 +163,17 @@
                                 </select>
                                 </div>
                               </div> 
-
+                              <div class="col-lg-3">
+                                <div class="form-group">
+                                  <label class="form-control-label tx-inverse">Shift: <span class="tx-danger">*</span></label>
+                                  <select name="shift" id="shift" class="form-control select2-show-search" data-placeholder="" required>
+                                    <option label=""></option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="Non Shift" selected>Non Shift</option>
+                                </select>
+                                </div>
+                              </div> 
                               <div class="col-lg-3">
                                 <div class="form-group">
                                   <label class="form-control-label tx-inverse">Hari OFF: <span class="tx-danger">*</span></label>
@@ -1146,6 +1156,7 @@ if($(e.target).is("button")){
     const counter = $("#counter").val()
     const jabatan = $("#jabatan").val()
     const kk = $("#kk").val()
+    const shift = $("#shift").val()
     const hr = $("#hr").val()
     const ca = $("#ca").val()
     const rek = $("#rek").val()
@@ -1178,7 +1189,7 @@ if($(e.target).is("button")){
     $.ajax({
       url:`{% url "tambah_pegawai" %}`,
       method:"post",
-      data:{nama,gender,tgl_masuk,nik,userid,status,div,counter,jabatan,kk,hr,ca,rek,payroll,nks,ntk,pks,ptk,keluarga,pihak,pengalaman,pendidikan,alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah,agama},
+      data:{nama,gender,tgl_masuk,nik,userid,status,div,counter,jabatan,kk,shift,hr,ca,rek,payroll,nks,ntk,pks,ptk,keluarga,pihak,pengalaman,pendidikan,alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah,agama},
       headers:{"X-CSRFToken":token},
       success:(e) => {
         localStorage.removeItem("data_pendidikan")

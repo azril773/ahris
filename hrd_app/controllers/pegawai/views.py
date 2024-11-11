@@ -367,6 +367,7 @@ def edit_pegawai(r,idp):
         #     kota_kabupaten_db(nama_kota_kabupaten=k["nama_kota_kabupaten"]).save(using=r.session["ccabang"])
         if pg.tgl_masuk is not None:
             pg.tgl_masuk = pg.tgl_masuk.strftime("%d-%m-%Y")
+        shift = ["A","B","Non Shift"]
         data = serialize("json",kota_kabupaten)
         data = {
             'akses' : akses,
@@ -390,6 +391,7 @@ def edit_pegawai(r,idp):
             'pengalaman':pgl,
             'pendidikan':pdk,
             'pribadi':pribadi,
+            "shift":shift,
             'idp':int(idp),
             'kota_kabupaten':kota_kabupaten,
             'modul_aktif' : 'Pegawai',
@@ -424,6 +426,7 @@ def epegawai(r,idp):
             counter = r.POST.get("counter")
             jabatan = r.POST.get("jabatan")
             kk = r.POST.get("kk")
+            shift = r.POST.get("shift")
             hr = r.POST.get("hr")
             ca = r.POST.get("ca")
             rek = r.POST.get("rek")
@@ -494,6 +497,7 @@ def epegawai(r,idp):
                     tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
                     hari_off_id=hr,
                     kelompok_kerja_id=kk,
+                    shift=shift,
                     sisa_cuti=12,
                     counter_id=counter,
                     add_by=r.user.username,
@@ -648,6 +652,7 @@ def tambah_pegawai(r):
             counter = r.POST.get("counter")
             jabatan = r.POST.get("jabatan")
             kk = r.POST.get("kk")
+            shift = r.POST.get("shift")
             hr = r.POST.get("hr")
             ca = r.POST.get("ca")
             rek = r.POST.get("rek")
@@ -739,6 +744,7 @@ def tambah_pegawai(r):
                     tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
                     hari_off_id=hr,
                     kelompok_kerja_id=kk,
+                    shift=shift,
                     sisa_cuti=12,
                     counter_id=counter,
                     add_by=r.user.username,
@@ -2462,6 +2468,7 @@ def tambah_pegawai_non_validasi(r):
                 counter = r.POST.get("counter")
                 jabatan = r.POST.get("jabatan")
                 kk = r.POST.get("kk")
+                shift = r.POST.get("shift")
                 hr = r.POST.get("hr")
                 ca = r.POST.get("ca")
                 rek = r.POST.get("rek")
@@ -2610,6 +2617,7 @@ def tambah_pegawai_non_validasi(r):
                         tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
                         hari_off_id=hr,
                         kelompok_kerja_id=kk,
+                        shift=shift,
                         sisa_cuti=12,
                         counter_id=counter,
                         add_by=r.user.username,
