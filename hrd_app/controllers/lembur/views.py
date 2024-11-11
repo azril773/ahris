@@ -1586,15 +1586,15 @@ def tambah_kompen(r):
         # update absensi
         if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_absen=tgl).exists():
             ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(idp), tgl_absen=tgl)
-            
-            jm = datetime.combine(ab.tgl_absen,ab.jam_masuk)
-            jp = datetime.combine(ab.tgl_absen,ab.jam_pulang)
-            
-            njm = jm + timedelta(hours=kompen)
-            njp = jp - timedelta(hours=kompen)
-            
             # total jam kerja         
             if ab.masuk is not None and ab.pulang is not None:
+                
+                jm = datetime.combine(ab.tgl_absen,ab.jam_masuk)
+                jp = datetime.combine(ab.tgl_absen,ab.jam_pulang)
+                
+                njm = jm + timedelta(hours=kompen)
+                njp = jp - timedelta(hours=kompen)
+                
                 if ab.pulang > ab.masuk:
                     
                     dmsk = f'{ab.tgl_absen} {ab.masuk}'
@@ -1621,26 +1621,33 @@ def tambah_kompen(r):
                     status = 'ok'                
                 else: 
                     
-                    status = 'Jam masuk > Jam Pulang'                
+                    status = 'Jam masuk > Jam Pulang'   
+                    
+                if jenis == 'awal':
+                    jm_baru = njm.time()
+                    jp_baru = ab.jam_pulang
+                    ket = f'Kompen/PJK-Awal {kompen} Jam'
+                elif jenis == 'akhir':
+                    jm_baru = ab.jam_masuk
+                    jp_baru = njp.time()
+                    ket = f'Kompen/PJK-Akhir {kompen} Jam'
+                else:
+                    jm_baru = njm.time()
+                    jp_baru = njp.time()
+                    ket = f'Kompen/PJK 1 Hari'            
+                ab.jam_masuk = jm_baru
+                ab.jam_pulang = jp_baru
+                     
             else:
                 tjk = 0
                 status = 'ok'
         
             if jenis == 'awal':
-                jm_baru = njm.time()
-                jp_baru = ab.jam_pulang
                 ket = f'Kompen/PJK-Awal {kompen} Jam'
             elif jenis == 'akhir':
-                jm_baru = ab.jam_masuk
-                jp_baru = njp.time()
                 ket = f'Kompen/PJK-Akhir {kompen} Jam'
             else:
-                jm_baru = njm.time()
-                jp_baru = njp.time()
                 ket = f'Kompen/PJK 1 Hari'            
-        
-            ab.jam_masuk = jm_baru
-            ab.jam_pulang = jp_baru
             ab.keterangan_lain = ket
             ab.total_jam_kerja = round(tjk,1)
             ab.edit_by = nama_user

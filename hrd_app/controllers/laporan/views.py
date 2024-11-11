@@ -124,7 +124,7 @@ def laporan_json(r):
                             urh += 1
                         elif re.search("(bs)",a.keterangan_ijin,re.I):
                             bs += 1
-                        elif re.search("(ijin)",a.keterangan_ijin,re.I):
+                        elif re.search("(ijin|izin)",a.keterangan_ijin,re.I):
                             ijin += 1
                         elif re.search("(dl)",a.keterangan_ijin,re.I):
                             dl += 1
@@ -237,7 +237,7 @@ def laporan_json(r):
                             urh += 1
                         elif re.search("(bs)",a.keterangan_ijin,re.I):
                             bs += 1
-                        elif re.search("(ijin)",a.keterangan_ijin,re.I):
+                        elif re.search("(ijin|izin)",a.keterangan_ijin,re.I):
                             ijin += 1
                         elif re.search("(dl)",a.keterangan_ijin,re.I):
                             dl += 1
