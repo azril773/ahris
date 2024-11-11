@@ -93,7 +93,7 @@ def tambah_kk_json(r):
             tk = kelompok_kerja_db(
                 kelompok = tkk
             )    
-            tk.save(r.session["ccabang"])
+            tk.save(using=r.session["ccabang"])
             
             dkk = kelompok_kerja_db.objects.using(r.session["ccabang"]).last()
         
@@ -191,7 +191,7 @@ def tambah_jam_kerja(r):
                     jam_pulang=jam_pulang,
                     lama_istirahat=lama_istirahat,
                     hari=h
-                ).save(r.session["ccabang"])
+                ).save(using=r.session["ccabang"])
             status = "ok"
         return JsonResponse({"status": status})
 
@@ -231,7 +231,7 @@ def edit_jam_kerja(r):
                 jam_pulang=jam_pulang,
                 lama_istirahat=lama_istirahat,
                 hari=h
-            ).save(r.session["ccabang"])
+            ).save(using=r.session["ccabang"])
         status = "ok"
         return JsonResponse({"status": status})
 
@@ -254,7 +254,7 @@ def hapus_jam_kerja(r):
             delete_by = nama_user,
             delete_item = f'hapus jam kerja : {ln.kk.kelompok}'
         )
-        thapus.save(r.session["ccabang"])
+        thapus.save(using=r.session["ccabang"])
         
         ln.delete(using=r.session["ccabang"])
         
