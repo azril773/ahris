@@ -216,7 +216,7 @@ def edit_jam_kerja(r):
 
         if len(hari) >= 7:
             hari = ["Semua Hari"]
-        jamkerja_db.objects.using(r.session["ccabang"]).filter(id=int(eid)).delete(using=r.session["ccabang"])
+        jamkerja_db.objects.using(r.session["ccabang"]).filter(id=int(eid)).delete()
         for h in hari:
             # if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),hari=h).exists():
             #     continue

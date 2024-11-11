@@ -1305,3 +1305,20 @@ def print_laporan_divisi_excel(r):
         messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))
         return redirect("laporan",sid=sid)
     return render(r,"hrd_app/laporan/print_laporan_pegawai.html",{"data":data})
+
+
+@login_required
+def print_laporan_shift(r,shift,tgl):
+    try:
+        date = datetime.strptime(tgl,"%Y-%m-%d")
+    except:
+        date = datetime.today()
+    print(date)
+    pegawai = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai").filter(pegawai__shift__iregex="^a$",tgl_absen=date.date())
+    print(pegawai)
+    data = []
+    for pgw in pegawai:
+        obj = {
+
+        }
+    return render(r,"hrd_app/laporan/[shift]/print_laporan_shift.html")
