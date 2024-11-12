@@ -931,6 +931,7 @@ def pabsen(req):
     cuti = []
     geser = []
     geser_all = []
+    kompen = []
     opg = []
     opg_all = []
     dl = []
@@ -1026,6 +1027,16 @@ def pabsen(req):
         }
         dl.append(data)
         dl_idp.append(n.pegawai_id)
+
+    for k in kompen_db.objects.using(req.session["ccabang"]).all():
+        data = {
+            "idl":k.pk,
+            "idp":k.pegawai_id,
+            "jenis_kompen":k.jenis_kompen,
+            "kompen":k.kompen,
+            "tgl_kompen":k.tgl_kompen,
+        }
+        kompen.append(data)
         
     # data absensi
     if int(sid) == 0:
@@ -1336,6 +1347,102 @@ def pabsen(req):
             else:
                 pass                                 
         
+
+        for kmpn in kompen:
+            if a.pegawai_id == kmpn["idp"]:
+                if kmpn["tgl_kompen"] == a.tgl_absen:
+                    print("OKOKO")
+                    if ab.jam_masuk is not None and ab.jam_pulang is None:
+                        if ab.masuk is not None and ab.pulang is not None:
+                            if ab.pulang > ab.masuk:
+                                jm = datetime.combine(ab.tgl_absen,ab.jam_masuk)
+                                jp = datetime.combine(ab.tgl_absen,ab.jam_pulang)
+                                
+                                jkompen = float(kmpn["kompen"])
+                                
+                                if kmpn["jenis_kompen"] == 'awal':
+                                    njm = jm - timedelta(hours=jkompen)
+                                    njp = ab.jam_pulang
+                                elif kmpn["jenis_kompen"] == 'akhir':    
+                                    njm = ab.jam_masuk
+                                    njp = jp + timedelta(hours=jkompen)
+                                else:    
+                                    njm = jm - timedelta(hours=jkompen)
+                                    njp = jp + timedelta(hours=jkompen)
+                                
+                                dmsk = f'{ab.tgl_absen} {ab.masuk}'
+                                dplg = f'{ab.tgl_absen} {ab.pulang}'
+                                
+                                msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+                                plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+                                
+                                dselisih = plg - msk
+                                djam_selisih = f'{ab.tgl_absen} {dselisih}'
+                                selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
+                                
+                                if int(selisih.hour) <= 4:
+                                    tjk = 0
+                                else:
+                                    detik = selisih.second / 3600
+                                    menit = selisih.minute / 60
+                                    hour = selisih.hour
+                                    
+                                    jam = int(hour) + float(menit) + float(detik)
+                                    
+                                    tjk = jam       
+                                
+                                status = 'ok'                
+                                ab.jam_masuk = njm
+                                ab.jam_pulang = njp
+                            else: 
+                                # dmsk = f'{ab.tgl_absen} {ab.masuk}'
+                                # dplg = f'{ab.tgl_absen} {ab.pulang}'
+                                
+                                # msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+                                # plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+                                
+                                # dselisih = plg - msk
+                                # djam_selisih = f'{ab.tgl_absen} {dselisih}'
+                                # date_part = djam_selisih.split(' ', 2)
+                                # # Parse the date and time
+                                # # Adjust the date based on the delta part
+                                # if len(date_part) > 2:
+                                #     base_datetime = datetime.strptime(date_part[0] + ' ' + date_part[2].split(",")[1], '%Y-%m-%d %H:%M:%S')
+                                #     if date_part[1] == '-1':
+                                #         adjusted_datetime = base_datetime - timedelta(days=1)
+                                #     elif date_part[1] == '+1':
+                                #         adjusted_datetime = base_datetime + timedelta(days=1)
+                                # else:
+                                #     base_datetime = datetime.strptime(" ".join(date_part), '%Y-%m-%d %H:%M:%S')
+                                #     adjusted_datetime = base_datetime     
+                                # selisih = adjusted_datetime
+                                # if int(selisih.hour) <= 4:
+                                #     tjk = 0
+                                # else:
+                                #     detik = selisih.second / 3600
+                                #     menit = selisih.minute / 60
+                                #     hour = selisih.hour
+                                    
+                                #     jam = int(hour) + float(menit) + float(detik)
+                                #     tjk = jam  
+                                tjk = 0   
+                        else:
+                            tjk = 0
+                    else:
+                        tjk = 0
+                    if kmpn["jenis_kompen"] == 'awal':
+                        ab.keterangan_lain = f"Kompen/PJK-Awal {kmpn['kompen']} Jam"
+                    elif kmpn["jenis_kompen"] == "akhir":
+                        ab.keterangan_lain = f"Kompen/PJK-Akhir {kmpn['kompen']} Jam"
+                    else:
+                        ab.keterangan_lain = f"Kompen/PJK 1 hari"
+                    nama_user = req.user.username
+                    ab.total_jam_kerja = round(tjk,1)
+                    ab.edit_by = nama_user
+                    ab.save(using=req.session["ccabang"])
+
+        
+
         # cuti
         for c in cuti:
             # jika didalam data cuti ada pegawai id
