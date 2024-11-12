@@ -10,6 +10,7 @@
 
     <div class="br-section-wrapper">
         <!-- Pesan Error -->
+         <div id="msginfo"></div>
         {% for message in messages %}
         <div class="container-fluid p-0">
             {% if 'safe' in message.tags %}
@@ -160,6 +161,17 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Shift:</label>
+
+                                <select name="shift" id="shift" class="shadow-sm" data-placeholder='Pilih' required=required>
+                                    {% for s in shift %}
+                                        <option value="{{s.pk}}">{{s.shift}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
         
                         <div class="modal-footer">
                         <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
@@ -274,6 +286,17 @@
                                 </select>
                             </div>
                         </div>
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Shift:</label>
+
+                                <select name="eshift" id="eshift" class="shadow-sm" data-placeholder='Pilih' required=required>
+                                    {% for s in shift %}
+                                        <option value="{{s.pk}}">{{s.shift}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
                         <input type="hidden" name="edit_id" id="edit_id">
                         <div class="modal-footer">
                         <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
@@ -335,28 +358,30 @@
         time_24hr:true
     });
         const kkSelect = $('#kk').selectize();
+        const shiftSelect = $('#shift').selectize();
         const hariSelect = $('#hari').selectize({
             maxItems: null,
             valueField: 'hari',
             labelField: 'hari',
             searchField: 'hari',
             options: [
-              {hari:'Senin'},
-              {hari:'Selasa'},
+            {hari:'Senin'},
+            {hari:'Selasa'},
               {hari:'Rabu'},
               {hari:'Kamis'},
               {hari:'Jumat'},
               {hari:'Sabtu'},
               {hari:'Minggu'},
               {hari:'Semua Hari'}
-            ],
-            create: false
-        });
-
+              ],
+              create: false
+            });
+            
         const selectekk = $('#ekk').selectize();
-
+        
         const ejkkSelect = $('#ejkk').selectize();
-
+        
+        const eshiftSelect = $('#eshift').selectize();
         const ehariSelect = $('#ejhari').selectize({
             maxItems: null,
             valueField: 'hari',
@@ -391,7 +416,7 @@
                 { 
                     data: null,
                     "render": function(data, type, row, meta){    
-                        data = `<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-target="#edit" data-toggle="modal" data-emasuk='${row.masuk}' data-epulang='${row.pulang}' data-elist='${row.list}' data-ekk='${row.kk}' data-eid='${row.id}' data-ehari='${row.hari}' >Edit</button> &nbsp; <button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-hid='${row.id}' data-toggle="modal">Hapus</button>`;
+                        data = `<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-target="#edit" data-toggle="modal" data-emasuk='${row.masuk}' data-epulang='${row.pulang}' data-elist='${row.lama_ist}' data-ekk='${row.kk}' data-eid='${row.id}' data-ehari='${row.hari}' data-eshift="${row.shift}">Edit</button> &nbsp; <button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-hid='${row.id}' data-toggle="modal">Hapus</button>`;
                         return data;
                     } 
                 },
@@ -501,20 +526,24 @@
             const lama_istirahat = $("#lama_istirahat").val()
             const jam_pulang = $("#jam_pulang").val()
             const hari = $("#hari").val()
+            const shift = $("#shift").val()
             $.ajax({
                 url:"{% url 'tjamkerja' %}",
                 method:"post",
-                data:{kk,jam_masuk,lama_istirahat,jam_pulang,hari},
+                data:{kk,shift,jam_masuk,lama_istirahat,jam_pulang,hari},
                 headers:{"X-CSRFToken":token},
                 success(e){
-                    if(e.status == 'duplikat'){
-                        alert("Jam kerja sudah ada!")
-                    }
+                    $("#msginfo p").remove()
+                    $("#msginfo").append(`<p class="alert alert-success">${e.msg}</p>`)
                     table.ajax.reload()
-                   $("#tambah").modal("hide")
-                   $("#tambahForm")[0].reset()
-                   hariSelect[0].selectize.clear()
-                   kkSelect[0].selectize.clear()
+                    $("#tambah").modal("hide")
+                    $("#tambahForm")[0].reset()
+                    hariSelect[0].selectize.clear()
+                    kkSelect[0].selectize.clear()
+                },
+                error:(err) => {
+                    $("#msginfo p").remove()
+                    $("#msginfo").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
                 }
             })
             
@@ -529,18 +558,26 @@
             const lama_istirahat = $("#elama_istirahat").val();
             const kk = $("#ejkk").val();
             const hari = $("#ejhari").val();    
+            const shift = $("#eshift").val();    
             console.log(id,jam_masuk,jam_pulang,lama_istirahat,kk,hari)
             $.ajax({
                 url:"{% url 'edit_jkerja' %}",
                 method:'post',
-                data:{id,jam_masuk,jam_pulang,lama_istirahat,kk,hari},
+                data:{id,jam_masuk,jam_pulang,lama_istirahat,kk,shift,hari},
                 headers:{"X-CSRFToken":token},
                 success(e){
+                    $("#msginfo p").remove()
+                    $("#msginfo").append(`<p class="alert alert-success">${e.msg}</p>`)
                     ejkkSelect[0].selectize.clear()
                     ehariSelect[0].selectize.clear()
                    $("#editForm")[0].reset()
                     table.ajax.reload()
                     $("#edit").modal("hide")
+                },
+                error:(err) => {
+                    $("#msginfo p").remove()
+                    $("#msginfo").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+
                 }
             })
         });
@@ -561,18 +598,17 @@
                 headers:{"X-CSRFToken":token},
                 success: function (response) { 
                     
-                    if (response.status == 'ok') { 
-                        console.log(response.status)       
-                    }
-                    
+                    $("#msginfo p").remove()
+                    $("#msginfo").append(`<p class="alert alert-success">${e.msg}</p>`)
                     table.ajax.reload(null, false);
 
                     $('#hapus').modal('hide');
                     $("#hapusForm")[0].reset();                   
                         
                 },
-                error: function (error) {
-                    alert('Terjadi kesalahan sistem, hubungi IT.')
+                error: function (err) {
+                    $("#msginfo p").remove()
+                    $("#msginfo").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
                 }
             });
 
@@ -587,6 +623,7 @@ $('#edit').on('show.bs.modal', function (e) {
     var elist = $(e.relatedTarget).data('elist');
     var ekk = $(e.relatedTarget).data('ekk');
     var ehari = $(e.relatedTarget).data('ehari');
+    var eshift = $(e.relatedTarget).data('eshift');
     //populate the textbox
     $(e.currentTarget).find('input[name="edit_id"]').val(edit_id);
     $(e.currentTarget).find('input[name="ejam_masuk"]').val(emasuk);
@@ -594,6 +631,7 @@ $('#edit').on('show.bs.modal', function (e) {
     $(e.currentTarget).find('input[name="elama_istirahat"]').val(elist);
     ejkkSelect[0].selectize.setValue(ekk)
     ehariSelect[0].selectize.setValue(ehari)    
+    eshiftSelect[0].selectize.setValue(eshift)    
 });
 
 $('#hapus').on('show.bs.modal', function (e) {

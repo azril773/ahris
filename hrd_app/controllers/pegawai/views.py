@@ -613,6 +613,7 @@ def tpegawai(r):
         kk = kelompok_kerja_db.objects.using(r.session["ccabang"]).all().order_by('kelompok')
         status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('status')
         hr = hari_db.objects.using(r.session["ccabang"]).all()
+        shift = shift_db.objects.using(r.session["ccabang"]).all()
 
         kota_kabupaten = kota_kabupaten_db.objects.using(r.session["ccabang"]).all()
         userid = ""
@@ -627,6 +628,7 @@ def tpegawai(r):
             'status':status,
             "kota_kabupaten":kota_kabupaten,
             "kk":kk,
+            "shift":shift,
             "hr":hr,
             "userid":userid
         }
