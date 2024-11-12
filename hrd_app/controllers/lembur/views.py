@@ -1586,61 +1586,66 @@ def tambah_kompen(r):
         # update absensi
         if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_absen=tgl).exists():
             ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(idp), tgl_absen=tgl)
-            # total jam kerja         
-            if ab.masuk is not None and ab.pulang is not None:
-                
-                jm = datetime.combine(ab.tgl_absen,ab.jam_masuk)
-                jp = datetime.combine(ab.tgl_absen,ab.jam_pulang)
-                
-                njm = jm + timedelta(hours=kompen)
-                njp = jp - timedelta(hours=kompen)
-                
-                if ab.pulang > ab.masuk:
+            # total jam kerja 
+            if ab.jam_masuk is not None and ab.pulang is not None:
+                if ab.masuk is not None and ab.pulang is not None:
                     
-                    dmsk = f'{ab.tgl_absen} {ab.masuk}'
-                    dplg = f'{ab.tgl_absen} {ab.pulang}'
+                    jm = datetime.combine(ab.tgl_absen,ab.jam_masuk)
+                    jp = datetime.combine(ab.tgl_absen,ab.jam_pulang)
                     
-                    msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
-                    plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+                    njm = jm + timedelta(hours=kompen)
+                    njp = jp - timedelta(hours=kompen)
                     
-                    dselisih = plg - msk
-                    djam_selisih = f'{ab.tgl_absen} {dselisih}'
-                    selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
-                    
-                    if int(selisih.hour) <= 4:
-                        tjk = 0
+                    if ab.pulang > ab.masuk:
+                        
+                        dmsk = f'{ab.tgl_absen} {ab.masuk}'
+                        dplg = f'{ab.tgl_absen} {ab.pulang}'
+                        
+                        msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+                        plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+                        
+                        dselisih = plg - msk
+                        djam_selisih = f'{ab.tgl_absen} {dselisih}'
+                        selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
+                        
+                        if int(selisih.hour) <= 4:
+                            tjk = 0
+                        else:
+                            detik = selisih.second / 3600
+                            menit = selisih.minute / 60
+                            hour = selisih.hour
+                            
+                            jam = int(hour) + float(menit) + float(detik)
+                            
+                            tjk = jam       
+                        
+                        status = 'ok'                
+                    else: 
+                        
+                        status = 'Jam masuk > Jam Pulang'   
+                        
+                    if jenis == 'awal':
+                        jm_baru = njm.time()
+                        jp_baru = ab.jam_pulang
+                        ket = f'Kompen/PJK-Awal {kompen} Jam'
+                    elif jenis == 'akhir':
+                        jm_baru = ab.jam_masuk
+                        jp_baru = njp.time()
+                        ket = f'Kompen/PJK-Akhir {kompen} Jam'
                     else:
-                        detik = selisih.second / 3600
-                        menit = selisih.minute / 60
-                        hour = selisih.hour
+                        jm_baru = njm.time()
+                        jp_baru = njp.time()
+                        ket = f'Kompen/PJK 1 Hari'            
+                    ab.jam_masuk = jm_baru
+                    ab.jam_pulang = jp_baru
                         
-                        jam = int(hour) + float(menit) + float(detik)
-                        
-                        tjk = jam       
-                    
-                    status = 'ok'                
-                else: 
-                    
-                    status = 'Jam masuk > Jam Pulang'   
-                    
-                if jenis == 'awal':
-                    jm_baru = njm.time()
-                    jp_baru = ab.jam_pulang
-                    ket = f'Kompen/PJK-Awal {kompen} Jam'
-                elif jenis == 'akhir':
-                    jm_baru = ab.jam_masuk
-                    jp_baru = njp.time()
-                    ket = f'Kompen/PJK-Akhir {kompen} Jam'
                 else:
-                    jm_baru = njm.time()
-                    jp_baru = njp.time()
-                    ket = f'Kompen/PJK 1 Hari'            
-                ab.jam_masuk = jm_baru
-                ab.jam_pulang = jp_baru
-                     
+                    tjk = 0
+                    status ='ok'
             else:
                 tjk = 0
-                status = 'ok'
+                status ='ok'
+
         
             if jenis == 'awal':
                 ket = f'Kompen/PJK-Awal {kompen} Jam'
@@ -1742,56 +1747,60 @@ def batal_kompen(r):
     
     ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(idp), tgl_absen=kp.tgl_kompen)
         
-    jm = datetime.combine(ab.tgl_absen,ab.jam_masuk)
-    jp = datetime.combine(ab.tgl_absen,ab.jam_pulang)
-    
-    jkompen = float(kp.kompen)
-    
-    if kp.jenis_kompen == 'awal':
-        njm = jm - timedelta(hours=jkompen)
-        njp = ab.jam_pulang
-    elif kp.jenis_kompen == 'akhir':    
-        njm = ab.jam_masuk
-        njp = jp + timedelta(hours=jkompen)
-    else:    
-        njm = jm - timedelta(hours=jkompen)
-        njp = jp + timedelta(hours=jkompen)
     
     # total jam kerja         
-    if ab.masuk is not None and ab.pulang is not None:
-        if ab.pulang > ab.masuk:
-            
-            dmsk = f'{ab.tgl_absen} {ab.masuk}'
-            dplg = f'{ab.tgl_absen} {ab.pulang}'
-            
-            msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
-            plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
-            
-            dselisih = plg - msk
-            djam_selisih = f'{ab.tgl_absen} {dselisih}'
-            selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
-            
-            if int(selisih.hour) <= 4:
-                tjk = 0
-            else:
-                detik = selisih.second / 3600
-                menit = selisih.minute / 60
-                hour = selisih.hour
+    if ab.jam_masuk is not None and ab.jam_pulang is not None:
+        if ab.masuk is not None and ab.pulang is not None:
+            if ab.pulang > ab.masuk:
+                jm = datetime.combine(ab.tgl_absen,ab.jam_masuk)
+                jp = datetime.combine(ab.tgl_absen,ab.jam_pulang)
                 
-                jam = int(hour) + float(menit) + float(detik)
+                jkompen = float(kp.kompen)
                 
-                tjk = jam       
-            
-            status = 'ok'                
-        else: 
-            
-            status = 'Jam masuk > Jam Pulang'                
+                if kp.jenis_kompen == 'awal':
+                    njm = jm - timedelta(hours=jkompen)
+                    njp = ab.jam_pulang
+                elif kp.jenis_kompen == 'akhir':    
+                    njm = ab.jam_masuk
+                    njp = jp + timedelta(hours=jkompen)
+                else:    
+                    njm = jm - timedelta(hours=jkompen)
+                    njp = jp + timedelta(hours=jkompen)
+                
+                dmsk = f'{ab.tgl_absen} {ab.masuk}'
+                dplg = f'{ab.tgl_absen} {ab.pulang}'
+                
+                msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+                plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+                
+                dselisih = plg - msk
+                djam_selisih = f'{ab.tgl_absen} {dselisih}'
+                selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
+                
+                if int(selisih.hour) <= 4:
+                    tjk = 0
+                else:
+                    detik = selisih.second / 3600
+                    menit = selisih.minute / 60
+                    hour = selisih.hour
+                    
+                    jam = int(hour) + float(menit) + float(detik)
+                    
+                    tjk = jam       
+                
+                status = 'ok'                
+                ab.jam_masuk = njm
+                ab.jam_pulang = njp
+            else: 
+                
+                status = 'Jam masuk > Jam Pulang'                
+        else:
+            tjk = 0
+            status = 'ok'
     else:
         tjk = 0
         status = 'ok'
 
-    ab.jam_masuk = njm
-    ab.jam_pulang = njp
     ab.keterangan_lain = None
     ab.total_jam_kerja = round(tjk,1)
     ab.edit_by = nama_user
