@@ -196,10 +196,10 @@
                                   <select name="shift" id="shift" class="form-control select2-show-search" data-placeholder="" required>
                                     <option label=""></option>
                                     {% for s in shift %}
-                                    {% if pg.shift == s %}
-                                      <option value={{s}} selected>{{s}}</option>
+                                    {% if pg.shift == s.shift %}
+                                      <option value={{s.shift}} selected>{{s.shift}}</option>
                                     {% else %}
-                                      <option value={{s}}>{{s}}</option>
+                                      <option value={{s.shift}}>{{s.shift}}</option>
                                     {% endif %}
                                     {% endfor %}
                                 </select>

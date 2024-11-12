@@ -363,11 +363,11 @@ def edit_pegawai(r,idp):
         #         kota_kabupaten_db(nama_kota_kabupaten=rk['name']).save(using=r.session["ccabang"])
         # kota_kabupaten = kota_kabupaten_db.objects.using(r.session["ccabang"]).values("nama_kota_kabupaten")
         kota_kabupaten = kota_kabupaten_db.objects.using(r.session["ccabang"]).all()
+        shift = shift_db.objects.using(r.session["ccabang"]).all()
         # for k in kota_kabupaten:
         #     kota_kabupaten_db(nama_kota_kabupaten=k["nama_kota_kabupaten"]).save(using=r.session["ccabang"])
         if pg.tgl_masuk is not None:
             pg.tgl_masuk = pg.tgl_masuk.strftime("%d-%m-%Y")
-        shift = ["A","B","Non Shift"]
         data = serialize("json",kota_kabupaten)
         data = {
             'akses' : akses,
@@ -391,6 +391,7 @@ def edit_pegawai(r,idp):
             'pengalaman':pgl,
             'pendidikan':pdk,
             'pribadi':pribadi,
+            "shift":shift,
             "shift":shift,
             'idp':int(idp),
             'kota_kabupaten':kota_kabupaten,
