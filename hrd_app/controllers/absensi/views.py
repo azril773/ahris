@@ -932,6 +932,7 @@ def pabsen(req):
     geser = []
     geser_all = []
     opg = []
+    lmbr = []
     opg_all = []
     dl = []
     dl_idp = []
@@ -1026,7 +1027,7 @@ def pabsen(req):
         }
         dl.append(data)
         dl_idp.append(n.pegawai_id)
-        
+            
     # data absensi
     if int(sid) == 0:
         data = absensi_db.objects.using(req.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()))
