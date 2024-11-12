@@ -352,6 +352,14 @@ class sangsi_db(models.Model):
         verbose_name_plural = 'Sangsi'                                 
 
 
+class shift_db(models.Model):
+    shift = models.CharField(max_length=100, null=True)
+    def __str__(self):
+        return self.shift
+    
+    class Meta:
+        verbose_name = 'Shift'
+
 pilihan_hari = (("Semua Hari", "Semua Hari"), ("Senin", "Senin"), ("Selasa", "Selasa"), ("Rabu", "Rabu"), ("Kamis", "Kamis"), ("Jumat", "Jumat"), ("Sabtu", "Sabtu"), ("Minggu", "Minggu"))
 
 class jamkerja_db(models.Model):
@@ -361,7 +369,7 @@ class jamkerja_db(models.Model):
     jam_pulang = models.TimeField(null=True)
     lama_istirahat = models.FloatField(null=True)
     hari = models.CharField(max_length=50, choices=pilihan_hari)
-    
+    shift = models.ForeignKey(shift_db,on_delete=models.CASCADE,null=True)
     add_by = models.CharField(max_length=100, null=True)
     edit_by = models.CharField(max_length=100, null=True)
     add_date = models.DateTimeField(auto_now_add=True, null=True)
@@ -625,6 +633,7 @@ class absensi_db(models.Model):
     lama_istirahat2 = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     jam_pulang = models.TimeField(null=True)
     jam_istirahat = models.TimeField(null=True) 
+    jam_kerja = models.ForeignKey(jamkerja_db,on_delete=models.CASCADE,null=True)
     
     total_jam_kerja = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=0)
     total_jam_istirahat = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=0)

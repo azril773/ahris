@@ -10,5 +10,5 @@ urlpatterns = [
     path('print_laporan_divisi/', views.print_laporan_divisi, name='print_laporan_divisi'),
     path('print_laporan_divisi_excel/', views.print_laporan_divisi_excel, name='print_laporan_divisi_excel'),
     
-    path('print_laporan_shift/<str:shift>/<str:tgl>', views.print_laporan_shift, name='print_laporan_shift'),
+    path('print_laporan_shift', views.print_laporan_shift, name='print_laporan_shift'),
 ]  

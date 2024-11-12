@@ -25,6 +25,7 @@ def laporan(r,sid):
         jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()  
         sall = status_pegawai_db.objects.using(r.session["ccabang"]).all()
         divisi = divisi_db.objects.using(r.session["ccabang"]).all()
+        shift = shift_db.objects.using(r.session["ccabang"]).all()
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
         data = {
             'akses' : akses,
@@ -39,6 +40,7 @@ def laporan(r,sid):
             "bulan":sp.month,
             "pegawai":pegawai,
             "divisi":divisi,
+            "shift":shift,
             "nama_bulan":nama_bulan(sp.month),
             "tahun":sp.year,
             "sall":sall,
@@ -1308,17 +1310,79 @@ def print_laporan_divisi_excel(r):
 
 
 @login_required
-def print_laporan_shift(r,shift,tgl):
+def print_laporan_shift(r):
+    id_user = r.user.id
+    akses_divisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+    adiv = [div.divisi.pk for div in akses_divisi]
+    shift = r.POST.getlist("shift[]")
+    tanggal = r.POST.getlist("tanggal")
+    # try:
+    #     date = datetime.strptime(tgl,"%Y-%m-%d")
+    # except:
     try:
-        date = datetime.strptime(tgl,"%Y-%m-%d")
-    except:
-        date = datetime.today()
-    print(date)
-    pegawai = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai").filter(pegawai__shift__iregex="^a$",tgl_absen=date.date())
-    print(pegawai)
-    data = []
-    for pgw in pegawai:
-        obj = {
+        date = []
+        for dt in tanggal[0].split(","):
+            date.append(datetime.strptime(dt.strip(),"%d-%m-%Y").strftime("%Y-%m-%d"))
+    except Exception as e:
+        date = [datetime.today().date()]
+    shiftdata = shift_db.objects.using(r.session["ccabang"]).filter(id__in=shift)
+    result = []
+    for d in date:    
+        obj = {}
+        for s in shiftdata:
+            obj[s.pk] = {"shift":s.shift,"divisi":{}}
+        absensi = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(jam_kerja__shift_id__in=shift,tgl_absen=d)
+        for ab in absensi:
+            shiftpegawai = shift_db.objects.using(r.session["ccabang"]).filter(shift__iregex=f"^{ab.pegawai.shift}$")
+            print(shiftpegawai)
+            if shiftpegawai.exists():
+                shift = shiftpegawai[0].pk
+            else:
+                shift = ab.jam_kerja.shift_id
+            div = obj[shift]["divisi"].keys()
+            if ab.pegawai.divisi.pk in div:
+                if ab.masuk is not None and ab.pulang is not None:
+                    obj[shift]["divisi"][ab.pegawai.divisi.pk]["masuk"] += 1
+                if ab.keterangan_absensi is not None:
+                    if ab.keterangan_absensi == "OFF":
+                        obj[shift]["divisi"][ab.pegawai.divisi.pk]["off"] += 1
+                    else:
+                        pass
+                else:
+                    pass
+                if ab.keterangan_ijin is not None:
+                    if re.match("/sakit/",ab.keterangan_ijin) is not None:
+                        obj[shift]["divisi"][ab.pegawai.divisi.pk]["sakit"] += 1
+                    else:
+                        obj[shift]["divisi"][ab.pegawai.divisi.pk]["izin"] += 1
 
-        }
-    return render(r,"hrd_app/laporan/[shift]/print_laporan_shift.html")
+                if ab.keterangan_absensi is None and ab.keterangan_ijin is None and ab.keterangan_lain is None:
+                    obj[shift]["divisi"][ab.pegawai.divisi.pk]["tanpa_keterangan"] += 1
+                if re.match("/(?i)^m$/",ab.jam_kerja.shift.shift):
+                    obj[shift]["divisi"][ab.pegawai.divisi.pk]["m"] += 1
+                elif re.match("/(?i)^mf$/",ab.jam_kerja.shift.shift):
+                    obj[shift]["divisi"][ab.pegawai.divisi.pk]["mf"] += 1
+            else:
+                obj[shift]["divisi"][ab.pegawai.divisi.pk] = {
+                    "divisi":ab.pegawai.divisi.divisi,
+                    "divisi_id":ab.pegawai.divisi.pk,
+                    "masuk":0,
+                    "cuti":0,
+                    "m":0,
+                    "mf":0,
+                    "off":0,
+                    "sakit":0,
+                    "izin":0,
+                    "tanpa_keterangan":0,
+                }
+
+        data = []
+        for s2 in shiftdata:
+            dv = []
+            for key in obj[s2.pk]["divisi"].keys():
+                dv.append(obj[s2.pk]["divisi"][key])
+            obj[s2.pk]["divisi_count"] = len(dv)
+            obj[s2.pk]["divisi"] = dv
+            data.append(obj[s2.pk])
+        result.append({"tanggal":d,"data":data})
+    return render(r,"hrd_app/laporan/[shift]/print_laporan_shift.html",{"data":result})
