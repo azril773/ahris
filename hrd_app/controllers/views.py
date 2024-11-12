@@ -140,6 +140,8 @@ from hrd_app.controllers.login.views import *
 
 from hrd_app.controllers.ypc.views import *
 
+from hrd_app.controllers.shift.views import *
+
 # df = pd.read_csv("absensi.csv")
 #     data = []
 #     userids = []

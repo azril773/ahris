@@ -58,7 +58,7 @@ def jam_kerja(r):
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
-        
+        shift = shift_db.objects.using(r.session["ccabang"]).all()
         kk = kelompok_kerja_db.objects.using(r.session["ccabang"]).all().order_by('kelompok')
         data = {       
             'dsid': dsid,
@@ -67,6 +67,7 @@ def jam_kerja(r):
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
             'kk': kk,
+            'shift': shift,
             'modul_aktif' : 'Jam Kerja'     
         }
         
@@ -138,7 +139,8 @@ def jam_kerja_json(r):
                 'masuk': i.jam_masuk,
                 'lama_ist': i.lama_istirahat,
                 'pulang': i.jam_pulang,
-                'hari':i.hari
+                'hari':i.hari,
+                "shift":i.shift.pk if i.shift is not None else None
             }
             data.append(jk)
         return JsonResponse({"data": data})
@@ -152,6 +154,7 @@ def tambah_jam_kerja(r):
         jam_masuk = r.POST.get("jam_masuk")
         lama_istirahat = r.POST.get("lama_istirahat")
         jam_pulang = r.POST.get("jam_pulang")
+        shift = r.POST.get("shift")
         hari = r.POST.getlist("hari[]")
 
 
@@ -171,10 +174,10 @@ def tambah_jam_kerja(r):
 
         if len(hari) >= 7:
             hari = ["Semua Hari"]
-
-
+        if not shift_db.objects.using(r.session["ccabang"]).filter(id=int(shift)).exists():
+            return JsonResponse({"status":'error',"msg":"Shift tidak ada"},status=400)
         if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),jam_masuk=jam_masuk,jam_pulang=jam_pulang).exists():
-            status = "gagal tambah"
+            return JsonResponse({"status":'error',"msg":"Jam masuk atau pulang harus berbeda"},status=400)
         else:
             
             for h in hari:
@@ -190,10 +193,10 @@ def tambah_jam_kerja(r):
                     jam_masuk=jam_masuk,
                     jam_pulang=jam_pulang,
                     lama_istirahat=lama_istirahat,
-                    hari=h
+                    hari=h,
+                    shift_id=int(shift)
                 ).save(using=r.session["ccabang"])
-            status = "ok"
-        return JsonResponse({"status": status})
+            return JsonResponse({"status":"success","msg":"Berhasil tambah jam kerja"})
 
 
 @login_required
@@ -206,6 +209,7 @@ def edit_jam_kerja(r):
         jam_pulang = r.POST.get("jam_pulang")
         lama_istirahat = r.POST.get("lama_istirahat")
         kk = r.POST.get("kk")
+        shift = r.POST.get("shift")
         hari = r.POST.getlist("hari[]")
         for h in hari:
             if h.lower() == 'semua hari':
@@ -213,7 +217,8 @@ def edit_jam_kerja(r):
                 break
                 
         
-
+        if not shift_db.objects.using(r.session["ccabang"]).filter(id=int(shift)).exists():
+            return JsonResponse({"status":'error',"msg":"Shift tidak ada"},status=400)
         if len(hari) >= 7:
             hari = ["Semua Hari"]
         jamkerja_db.objects.using(r.session["ccabang"]).filter(id=int(eid)).delete()
@@ -224,16 +229,16 @@ def edit_jam_kerja(r):
             if h.lower() == 'semua hari':
                 if jamkerja_db.objects.using(r.session["ccabang"]).filter(~Q(hari='semua hari'),kk_id=int(kk)).exists():
                     break
-            
+            jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=kk,jam_masuk=jam_masuk,jam_pulang=jam_pulang,hari=h,shift_id=shift).delete()
             jamkerja_db(
                 kk_id=kk,
                 jam_masuk=jam_masuk,
                 jam_pulang=jam_pulang,
                 lama_istirahat=lama_istirahat,
-                hari=h
+                hari=h,
+                shift_id=shift
             ).save(using=r.session["ccabang"])
-        status = "ok"
-        return JsonResponse({"status": status})
+        return JsonResponse({"status":"success","msg":"Berhasil edit jam kerja"})
 
 
 @login_required
@@ -260,5 +265,5 @@ def hapus_jam_kerja(r):
         
         status = 'ok'
         
-        return JsonResponse({"status": status})
+        return JsonResponse({"status":"success","msg":"Berhasil hapus jam kerja"})
 

@@ -94,6 +94,9 @@ urlpatterns = [
     
     path("",include("hrd_app.router.ypc.ui.urls")),
     path("",include("hrd_app.router.ypc.backend.urls")),
+
+    path("",include("hrd_app.router.shift.ui.urls")),
+    path("",include("hrd_app.router.shift.backend.urls")),
     
 
     path('pengaturan', views.pengaturan, name='pengaturan'),

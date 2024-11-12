@@ -168,9 +168,9 @@
                                   <label class="form-control-label tx-inverse">Shift: <span class="tx-danger">*</span></label>
                                   <select name="shift" id="shift" class="form-control select2-show-search" data-placeholder="" required>
                                     <option label=""></option>
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="Non Shift" selected>Non Shift</option>
+                                    {% for s in shift %}
+                                      <option value="{{s.pk}}">{{s.shift}}</option>
+                                    {% endfor %}
                                 </select>
                                 </div>
                               </div> 
