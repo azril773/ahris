@@ -1327,18 +1327,14 @@ def print_laporan_shift(r):
         date = [datetime.today().date()]
     shiftdata = shift_db.objects.using(r.session["ccabang"]).filter(id__in=shift)
     result = []
+    shifts = [int(sh) for sh in shift]
     for d in date:    
         obj = {}
         for s in shiftdata:
             obj[s.pk] = {"shift":s.shift,"divisi":{}}
-        absensi = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(jam_kerja__shift_id__in=shift,tgl_absen=d)
+        absensi = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(jam_kerja__shift_id__in=shifts,tgl_absen=d)
         for ab in absensi:
-            shiftpegawai = shift_db.objects.using(r.session["ccabang"]).filter(shift__iregex=f"^{ab.pegawai.shift}$")
-            print(shiftpegawai)
-            if shiftpegawai.exists():
-                shift = shiftpegawai[0].pk
-            else:
-                shift = ab.jam_kerja.shift_id
+            shift = ab.jam_kerja.shift_id
             div = obj[shift]["divisi"].keys()
             if ab.pegawai.divisi.pk in div:
                 if ab.masuk is not None and ab.pulang is not None:
@@ -1368,8 +1364,6 @@ def print_laporan_shift(r):
                     "divisi_id":ab.pegawai.divisi.pk,
                     "masuk":0,
                     "cuti":0,
-                    "m":0,
-                    "mf":0,
                     "off":0,
                     "sakit":0,
                     "izin":0,
@@ -1385,4 +1379,6 @@ def print_laporan_shift(r):
             obj[s2.pk]["divisi"] = dv
             data.append(obj[s2.pk])
         result.append({"tanggal":d,"data":data})
+
+    print(result)
     return render(r,"hrd_app/laporan/[shift]/print_laporan_shift.html",{"data":result})
