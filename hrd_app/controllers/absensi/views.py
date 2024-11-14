@@ -1636,6 +1636,7 @@ def pabsen(req):
                 dselisih_b = plg_b - msk_b
                 # if dselisih_b.hour < 10
                 djam_selisih_b = f'{ab.tgl_absen} {dselisih_b}'
+                date_part = djam_selisih_b.split(' ', 2)
                 # Split the string to separate the date and time parts
                 if len(date_part) > 2:
                     base_datetime = datetime.strptime(date_part[0] + ' ' + date_part[2].split(",")[1], '%Y-%m-%d %H:%M:%S')
@@ -2148,15 +2149,16 @@ def pu(r,tgl,userid,sid):
                 dselisih = plg - msk
                 djam_selisih = f'{abs.tgl_absen} {dselisih}'
                 # Split the string to separate the date and time parts
-                date_part, delta_part, time_part = djam_selisih.split(' ', 2)
-                # Parse the date and time
-                base_datetime = datetime.strptime(date_part + ' ' + time_part.split(",")[1], '%Y-%m-%d %H:%M:%S')
-                # Adjust the date based on the delta part
-                if delta_part == '-1':
-                    adjusted_datetime = base_datetime - timedelta(days=1)
-                elif delta_part == '+1':
-                    adjusted_datetime = base_datetime + timedelta(days=1)
+                date_part = djam_selisih.split(' ', 2)
+                # Split the string to separate the date and time parts
+                if len(date_part) > 2:
+                    base_datetime = datetime.strptime(date_part[0] + ' ' + date_part[2].split(",")[1], '%Y-%m-%d %H:%M:%S')
+                    if date_part[1] == '-1':
+                        adjusted_datetime = base_datetime - timedelta(days=1)
+                    elif date_part[1] == '+1':
+                        adjusted_datetime = base_datetime + timedelta(days=1)
                 else:
+                    base_datetime = datetime.strptime(" ".join(date_part), '%Y-%m-%d %H:%M:%S')
                     adjusted_datetime = base_datetime
                 selisih = adjusted_datetime
                 if int(selisih.hour) <= 4:
