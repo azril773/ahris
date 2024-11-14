@@ -1508,21 +1508,21 @@ def pabsen(req):
                 # cek jika di dalam data opg diambil pada tanggal saat ini
                 if o['diambil_tgl'] == ab.tgl_absen:
                     
-                    opg = opg_db.objects.using(req.session["ccabang"]).get(id=o['id'])
+                    opg_get= opg_db.objects.using(req.session["ccabang"]).get(id=o['id'])
                     # jika tidak masuk dan tidak ada pulang
                     if ab.masuk is None and ab.pulang is None and ab.masuk_b is None and ab.pulang_b is None:
                         topg = datetime.strftime(o['diambil_tgl'], '%d-%m-%Y')
                         ab.keterangan_absensi = f'OPG-({topg})'
                         ab.save(using=req.session["ccabang"])                                
                         
-                        opg.status = 1
-                        opg.edit_by ='Program'
-                        opg.save(using=req.session["ccabang"])
+                        opg_get.status = 1
+                        opg_get.edit_by ='Program'
+                        opg_get.save(using=req.session["ccabang"])
                     # jika masuk dan pulang
                     else:
-                        opg.diambil_tgl = None
-                        opg.edit_by = 'Program'
-                        opg.save(using=req.session["ccabang"])
+                        opg_get.diambil_tgl = None
+                        opg_get.edit_by = 'Program'
+                        opg_get.save(using=req.session["ccabang"])
                             
                 else:
                     pass
