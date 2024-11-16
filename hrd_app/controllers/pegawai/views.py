@@ -2727,9 +2727,12 @@ def spegawai_payroll(r):
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):
         akses = akses_db.objects.using(r.session["ccabang"]).get(user_id=id_user)
         akses = akses.akses
+        pegawaip = pegawai_payroll_db.objects.using(f'p{r.session["ccabang"]}').all()
         if akses == "root" or akses == "hrd":
             pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
             for p in pegawai:
+                if len([pe for pe in pegawaip if p.userid == pe.userid]) > 0:
+                    continue
                 pegawai_payroll_db(
                     id=p.pk,
                     nama=p.nama,
@@ -2751,6 +2754,7 @@ def spegawai_payroll(r):
                     tgl_aktif=p.tgl_aktif,
                     tgl_nonaktif=p.tgl_nonaktif,
                     sisa_cuti=p.sisa_cuti,
+                    status_payroll=0,
                     add_by="prog",
                     edit_by="prog",
                 ).save(using=f'p{r.session["ccabang"]}')

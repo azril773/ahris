@@ -1269,7 +1269,7 @@ class pegawai_payroll_db(models.Model):
     tgl_masuk = models.DateField(null=True, blank=True)
     tgl_aktif = models.DateTimeField(null=True, blank=True)
     tgl_nonaktif = models.DateTimeField(null=True, blank=True)
-
+    status_payroll = models.IntegerField()
     sisa_cuti = models.IntegerField(null=True)
 
     add_by = models.CharField(max_length=100, null=True, blank=True)
