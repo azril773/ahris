@@ -836,11 +836,16 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                                 }
                                                 dt.append(data)
                                         except absensi_db.DoesNotExist:
-                                            absensi_db(
-                                                tgl_absen=tmin.date(),
-                                                pegawai_id=ab.pegawai.pk,
-                                                istirahat2=jam_absen.time()
-                                            ).save(using=cabang)
+                                            if not absensi_db.objects.using(cabang).filter(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk).exists():
+                                                absensi_db(
+                                                    tgl_absen=tmin.date(),
+                                                    pegawai_id=ab.pegawai.pk,
+                                                    istirahat2=jam_absen.time()
+                                                ).save(using=cabang)
+                                            else:
+                                                abm = absensi_db.objects.using(cabang).filter(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk)
+                                                abm.istirahat2 = jam_absen.time()
+                                                abm.save(using=cabang)
                                             data = {
                                                 "userid": a["userid"],
                                                 "jam_absen": jam_absen - timedelta(days=1),
@@ -955,11 +960,16 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                                 }
                                                 dt.append(data)
                                     except absensi_db.DoesNotExist:
-                                        absensi_db(
-                                            tgl_absen=tmin.date(),
-                                            pegawai_id=ab.pegawai.pk,
-                                            istirahat2=jam_absen
-                                        ).save(using=cabang)
+                                        if not absensi_db.objects.using(cabang).filter(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk).exists():
+                                            absensi_db(
+                                                tgl_absen=tmin.date(),
+                                                pegawai_id=ab.pegawai.pk,
+                                                istirahat2=jam_absen.time()
+                                            ).save(using=cabang)
+                                        else:
+                                            abm = absensi_db.objects.using(cabang).filter(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk)
+                                            abm.istirahat2 = jam_absen.time()
+                                            abm.save(using=cabang)
                                         data = {
                                             "userid": a["userid"],
                                             "jam_absen": jam_absen - timedelta(days=1),
@@ -1646,7 +1656,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                             except:
                                                 absensi_db(
                                                     tgl_absen=tmin.date(),
-                                                    pegawai_id=pg["id"],
+                                                    pegawai__userid=a["userid"],
                                                     pulang=jam_absen.time(),
                                                 ).save(using=cabang)
                                                 data = {
@@ -1875,11 +1885,21 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                                 ab2.pulang = jam_absen.time()
                                                 ab2.save(using=cabang)
                                     except absensi_db.DoesNotExist:
-                                        absensi_db(
-                                            pulang=jam_absen.time(),
-                                            tgl_absen=tmin.date(),
-                                            pegawai_id=ab.pegawai.pk
-                                        ).save(using=cabang)
+                                        if not absensi_db.objects.using(cabang).filter(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk).exists():
+                                            absensi_db(
+                                                tgl_absen=tmin.date(),
+                                                pegawai_id=ab.pegawai.pk,
+                                                pulang=jam_absen.time()
+                                            ).save(using=cabang)
+                                        else:
+                                            abm = absensi_db.objects.using(cabang).filter(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk)
+                                            abm.pulang = jam_absen.time()
+                                            abm.save(using=cabang)
+                                        # absensi_db(
+                                        #     pulang=jam_absen.time(),
+                                        #     tgl_absen=tmin.date(),
+                                        #     pegawai_id=ab.pegawai.pk
+                                        # ).save(using=cabang)
                                         data = {
                                             "userid": a["userid"],
                                             "jam_absen": jam_absen - timedelta(days=1),
@@ -2030,11 +2050,16 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                     }
                                     dt.append(data)
                             except absensi_db.DoesNotExist:
-                                absensi_db(
-                                    pegawai_id=ab.pegawai.pk,
-                                    tgl_absen=tplus.date(),
-                                    masuk=jam_absen.time()
-                                ).save(using=cabang)
+                                if not absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk).exists():
+                                    absensi_db(
+                                        tgl_absen=tplus.date(),
+                                        pegawai_id=ab.pegawai.pk,
+                                        masuk=jam_absen.time()
+                                    ).save(using=cabang)
+                                else:
+                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm.masuk = jam_absen.time()
+                                    abm.save(using=cabang)
                                 data = {
                                         "userid": a["userid"],
                                         "jam_absen": jam_absen + timedelta(days=1),
@@ -2138,11 +2163,16 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         }
                                         dt.append(data)
                             except absensi_db.DoesNotExist:
-                                absensi_db(
-                                    pegawai_id=ab.pegawai.pk,
-                                    tgl_absen=tplus.date(),
-                                    masuk=jam_absen.time()
-                                ).save(using=cabang)
+                                if not absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk).exists():
+                                    absensi_db(
+                                        tgl_absen=tplus.date(),
+                                        pegawai_id=ab.pegawai.pk,
+                                        istirahat=jam_absen.time()
+                                    ).save(using=cabang)
+                                else:
+                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm.istirahat = jam_absen.time()
+                                    abm.save(using=cabang)
                                 data = {
                                     "userid": a["userid"],
                                     "jam_absen": jam_absen + timedelta(days=1),
@@ -2220,11 +2250,16 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         }
                                         dt.append(data)
                             except absensi_db.DoesNotExist:
-                                absensi_db(
-                                    pegawai_id=ab.pegawai.pk,
-                                    tgl_absen=tplus.date(),
-                                    masuk=jam_absen.time()
-                                ).save(using=cabang)
+                                if not absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk).exists():
+                                    absensi_db(
+                                        tgl_absen=tplus.date(),
+                                        pegawai_id=ab.pegawai.pk,
+                                        istirahat2=jam_absen.time()
+                                    ).save(using=cabang)
+                                else:
+                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm.istirahat2 = jam_absen.time()
+                                    abm.save(using=cabang)
                                 data = {
                                     "userid": a["userid"],
                                     "jam_absen": jam_absen + timedelta(days=1),
@@ -2302,11 +2337,16 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         }
                                         dt.append(data)
                             except absensi_db.DoesNotExist:
-                                absensi_db(
-                                    pegawai_id=ab.pegawai.pk,
-                                    tgl_absen=tplus.date(),
-                                    masuk=jam_absen.time()
-                                ).save(using=cabang)
+                                if not absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk).exists():
+                                    absensi_db(
+                                        tgl_absen=tplus.date(),
+                                        pegawai_id=ab.pegawai.pk,
+                                        kembali=jam_absen.time()
+                                    ).save(using=cabang)
+                                else:
+                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm.kembali = jam_absen.time()
+                                    abm.save(using=cabang)
                                 data = {
                                     "userid": a["userid"],
                                     "jam_absen": jam_absen + timedelta(days=1),
@@ -2369,11 +2409,16 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         }
                                         dt.append(data)
                             except:
-                                absensi_db(
-                                    pegawai_id=ab.pegawai.pk,
-                                    tgl_absen=tplus.date(),
-                                    masuk=jam_absen.time()
-                                ).save(using=cabang)
+                                if not absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk).exists():
+                                    absensi_db(
+                                        tgl_absen=tplus.date(),
+                                        pegawai_id=ab.pegawai.pk,
+                                        kembali2=jam_absen.time()
+                                    ).save(using=cabang)
+                                else:
+                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm.kembali2 = jam_absen.time()
+                                    abm.save(using=cabang)
                                 data = {
                                     "userid": a["userid"],
                                     "jam_absen": jam_absen + timedelta(days=1),
@@ -2466,11 +2511,16 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         }
                                         dt.append(data)
                             except absensi_db.DoesNotExist:
-                                absensi_db(
-                                    pegawai_id=ab.pegawai.pk,
-                                    tgl_absen=tplus.date(),
-                                    masuk=jam_absen.time()
-                                ).save(using=cabang)
+                                if not absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk).exists():
+                                    absensi_db(
+                                        tgl_absen=tplus.date(),
+                                        pegawai_id=ab.pegawai.pk,
+                                        pulang=jam_absen.time()
+                                    ).save(using=cabang)
+                                else:
+                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm.pulang = jam_absen.time()
+                                    abm.save(using=cabang)
                                 data = {
                                     "userid": a["userid"],
                                     "jam_absen": jam_absen + timedelta(days=1),
