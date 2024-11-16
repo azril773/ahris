@@ -15,9 +15,9 @@ import pickle
 def broadcast(r,sid):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         

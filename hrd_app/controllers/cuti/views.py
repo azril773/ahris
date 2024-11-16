@@ -6,8 +6,8 @@ from django.db import transaction
 def cuti(r, sid):
     iduser = r.user.id
     
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -86,8 +86,8 @@ def cuti(r, sid):
 def detail_cuti(r, sid, idp):
     iduser = r.user.id
     
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id     
         
@@ -129,8 +129,8 @@ def detail_cuti(r, sid, idp):
 def cari_cuti(r):
     iduser = r.user.id
     
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         

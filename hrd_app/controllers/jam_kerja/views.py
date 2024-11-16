@@ -6,7 +6,7 @@ import pandas as pd
 @login_required
 def jam_kerja(r):
     iduser = r.user.id
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         # excel = pd.read_excel("static/jam_kerja.xlsx",sheet_name="Sheet1")
         # data = []
         # for n in excel.iloc[:,0]:
@@ -55,7 +55,7 @@ def jam_kerja(r):
         #             jamkerja.hari = d["hari"]
         #             jamkerja.save(r.session["ccabang"])
 
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         shift = shift_db.objects.using(r.session["ccabang"]).all()

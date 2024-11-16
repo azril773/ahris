@@ -19,7 +19,7 @@
 
     <!-- Bracket CSS -->
     <link rel="stylesheet" href="{% static 'css/bracket.css'%}">
-
+    <link rel="stylesheet" href="{% static "css/selectize.default.css" %}" />
     <!-- Disable faveicon -->
     <link rel="shortcut icon" href="#" />
   </head>
@@ -68,6 +68,15 @@
           <div class="form-group">
             <input name="password" type="password" class="form-control" placeholder="password" required="required">
           </div>
+          <label for="cabang" class="text-dark">Pilih Cabang</label>
+          <select name="cabang" id="cabang">
+            <option value="tasik">Tasik</option>
+            <option value="sumedang">Sumedang</option>
+            <option value="cirebon">Cirebon</option>
+            <option value="cihideung">Cihideung</option>
+            <option value="garut">Garut</option>
+          </select>
+          <br>
           <input type="hidden" name="next" value="hrd">
           <button type="submit" class="btn btn-info btn-block">Login</button>
         </form>
@@ -76,8 +85,12 @@
     </div>
 
     <script src="{% static 'lib/jquery/jquery.js'%}"></script>
+    <script type="text/javascript" src="/static/lib/jquery/jquery.js"></script>
+    <script src="{% static "js/selectize.min.js" %}"></script>
     <script src="{% static 'lib/popper.js/popper.js'%}"></script>
     <script src="{% static 'lib/bootstrap/bootstrap.js'%}"></script>
-
+    <script>
+      $("#cabang").selectize()
+    </script>
   </body>
 </html>

@@ -4,8 +4,8 @@ from hrd_app.controllers.lib import *
 def tlengkap(r,sid):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id     
         
@@ -36,8 +36,8 @@ def tlengkap(r,sid):
 def tketerangan(r,sid):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id     
         
@@ -68,8 +68,8 @@ def tketerangan(r,sid):
 def terlambat(r,sid):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id     
         

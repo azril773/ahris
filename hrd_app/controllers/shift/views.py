@@ -4,7 +4,7 @@ from hrd_app.controllers.lib import *
 @login_required
 def shift(r):
     id_user = r.user.id
-    akses = akses_db.objects.filter(user_id=id_user)
+    akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     if akses.exists():
         shift = shift_db.objects.using(r.session["ccabang"]).all()
         akses = akses[0]

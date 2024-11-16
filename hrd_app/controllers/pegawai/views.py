@@ -5,8 +5,8 @@ import pandas as pd
 def pegawai(r,sid):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         # excel = pd.read_excel("static/ahris.xlsx")
         # data = []
@@ -253,8 +253,8 @@ def pegawai(r,sid):
 def pegawai_non_aktif(r,sid):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id     
@@ -282,8 +282,8 @@ def pegawai_non_aktif(r,sid):
 def edit_pegawai(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id     
@@ -411,7 +411,7 @@ def edit_pegawai(r,idp):
 def epegawai(r,idp):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         try:
-            user = akses_db.objects.filter(user_id=r.user.id)
+            user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)
             if not user.exists():
                 return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
             user = user[0]
@@ -603,8 +603,8 @@ def epegawai(r,idp):
 def tpegawai(r):
     iduser = r.user.id
 
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
 
@@ -640,7 +640,7 @@ def tambah_pegawai(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         try:
             
-            user = akses_db.objects.filter(user_id=r.user.id)
+            user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)
             if not user.exists():
                 return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
             user = user[0]
@@ -895,8 +895,8 @@ def tambah_kl(r, idp):
 def general_data(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         id_user = r.user.id
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
@@ -949,8 +949,8 @@ def general_data(r,idp):
 def general_data_nonaktif(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
@@ -1006,8 +1006,8 @@ def general_data_nonaktif(r,idp):
 def data_pribadi(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
@@ -1070,8 +1070,8 @@ def data_pribadi(r,idp):
 def data_pribadi_nonaktif(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
@@ -1133,8 +1133,8 @@ def data_pribadi_nonaktif(r,idp):
 def pendidikan_kerja(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
@@ -1182,8 +1182,8 @@ def pendidikan_kerja(r,idp):
 def pendidikan_kerja_nonaktif(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
@@ -1231,8 +1231,8 @@ def pendidikan_kerja_nonaktif(r,idp):
 def promosi_demosi(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
@@ -1275,8 +1275,8 @@ def promosi_demosi(r,idp):
 # def promosi_demosi(r,idp):
 #     iduser = r.user.id
         
-#     if akses_db.objects.filter(user_id=iduser).exists():
-#         dakses = akses_db.objects.get(user_id=iduser)
+#     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+#         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
 #         akses = dakses.akses
            
 #         dsid = dakses.sid_id   
@@ -1307,8 +1307,8 @@ def promosi_demosi(r,idp):
 def promosi_demosi_nonaktif(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
@@ -1351,8 +1351,8 @@ def promosi_demosi_nonaktif(r,idp):
 # def promosi_demosi_nonaktif(r,idp):
 #     iduser = r.user.id
         
-#     if akses_db.objects.filter(user_id=iduser).exists():
-#         dakses = akses_db.objects.get(user_id=iduser)
+#     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+#         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
 #         akses = dakses.akses
            
 #         dsid = dakses.sid_id   
@@ -1458,8 +1458,8 @@ def promodemo_json(r,idp,aktif):
 def sangsi(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
@@ -1496,8 +1496,8 @@ def sangsi(r,idp):
 def sangsi_nonaktif(r,idp):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
@@ -2255,8 +2255,8 @@ def detail_pegawai_json(r, idp):
 @login_required
 def registrasi_pegawai(r):
     iduser = r.user.id
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
 
         dsid = dakses.sid_id     
@@ -2281,8 +2281,8 @@ def registrasi_pegawai(r):
 @login_required
 def rpm(r):
     iduser = r.user.id
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -2308,9 +2308,9 @@ def rpm(r):
 def rp_mesin(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -2336,9 +2336,9 @@ def rp_mesin(r):
 def rp_cmesin(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -2363,12 +2363,12 @@ def rp_cmesin(r):
 def rp_form(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
         user = r.user.username
 
         iduser = r.user.id
-        data_akses = akses_db.objects.get(user=iduser)
+        data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
         akses = data_akses.akses 
         dsid = data_akses.sid_id
         nama = r.POST.get("nama")
@@ -2415,7 +2415,7 @@ def rp_form(r):
                 finally:
                     if conn:
                         conn.disconnect()
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         counter = counter_db.objects.using(r.session["ccabang"]).all().order_by('counter')
@@ -2455,7 +2455,7 @@ def tambah_pegawai_non_validasi(r):
         with transaction.atomic(using=r.session["ccabang"]) as wt:
             
             try:
-                user = akses_db.objects.filter(user_id=r.user.id)
+                user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)
                 if not user.exists():
                     return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
                 user = user[0]
@@ -2720,3 +2720,41 @@ def ambil_mesin(r):
     except Exception as e:
         messages.error(r,"Proccess terminate : {}".format(e))
         return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
+
+@login_required
+def spegawai_payroll(r):
+    id_user = r.user.id
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):
+        akses = akses_db.objects.using(r.session["ccabang"]).get(user_id=id_user)
+        akses = akses.akses
+        if akses == "root" or akses == "hrd":
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
+            for p in pegawai:
+                pegawai_payroll_db(
+                    id=p.pk,
+                    nama=p.nama,
+                    email=p.email,
+                    no_telp=p.no_telp,
+                    userid=p.userid,
+                    gender=p.gender,
+                    status=p.status,
+                    nik=p.nik,
+                    divisi=p.divisi,
+                    no_rekening=p.no_rekening,
+                    no_bpjs_ks=p.no_bpjs_ks,
+                    no_bpjs_tk=p.no_bpjs_tk,
+                    payroll_by=p.payroll_by,
+                    ks_premi=p.ks_premi,
+                    tk_premi=p.tk_premi,
+                    aktif=1,
+                    tgl_masuk=p.tgl_masuk,
+                    tgl_aktif=p.tgl_aktif,
+                    tgl_nonaktif=p.tgl_nonaktif,
+                    sisa_cuti=p.sisa_cuti,
+                    add_by="prog",
+                    edit_by="prog",
+                ).save(using=f'p{r.session["ccabang"]}')
+        else:
+            pass
+    else:
+        pass

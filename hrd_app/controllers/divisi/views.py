@@ -7,9 +7,9 @@ from hrd_app.controllers.lib import *
 def divisi(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -113,3 +113,21 @@ def hapus_divisi(r):
         
         return JsonResponse({"status": status})
 
+
+@login_required
+def sdivisi_payroll(r):
+    id_user = r.user.id
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):
+        akses = akses_db.objects.using(r.session["ccabang"]).get(user_id=id_user)
+        akses = akses.akses
+        if akses == "root" or akses == "hrd":
+            divisi = divisi_db.objects.using(r.session["ccabang"]).all()
+            for d in divisi:
+                divisi_payroll_db(
+                    id=c.pk,
+                    divisi=c.divisi,
+                ).save(using=f'p{r.session["ccabang"]}')
+        else:
+            pass
+    else:
+        pass

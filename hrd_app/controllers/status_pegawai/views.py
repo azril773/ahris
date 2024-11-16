@@ -7,9 +7,9 @@ from hrd_app.controllers.lib import *
 def status_pegawai(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -118,9 +118,9 @@ def hapus_status_pegawai(r):
 def status_pegawai_lh(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
@@ -200,9 +200,9 @@ def hstatus_pegawai_lh(r):
 def status_pegawai_payroll(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
@@ -277,3 +277,22 @@ def hstatus_pegawai_payroll(r):
     except:
         return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
 
+
+
+@login_required
+def sstatus_payroll(r):
+    id_user = r.user.id
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):
+        akses = akses_db.objects.using(r.session["ccabang"]).get(user_id=id_user)
+        akses = akses.akses
+        if akses == "root" or akses == "hrd":
+            status = status_pegawai_db.objects.using(r.session["ccabang"]).all()
+            for s in status:
+                status_pegawai_payroll_app_db(
+                    id=s.pk,
+                    status=s.status,
+                ).save(using=f'p{r.session["ccabang"]}')
+        else:
+            pass
+    else:
+        pass 

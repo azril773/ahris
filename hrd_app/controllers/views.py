@@ -50,12 +50,12 @@ def user_logout(request):
         
 # Home
 @login_required
-def beranda(request):  
+def beranda(r):  
     
-    iduser = request.user.id
-    
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    iduser = r.user.id
+    print("KLKL")
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses        
         dsid = dakses.sid_id
         
@@ -70,7 +70,7 @@ def beranda(request):
         return redirect("absensi",sid=dsid)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('login')
 
 

@@ -460,16 +460,17 @@ class status_pegawai_payroll_db(models.Model):
         verbose_name = 'Status Pegawai yg Payroll'
         verbose_name_plural = 'Status Pegawai yg Payroll'
      
-class status_pegawai_payroll_db(models.Model):
-    status_pegawai = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE, null=True)    
-    
-    def __int__(self):
-        return self.status_pegawai
+     
+class cabang_db(models.Model):
+    cabang = models.CharField(max_length=100)
+
+
+    def __str__(self) -> str:
+        return self.cabang
     
     class Meta:
-        verbose_name = 'Status Pegawai yg Payroll'
-        verbose_name_plural = 'Status Pegawai yg Payroll'
-     
+        verbose_name = "Cabang DB"
+        verbose_name_plural = "Cabang DB"
 # Akses
 # ==================================================================
 
@@ -813,7 +814,7 @@ cabang =  (("tasik","tasik"),("sumedang","sumedang"),("cirebon","cirebon"),("gar
 
 class akses_cabang_db(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
-    cabang = models.CharField(choices=cabang,max_length=50,null=False)
+    cabang = models.ForeignKey(cabang_db,on_delete=models.CASCADE,null=False)
     add_by = models.CharField(max_length=100, null=True)
     edit_by = models.CharField(max_length=100, null=True)
     add_date = models.DateTimeField(auto_now_add=True, null=True)
@@ -1239,3 +1240,75 @@ class kompen_db_arsip(models.Model):
         verbose_name = 'Kompensasi'
         verbose_name_plural = 'Kompensasi'        
         
+
+
+    
+# ++++++++++++++++++++++++++++++++++
+# Payroll
+class pegawai_payroll_db(models.Model):
+    nama = models.CharField(max_length=200, null=True)
+    email = models.CharField(max_length=200, null=True)
+    no_telp = models.CharField(max_length=100, null=True)
+    userid = models.CharField(max_length=100, unique=True, null=True)
+    gender = models.CharField(max_length=10, null=True)
+
+    status = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE)
+    nik = models.CharField(max_length=100, null=True)
+    divisi = models.ForeignKey(divisi_db, on_delete=models.CASCADE)
+    counter = models.ForeignKey(counter_db, on_delete=models.CASCADE, null=True)
+
+    no_rekening = models.CharField(max_length=50, null=True, blank=True)
+    no_bpjs_ks = models.CharField(max_length=50, null=True, blank=True)
+    no_bpjs_tk = models.CharField(max_length=50, null=True, blank=True)
+    payroll_by = models.CharField(max_length=50, choices=pilihan_pengelola, default='HRD')
+
+    ks_premi = models.IntegerField(default=0)
+    tk_premi = models.IntegerField(default=0)
+
+    aktif = models.IntegerField(null=True)
+    tgl_masuk = models.DateField(null=True, blank=True)
+    tgl_aktif = models.DateTimeField(null=True, blank=True)
+    tgl_nonaktif = models.DateTimeField(null=True, blank=True)
+
+    sisa_cuti = models.IntegerField(null=True)
+
+    add_by = models.CharField(max_length=100, null=True, blank=True)
+    edit_by = models.CharField(max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    update_at = models.DateTimeField(auto_now=True, null=True)
+
+    class Meta:
+        managed = False
+        db_table = "payroll_app_pegawai_db"
+
+class counter_payroll_db(models.Model):
+    counter = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.counter
+
+    class Meta:
+        managed=False
+        db_table="payroll_app_counter_db"   
+
+
+
+class status_pegawai_payroll_app_db(models.Model):
+    status = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.status
+
+    class Meta:
+        managed=False
+        db_table="payroll_app_status_pegawai_db"     
+
+class divisi_payroll_db(models.Model):
+    divisi = models.CharField(max_length=100)
+
+    def __str__(self) -> str:
+        return self.divisi
+    
+    class Meta:
+        managed=False
+        db_table="payroll_app_divisi_db" 

@@ -280,26 +280,26 @@ def periode_tgl(tanggal):
 
 # Pengaturan
 @login_required
-def pengaturan(request):
-    iduser = request.user.id
+def pengaturan(r):
+    iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
         data = {       
 
             'akses' : akses,
-            "cabang":request.session["cabang"],
-            "ccabang":request.session["ccabang"],
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
             'dsid': dsid,  
             'modul_aktif' : 'Admin Panel'   
         }
         
-        return render(request,'hrd_app/pengaturan/admin_panel.html', data)
+        return render(r,'hrd_app/pengaturan/admin_panel.html', data)
         
     else:    
-        messages.info(request, 'Data akses Anda belum di tentukan.')        
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')

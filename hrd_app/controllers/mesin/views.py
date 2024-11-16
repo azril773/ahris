@@ -4,9 +4,9 @@ from hrd_app.controllers.lib import *
 def amesin(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -47,9 +47,9 @@ def mesin_json(r):
 def admesin(r,id): 
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -105,8 +105,8 @@ def admesin(r,id):
 def rmesin(r,userid,id,uid):
     iduser = r.user.id
 
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
 
@@ -145,7 +145,7 @@ def rmesin(r,userid,id,uid):
 def tambah_data_pegawai(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        user = akses_db.objects.filter(user_id=r.user.id)
+        user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)
         if not user.exists():
             return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
         user = user[0]
@@ -373,9 +373,9 @@ def tambah_data_pegawai(r):
 def datamesin(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -401,7 +401,7 @@ def add_data(r,id):
     user = r.user.username
 
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses   
     try:
         mesin = mesin_db.objects.using(r.session["ccabang"]).filter(id=int(id))
@@ -461,9 +461,9 @@ def add_data(r,id):
 def cdatamesin(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -492,7 +492,7 @@ def cdatamesin(r):
 @login_required
 def cpalldata(r):
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         master = r.POST.get("mesin")
@@ -555,7 +555,7 @@ def cpalldata(r):
 @login_required
 def cppegawai(r):
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         master = r.POST.get("mesin")
@@ -630,7 +630,7 @@ def cppegawai(r):
 @login_required
 def cpdivisi(r):
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         master = r.POST.get("mesin")
@@ -701,7 +701,7 @@ def cpdivisi(r):
 @login_required
 def adduser_machine(r): 
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         mesin = r.POST.get("mesin")
@@ -747,7 +747,7 @@ def adduser_machine(r):
 @login_required
 def edituser_machine(r):
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         mesin = r.POST.get("mesin")
@@ -790,7 +790,7 @@ def edituser_machine(r):
 @login_required
 def deleteuser_machine(r):
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         pegawai = r.POST.getlist("pegawai[]")
@@ -820,7 +820,7 @@ def deleteuser_machineu(r):
     user = r.user.username
 
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         pegawai = r.POST.get("userid")
@@ -848,7 +848,7 @@ def deleteuser_machineu(r):
 def hapusabsen(r,id):
 
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         try:
@@ -873,7 +873,7 @@ def hapusabsen(r,id):
 def sesuaikanjam(r,id):
 
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         try:
@@ -900,7 +900,7 @@ def sesuaikanjam(r,id):
 def clearbuffer(r,id):
 
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     if akses == "admin" or akses == "root":
         try:
@@ -925,7 +925,7 @@ def clearbuffer(r,id):
 def tmesin(r):
 
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     nama = r.POST.get("namamesin")
     ip = r.POST.get("ipaddress")
@@ -952,7 +952,7 @@ def tmesin(r):
 def hmesin(r):
 
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     idmesin = r.POST.get("idmesin")
     if akses == "admin" or akses == "root":
@@ -966,7 +966,7 @@ def hmesin(r):
 def emesin(r):
 
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     nama = r.POST.get("editnamamesin")
     ip = r.POST.get("editipaddress")
@@ -993,7 +993,7 @@ def emesin(r):
 def getmesin(r):
 
     iduser = r.user.id
-    data_akses = akses_db.objects.get(user=iduser)
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     idmesin = r.POST.get("idmesin")
     if akses == "admin" or akses == "root":
@@ -1012,7 +1012,7 @@ def getmesin(r):
 # def get_mesin(r,mesin):
 
 #     iduser = r.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses 
 #     if akses == "admin" or akses == "root":
 #         mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(mesin))
@@ -1038,7 +1038,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1080,7 +1080,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1106,7 +1106,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1187,7 +1187,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1234,7 +1234,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1255,7 +1255,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1280,7 +1280,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1325,7 +1325,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1348,7 +1348,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1383,7 +1383,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1419,7 +1419,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin':
@@ -1454,7 +1454,7 @@ def getmesin(r):
 #     user = request.user.username
 
 #     iduser = request.user.id
-#     data_akses = akses_db.objects.get(user=iduser)
+#     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
 #     if akses == 'root' or akses == 'it' or akses == 'admin' or akses == 'user':

@@ -7,9 +7,9 @@ from hrd_app.controllers.lib import *
 def counter(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -113,3 +113,22 @@ def hapus_counter(r):
         
         return JsonResponse({"status": status})
 
+
+
+@login_required
+def scounter_payroll(r):
+    id_user = r.user.id
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):
+        akses = akses_db.objects.using(r.session["ccabang"]).get(user_id=id_user)
+        akses = akses.akses
+        if akses == "root" or akses == "hrd":
+            counter = counter_db.objects.using(r.session["ccabang"]).all()
+            for c in counter:
+                counter_payroll_db(
+                    id=c.pk,
+                    counter=c.counter,
+                ).save(using=f'p{r.session["ccabang"]}')
+        else:
+            pass
+    else:
+        pass
