@@ -1,0 +1,65 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        {% if messages %}
+            {% for message in messages %}
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+            {% endfor %}
+        {% endif %}
+
+
+
+            <div class="row">
+                <div class="col-12">
+                    <select name="pilih_cabang" id="pilih_cabang">
+                        <option value="">Pilih Cabang</option>
+                        {% for c in cabang %}
+                            <option value="{{c.pk}}" style="text-transform: capitalize;">{{c.cabang}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+    </div>
+
+</div>
+
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>
+    $("#pilih_cabang").selectize({
+        onChange:(value) => {
+            window.location.href = `/hrd/registrasi/${value}`
+        }
+    })
+</script>
+
+{% endblock hrd_ajax %}
