@@ -916,7 +916,7 @@ def pabsen(req):
     now = datetime.now()
     hari = now.strftime("%A")
     hari = nama_hari(hari)
-
+# sdsdsd
     if req.session["ccabang"] != "tasik":
         prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],)
     else:
