@@ -1294,7 +1294,7 @@ def print_laporan_divisi_excel(r):
                         obj["sln"].append(sln)
                         obj["kehadiran"].append(kehadiran)
                         obj["ln"].append(ab.libur_nasional)
-        
+        # sdsd
         # tselisih = str(tselisih).split(".")
         slc = slice(0,2)
         df = pd.DataFrame(obj)
