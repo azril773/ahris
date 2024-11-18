@@ -1294,7 +1294,11 @@ def print_laporan_divisi_excel(r):
                         obj["sln"].append(sln)
                         obj["kehadiran"].append(kehadiran)
                         obj["ln"].append(ab.libur_nasional)
+<<<<<<< HEAD
+        # sdsd
+=======
         
+>>>>>>> parent of 89c2b883 (Revert "update")
         # tselisih = str(tselisih).split(".")
         slc = slice(0,2)
         df = pd.DataFrame(obj)
