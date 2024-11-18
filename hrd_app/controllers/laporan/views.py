@@ -1298,6 +1298,9 @@ def print_laporan_divisi_excel(r):
         # sdsd
 =======
         
+<<<<<<< HEAD
+>>>>>>> parent of 89c2b883 (Revert "update")
+=======
 >>>>>>> parent of 89c2b883 (Revert "update")
         # tselisih = str(tselisih).split(".")
         slc = slice(0,2)
