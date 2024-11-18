@@ -1299,6 +1299,9 @@ def print_laporan_divisi_excel(r):
 =======
         
 <<<<<<< HEAD
+<<<<<<< HEAD
+>>>>>>> parent of 89c2b883 (Revert "update")
+=======
 >>>>>>> parent of 89c2b883 (Revert "update")
 =======
 >>>>>>> parent of 89c2b883 (Revert "update")
