@@ -909,7 +909,7 @@ def pabsen(req):
 
         ddt.append(data)
         
-    status_lh = [st.pk for st in status_pegawai_lintas_hari_db.objects.using(req.session["ccabang"]).all()]
+    status_lh = [st.status_pegawai.pk for st in status_pegawai_lintas_hari_db.objects.using(req.session["ccabang"]).all()]
     # proses data simpan di dt array
     # obj 
     jamkerja = jamkerja_db.objects.using(req.session["ccabang"]).select_related('kk').all()
