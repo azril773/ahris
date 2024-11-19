@@ -144,6 +144,7 @@ def laporan_json(r):
             
             obj = {
                 "id" : pgw.id,
+                "status":pgw.status.pk,
                 "nik":pgw.nik,
                 "jk":pgw.gender[0] if pgw.gender != "" else "",
                 "nama": pgw.nama,
@@ -255,6 +256,7 @@ def laporan_json(r):
                         af += 1
             obj = {
                 "id" : pgw.id,
+                "status":pgw.status.pk,
                 "nik":pgw.nik,
                 "jk":pgw.gender[0] if pgw.gender != "" else "",
                 "nama": pgw.nama,
@@ -283,6 +285,39 @@ def laporan_json(r):
                 "dl":dl if dl > 0 else ""
             }
             data.append(obj)
+        for dt in data:
+            if not rekap_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(dt["id"]),periode=int(bulan),tahun=int(tahun)).exists():
+                rekap_db(
+                    pegawai_id=dt["id"],
+                    status_id=dt["status"],
+                    tharikerja=dt["total_hari"] if dt["total_hari"] != "" else 0,
+                    periode=bulan,
+                    tahun=tahun,
+                    sb=dt['sb'] if dt["sb"] != "" else 0,
+                    sdl=dt["sdl"] if dt["sdl"] != "" else 0,
+                    sdp=dt["sdp"] if dt["sdp"] != "" else 0,
+                    ijin=dt["ijin"] if dt["ijin"] != "" else 0,
+                    af=dt['af'] if dt["af"] != "" else 0,
+                    insentif=0,
+                    cm=dt["cm"] if dt["cm"] != "" else 0,
+                    keterangan=''
+                ).save(using=r.session["ccabang"])
+            else:
+                rekap_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(dt["id"]),periode=int(bulan),tahun=int(tahun)).update(
+                    pegawai_id=dt["id"],
+                    status_id=dt["status"],
+                    tharikerja=dt["total_hari"] if dt["total_hari"] != "" else 0,
+                    periode=bulan,
+                    tahun=tahun,
+                    sb=dt['sb'] if dt["sb"] != "" else 0,
+                    sdl=dt["sdl"] if dt["sdl"] != "" else 0,
+                    sdp=dt["sdp"] if dt["sdp"] != "" else 0,
+                    ijin=dt["ijin"] if dt["ijin"] != "" else 0,
+                    af=dt['af'] if dt["af"] != "" else 0,
+                    insentif=0,
+                    cm=dt["cm"] if dt["cm"] != "" else 0,
+                    keterangan=''
+                )
     return JsonResponse({"data":data},status=200)
 
 
@@ -1294,17 +1329,7 @@ def print_laporan_divisi_excel(r):
                         obj["sln"].append(sln)
                         obj["kehadiran"].append(kehadiran)
                         obj["ln"].append(ab.libur_nasional)
-<<<<<<< HEAD
-        # sdsd
-=======
         
-<<<<<<< HEAD
-<<<<<<< HEAD
->>>>>>> parent of 89c2b883 (Revert "update")
-=======
->>>>>>> parent of 89c2b883 (Revert "update")
-=======
->>>>>>> parent of 89c2b883 (Revert "update")
         # tselisih = str(tselisih).split(".")
         slc = slice(0,2)
         df = pd.DataFrame(obj)
