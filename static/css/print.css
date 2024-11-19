@@ -1,0 +1,17 @@
+.head{
+    border-bottom: 2px solid rgb(0, 0, 0) !important;
+    /* padding-left: 3px !important; */
+    text-align: start;
+}
+
+.body{
+    border-bottom: 1px solid rgb(211, 211, 211) !important;
+    /* padding-left: 3px !important; */
+}
+
+.hprint, .dprint {
+    padding: 2px;
+    margin: 0 ;
+    border: 1px solid black !important;
+    line-height: 1;
+  }
