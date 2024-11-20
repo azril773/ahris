@@ -850,7 +850,7 @@ def pabsen(req):
                     )
                     tabsen.save(using=req.session['ccabang'])
     
-    # dmesin = []
+    dmesin = []
     # ambil data mesin simpan di att dan dmesin array
     try:
         pools = Pool(processes=2
@@ -866,6 +866,7 @@ def pabsen(req):
             for d in dm:    
                 dmesin.append(d)
     except Exception as err:
+        print(err)
         messages.error(req,"Terjadi kesalahan pada mesin finger. Silahkan coba lagi")
         return redirect("absensi",sid=sid)
 
