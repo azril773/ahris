@@ -269,14 +269,16 @@ def tambah_lembur(r):
             
             # Dengan istirahat (di jadwal kerja)
             if ab.lama_istirahat != 0 or ab.lama_istirahat is not None:
-                if ab.masuk is not None and ab.pulang is not None:
+                if ab.masuk is not None and ab.pulang is not None or ab.masuk_b is not None and ab.pulang_b is not None:
                     
                     jadwal_masuk = datetime.combine(ab.tgl_absen, ab.jam_masuk) 
                     jadwal_pulang = datetime.combine(ab.tgl_absen, ab.jam_pulang)
-                     
-                    absen_masuk = datetime.combine(ab.tgl_absen, ab.masuk)
-                    absen_pulang = datetime.combine(ab.tgl_absen, ab.pulang)
-                    
+                    if ab.masuk is not None and ab.pulang is not None:
+                        absen_masuk = datetime.combine(ab.tgl_absen, ab.masuk)
+                        absen_pulang = datetime.combine(ab.tgl_absen, ab.pulang)
+                    elif ab.masuk_b is not None and ab.pulang_b is not None:
+                        absen_masuk = datetime.combine(ab.tgl_absen, ab.masuk_b)
+                        absen_pulang = datetime.combine(ab.tgl_absen, ab.pulang_b)
                     bm = jadwal_masuk + timedelta(minutes=5)
                     batas_masuk = datetime.strptime(str(bm), "%Y-%m-%d %H:%M:%S")                                                   
                         
