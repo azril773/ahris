@@ -897,6 +897,7 @@ def pabsen(req):
         ddr.append(data)              
     
     ddt = []
+    ddtor = []
     
     # ambil data trans simpan di ddt
     for d2 in data_trans_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
@@ -907,7 +908,7 @@ def pabsen(req):
             "mesin": d2.mesin,
             "ket": d2.keterangan
         }
-
+        ddtor.append(data)
         ddt.append(data)
         
     status_lh = [st.status_pegawai.pk for st in status_pegawai_lintas_hari_db.objects.using(req.session["ccabang"]).all()]
@@ -925,35 +926,54 @@ def pabsen(req):
     #         "punch": 0,
     #         "mesin": 'Mesanine' 
     #     },
-    #     {
-    #         'userid':'150',
-    #         "jam_absen": '2024-11-19 12:00:30',
-    #         "punch": 3,
-    #         "mesin": 'Mesanine' 
-    #     },
+    #     # {
+    #     #     'userid':'150',
+    #     #     "jam_absen": '2024-11-19 12:00:30',
+    #     #     "punch": 3,
+    #     #     "mesin": 'Mesanine' 
+    #     # },
     #     {
     #         'userid':'150',
     #         "jam_absen": '2024-11-19 12:01:20',
     #         "punch": 2,
     #         "mesin": 'Mesanine' 
     #     },
-        # {
-        #     'userid':'150',
-        #     "jam_absen": '2024-11-19 16:30:20',
-        #     "punch": 0,
-        #     "mesin": 'Mesanine' 
-        # },
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 13:30:20',
+    #         "punch": 3,
+    #         "mesin": 'Mesanine' 
+    #     },
     #     {
     #         'userid':'150',
     #         "jam_absen": '2024-11-19 16:30:40',
     #         "punch": 1,
     #         "mesin": 'Mesanine' 
-    #     }
+    #     },
+    #     # {
+    #     #     'userid':'150',
+    #     #     "jam_absen": '2024-11-20 08:00:20',
+    #     #     "punch": 0,
+    #     #     "mesin": 'Mesanine' 
+    #     # },
+    #     # {
+    #     #     'userid':'150',
+    #     #     "jam_absen": '2024-11-20 13:00:20',
+    #     #     "punch": 2,
+    #     #     "mesin": 'Mesanine' 
+    #     # },
+    #     # {
+    #     #     'userid':'150',
+    #     #     "jam_absen": '2024-11-20 16:30:20',
+    #     #     "punch": 1,
+    #     #     "mesin": 'Mesanine' 
+    #     # }
     # ]
+    # print(ddt)
     if req.session["ccabang"] != "tasik":
-        prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt)
+        prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)
     else:
-        prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt)
+        prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)
 
     # simpan data trans
     
