@@ -36,7 +36,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                 # print(cekddt)
                 if len(cekddt) > 0:
                     for c in cekddt:
-                        cjam_absen = datetime.strptime(datetime.strftime(c["jam_absen"],"%Y-%m-%d %H:%M:%S"),"%Y-%m-%d %H:%M:%S")
+                        cjam_absen = c["jam_absen"]
 
                         ja = datetime.strptime(a["jam_absen"],"%Y-%m-%d %H:%M:%S")
                         print(type(cjam_absen),type(ja))

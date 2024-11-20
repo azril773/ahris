@@ -229,7 +229,7 @@ def edit_jam_kerja(r):
             if h.lower() == 'semua hari':
                 if jamkerja_db.objects.using(r.session["ccabang"]).filter(~Q(hari='semua hari'),kk_id=int(kk)).exists():
                     break
-            jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=kk,jam_masuk=jam_masuk,jam_pulang=jam_pulang,hari=h,shift_id=shift).delete()
+            jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=kk,jam_masuk=jam_masuk,jam_pulang=jam_pulang,hari=h).delete()
             jamkerja_db(
                 kk_id=kk,
                 jam_masuk=jam_masuk,

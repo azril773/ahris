@@ -917,6 +917,38 @@ def pabsen(req):
     hari = now.strftime("%A")
     hari = nama_hari(hari)
 # sdsdsd
+    # att = [
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 08:00:20',
+    #         "punch": 0,
+    #         "mesin": 'Mesanine' 
+    #     },
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 12:30:20',
+    #         "punch": 2,
+    #         "mesin": 'Mesanine' 
+    #     },
+    #     # {
+    #     #     'userid':'150',
+    #     #     "jam_absen": '2024-11-19 13:10:20',
+    #     #     "punch": 3,
+    #     #     "mesin": 'Mesanine' 
+    #     # },
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 16:30:20',
+    #         "punch": 0,
+    #         "mesin": 'Mesanine' 
+    #     },
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 16:30:40',
+    #         "punch": 1,
+    #         "mesin": 'Mesanine' 
+    #     }
+    # ]
     if req.session["ccabang"] != "tasik":
         prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt)
     else:
