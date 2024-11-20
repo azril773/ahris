@@ -140,7 +140,7 @@ def jam_kerja_json(r):
                 'lama_ist': i.lama_istirahat,
                 'pulang': i.jam_pulang,
                 'hari':i.hari,
-                "shift":i.shift.pk if i.shift is not None else "-"
+                "shift":i.shift.shift if i.shift is not None else "-"
             }
             data.append(jk)
         return JsonResponse({"data": data})
