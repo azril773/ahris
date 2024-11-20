@@ -850,7 +850,7 @@ def pabsen(req):
                     )
                     tabsen.save(using=req.session['ccabang'])
     
-    dmesin = []
+    # dmesin = []
     # ambil data mesin simpan di att dan dmesin array
     try:
         pools = Pool(processes=2
@@ -926,22 +926,22 @@ def pabsen(req):
     #     },
     #     {
     #         'userid':'150',
-    #         "jam_absen": '2024-11-19 12:30:20',
+    #         "jam_absen": '2024-11-19 12:00:30',
+    #         "punch": 3,
+    #         "mesin": 'Mesanine' 
+    #     },
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 12:01:20',
     #         "punch": 2,
     #         "mesin": 'Mesanine' 
     #     },
-    #     # {
-    #     #     'userid':'150',
-    #     #     "jam_absen": '2024-11-19 13:10:20',
-    #     #     "punch": 3,
-    #     #     "mesin": 'Mesanine' 
-    #     # },
-    #     {
-    #         'userid':'150',
-    #         "jam_absen": '2024-11-19 16:30:20',
-    #         "punch": 0,
-    #         "mesin": 'Mesanine' 
-    #     },
+        # {
+        #     'userid':'150',
+        #     "jam_absen": '2024-11-19 16:30:20',
+        #     "punch": 0,
+        #     "mesin": 'Mesanine' 
+        # },
     #     {
     #         'userid':'150',
     #         "jam_absen": '2024-11-19 16:30:40',

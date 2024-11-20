@@ -26,51 +26,80 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                         punch = a['punch'],
                         mesin = a['mesin']             
                     ).save(using=cabang)
-                    
                 jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
+                japlus = jam_absen + timedelta(minutes=1,seconds=30)
+                jamin = jam_absen - timedelta(minutes=1,seconds=30)
 
                 pg = next((pgw for pgw in pegawai if pgw["userid"] == a["userid"]),None)
                 # print(jam_absen)
                 # print(ddt)
-                cekddt = [d for d in ddt if d["jam_absen"].date() == jam_absen.date() and d["jam_absen"].hour == jam_absen.hour and d["jam_absen"].minute == jam_absen.minute and int(d["userid"]) == int(a["userid"]) and d["punch"] != a["punch"]]
+                cekddt = [d for d in ddt if d["jam_absen"].date() == jam_absen.date() and int(d["userid"]) == int(a["userid"]) and  d["jam_absen"] > jamin and d["jam_absen"] < japlus and jam_absen > d["jam_absen"]]
+                con = []
                 # print(cekddt)
                 if len(cekddt) > 0:
                     for c in cekddt:
-                        cjam_absen = c["jam_absen"]
-
-                        ja = datetime.strptime(a["jam_absen"],"%Y-%m-%d %H:%M:%S")
-                        print(type(cjam_absen),type(ja))
-                        if cjam_absen == ja:
-                            break
+                        ab = absensi_db.objects.using(cabang).filter(tgl_absen=jam_absen.date(),pegawai__userid=a["userid"])
+                        if ab.exists():
+                            ab = ab[0]
+                            ab.masuk = ab.masuk if ab.masuk != c["jam_absen"].time() else None
+                            ab.pulang = ab.pulang if ab.pulang != c["jam_absen"].time() else None
+                            ab.istirahat = ab.istirahat if ab.istirahat != c["jam_absen"].time() else None
+                            ab.kembali = ab.kembali if ab.kembali != c["jam_absen"].time() else None
+                            ab.istirahat2 = ab.istirahat2 if ab.istirahat2 != c["jam_absen"].time() else None
+                            ab.kembali2 = ab.kembali2 if ab.kembali2 != c["jam_absen"].time() else None
+                            ab.masuk_b = ab.masuk_b if ab.masuk_b != c["jam_absen"].time() else None
+                            ab.pulang_b = ab.pulang_b if ab.pulang_b != c["jam_absen"].time() else None
+                            ab.istirahat_b = ab.istirahat_b if ab.istirahat_b != c["jam_absen"].time() else None
+                            ab.kembali_b = ab.kembali_b if ab.kembali_b != c["jam_absen"].time() else None
+                            ab.istirahat2_b = ab.istirahat2_b if ab.istirahat2_b != c["jam_absen"].time() else None
+                            ab.kembali2_b = ab.kembali2_b if ab.kembali2_b != c["jam_absen"].time() else None
+                            ab.save(using=cabang)
+                            data_trans_db.objects.using(cabang).filter(userid=int(c["userid"]),jam_absen=c["jam_absen"]).delete()
                         else:
-                            # pass
-                            ab = absensi_db.objects.using(cabang).filter(tgl_absen=jam_absen.date(),pegawai__userid=a["userid"])
-                            if ab.exists():
-                                ab = ab[0]
-                                if ja > cjam_absen:
-                                    print(ab.masuk_b,cjam_absen)
-                                    ab.masuk = ab.masuk if ab.masuk != cjam_absen.time() else None
-                                    ab.pulang = ab.pulang if ab.pulang != cjam_absen.time() else None
-                                    ab.istirahat = ab.istirahat if ab.istirahat != cjam_absen.time() else None
-                                    ab.kembali = ab.kembali if ab.kembali != cjam_absen.time() else None
-                                    ab.istirahat2 = ab.istirahat2 if ab.istirahat2 != cjam_absen.time() else None
-                                    ab.kembali2 = ab.kembali2 if ab.kembali2 != cjam_absen.time() else None
-                                    ab.masuk_b = ab.masuk_b if ab.masuk_b != cjam_absen.time() else None
-                                    ab.pulang_b = ab.pulang_b if ab.pulang_b != cjam_absen.time() else None
-                                    ab.istirahat_b = ab.istirahat_b if ab.istirahat_b != cjam_absen.time() else None
-                                    ab.kembali_b = ab.kembali_b if ab.kembali_b != cjam_absen.time() else None
-                                    ab.istirahat2_b = ab.istirahat2_b if ab.istirahat2_b != cjam_absen.time() else None
-                                    ab.kembali2_b = ab.kembali2_b if ab.kembali2_b != cjam_absen.time() else None
-                                    ab.save(using=cabang)
-                                    data_trans_db.objects.using(cabang).filter(userid=int(c["userid"]),jam_absen=cjam_absen).delete()
-                                    # s = jam_absen - c["jam_absen"]
-                                else:
-                                    # s = jam_absen - c["jam_absen"]
-                                    pass
-                            else:
-                                pass
+                            pass
+                    print(cekddt)
+                    print(jam_absen)
+                else:
+                    continue
+                        
+                # # print(cekddt)
+                # if len(cekddt) > 0:
+                #     for c in cekddt:
+                #         cjam_absen = c["jam_absen"]
+
+                #         ja = datetime.strptime(a["jam_absen"],"%Y-%m-%d %H:%M:%S")
+                #         print(type(cjam_absen),type(ja))
+                #         if cjam_absen == ja:
+                #             break
+                #         else:
+                #             # pass
+                #             ab = absensi_db.objects.using(cabang).filter(tgl_absen=jam_absen.date(),pegawai__userid=a["userid"])
+                #             if ab.exists():
+                #                 ab = ab[0]
+                #                 if ja > cjam_absen:
+                #                     print(ab.masuk_b,cjam_absen)
+                #                     ab.masuk = ab.masuk if ab.masuk != cjam_absen.time() else None
+                #                     ab.pulang = ab.pulang if ab.pulang != cjam_absen.time() else None
+                #                     ab.istirahat = ab.istirahat if ab.istirahat != cjam_absen.time() else None
+                #                     ab.kembali = ab.kembali if ab.kembali != cjam_absen.time() else None
+                #                     ab.istirahat2 = ab.istirahat2 if ab.istirahat2 != cjam_absen.time() else None
+                #                     ab.kembali2 = ab.kembali2 if ab.kembali2 != cjam_absen.time() else None
+                #                     ab.masuk_b = ab.masuk_b if ab.masuk_b != cjam_absen.time() else None
+                #                     ab.pulang_b = ab.pulang_b if ab.pulang_b != cjam_absen.time() else None
+                #                     ab.istirahat_b = ab.istirahat_b if ab.istirahat_b != cjam_absen.time() else None
+                #                     ab.kembali_b = ab.kembali_b if ab.kembali_b != cjam_absen.time() else None
+                #                     ab.istirahat2_b = ab.istirahat2_b if ab.istirahat2_b != cjam_absen.time() else None
+                #                     ab.kembali2_b = ab.kembali2_b if ab.kembali2_b != cjam_absen.time() else None
+                #                     ab.save(using=cabang)
+                #                     data_trans_db.objects.using(cabang).filter(userid=int(c["userid"]),jam_absen=cjam_absen).delete()
+                #                     # s = jam_absen - c["jam_absen"]
+                #                 else:
+                #                     # s = jam_absen - c["jam_absen"]
+                #                     pass
+                #             else:
+                #                 pass
                                 
-                    continue 
+                #     continue 
                 # # Versi
             
                 for r in rangetgl:
