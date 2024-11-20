@@ -61,7 +61,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                     ab.kembali_b = ab.kembali_b if ab.kembali_b != cjam_absen.time() else None
                                     ab.istirahat2_b = ab.istirahat2_b if ab.istirahat2_b != cjam_absen.time() else None
                                     ab.kembali2_b = ab.kembali2_b if ab.kembali2_b != cjam_absen.time() else None
-                                    ab.save()
+                                    ab.save(using=cabang)
                                     data_trans_db.objects.using(cabang).filter(userid=int(c["userid"]),jam_absen=cjam_absen).delete()
                                     # s = jam_absen - c["jam_absen"]
                                 else:
