@@ -176,11 +176,12 @@ def tambah_jam_kerja(r):
             hari = ["Semua Hari"]
         if not shift_db.objects.using(r.session["ccabang"]).filter(id=int(shift)).exists():
             return JsonResponse({"status":'error',"msg":"Shift tidak ada"},status=400)
-        if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),jam_masuk=jam_masuk,jam_pulang=jam_pulang).exists():
-            return JsonResponse({"status":'error',"msg":"Jam masuk atau pulang harus berbeda"},status=400)
+        
         else:
             
             for h in hari:
+                if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),jam_masuk=jam_masuk,jam_pulang=jam_pulang,hari=h).exists():
+                    return JsonResponse({"status":'error',"msg":"Jam masuk atau pulang harus berbeda"},status=400)
                 # if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),hari=h).exists():
                 #     continue
                 
@@ -253,7 +254,7 @@ def hapus_jam_kerja(r):
         try:
             ln = jamkerja_db.objects.using(r.session["ccabang"]).get(id=int(hid))           
         except:
-            return JsonResponse({'status':'gagal hapus'})
+            return JsonResponse({'status':'gagal hapus'},status=400)
 
         thapus = histori_hapus_db(
             delete_by = nama_user,
