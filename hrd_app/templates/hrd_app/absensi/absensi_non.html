@@ -312,17 +312,6 @@
                         }
                     }
                 },
-                { 
-                    data: null,
-                    "render": function(data, type, row, meta){    
-                        if(row.masuk == null || row.pulang == null || row.masuk > row.jam_masuk){
-                            data = '<button class="btn btn-sm btn-warning mb-1 tx-12" data-toggle="modal" data-target="#editIjin" data-id="'+row.id+'">Edit</button>';
-                            return data;
-                        } else {
-                            return ""
-                        }
-                    } 
-                },
                 
             ],   
 
@@ -342,7 +331,6 @@
                 $('td', row).eq(8).addClass('hitam');
                 $('td', row).eq(9).addClass('hitam');
                 $('td', row).eq(10).addClass('hitam');
-                $('td', row).eq(11).addClass('hitam');
             },
 
 
@@ -424,17 +412,6 @@
                         }
                     }
                 },
-                { 
-                    data: null,
-                    "render": function(data, type, row, meta){    
-                        if(row.masuk == null || row.pulang == null || row.masuk > row.jam_masuk){
-                            data = '<button class="btn btn-sm btn-warning mb-1 tx-12" data-toggle="modal" data-target="#editIjin" data-id="'+row.id+'">Edit</button>';
-                            return data;
-                        } else {
-                            return ""
-                        }
-                    } 
-                },
                 
             ],   
 
@@ -454,7 +431,6 @@
                 $('td', row).eq(8).addClass('hitam');
                 $('td', row).eq(9).addClass('hitam');
                 $('td', row).eq(10).addClass('hitam');
-                $('td', row).eq(11).addClass('hitam');
             },
 
             destroy: true,
