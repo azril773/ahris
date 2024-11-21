@@ -852,23 +852,23 @@ def pabsen(req):
     
     dmesin = []
     # ambil data mesin simpan di att dan dmesin array
-    # try:
-    #     pools = Pool(processes=2
-    #                  )
-    #     for m in mesin_db.objects.using(req.session["ccabang"]).filter(status='Active'):
-    #         ress = pools.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
-    #         # time.sleep(1)
-    #         dmesin.append(ress)
-    #     msn = [mesin.wait() for mesin in dmesin]
-    #     datas = [dt for dt in [dataMesin.get() for dataMesin in dmesin] if len(dt) > 0] 
-    #     dmesin = []
-    #     for dm in datas:
-    #         for d in dm:    
-    #             dmesin.append(d)
-    # except Exception as err:
-    #     print(err)
-    #     messages.error(req,"Terjadi kesalahan pada mesin finger. Silahkan coba lagi")
-    #     return redirect("absensi",sid=sid)
+    try:
+        pools = Pool(processes=2
+                     )
+        for m in mesin_db.objects.using(req.session["ccabang"]).filter(status='Active'):
+            ress = pools.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
+            # time.sleep(1)
+            dmesin.append(ress)
+        msn = [mesin.wait() for mesin in dmesin]
+        datas = [dt for dt in [dataMesin.get() for dataMesin in dmesin] if len(dt) > 0] 
+        dmesin = []
+        for dm in datas:
+            for d in dm:    
+                dmesin.append(d)
+    except Exception as err:
+        print(err)
+        messages.error(req,"Terjadi kesalahan pada mesin finger. Silahkan coba lagi")
+        return redirect("absensi",sid=sid)
 
     # return render(req,'hrd_app/example/ex.html')
     # reordering (ascending)
@@ -878,7 +878,7 @@ def pabsen(req):
     #     "punch":0,
     #     "mesin":"FS"
     # })
-    # att = sorted(dmesin, key=lambda i: i['jam_absen'])
+    att = sorted(dmesin, key=lambda i: i['jam_absen'])
 
     # att = sorted(att, key=lambda i: i['jam_absen'])
     ddr = []
@@ -919,62 +919,62 @@ def pabsen(req):
     hari = now.strftime("%A")
     hari = nama_hari(hari)
 # sdsdsd
-    att = [
-        {
-            'userid':'150',
-            "jam_absen": '2024-11-19 08:00:20',
-            "punch": 0,
-            "mesin": 'Mesanine' 
-        },
-        {
-            'userid':'150',
-            "jam_absen": '2024-11-19 08:01:20',
-            "punch": 0,
-            "mesin": 'Mesanine' 
-        },
-        # {
-        #     'userid':'150',
-        #     "jam_absen": '2024-11-19 12:00:30',
-        #     "punch": 3,
-        #     "mesin": 'Mesanine' 
-        # },
-        {
-            'userid':'150',
-            "jam_absen": '2024-11-19 12:01:20',
-            "punch": 2,
-            "mesin": 'Mesanine' 
-        },
-        {
-            'userid':'150',
-            "jam_absen": '2024-11-19 13:30:20',
-            "punch": 3,
-            "mesin": 'Mesanine' 
-        },
-        {
-            'userid':'150',
-            "jam_absen": '2024-11-19 16:30:40',
-            "punch": 1,
-            "mesin": 'Mesanine' 
-        },
-        # {
-        #     'userid':'150',
-        #     "jam_absen": '2024-11-20 08:00:20',
-        #     "punch": 0,
-        #     "mesin": 'Mesanine' 
-        # },
-        # {
-        #     'userid':'150',
-        #     "jam_absen": '2024-11-20 13:00:20',
-        #     "punch": 2,
-        #     "mesin": 'Mesanine' 
-        # },
-        # {
-        #     'userid':'150',
-        #     "jam_absen": '2024-11-20 16:30:20',
-        #     "punch": 1,
-        #     "mesin": 'Mesanine' 
-        # }
-    ]
+    # att = [
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 08:00:20',
+    #         "punch": 0,
+    #         "mesin": 'Mesanine' 
+    #     },
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 08:01:20',
+    #         "punch": 0,
+    #         "mesin": 'Mesanine' 
+    #     },
+    #     # {
+    #     #     'userid':'150',
+    #     #     "jam_absen": '2024-11-19 12:00:30',
+    #     #     "punch": 3,
+    #     #     "mesin": 'Mesanine' 
+    #     # },
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 12:01:20',
+    #         "punch": 2,
+    #         "mesin": 'Mesanine' 
+    #     },
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 13:30:20',
+    #         "punch": 3,
+    #         "mesin": 'Mesanine' 
+    #     },
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 16:30:40',
+    #         "punch": 1,
+    #         "mesin": 'Mesanine' 
+    #     },
+    #     # {
+    #     #     'userid':'150',
+    #     #     "jam_absen": '2024-11-20 08:00:20',
+    #     #     "punch": 0,
+    #     #     "mesin": 'Mesanine' 
+    #     # },
+    #     # {
+    #     #     'userid':'150',
+    #     #     "jam_absen": '2024-11-20 13:00:20',
+    #     #     "punch": 2,
+    #     #     "mesin": 'Mesanine' 
+    #     # },
+    #     # {
+    #     #     'userid':'150',
+    #     #     "jam_absen": '2024-11-20 16:30:20',
+    #     #     "punch": 1,
+    #     #     "mesin": 'Mesanine' 
+    #     # }
+    # ]
     # print(ddt)
     if req.session["ccabang"] != "tasik":
         prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)
