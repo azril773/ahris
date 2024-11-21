@@ -926,6 +926,12 @@ def pabsen(req):
     #         "punch": 0,
     #         "mesin": 'Mesanine' 
     #     },
+    #     {
+    #         'userid':'150',
+    #         "jam_absen": '2024-11-19 08:01:20',
+    #         "punch": 0,
+    #         "mesin": 'Mesanine' 
+    #     },
     #     # {
     #     #     'userid':'150',
     #     #     "jam_absen": '2024-11-19 12:00:30',
