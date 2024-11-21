@@ -97,9 +97,7 @@ def laporan_json(r):
                         total_hari += 1
                     if a.jam_masuk is not None and a.masuk is not None:
                         if a.masuk > a.jam_masuk:
-                            if a.keterangan_ijin is not None:
-                                terlambat_ijin += 1
-                            else:
+                            if a.keterangan_ijin is None:
                                 terlambat += 1
                     if a.keterangan_ijin is not None:
                         if re.search("(sdp)",a.keterangan_ijin,re.I):
@@ -126,6 +124,8 @@ def laporan_json(r):
                             urh += 1
                         elif re.search("(bs)",a.keterangan_ijin,re.I):
                             bs += 1
+                        elif re.search("terlambat",a.keterangan_ijin,re.I):
+                            terlambat_ijin += 1
                         elif re.search("(ijin|izin)",a.keterangan_ijin,re.I):
                             ijin += 1
                         elif re.search("(dl)",a.keterangan_ijin,re.I):
@@ -211,9 +211,7 @@ def laporan_json(r):
                         total_hari += 1
                     if a.jam_masuk is not None and a.masuk is not None:
                         if a.masuk > a.jam_masuk:
-                            if a.keterangan_ijin is not None:
-                                terlambat_ijin += 1
-                            else:
+                            if a.keterangan_ijin is None:
                                 terlambat += 1
                     if a.keterangan_ijin is not None:
                         if re.search("(sdp)",a.keterangan_ijin,re.I):
@@ -240,6 +238,8 @@ def laporan_json(r):
                             urh += 1
                         elif re.search("(bs)",a.keterangan_ijin,re.I):
                             bs += 1
+                        elif re.search("terlambat",a.keterangan_ijin,re.I):
+                            terlambat_ijin += 1
                         elif re.search("(ijin|izin)",a.keterangan_ijin,re.I):
                             ijin += 1
                         elif re.search("(dl)",a.keterangan_ijin,re.I):
