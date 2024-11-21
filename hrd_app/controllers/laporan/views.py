@@ -1,5 +1,5 @@
 from hrd_app.controllers.lib import *
-
+import os
 @login_required
 def laporan(r,sid):
     iduser = r.user.id
@@ -702,10 +702,13 @@ def laporan_json_periode_excel(r,sid,id,bulan,tahun):
             # }
             # dat  a.append(absen)
         
-        tselisih = str(tselisih).split(".")
+        # tselisih = str(tselisih).split(".")
         slc = slice(0,2)
         df = pd.DataFrame(obj)
         if pegawai.exists():
+            for f in os.listdir("static/excel/"):
+                if re.search(".*",f):
+                    os.remove("static/excel/"+f)
             df.to_excel(f"static/excel/{pegawai[0].nama}-{pegawai[0].divisi.divisi}-{dari}-{sampai}.xlsx")
             with open(f"static/excel/{pegawai[0].nama}-{pegawai[0].divisi.divisi}-{dari}-{sampai}.xlsx","rb") as file:
                 http = HttpResponse(file.read(),content_type="application/vnd.ms-excel")
@@ -1292,10 +1295,13 @@ def print_laporan_divisi_excel(r):
                         obj["kehadiran"].append(kehadiran)
                         obj["ln"].append(ab.libur_nasional)
         
-        tselisih = str(tselisih).split(".")
+        # tselisih = str(tselisih).split(".")
         slc = slice(0,2)
         df = pd.DataFrame(obj)
         if divisi.exists():
+            for f in os.listdir("static/excel/"):
+                if re.search(".*",f):
+                    os.remove("static/excel/"+f)
             df.to_excel(f"static/excel/{divisi[0].divisi}-{dr}-{sp}.xlsx")
             with open(f"static/excel/{divisi[0].divisi}-{dr}-{sp}.xlsx","rb") as file:
                 http = HttpResponse(file.read(),content_type="application/vnd.ms-excel")
