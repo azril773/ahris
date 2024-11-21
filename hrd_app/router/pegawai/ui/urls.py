@@ -19,7 +19,7 @@ urlpatterns = [
     path('rp_form', views.rp_form, name='rp_form'),
     path('rp_cmesin', views.rp_cmesin, name='rp_cmesin'),
     path('rpm', views.rpm, name='rpm'),
-    path('spegawai_payroll', views.spegawai_payroll, name='spegawai_payroll'),
+    # path('spegawai_payroll', views.spegawai_payroll, name='spegawai_payroll'),
 
 
 ]
