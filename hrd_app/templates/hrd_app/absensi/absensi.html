@@ -119,7 +119,6 @@
                 <th>Pulang (B)</th>
                 <th>T.Jam</th>
                 <th>Keterangan</th>
-                <th>Action</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -320,17 +319,6 @@
                         }
                     }
                 },
-                { 
-                    data: null,
-                    "render": function(data, type, row, meta){    
-                        if(row.masuk == null || row.pulang == null || row.masuk > row.jam_masuk){
-                            data = '<button class="btn btn-sm btn-warning mb-1 tx-12" data-toggle="modal" data-target="#editIjin" data-id="'+row.id+'">Edit</button>';
-                            return data;
-                        } else {
-                            return ""
-                        }
-                    } 
-                },
                 
             ],   
 
@@ -354,7 +342,6 @@
                 $('td', row).eq(12).addClass('hitam');
                 $('td', row).eq(13).addClass('hitam');
                 $('td', row).eq(14).addClass('hitam');
-                $('td', row).eq(15).addClass('hitam');
             },
 
 
@@ -440,17 +427,6 @@
                         }
                     }
                 },
-                { 
-                    data: null,
-                    "render": function(data, type, row, meta){    
-                        if(row.masuk == null || row.pulang == null || row.masuk > row.jam_masuk){
-                            data = '<button class="btn btn-sm btn-warning mb-1 tx-12" data-toggle="modal" data-target="#editIjin" data-id="'+row.id+'">Edit</button>';
-                            return data;
-                        } else {
-                            return ""
-                        }
-                    } 
-                },
                 
             ],   
 
@@ -474,7 +450,6 @@
                 $('td', row).eq(12).addClass('hitam');
                 $('td', row).eq(13).addClass('hitam');
                 $('td', row).eq(14).addClass('hitam');
-                $('td', row).eq(15).addClass('hitam');
             },
 
             destroy: true,
