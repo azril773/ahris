@@ -21,7 +21,7 @@ def absensi(r,sid):
         today_datetime = datetime.strptime(f'{today}','%Y-%m-%d')       
         tmin = today_datetime - timedelta(days=1)
         
-        dari = datetime.strptime(f'{tmin}','%Y-%m-%d %H:%M:%S').date()
+        dari = today
         sampai = today
         
         dr = datetime.strftime(dari,'%d-%m-%Y')
@@ -853,8 +853,7 @@ def pabsen(req):
     dmesin = []
     # ambil data mesin simpan di att dan dmesin array
     try:
-        pools = Pool(processes=2
-                     )
+        pools = Pool(processes=2)
         for m in mesin_db.objects.using(req.session["ccabang"]).filter(status='Active'):
             ress = pools.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
             # time.sleep(1)
