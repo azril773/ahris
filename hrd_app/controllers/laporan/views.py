@@ -13,8 +13,12 @@ def laporan(r,sid):
         for i in range(dr.year,sp.year+1):
             list_year.append(i)
         dsid = dakses.sid_id     
-        
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
         
         ###
         try:

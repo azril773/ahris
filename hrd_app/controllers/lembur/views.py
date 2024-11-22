@@ -7,8 +7,8 @@ from hrd_app.controllers.lib import *
 def lembur(r, sid):
     iduser = r.user.id
     
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -27,7 +27,13 @@ def lembur(r, sid):
             ids = ids.status_pegawai.pk
         except:
             ids = 0
-        status = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).all().values("status_pegawai_id","status_pegawai__status")
+            
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id").values("status_pegawai_id","status_pegawai__status")
         if sid == 0:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).all()
         else:
@@ -84,8 +90,8 @@ def lembur(r, sid):
 def lembur_belum_proses(r, sid):
     iduser = r.user.id
     
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -159,8 +165,8 @@ def lembur_belum_proses(r, sid):
 def cari_lembur(r):
     iduser = r.user.id
     
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -626,6 +632,7 @@ def tambah_lembur(r):
                         lebih = lebih_awal
                     elif awal == 0 and akhir > 0:
                         lebih = lebih_akhir    
+                        
                     # pengelolaan lembur
                     if lebih == 0:
                         if ab.pulang < ab.masuk:
@@ -1903,8 +1910,8 @@ def kompen_json(r, idp, prd, thn):
 def kompen(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
 
         dsid = dakses.sid_id  
@@ -1944,9 +1951,9 @@ def kompen(r):
 def status_pegawai_lembur(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -2030,9 +2037,9 @@ def hstatus_pegawai_lembur(r):
 def status_pegawai_libur_nasional(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
@@ -2113,9 +2120,9 @@ def hstatus_pegawai_libur_nasional(r):
 def status_pegawai_opg(r):
     iduser = r.user.id
         
-    if akses_db.objects.filter(user_id=iduser).exists():
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
-        dakses = akses_db.objects.get(user_id=iduser)
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
