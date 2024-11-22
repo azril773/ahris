@@ -34,7 +34,7 @@ def geser_off(r, sid):
 
         pegawai = []
             
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
