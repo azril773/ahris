@@ -27,7 +27,14 @@ def absensi(r,sid):
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')
         
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        print(aksesdivisi)
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        print(statusid)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
         
         ##
         try:
