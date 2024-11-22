@@ -93,8 +93,12 @@ def cari_geser_off(r):
         sid = r.POST.get('sid')
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()               
-        
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
         
         try:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
@@ -104,7 +108,7 @@ def cari_geser_off(r):
 
         pegawai = []
             
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -160,7 +164,12 @@ def cari_geser_off_sid(r, dr, sp, sid):
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()               
         
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
         
         try:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
@@ -170,7 +179,7 @@ def cari_geser_off_sid(r, dr, sp, sid):
 
         pegawai = []
             
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -223,9 +232,9 @@ def geseroff_json(r, dr, sp, sid):
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-                
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]  
         if int(sid) == 0:
-            for i in geseroff_db.objects.using(r.session["ccabang"]).filter(dari_tgl__range=(dari,sampai)):
+            for i in geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(dari_tgl__range=(dari,sampai),pegawai__divisi_id__in=aksesdivisi):
                             
                 gf = {
                     'id':i.id,
@@ -240,7 +249,7 @@ def geseroff_json(r, dr, sp, sid):
                 }
                 data.append(gf)
         else:
-            for i in geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(dari_tgl__range=(dari,sampai), pegawai__status_id=int(sid)):
+            for i in geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(dari_tgl__range=(dari,sampai), pegawai__status_id=int(sid),pegawai__divisi_id__in=aksesdivisi):
                             
                 gf = {
                     'id':i.id,
@@ -271,8 +280,9 @@ def tambah_geseroff(r):
     ke = datetime.strptime(dtgl2,'%d-%m-%Y').date()   
     
     fdari = datetime.strftime(dari,'%d-%m-%Y')  
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)] 
     try:
-        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(dpegawai))  
+        pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=int(dpegawai),divisi_id__in=aksesdivisi)  
     except:
         return JsonResponse({"status":"error","msg":"Data pegawai tidak ada"},status=400)
     off = pg.hari_off.hari
@@ -421,8 +431,9 @@ def batal_geseroff(r):
     nama_user = r.user.username
 
     id_batal = r.POST.get('id_batal')
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)] 
     try:
-        gf = geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(id=int(id_batal))
+        gf = geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").get(id=int(id_batal),pegawai__divisi_id__in=aksesdivisi)
     except:
         return JsonResponse({"status":"error","msg":"Geser off tidak ada"},status=400)
     ke_tgl = gf.ke_tgl

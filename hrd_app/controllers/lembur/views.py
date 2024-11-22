@@ -40,7 +40,7 @@ def lembur(r, sid):
         else:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
         pegawai = []
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1,divisi_id__in=aksesdivisi):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -106,8 +106,12 @@ def lembur_belum_proses(r, sid):
         
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')                 
-        
-        status = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).all().values("status_pegawai_id","status_pegawai__status")
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for pp in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(pp.status_id)
+            # print(p)
+        status = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(status_pegawai_id__in=statusid).order_by("id").values("status_pegawai_id","status_pegawai__status")
         try:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
@@ -175,7 +179,7 @@ def cari_lembur(r):
         tahun = r.POST.get('tahun')
         sid = r.POST.get('sid')
         bln = nama_bulan(int(periode))
-        
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
         lstatus = []
         try:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
@@ -184,7 +188,7 @@ def cari_lembur(r):
             sid_lembur = 0
         pegawai = []
             
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 if int(sid) == p.status.pk:
                     data = {
@@ -266,13 +270,14 @@ def tambah_lembur(r):
         looping = (akhir / 0.5)                  
                     
     # pengolahan lembur
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     if lembur_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_lembur=tgl).exists():
         messages.info(r, 'Duplikat Data.') 
     else:
         
         # jika absensi ada
-        if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen=tgl, pegawai_id=int(idp)).exists():
-            ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(tgl_absen=tgl, pegawai_id=int(idp))            
+        if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(tgl_absen=tgl, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi).exists():
+            ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(tgl_absen=tgl, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi)            
             
             # Dengan istirahat (di jadwal kerja)
             if ab.lama_istirahat != 0 or ab.lama_istirahat is not None:
@@ -767,15 +772,15 @@ def tambah_lembur(r):
 
     # insert or update rekap lembur
     # -------------------------------------------------------------
-    # hitung total lembur
-    tl = lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_lembur__range=(dr,sp)).aggregate(total=Sum('proses_lembur'))
+    # hitung total lembur'
+    tl = lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), tgl_lembur__range=(dr,sp)).aggregate(total=Sum('proses_lembur'))
     if tl['total'] is None:
         tlembur = 0
     else:
         tlembur = tl['total'] 
     
     # hitung total kompen
-    kp = kompen_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_kompen__range=(dr,sp)).aggregate(total=Sum('kompen')) 
+    kp = kompen_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), tgl_kompen__range=(dr,sp)).aggregate(total=Sum('kompen')) 
     if kp['total'] is None:
         tkompen = 0
     else:
@@ -789,15 +794,15 @@ def tambah_lembur(r):
         thns = thn    
         
     # hitung sisa lembur
-    if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), periode=prds, tahun=thns).exists():
-        rkps = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(idp), periode=prds, tahun=thns)
+    if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prds, tahun=thns).exists():
+        rkps = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prds, tahun=thns)
         sisa_lembur_sbl = rkps.sisa_lembur
     else:
         sisa_lembur_sbl = 0     
         
     # input or update rekap lembur  
-    if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), periode=prd, tahun=thn).exists():
-        rk = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(idp), periode=prd, tahun=thn)
+    if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prd, tahun=thn).exists():
+        rk = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prd, tahun=thn)
         
         rk.total_lembur = float(sisa_lembur_sbl + tlembur)
         rk.total_kompen = float(tkompen)
@@ -860,9 +865,10 @@ def proses_ulang_lembur(r, idl):
                     
     # pengolahan lembur
     # ------------------------------------------------------------- 
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     # jika absensi ada
-    if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen=tgl, pegawai_id=int(idp)).exists():
-        ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(tgl_absen=tgl, pegawai_id=int(idp))            
+    if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(tgl_absen=tgl, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi).exists():
+        ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(tgl_absen=tgl, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi)            
         
         # Tanpa istirahat (di jadwal kerja)
         if (ab.lama_istirahat == 0 and ab.lama_istirahat is not None) or ab.lama_istirahat is None:
@@ -1213,14 +1219,14 @@ def proses_ulang_lembur(r, idl):
     # insert or update rekap lembur
     # -------------------------------------------------------------
     # hitung total lembur
-    tl = lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_lembur__range=(dr,sp)).aggregate(total=Sum('proses_lembur'))
+    tl = lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), tgl_lembur__range=(dr,sp)).aggregate(total=Sum('proses_lembur'))
     if tl['total'] is None:
         tlembur = 0
     else:
         tlembur = tl['total']    
     
     # hitung total kompen
-    kp = kompen_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_kompen__range=(dr,sp)).aggregate(total=Sum('kompen')) 
+    kp = kompen_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), tgl_kompen__range=(dr,sp)).aggregate(total=Sum('kompen')) 
     if kp['total'] is None:
         tkompen = 0
     else:
@@ -1234,15 +1240,15 @@ def proses_ulang_lembur(r, idl):
         thns = thn    
         
     # hitung sisa lembur
-    if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), periode=prds, tahun=thns).exists():
-        rkps = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(idp), periode=prds, tahun=thns)
+    if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prds, tahun=thns).exists():
+        rkps = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prds, tahun=thns)
         sisa_lembur_sbl = rkps.sisa_lembur
     else:
         sisa_lembur_sbl = 0     
         
     # input or update rekap lembur  
-    if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), periode=prd, tahun=thn).exists():
-        rk = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(idp), periode=prd, tahun=thn)
+    if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prd, tahun=thn).exists():
+        rk = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prd, tahun=thn)
         
         rk.total_lembur = float(sisa_lembur_sbl + tlembur)
         rk.total_kompen = float(tkompen)
@@ -1282,9 +1288,9 @@ def batal_lembur(r):
     sp = pt[1]
     prd = pt[2]
     thn = pt[3]
-    
-    if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=idp, periode=prd, tahun=thn).exists():
-        drk = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=idp, periode=prd, tahun=thn)
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+    if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=idp, periode=prd, tahun=thn).exists():
+        drk = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(pegawai__divisi_id__in=aksesdivisi,pegawai_id=idp, periode=prd, tahun=thn)
         sisa_lembur_sekarang = drk.sisa_lembur
         lembur_sekarang = lb.proses_lembur
     
@@ -1435,12 +1441,12 @@ def bayar_lembur(r):
 def rekap_lembur_json(r, sid, prd, thn):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
         data = []
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
-        if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(periode=int(prd), tahun=int(thn)).exists():
+        if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,periode=int(prd), tahun=int(thn)).exists():
         
-            for r in rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(periode=int(prd), tahun=int(thn), sisa_lembur__gt=0,pegawai__divisi_id__in=aksesdivisi).order_by('pegawai__divisi__divisi','pegawai__nik'):
+            for r in rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(periode=int(prd), tahun=int(thn), sisa_lembur__gt=0,pegawai__divisi_id__in=aksesdivisi).order_by('pegawai__divisi__divisi','pegawai__nik'):
                 
                 if sid == 0:                    
                     rkp = {
@@ -1488,8 +1494,9 @@ def lembur_belum_proses_json(r, sid):
     if r.headers["X-Requested-With"] == "XMLHttpRequest": 
         
         data = []
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
         
-        for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(status=0).order_by('tgl_lembur','pegawai__divisi__divisi','pegawai__nik'):
+        for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(status=0,pegawai__divisi_id__in=aksesdivisi).order_by('tgl_lembur','pegawai__divisi__divisi','pegawai__nik'):
             if sid == 0:
                 lbr = {
                     'id':l.id,
@@ -1533,14 +1540,13 @@ def lembur_belum_proses_json(r, sid):
 def lembur_json(r, idp, prd, thn):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest": 
-        
         data = []
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
         pa = periode_absen(prd,thn)
         dr = pa[0].date()
         sp = pa[1].date()
         if int(idp) == 0:
-            for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_lembur__range=(dr,sp), status=1,pegawai__divisi_id__in=aksesdivisi).order_by('tgl_lembur'):
+            for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(tgl_lembur__range=(dr,sp), status=1,pegawai__divisi_id__in=aksesdivisi).order_by('tgl_lembur'):
                 lbr = {
                     'id':l.id,
                     'tgl':datetime.strftime(l.tgl_lembur,'%d-%m-%Y'),
@@ -1552,7 +1558,7 @@ def lembur_json(r, idp, prd, thn):
                 }
                 data.append(lbr)   
         else:
-            for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_lembur__range=(dr,sp), status=1,pegawai__divisi_id__in=aksesdivisi).order_by('tgl_lembur'):
+            for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai_id=int(idp), tgl_lembur__range=(dr,sp), status=1,pegawai__divisi_id__in=aksesdivisi).order_by('tgl_lembur'):
                 lbr = {
                     'id':l.id,
                     'tgl':datetime.strftime(l.tgl_lembur,'%d-%m-%Y'),
