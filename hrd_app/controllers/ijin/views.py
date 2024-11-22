@@ -303,7 +303,7 @@ def tambah_ijin(r):
     dpegawai = r.POST.get('pegawai')
     dijin = r.POST.get('ijin')
     dket = r.POST.get('ket')
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     try:
        ij = jenis_ijin_db.objects.using(r.session["ccabang"]).get(id=int(dijin))
     except: 
