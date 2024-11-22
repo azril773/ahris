@@ -1436,9 +1436,10 @@ def rekap_lembur_json(r, sid, prd, thn):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
         if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(periode=int(prd), tahun=int(thn)).exists():
         
-            for r in rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(periode=int(prd), tahun=int(thn), sisa_lembur__gt=0).order_by('pegawai__divisi__divisi','pegawai__nik'):
+            for r in rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(periode=int(prd), tahun=int(thn), sisa_lembur__gt=0,pegawai__divisi_id=aksesdivisi).order_by('pegawai__divisi__divisi','pegawai__nik'):
                 
                 if sid == 0:                    
                     rkp = {
@@ -1533,12 +1534,12 @@ def lembur_json(r, idp, prd, thn):
     if r.headers["X-Requested-With"] == "XMLHttpRequest": 
         
         data = []
-        
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
         pa = periode_absen(prd,thn)
         dr = pa[0].date()
         sp = pa[1].date()
         if int(idp) == 0:
-            for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_lembur__range=(dr,sp), status=1).order_by('tgl_lembur'):
+            for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_lembur__range=(dr,sp), status=1,pegawai__divisi_id=aksesdivisi).order_by('tgl_lembur'):
                 lbr = {
                     'id':l.id,
                     'tgl':datetime.strftime(l.tgl_lembur,'%d-%m-%Y'),
@@ -1550,7 +1551,7 @@ def lembur_json(r, idp, prd, thn):
                 }
                 data.append(lbr)   
         else:
-            for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_lembur__range=(dr,sp), status=1).order_by('tgl_lembur'):
+            for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(idp), tgl_lembur__range=(dr,sp), status=1,pegawai__divisi_id=aksesdivisi).order_by('tgl_lembur'):
                 lbr = {
                     'id':l.id,
                     'tgl':datetime.strftime(l.tgl_lembur,'%d-%m-%Y'),
