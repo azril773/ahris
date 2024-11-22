@@ -30,16 +30,17 @@ def lembur(r, sid):
             
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
         statusid=[]
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
-            statusid.append(p.status_id)
+        for pp in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(pp.status_id)
             # print(p)
-        status = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(status_pegawai_id__in=statusid).order_by("id")
+        status = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(status_pegawai_id__in=statusid).order_by("id").values("status_pegawai_id","status_pegawai__status")
+        print(status)
         if sid == 0:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).all()
         else:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
         pegawai = []
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
