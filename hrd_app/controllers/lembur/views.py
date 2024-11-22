@@ -33,7 +33,7 @@ def lembur(r, sid):
         for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
             statusid.append(p.status_id)
             # print(p)
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id").values("status_pegawai_id","status_pegawai__status")
+        status = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(status_pegawai_id__in=statusid).order_by("id")
         if sid == 0:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).all()
         else:
