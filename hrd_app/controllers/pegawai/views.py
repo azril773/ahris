@@ -2429,7 +2429,8 @@ def rp_form(r):
         akses = dakses.akses
         dsid = dakses.sid_id
         counter = counter_db.objects.using(r.session["ccabang"]).all().order_by('counter')
-        divisi = divisi_db.objects.using(r.session["ccabang"]).all().order_by('divisi')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=aksesdivisi).order_by('divisi')
         jabatan = jabatan_db.objects.using(r.session["ccabang"]).all().order_by('jabatan')
         kk = kelompok_kerja_db.objects.using(r.session["ccabang"]).all().order_by('kelompok')
         status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('status')
