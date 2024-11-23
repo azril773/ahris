@@ -29,7 +29,12 @@ def cuti(r, sid):
         #             ct.save(using=r.session["ccabang"])
         #     except Exception as e:
         #         pass
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
         try:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
             sid_lembur = sid_lembur.status_pegawai.pk
@@ -37,7 +42,7 @@ def cuti(r, sid):
             sid_lembur = 0
         pegawai = []
             
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -92,8 +97,12 @@ def detail_cuti(r, sid, idp):
         dsid = dakses.sid_id     
         
         today = date.today()
-        
-        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        try:
+            pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=int(idp),divisi_id__in=aksesdivisi)
+        except:
+            messages.error(r,'Pegawai tidak ada')
+            return redirect("cuti",sid=sid)
         
         try:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
@@ -179,9 +188,9 @@ def cuti_json(r, dr, sp, sid):
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-                       
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
         if int(sid) == 0:
-            for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai)):
+            for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai),pegawai__divisi_id__in=aksesdivisi):
                 
                 ct = {
                     'id':i.id,
@@ -195,7 +204,7 @@ def cuti_json(r, dr, sp, sid):
                 }
                 data.append(ct)
         else:
-            for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai), pegawai__status_id=int(sid)):
+            for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai), pegawai__status_id=int(sid),pegawai__divisi_id__in=aksesdivisi):
                             
                 ct = {
                     'id':i.id,
@@ -221,8 +230,8 @@ def dcuti_json(r, idp):
         
         ac = awal_cuti_db.objects.using(r.session["ccabang"]).last()
         tac = ac.tgl
-        
-        for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_cuti__gte=tac, pegawai_id=int(idp)):
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__gte=tac, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi):
                         
             ct = {
                 'id':i.id,
@@ -244,7 +253,7 @@ def tambah_cuti(r):
     dtgl = r.POST.get('tgl')
     idp = r.POST.get('idp')
     dket = r.POST.get('ket')
-    
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     ltgl = dtgl.split(', ')   
     ac = awal_cuti_db.objects.using(r.session["ccabang"]).last()
     if ac is None:
@@ -255,7 +264,7 @@ def tambah_cuti(r):
         with transaction.atomic(using=r.session["ccabang"]):
             tgl = datetime.strptime(t,'%d-%m-%Y').date()
             try:
-                pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
+                pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=int(idp),divisi_id__in=aksesdivisi)
             except:
                 return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
             if pg.sisa_cuti is not None:
@@ -511,9 +520,10 @@ def edit_sisa_cuti(r):
     
     idp = r.POST.get('idp')
     scuti = r.POST.get('scuti')
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     modul = r.POST.get('modul')
     try:
-        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
+        pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=int(idp),divisi_id__in=aksesdivisi)
     except:
         return JsonResponse({"status":'error',"msg":"Pegawai tidak ada"},status=400)
     
@@ -552,15 +562,16 @@ def batal_cuti(r):
     nama_user = r.user.username
     
     idc = r.POST.get('idc')
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     try:
-        ct = cuti_db.objects.using(r.session["ccabang"]).get(id=int(idc))
+        ct = cuti_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").get(id=int(idc),pegawai__divisi_id__in=aksesdivisi)
     except:
         return JsonResponse({"status":"error","msg":"Cuti tidak ada"},status=400)
     tcuti = ct.tgl_cuti
     idp = ct.pegawai_id
     
     try:
-        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=idp)
+        pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=idp,divisi_id__in=aksesdivisi)
     except:
         return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
     if pg.sisa_cuti is not None:

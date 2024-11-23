@@ -18,7 +18,12 @@ def opg(r, sid):
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')                 
         
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
         
         try:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
@@ -28,7 +33,7 @@ def opg(r, sid):
 
         pegawai = []
             
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -217,9 +222,9 @@ def opg_json(r, dr, sp, sid):
         data = []
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-                
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
         if int(sid) == 0:
-            for i in opg_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(opg_tgl__range=(dari,sampai)):
+            for i in opg_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(opg_tgl__range=(dari,sampai),pegawai__divisi_id__in=aksesdivisi):
                 
                 if i.diambil_tgl is not None:
                     dtgl = datetime.strftime(i.diambil_tgl, '%d-%m-%Y')
@@ -240,7 +245,7 @@ def opg_json(r, dr, sp, sid):
                 }
                 data.append(op)
         else:
-            for i in opg_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(opg_tgl__range=(dari,sampai), pegawai__status_id=int(sid)):
+            for i in opg_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(opg_tgl__range=(dari,sampai), pegawai__status_id=int(sid),pegawai__divisi_id__in=aksesdivisi):
                 
                 if i.diambil_tgl is not None:
                     dtgl = datetime.strftime(i.diambil_tgl, '%d-%m-%Y')
@@ -269,10 +274,10 @@ def tambah_opg(r):
     
     dtgl = r.POST.get('tgl')
     dpegawai = r.POST.get('pegawai')
-    
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     tgl = datetime.strptime(dtgl,'%d-%m-%Y').date()   
     try:
-        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(dpegawai))  
+        pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=int(dpegawai),divisi_id__in=aksesdivisi)  
     except:
         return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
     off = pg.hari_off.hari
@@ -286,7 +291,7 @@ def tambah_opg(r):
     day = tgl.strftime("%A")
     nh = nama_hari(day) 
             
-    if opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(dpegawai), opg_tgl=tgl).exists():
+    if opg_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(pegawai_id=int(dpegawai), opg_tgl=tgl,pegawai__divisi_id__in=aksesdivisi).exists():
         status = 'duplikat'
     else:        
         
@@ -343,17 +348,18 @@ def pakai_opg(r):
     
     idopg = r.POST.get('id_pakai')
     dtgl = r.POST.get('ptgl')
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     
     diambil_tgl = datetime.strptime(dtgl,'%d-%m-%Y').date()
     try:
-        opg = opg_db.objects.using(r.session["ccabang"]).get(id=int(idopg))
+        opg = opg_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").get(id=int(idopg),pegawai__divisi_id__in=aksesdivisi)
     except:
         return JsonResponse({"status":"error","msg":"Opg tidak ada"},status=400)
     idp = opg.pegawai_id
     opg_tgl = datetime.strftime(opg.opg_tgl,'%d-%m-%Y')
     
     try:
-        pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))  
+        pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=int(idp),divisi_id__in=aksesdivisi)  
     except:
         return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
     off = pg.hari_off.hari
@@ -402,8 +408,9 @@ def batal_opg(r):
     nama_user = r.user.username
     
     idopg = r.POST.get('id_batal')
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     try:
-        opg = opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(id=int(idopg))
+        opg = opg_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(id=int(idopg),pegawai__divisi_id__in=aksesdivisi)
     except:
         return JsonResponse({"status":"error","msg":"Opg tidak ada"},status=400)
     idp = opg.pegawai_id
@@ -429,8 +436,9 @@ def hapus_opg(r):
     nama_user = r.user.username
     
     idopg = r.POST.get('id_hapus')
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     try:
-        opg = opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(id=int(idopg))
+        opg = opg_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").get(id=int(idopg),pegawai__divisi_id__in=aksesdivisi)
     except:
         return JsonResponse({"status":'error',"msg":"Opg tidak ada"},status=400)
     idp = opg.pegawai_id

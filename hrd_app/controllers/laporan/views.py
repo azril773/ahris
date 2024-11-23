@@ -13,8 +13,12 @@ def laporan(r,sid):
         for i in range(dr.year,sp.year+1):
             list_year.append(i)
         dsid = dakses.sid_id     
-        
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
         
         ###
         try:
@@ -26,7 +30,7 @@ def laporan(r,sid):
         sall = status_pegawai_db.objects.using(r.session["ccabang"]).all()
         divisi = divisi_db.objects.using(r.session["ccabang"]).all()
         shift = shift_db.objects.using(r.session["ccabang"]).all()
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi)
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
@@ -61,11 +65,11 @@ def laporan_json(r):
     date = tahun+"-"+bulan+"-25"
     sp = datetime.strptime(date,"%Y-%m-%d")
     dr = sp - timedelta(days=30)
-
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     data = []
 
     if int(sid) == 0:
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(divisi_id__in=aksesdivisi)
         for pgw in pegawai:
             off = 0
             terlambat = 0
@@ -174,7 +178,7 @@ def laporan_json(r):
             }
             data.append(obj)
     else:
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id = sid)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(status_id = sid,divisi_id__in=aksesdivisi)
         for pgw in pegawai:
             off = 0
             terlambat = 0

@@ -26,13 +26,12 @@ def absensi(r,sid):
         
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')
+        
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
-        print(aksesdivisi)
         statusid=[]
         for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
             statusid.append(p.status_id)
             # print(p)
-        print(statusid)
         status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
         
         ##
@@ -637,7 +636,7 @@ def absensi_json(r, dr, sp, sid):
                 if a.keterangan_ijin is not None:
                     sket += f'{a.keterangan_ijin}, '
                     kijin = ''
-                else:
+                else: 
                     if a.masuk is not None and a.jam_masuk is not None:
                         if a.masuk > a.jam_masuk:
                             sket += f"Terlambat masuk tanpa ijin, "

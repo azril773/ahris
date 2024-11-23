@@ -19,7 +19,12 @@ def ijin(r, sid):
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')
         
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
         
         try:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
@@ -31,7 +36,7 @@ def ijin(r, sid):
         pegawai = []
         pp = []
             
-        for p in pegawai_db.objects.using(r.session["ccabang"]).all():
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -50,7 +55,7 @@ def ijin(r, sid):
                     pegawai.append(data)
             else:
                 pass    
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(Q(gender__regex=r"(?i)perempuan") | Q(gender__regex=r"(?i)p")):
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(Q(gender__regex=r"(?i)perempuan") | Q(gender__regex=r"(?i)p"),divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -122,8 +127,8 @@ def cari_ijin(r):
             sid_lembur = 0
 
         pegawai = []
-            
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -189,8 +194,8 @@ def cari_ijin_sid(r, dr, sp, sid):
             sid_lembur = 0
 
         pegawai = []
-            
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
@@ -244,7 +249,8 @@ def ijin_json(r, dr, sp, sid):
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-        for i in ijin_db.objects.using(r.session["ccabang"]).select_related('pegawai','ijin').filter(tgl_ijin__range=(dari,sampai)):
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        for i in ijin_db.objects.using(r.session["ccabang"]).select_related('pegawai','ijin').filter(tgl_ijin__range=(dari,sampai),pegawai__divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 
                 tijin = i.tgl_ijin.strftime("%A")
@@ -297,6 +303,7 @@ def tambah_ijin(r):
     dpegawai = r.POST.get('pegawai')
     dijin = r.POST.get('ijin')
     dket = r.POST.get('ket')
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     try:
        ij = jenis_ijin_db.objects.using(r.session["ccabang"]).get(id=int(dijin))
     except: 
