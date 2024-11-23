@@ -4,7 +4,6 @@ import pandas as pd
 @login_required
 def pegawai(r,sid):
     iduser = r.user.id
-        
     if akses_db.objects.filter(user_id=iduser).exists():
         dakses = akses_db.objects.get(user_id=iduser)
         akses = dakses.akses
@@ -230,7 +229,12 @@ def pegawai(r,sid):
 
         dsid = dakses.sid_id     
         
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('id')       
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")      
         # status = serialize("json",status)
         data = {
             'akses' : akses,
@@ -259,7 +263,12 @@ def pegawai_non_aktif(r,sid):
            
         dsid = dakses.sid_id     
         
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('id')       
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # print(p)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")       
                 
         data = {
             'akses' : akses,
@@ -287,10 +296,10 @@ def edit_pegawai(r,idp):
         akses = dakses.akses
            
         dsid = dakses.sid_id     
-        
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
         pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
         counter = counter_db.objects.using(r.session["ccabang"]).all().order_by('counter')
-        divisi = divisi_db.objects.using(r.session["ccabang"]).all().order_by('divisi')
+        divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=aksesdivisi).order_by('divisi')
         jabatan = jabatan_db.objects.using(r.session["ccabang"]).all().order_by('jabatan')
         kk = kelompok_kerja_db.objects.using(r.session["ccabang"]).all().order_by('kelompok')
         status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('status')
@@ -609,7 +618,8 @@ def tpegawai(r):
         dsid = dakses.sid_id
 
         counter = counter_db.objects.using(r.session["ccabang"]).all().order_by('counter')
-        divisi = divisi_db.objects.using(r.session["ccabang"]).all().order_by('divisi')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=aksesdivisi).order_by('divisi')
         jabatan = jabatan_db.objects.using(r.session["ccabang"]).all().order_by('jabatan')
         kk = kelompok_kerja_db.objects.using(r.session["ccabang"]).all().order_by('kelompok')
         status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('status')
