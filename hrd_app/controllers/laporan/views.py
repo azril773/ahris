@@ -30,7 +30,7 @@ def laporan(r,sid):
         sall = status_pegawai_db.objects.using(r.session["ccabang"]).all()
         divisi = divisi_db.objects.using(r.session["ccabang"]).all()
         shift = shift_db.objects.using(r.session["ccabang"]).all()
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi)
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
