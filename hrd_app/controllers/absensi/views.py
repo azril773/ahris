@@ -636,7 +636,7 @@ def absensi_json(r, dr, sp, sid):
                 if a.keterangan_ijin is not None:
                     sket += f'{a.keterangan_ijin}, '
                     kijin = ''
-                else:
+                else: 
                     if a.masuk is not None and a.jam_masuk is not None:
                         if a.masuk > a.jam_masuk:
                             sket += f"Terlambat masuk tanpa ijin, "
