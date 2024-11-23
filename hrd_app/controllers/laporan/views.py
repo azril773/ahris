@@ -65,11 +65,11 @@ def laporan_json(r):
     date = tahun+"-"+bulan+"-25"
     sp = datetime.strptime(date,"%Y-%m-%d")
     dr = sp - timedelta(days=30)
-
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     data = []
 
     if int(sid) == 0:
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(divisi_id__in=aksesdivisi)
         for pgw in pegawai:
             off = 0
             terlambat = 0
@@ -177,7 +177,7 @@ def laporan_json(r):
             }
             data.append(obj)
     else:
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id = sid)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(status_id = sid,divisi_id__in=aksesdivisi)
         for pgw in pegawai:
             off = 0
             terlambat = 0
