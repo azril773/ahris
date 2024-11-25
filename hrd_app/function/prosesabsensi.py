@@ -142,7 +142,13 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                                     if(j in data):
                                         continue
                                     data.append(j)
-                                    selisih = abs(datetime.combine(ab.tgl_absen, j.jam_pulang) - datetime.combine(ab.tgl_absen,jam_absen.time()))
+                                    if ab.masuk is not None:
+                                        selisih = (abs(datetime.combine(ab.tgl_absen, j.jam_pulang) - datetime.combine(ab.tgl_absen,jam_absen.time()))) + abs(datetime.combine(ab.tgl_absen, j.jam_masuk) - datetime.combine(ab.tgl_absen,ab.masuk))
+                                    elif ab.masuk_b is not None:
+                                        selisih = (abs(datetime.combine(ab.tgl_absen, j.jam_pulang) - datetime.combine(ab.tgl_absen,jam_absen.time()))) + abs(datetime.combine(ab.tgl_absen, j.jam_masuk) - datetime.combine(ab.tgl_absen,ab.masuk_b))
+                                    else:
+                                        selisih = abs(datetime.combine(ab.tgl_absen, j.jam_pulang) - datetime.combine(ab.tgl_absen,jam_absen.time()))
+
                                     ds.append(selisih)
                                     getMin = min(ds)
                                     jam = data[ds.index(getMin)]
