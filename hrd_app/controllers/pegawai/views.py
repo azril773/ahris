@@ -4,8 +4,8 @@ import pandas as pd
 @login_required
 def pegawai(r,sid):
     iduser = r.user.id
-    if akses_db.objects.filter(user_id=iduser).exists():
-        dakses = akses_db.objects.get(user_id=iduser)
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         # excel = pd.read_excel("static/ahris.xlsx")
         # data = []
@@ -2385,6 +2385,7 @@ def rp_form(r):
         userid = r.POST.get("userid")
         tipe = r.POST.get("tipe")
         mesin = r.POST.get("mesin")
+        print(tipe)
         if tipe != "rp_mesin":
             if akses == "admin" or akses == "root":
                 level = r.POST.get("level")
@@ -2417,14 +2418,14 @@ def rp_form(r):
                         else:
                             conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
 
-
                     conn.enable_device()
+                    conn.disconnect()
                 except Exception as e:
-                    
                     messages.error(r,"Proccess terminate : {}".format(e))
-                finally:
-                    if conn:
-                        conn.disconnect()
+                    return redirect("rpm")
+                # finally:
+                #     if conn:
+                #         pass
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id

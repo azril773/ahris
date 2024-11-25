@@ -59,7 +59,7 @@ def auth_login(r):
                 r.session["cabang"] = [ac.cabang.cabang for ac in akses_cabang_db.objects.filter(user_id=user.pk)]
                 r.session["ccabang"] = cabang.cabang
                 login(r,user)
-                return redirect("pengaturan")
+                return redirect("beranda")
             else:
                 messages.error(r, 'Password salah.')        
                 return redirect('login')
