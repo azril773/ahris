@@ -37,14 +37,14 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                 #     continue
                 # print(jam_absen)
                 # print([lk for lk in dt if lk["jam_absen"].date() == jam_absen.date()],"DT")
-                cekuser = [du for du in dt if int(du["userid"]) == int(a["userid"]) and du["jam_absen"].date() == jam_absen.date() and du["jam_absen"] > jamin and du["jam_absen"] < japlus]
-                print(cekuser,jam_absen,"JAM ABSEN")
+                cekuser = [du for du in dt if int(du["userid"]) == int(a["userid"]) and du["jam_absen"].date() == jam_absen.date() and du["jam_absen"] > jamin and du["jam_absen"] < japlus and du["punch"] != a["punch"]]
+                # print(cekuser,jam_absen,"JAM ABSEN")
                 if len(cekuser) > 0:
                     cekddt = [d for d in cekuser if jam_absen > d["jam_absen"]]
                     con = []
                     # print(cekddt)
                     if len(cekddt) >0:
-                        print(cekddt)
+                        # print(cekddt)
                         for c in cekddt:
                             ab = absensi_db.objects.using(cabang).filter(tgl_absen=jam_absen.date(),pegawai__userid=a["userid"])
                             if ab.exists():
