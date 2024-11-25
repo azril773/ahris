@@ -1992,6 +1992,7 @@ def detail_absensi(r,userid,tgl,sid):
                 "jam_masuk":k.jam_masuk.strftime('%H:%M:%S'),
                 "jam_pulang": k.jam_pulang.strftime('%H:%M:%S'),
                 "lama_istirahat":k.lama_istirahat,
+                # "lama_istirahat2":k.lama_istirahat
                 "hari":k.hari
             }
             dt_kk.append(obj)
