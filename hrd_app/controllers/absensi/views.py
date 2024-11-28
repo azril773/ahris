@@ -848,7 +848,7 @@ def pabsen(req):
     #     print(err)
     #     messages.error(req,"Terjadi kesalahan pada mesin finger. Silahkan coba lagi")
     #     return redirect("absensi",sid=sid)
-    for m in mesin_db.objects.using(r.session["ccabang"]).filter(status='Active'):
+    for m in mesin_db.objects.using(req.session["ccabang"]).filter(status='Active'):
         ip = m.ipaddress
         # conn = None
         zk = ZK(str(ip), port=4370, timeout=65)
