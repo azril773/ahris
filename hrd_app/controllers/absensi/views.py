@@ -1300,28 +1300,29 @@ def pabsen(req):
                         
                         # Karyawan
                         else:
-                            if str(a.pegawai.hari_off) == str(nh):
-                                if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-                                    if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
-                                        pass
-                                    else:
-                                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                                            pass
-                                        else:
-                                            opg_db(
-                                                pegawai_id = ab.pegawai_id,
-                                                opg_tgl = ab.tgl_absen,   
-                                                keterangan = 'OFF Pengganti Reguler',                         
-                                                add_by = 'Program',
-                                            ).save(using=req.session["ccabang"])
+                            pass
+                            # if str(a.pegawai.hari_off) == str(nh):
+                            #     if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
+                            #         if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
+                            #             pass
+                            #         else:
+                            #             if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                            #                 pass
+                            #             else:
+                            #                 opg_db(
+                            #                     pegawai_id = ab.pegawai_id,
+                            #                     opg_tgl = ab.tgl_absen,   
+                            #                     keterangan = 'OFF Pengganti Reguler',                         
+                            #                     add_by = 'Program',
+                            #                 ).save(using=req.session["ccabang"])
                                             
-                                            # ditasik tidak ada insentif dihari minggu jika masuk
-                                            # ab.insentif = l['insentif_karyawan']
-                                            # ab.save(using=req.session["ccabang"])
-                                else:
-                                    pass    
-                            else:
-                                pass                                
+                            #                 # ditasik tidak ada insentif dihari minggu jika masuk
+                            #                 # ab.insentif = l['insentif_karyawan']
+                            #                 # ab.save(using=req.session["ccabang"])
+                            #     else:
+                            #         pass    
+                            # else:
+                            #     pass                                
                     else:
                         pass 
                 
