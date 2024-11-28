@@ -1593,7 +1593,11 @@ def tambah_kompen(r):
     sp = pt[1]
     prd = pt[2]
     thn = pt[3]   
-    rkp = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(idp), periode=prd, tahun=thn)
+    # print(prd,thn)
+    rkp = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(periode=prd, tahun=thn,pegawai_id=int(idp))
+    if not rkp.exists():
+        return JsonResponse({'status':'error','msg':f"Rekap lembur periode {prd} tahun {thn} tidak ada. Ambil kompen sudah melebihi batas tanggal(25) periode absen"},status=400)
+    rkp = rkp[0]
     sisa_lembur = rkp.sisa_lembur
     
     if kompen > sisa_lembur:

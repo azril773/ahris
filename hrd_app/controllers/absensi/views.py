@@ -1072,7 +1072,7 @@ def pabsen(req):
             'keterangan' : g.keterangan
         } 
         geser.append(data)
-    status_ln = [st.pk for st in list_status_opg_libur_nasional_db.objects.using(req.session["ccabang"]).all()]
+    status_ln = [st.status.pk for st in list_status_opg_libur_nasional_db.objects.using(req.session["ccabang"]).all()]
     # data opg
     for o in opg_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(diambil_tgl__range=(dari.date(),sampai.date()), status=0):
         data = {

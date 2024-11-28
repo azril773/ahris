@@ -587,7 +587,7 @@
                       
             },
             error: function (error) {
-                alert('Terjadi kesalahan sistem, hubungi IT.')
+                alert(error.responseJSON.msg)
             }
         });
 
