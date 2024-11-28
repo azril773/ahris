@@ -605,6 +605,7 @@ def epegawai(r,idp):
 
                 status= 'OK'
         except Exception as e:
+            print(e)
             return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
 

@@ -685,36 +685,11 @@ def absensi_json(r, dr, sp, sid):
         return JsonResponse({"data": data })
 
 
-def prosesMesin(m):
-    ip = m[0].ipaddress
-    # conn = None
-    zk = ZK(str(ip), port=4370, timeout=65)
-    dt = []
-    try:
-        conn = zk.connect()
-        conn.disable_device()
-        # Data absensi
-        absensi = conn.get_attendance()
-        for a in absensi:
-            if m[2] <= a.timestamp <= m[3]:   
-                # users = conn.get_users()
-                if str(a.user_id) in m[1]:     
-                    data = {
-                        "userid": a.user_id, 
-                        "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
-                        "punch": a.punch,
-                        "mesin": m[0].nama 
-                    }
-                    dt.append(data)
-                else:
-                    pass                
-        conn.enable_device()
-        conn.disconnect()
-    except Exception as e:
-        raise Exception("Terjadi kesalahan")
+# def prosesMesin(m):
+    
         # return redirect("absensi",sid=)
-    finally:
-        return dt
+    # finally:
+    #     return dt
 
 @login_required
 def pabsen(req):    
@@ -857,22 +832,48 @@ def pabsen(req):
     
     dmesin = []
     # ambil data mesin simpan di att dan dmesin array
-    try:
-        pools = Pool(processes=2)
-        for m in mesin_db.objects.using(req.session["ccabang"]).filter(status='Active'):
-            ress = pools.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
-            # time.sleep(1)
-            dmesin.append(ress)
-        msn = [mesin.wait() for mesin in dmesin]
-        datas = [dt for dt in [dataMesin.get() for dataMesin in dmesin] if len(dt) > 0] 
-        dmesin = []
-        for dm in datas:
-            for d in dm:    
-                dmesin.append(d)
-    except Exception as err:
-        print(err)
-        messages.error(req,"Terjadi kesalahan pada mesin finger. Silahkan coba lagi")
-        return redirect("absensi",sid=sid)
+    # try:
+    #     pools = Pool(processes=2)
+    #     for m in mesin_db.objects.using(req.session["ccabang"]).filter(status='Active'):
+    #         ress = pools.apply_async(prosesMesin,[(m,luserid,dari,sampai)])
+    #         # time.sleep(1)
+    #         dmesin.append(ress)
+    #     msn = [mesin.wait() for mesin in dmesin]
+    #     datas = [dt for dt in [dataMesin.get() for dataMesin in dmesin] if len(dt) > 0] 
+    #     dmesin = []
+    #     for dm in datas:
+    #         for d in dm:    
+    #             dmesin.append(d)
+    # except Exception as err:
+    #     print(err)
+    #     messages.error(req,"Terjadi kesalahan pada mesin finger. Silahkan coba lagi")
+    #     return redirect("absensi",sid=sid)
+    for m in mesin_db.objects.using(r.session["ccabang"]).filter(status='Active'):
+        ip = m.ipaddress
+        # conn = None
+        zk = ZK(str(ip), port=4370, timeout=65)
+        try:
+            conn = zk.connect()
+            conn.disable_device()
+            # Data absensi
+            absensi = conn.get_attendance()
+            for a in absensi:
+                if dari <= a.timestamp <= sampai:   
+                    # users = conn.get_users()
+                    if str(a.user_id) in luserid:     
+                        data = {
+                            "userid": a.user_id, 
+                            "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
+                            "punch": a.punch,
+                            "mesin": m[0].nama 
+                        }
+                        dmesin.append(data)
+                    else:
+                        pass                
+            conn.enable_device()
+            conn.disconnect()
+        except Exception as e:
+            raise Exception("Terjadi kesalahan")
 
     # return render(req,'hrd_app/example/ex.html')
     # reordering (ascending)
@@ -882,6 +883,7 @@ def pabsen(req):
     #     "punch":0,
     #     "mesin":"FS"
     # })
+
     att = sorted(dmesin, key=lambda i: i['jam_absen'])
 
     # att = sorted(att, key=lambda i: i['jam_absen'])
