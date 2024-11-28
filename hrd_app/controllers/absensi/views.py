@@ -865,7 +865,7 @@ def pabsen(req):
                             "userid": a.user_id, 
                             "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
                             "punch": a.punch,
-                            "mesin": m[0].nama 
+                            "mesin": m.nama 
                         }
                         dmesin.append(data)
                     else:
