@@ -1277,7 +1277,7 @@ def pabsen(req):
                     if a.pegawai.status_id in lsopg:
                         
                         # Staff
-                        if p['status'] == 'Staff': # regex
+                        if a.pegawai.status_id in status_ln: # regex
                             # jika hari off nya adalah hari minggu dan masuk maka hanya akan mendapatkan 1 opg
                             if str(a.pegawai.hari_off) == str(nh):
                                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
@@ -1382,12 +1382,12 @@ def pabsen(req):
                                         if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                             pass
                                         else:
-                                            opg_db(
-                                                pegawai_id = ab.pegawai_id,
-                                                opg_tgl = ab.tgl_absen,   
-                                                keterangan = 'OFF Pengganti Reguler',                         
-                                                add_by = 'Program',
-                                            ).save(using=req.session["ccabang"])
+                                            # opg_db(
+                                            #     pegawai_id = ab.pegawai_id,
+                                            #     opg_tgl = ab.tgl_absen,   
+                                            #     keterangan = 'OFF Pengganti Reguler',                         
+                                            #     add_by = 'Program',
+                                            # ).save(using=req.session["ccabang"])
                                             
                                             ab.insentif = l['insentif_karyawan']
                                             ab.save(using=req.session["ccabang"])
