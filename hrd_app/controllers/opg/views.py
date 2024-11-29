@@ -15,8 +15,8 @@ def opg(r, sid):
         dari = pa[0].date()
         sampai = pa[1].date()
         
-        dr = datetime.strftime(dari,'%d-%m-%Y')
-        sp = datetime.strftime(sampai,'%d-%m-%Y')                 
+        dr = datetime.strftime(dari,'%Y-%m-%d')
+        sp = datetime.strftime(sampai,'%Y-%m-%d')                 
         
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
         statusid=[]

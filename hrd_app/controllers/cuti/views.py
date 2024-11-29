@@ -16,8 +16,8 @@ def cuti(r, sid):
         dari = pa[0].date()
         sampai = pa[1].date()
         
-        dr = datetime.strftime(dari,'%d-%m-%Y')
-        sp = datetime.strftime(sampai,'%d-%m-%Y')                 
+        dr = datetime.strftime(dari,'%Y-%m-%d')
+        sp = datetime.strftime(sampai,'%Y-%m-%d')                 
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
         # for pgw in pegawai:
         #     try:
