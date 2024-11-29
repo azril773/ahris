@@ -1247,15 +1247,12 @@ class kompen_db_arsip(models.Model):
 # Payroll
 class pegawai_payroll_db(models.Model):
     nama = models.CharField(max_length=200, null=True)
-    email = models.CharField(max_length=200, null=True)
-    no_telp = models.CharField(max_length=100, null=True)
     userid = models.CharField(max_length=100, unique=True, null=True)
     gender = models.CharField(max_length=10, null=True)
 
     status = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE)
     nik = models.CharField(max_length=100, null=True)
     divisi = models.ForeignKey(divisi_db, on_delete=models.CASCADE)
-    counter = models.ForeignKey(counter_db, on_delete=models.CASCADE, null=True)
 
     no_rekening = models.CharField(max_length=50, null=True, blank=True)
     no_bpjs_ks = models.CharField(max_length=50, null=True, blank=True)
@@ -1267,10 +1264,7 @@ class pegawai_payroll_db(models.Model):
 
     aktif = models.IntegerField(null=True)
     tgl_masuk = models.DateField(null=True, blank=True)
-    tgl_aktif = models.DateTimeField(null=True, blank=True)
-    tgl_nonaktif = models.DateTimeField(null=True, blank=True)
     status_payroll = models.IntegerField()
-    sisa_cuti = models.IntegerField(null=True)
 
     add_by = models.CharField(max_length=100, null=True, blank=True)
     edit_by = models.CharField(max_length=100, null=True, blank=True)

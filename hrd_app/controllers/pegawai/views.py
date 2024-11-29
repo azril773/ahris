@@ -2749,8 +2749,6 @@ def spegawai_payroll(r):
                 pegawai_payroll_db(
                     id=p.pk,
                     nama=p.nama,
-                    email=p.email,
-                    no_telp=p.no_telp,
                     userid=p.userid,
                     gender=p.gender,
                     status=p.status,
@@ -2764,9 +2762,6 @@ def spegawai_payroll(r):
                     tk_premi=p.tk_premi,
                     aktif=1,
                     tgl_masuk=p.tgl_masuk,
-                    tgl_aktif=p.tgl_aktif,
-                    tgl_nonaktif=p.tgl_nonaktif,
-                    sisa_cuti=p.sisa_cuti,
                     status_payroll=0,
                     add_by="prog",
                     edit_by="prog",

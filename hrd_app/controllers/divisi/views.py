@@ -124,8 +124,8 @@ def sdivisi_payroll(r):
             divisi = divisi_db.objects.using(r.session["ccabang"]).all()
             for d in divisi:
                 divisi_payroll_db(
-                    id=c.pk,
-                    divisi=c.divisi,
+                    id=d.pk,
+                    divisi=d.divisi,
                 ).save(using=f'p{r.session["ccabang"]}')
         else:
             pass

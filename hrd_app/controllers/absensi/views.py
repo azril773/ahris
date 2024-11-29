@@ -1144,23 +1144,28 @@ def pabsen(req):
         if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
             if str(a.pegawai.hari_off) == str(nh):
                 # jika dia bisa mendapatkan opg 
+                # if 
+                #     continue
                 if a.pegawai.status_id in lsopg:
-                    # jika ada geder off dari hari ini ke hari lain
-                    if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
+                    if re.search("security",a.pegawai.status.status,re.IGNORECASE) is not None:
                         pass
-                    # jika tidak ada
                     else:
-                        
-                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                        # jika ada geder off dari hari ini ke hari lain
+                        if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
                             pass
-                        # jika tidak
+                        # jika tidak ada
                         else:
-                            opg_db(
-                                pegawai_id = ab.pegawai_id,
-                                opg_tgl = ab.tgl_absen,   
-                                keterangan = 'OFF Pengganti Reguler',                         
-                                add_by = 'Program',
-                            ).save(using=req.session["ccabang"])
+                            
+                            if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                                pass
+                            # jika tidak
+                            else:
+                                opg_db(
+                                    pegawai_id = ab.pegawai_id,
+                                    opg_tgl = ab.tgl_absen,   
+                                    keterangan = 'OFF Pengganti Reguler',                         
+                                    add_by = 'Program',
+                                ).save(using=req.session["ccabang"])
                 else:
                     pass
             else:
