@@ -269,8 +269,8 @@ def periode_tgl(tanggal):
             dr = '{}-{}-{}'.format(dtahun, dperiode - 1, 26)
             sp = '{}-{}-{}'.format(dtahun, dperiode, 25)
             
-    dr=datetime.strftime(dr,'%Y-%m-%d')
-    sp=datetime.strftime(sp,'%Y-%m-%d')
+    dr=datetime.strptime(dr,'%Y-%m-%d')
+    sp=datetime.strptime(sp,'%Y-%m-%d')
     prd = dperiode
     thn = dtahun
     

@@ -11,7 +11,7 @@ def ijin(r, sid):
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        today = date.today()
+        today = date.today().strftime("%Y-%m-%d")
         pa = periode_tgl(today)
         dari = pa[0].date()
         sampai = pa[1].date()
