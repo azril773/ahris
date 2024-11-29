@@ -12,7 +12,7 @@ def cuti(r, sid):
         dsid = dakses.sid_id
         
         today = date.today()
-        pa = periode_absen(today.month,today.year)
+        pa = periode_tgl(today)
         dari = pa[0].date()
         sampai = pa[1].date()
         
