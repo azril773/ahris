@@ -10,13 +10,13 @@ def opg(r, sid):
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        today = date.today().strftime("%Y-%m-%d")
-        pa = periode_tgl(today)
+        today = date.today()
+        pa = periode_absen(today.month,today.year)
         dari = pa[0].date()
         sampai = pa[1].date()
         
-        dr = datetime.strftime(dari,'%Y-%m-%d')
-        sp = datetime.strftime(sampai,'%Y-%m-%d')                 
+        dr = datetime.strftime(dari,'%d-%m-%Y')
+        sp = datetime.strftime(sampai,'%d-%m-%Y')                 
         
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
         statusid=[]

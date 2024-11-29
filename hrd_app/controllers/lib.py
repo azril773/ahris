@@ -242,7 +242,7 @@ def periode_skrg():
 
 def periode_tgl(tanggal):
     
-    ftgl = datetime.strptime(tanggal,'%Y-%m-%d')
+    ftgl = datetime.strptime(tanggal,'%d-%m-%Y')
     
     dtgl = ftgl.day
     dbln = ftgl.month
@@ -269,8 +269,8 @@ def periode_tgl(tanggal):
             dr = '{}-{}-{}'.format(dtahun, dperiode - 1, 26)
             sp = '{}-{}-{}'.format(dtahun, dperiode, 25)
             
-    dr=datetime.strptime(dr,'%Y-%m-%d')
-    sp=datetime.strptime(sp,'%Y-%m-%d')
+    dr=dr
+    sp=sp
     prd = dperiode
     thn = dtahun
     
