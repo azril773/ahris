@@ -12,9 +12,9 @@ def cuti(r, sid):
         dsid = dakses.sid_id
         
         today = date.today()
-        pa = periode_absen(today.month,today.year)
-        dari = pa[0].date()
-        sampai = pa[1].date()
+        pa = periode_skrg()
+        dari = datetime.strptime(pa[0].date().strftime("%d-%m-%Y"),"%d-%m-%Y").date()
+        sampai = datetime.strptime(pa[1].date().strftime("%d-%m-%Y"),"%d-%m-%Y").date()
         
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')                 
@@ -145,6 +145,7 @@ def cari_cuti(r):
         
         dtgl1 = r.POST.get('ctgl1')
         dtgl2 = r.POST.get('ctgl2')
+        print(dtgl1,dtgl2)
         idp = r.POST.get('idp')
         
         dari = datetime.strptime(dtgl1,'%d-%m-%Y').date()
