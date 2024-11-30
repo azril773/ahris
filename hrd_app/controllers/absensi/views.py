@@ -430,8 +430,8 @@ def absensi_json(r, dr, sp, sid):
         # print(red.hgetall(f"absensi-{today}-{sid}"))
         # print(red.hgetall(f"absensi-{today}-{sid}"))
         
-        if red.hgetall(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}"):
-            return JsonResponse({"data": json.loads(red.hgetall(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}")["data"]) })
+        # if red.hgetall(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}"):
+        #     return JsonResponse({"data": json.loads(red.hgetall(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}")["data"]) })
         if int(sid) == 0:
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(pegawai__divisi__in=divisi,tgl_absen__range=(dari,sampai)).order_by('tgl_absen','pegawai__divisi__divisi'):
                 sket = ""
@@ -699,8 +699,8 @@ def absensi_json(r, dr, sp, sid):
                 }
 
                 data.append(absen)
-        red.hset(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}",mapping={"data":json.dumps(data)})
-        red.expire(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}",timedelta(days=1))
+        # red.hset(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}",mapping={"data":json.dumps(data)})
+        # red.expire(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}",timedelta(days=1))
         return JsonResponse({"data": data })
 
 
@@ -2588,10 +2588,10 @@ def pu(r,tgl,userid,sid):
         "lebih_jam_kerja":str(abs.lebih_jam_kerja),
     }
     abs.save(using=r.session["ccabang"])
-    red = redis.Redis(host="15.63.254.114", port="6370", decode_responses=True, username="azril", password=132)
-    for s in red.scan_iter(f"absensi-*{abs.tgl_absen.strftime('%Y-%m-%d')}*-{sid}"):
-        print(s)
-        red.delete(s)
+    # red = redis.Redis(host="15.63.254.114", port="6370", decode_responses=True, username="azril", password=132)
+    # for s in red.scan_iter(f"absensi-*{abs.tgl_absen.strftime('%Y-%m-%d')}*-{sid}"):
+    #     print(s)
+    #     red.delete(s)
     return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
 
 @login_required
