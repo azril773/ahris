@@ -1143,14 +1143,15 @@ def print_laporan_divisi(r):
                         'ln': ab.libur_nasional
                     }
                     obj["absensi"].append(absen)
-                if obj["b"] > 0:
-                    if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
-                        obj["b"] = 1
-                    else:
-                        if a.masuk_b is not None or a.pulang_b is not None or a.istirahat_b is not None or a.kembali_b is not None or a.istirahat2_b is not None or a.kembali2_b is not None:
-                            obj["b"] = 0
-                        else:
+                    if obj["b"] > 0:
+                        if len([l for l in lh if l.status_pegawai.pk == ab.pegawai.status.pk]) > 0:
                             obj["b"] = 1
+                        else:
+                            if ab.masuk_b is not None or ab.pulang_b is not None or ab.istirahat_b is not None or ab.kembali_b is not None or ab.istirahat2_b is not None or ab.kembali2_b is not None:
+                                obj["b"] = 0
+                            else:
+                                obj["b"] = 1
+                print(obj["b"])
                 obj["kehadiran"] = kehadiran
                 obj["terlambat"] = trlmbt
                 tselisih = str(tselisih).split(".")
