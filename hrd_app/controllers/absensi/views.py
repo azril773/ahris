@@ -4,15 +4,22 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 from django.db import connection
 from multiprocessing import Pool
+import ast
 from hrd_app.function import prosesabsensi
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Absensi
 @login_required
 def absensi(r,sid):
     iduser = r.user.id
-        
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+        cache = [
+            {
+                "ab":dakses.akses
+            }
+        ]
+        
+        today = datetime.today().date()
         akses = dakses.akses
            
         dsid = dakses.sid_id     
@@ -79,7 +86,12 @@ def cari_absensi(r):
         id_user = r.user.id
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
-        
+        today = datetime.today().date()
+        # print(red.hgetall(f"absensi-{today}-{sid}"))
+        # print(red.hgetall(f"absensi-{today}-{sid}"))
+        # red = redis.Redis(host="15.63.254.114", port="6370", decode_responses=True, username="azril", password=132)
+        # if red.hgetall(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}"):
+        #     return JsonResponse({"data": json.loads(red.hgetall(f"absensi-{today}-{sid}")["data"]) })
         if int(sid) == 0:
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(tgl_absen__range=(dari,sampai),pegawai__divisi__in=divisi).order_by('tgl_absen','pegawai__divisi__divisi'):
                             
@@ -413,7 +425,13 @@ def absensi_json(r, dr, sp, sid):
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
+        red = redis.Redis(host="15.63.254.114", port="6370", decode_responses=True, username="azril", password=132)
+        today = datetime.today().date()
+        # print(red.hgetall(f"absensi-{today}-{sid}"))
+        # print(red.hgetall(f"absensi-{today}-{sid}"))
         
+        if red.hgetall(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}"):
+            return JsonResponse({"data": json.loads(red.hgetall(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}")["data"]) })
         if int(sid) == 0:
             for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__counter','pegawai__divisi').filter(pegawai__divisi__in=divisi,tgl_absen__range=(dari,sampai)).order_by('tgl_absen','pegawai__divisi__divisi'):
                 sket = ""
@@ -521,29 +539,29 @@ def absensi_json(r, dr, sp, sid):
                 if sket == "":
                     sket = "-"
                 absen = {
-                    'id': a.id,
-                    'tgl': datetime.strftime(a.tgl_absen,'%d-%m-%Y'),
+                    'id': str(a.id),
+                    'tgl': str(datetime.strftime(a.tgl_absen,'%d-%m-%Y')),
                     'hari': hari_ini,
-                    "tgl_absen":a.tgl_absen,
-                    'nama': a.pegawai.nama,
-                    'nik': a.pegawai.nik,
-                    'userid': a.pegawai.userid,
-                    'bagian': bagian,
-                    "jam_masuk":a.jam_masuk,
-                    "jam_pulang":a.jam_pulang,
-                    'masuk': msk,
-                    'keluar': ist,
-                    'kembali': kmb,
-                    'pulang': plg,
-                    'masuk_b': msk_b,
-                    'keluar_b': ist_b,
-                    'kembali_b': kmb_b,
-                    'pulang_b': plg_b,
-                    "jam_kembali":jmkem,
-                    'tj': a.total_jam_kerja,
-                    'ket': sket,
-                    'sln': sln,
-                    'ln': a.libur_nasional
+                    "tgl_absen":str(a.tgl_absen),
+                    'nama': str(a.pegawai.nama),
+                    'nik': str(a.pegawai.nik),
+                    'userid': str(a.pegawai.userid),
+                    'bagian': str(bagian),
+                    "jam_masuk":str(a.jam_masuk),
+                    "jam_pulang":str(a.jam_pulang),
+                    'masuk': str(msk),
+                    'keluar': str(ist),
+                    'kembali': str(kmb),
+                    'pulang': str(plg),
+                    'masuk_b': str(msk_b),
+                    'keluar_b': str(ist_b),
+                    'kembali_b': str(kmb_b),
+                    'pulang_b': str(plg_b),
+                    "jam_kembali":str(jmkem),
+                    'tj': str(a.total_jam_kerja),
+                    'ket': str(sket),
+                    'sln': str(sln),
+                    'ln': str(a.libur_nasional)
                 }
 
                 data.append(absen)
@@ -655,33 +673,34 @@ def absensi_json(r, dr, sp, sid):
                 if sket == "":
                     sket = "-"
                 absen = {
-                    'id': a.id,
-                    'tgl': datetime.strftime(a.tgl_absen,'%d-%m-%Y'),
+                    'id': str(a.id),
+                    'tgl': str(datetime.strftime(a.tgl_absen,'%d-%m-%Y')),
                     'hari': hari_ini,
-                    "tgl_absen":a.tgl_absen,
-                    'nama': a.pegawai.nama,
-                    'nik': a.pegawai.nik,
-                    'userid': a.pegawai.userid,
-                    'bagian': bagian,
-                    "jam_masuk":a.jam_masuk,
-                    "jam_pulang":a.jam_pulang,
-                    'masuk': msk,
-                    'keluar': ist,
-                    'kembali': kmb,
-                    'pulang': plg,
-                    'masuk_b': msk_b,
-                    'keluar_b': ist_b,
-                    'kembali_b': kmb_b,
-                    'pulang_b': plg_b,
-                    "jam_kembali":jmkem,
-                    'tj': a.total_jam_kerja,
-                    'ket': sket,
-                    'sln': sln,
-                    'ln': a.libur_nasional
+                    "tgl_absen":str(a.tgl_absen),
+                    'nama': str(a.pegawai.nama),
+                    'nik': str(a.pegawai.nik),
+                    'userid': str(a.pegawai.userid),
+                    'bagian': str(bagian),
+                    "jam_masuk":str(a.jam_masuk),
+                    "jam_pulang":str(a.jam_pulang),
+                    'masuk': str(msk),
+                    'keluar': str(ist),
+                    'kembali': str(kmb),
+                    'pulang': str(plg),
+                    'masuk_b': str(msk_b),
+                    'keluar_b': str(ist_b),
+                    'kembali_b': str(kmb_b),
+                    'pulang_b': str(plg_b),
+                    "jam_kembali":str(jmkem),
+                    'tj': str(a.total_jam_kerja),
+                    'ket': str(sket),
+                    'sln': str(sln),
+                    'ln': str(a.libur_nasional)
                 }
 
                 data.append(absen)
-            
+        red.hset(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}",mapping={"data":json.dumps(data)})
+        red.expire(f"absensi-{dari.strftime('%Y-%m-%d')}-{sampai.strftime('%Y-%m-%d')}-{sid}",timedelta(days=1))
         return JsonResponse({"data": data })
 
 
@@ -1109,6 +1128,7 @@ def pabsen(req):
         data = absensi_db.objects.using(req.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()))
     elif int(sid) > 0:
         data = absensi_db.objects.using(req.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()),pegawai__status_id=sid)
+    cache = []
     for a in data:
         day = a.tgl_absen.strftime("%A")
         nh = nama_hari(day)        
@@ -1955,7 +1975,57 @@ def pabsen(req):
         ab.total_jam_istirahat = tji + tji_b
         ab.total_jam_istirahat2 = tji2 + tji2_b
         ab.save(using=req.session["ccabang"])
-                    
+        if ab.pegawai.counter is not None:
+            ct = ab.pegawai.counter.counter
+        else:
+            ct = None
+
+        if ab.pegawai.divisi is not None:
+            dv = ab.pegawai.divisi.divisi
+        else:
+            dv = None
+
+        if ab.pegawai.hari_off is not None:
+            ho = ab.pegawai.hari_off.hari
+        else:
+            ho = None
+    #     if datetime.today().date() == ab.tgl_absen:
+    #         obj = {
+    #             "id":str(ab.pk),
+    #             "tgl_absen":a.tgl_absen.strftime("%Y-%m-%d"),
+    #             "hari_off":ho,
+    #             "nama":ab.pegawai.nama,
+    #             "userid":str(ab.pegawai.userid),
+    #             "nik":ab.pegawai.nik,
+    #             "divisi":dv,
+    #             "counter":ct,
+    #             "masuk":str(ab.masuk),
+    #             "pulang":str(ab.pulang),
+    #             "istirahat":str(ab.istirahat),
+    #             "istirahat2":str(ab.istirahat2),
+    #             "kembali":str(ab.kembali),
+    #             "kembali2":str(ab.kembali2),
+    #             "masuk_b":str(ab.masuk_b),
+    #             "pulang_b":str(ab.pulang_b),
+    #             "istirahat_b":str(ab.istirahat_b),
+    #             "istirahat2_b":str(ab.istirahat2_b),
+    #             "kembali_b":str(ab.kembali_b),
+    #             "kembali2_b":str(ab.kembali2_b),
+    #             "jam_masuk":str(ab.jam_masuk),
+    #             "jam_pulang":str(ab.jam_pulang),
+    #             "lama_istirahat":str(ab.lama_istirahat),
+    #             "keterangan_absensi":str(ab.keterangan_absensi),
+    #             "keterangan_lain":str(ab.keterangan_lain),
+    #             "keterangan_ijin":str(ab.keterangan_ijin),
+    #             "libur_nasional":str(ab.libur_nasional),
+    #             "total_jam_kerja":str(ab.total_jam_kerja)
+    #         }
+    #         cache.append(obj)
+    
+    # red = redis.Redis(host="15.63.254.114",port=6370,decode_responses=True, username="azril",password=132)
+    # today = datetime.today().date()
+    # red.hset(f'absensi-{today}-{sid}',mapping={"data":json.dumps(cache)})
+    
 
     return redirect ('absensi',sid=int(sid))   
     # return render(req,'hrd_app/example/ex.html')
@@ -2518,6 +2588,10 @@ def pu(r,tgl,userid,sid):
         "lebih_jam_kerja":str(abs.lebih_jam_kerja),
     }
     abs.save(using=r.session["ccabang"])
+    red = redis.Redis(host="15.63.254.114", port="6370", decode_responses=True, username="azril", password=132)
+    for s in red.scan_iter(f"absensi-*{abs.tgl_absen.strftime('%Y-%m-%d')}*-{sid}"):
+        print(s)
+        red.delete(s)
     return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
 
 @login_required
