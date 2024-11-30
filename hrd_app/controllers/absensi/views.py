@@ -425,7 +425,7 @@ def absensi_json(r, dr, sp, sid):
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-        red = redis.Redis(host="15.63.254.114", port="6370", decode_responses=True, username="azril", password=132)
+        # red = redis.Redis(host="15.63.254.114", port="6370", decode_responses=True, username="azril", password=132)
         today = datetime.today().date()
         # print(red.hgetall(f"absensi-{today}-{sid}"))
         # print(red.hgetall(f"absensi-{today}-{sid}"))
