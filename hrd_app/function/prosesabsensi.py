@@ -943,7 +943,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                                                     istirahat2=jam_absen.time()
                                                 ).save(using=cabang)
                                             else:
-                                                abm = absensi_db.objects.using(cabang).filter(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk)
+                                                abm = absensi_db.objects.using(cabang).get(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk)
                                                 abm.istirahat2 = jam_absen.time()
                                                 abm.save(using=cabang)
                                             data = {
@@ -1070,7 +1070,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                                                 istirahat2=jam_absen.time()
                                             ).save(using=cabang)
                                         else:
-                                            abm = absensi_db.objects.using(cabang).filter(tgl_absen=jam_absen.date(),pegawai_id=ab.pegawai.pk)
+                                            abm = absensi_db.objects.using(cabang).get(tgl_absen=jam_absen.date(),pegawai_id=ab.pegawai.pk)
                                             abm.istirahat2 = jam_absen.time()
                                             abm.save(using=cabang)
                                         data = {
@@ -1996,7 +1996,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                                                 pulang=jam_absen.time()
                                             ).save(using=cabang)
                                         else:
-                                            abm = absensi_db.objects.using(cabang).filter(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk)
+                                            abm = absensi_db.objects.using(cabang).get(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk)
                                             abm.pulang = jam_absen.time()
                                             abm.save(using=cabang)
                                         # absensi_db(
@@ -2162,7 +2162,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         masuk=jam_absen.time()
                                     ).save(using=cabang)
                                 else:
-                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
                                     abm.masuk = jam_absen.time()
                                     abm.save(using=cabang)
                                 data = {
@@ -2275,7 +2275,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         istirahat=jam_absen.time()
                                     ).save(using=cabang)
                                 else:
-                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
                                     abm.istirahat = jam_absen.time()
                                     abm.save(using=cabang)
                                 data = {
@@ -2362,7 +2362,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         istirahat2=jam_absen.time()
                                     ).save(using=cabang)
                                 else:
-                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
                                     abm.istirahat2 = jam_absen.time()
                                     abm.save(using=cabang)
                                 data = {
@@ -2449,7 +2449,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         kembali=jam_absen.time()
                                     ).save(using=cabang)
                                 else:
-                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
                                     abm.kembali = jam_absen.time()
                                     abm.save(using=cabang)
                                 data = {
@@ -2521,7 +2521,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         kembali2=jam_absen.time()
                                     ).save(using=cabang)
                                 else:
-                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
                                     abm.kembali2 = jam_absen.time()
                                     abm.save(using=cabang)
                                 data = {
@@ -2623,7 +2623,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         pulang=jam_absen.time()
                                     ).save(using=cabang)
                                 else:
-                                    abm = absensi_db.objects.using(cabang).filter(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
+                                    abm = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai_id=ab.pegawai.pk)
                                     abm.pulang = jam_absen.time()
                                     abm.save(using=cabang)
                                 data = {
