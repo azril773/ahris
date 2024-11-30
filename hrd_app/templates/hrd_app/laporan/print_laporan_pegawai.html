@@ -98,19 +98,19 @@
                     <tbody>
                         {% for ab in d.absensi %}
                         <tr class="body">
-                            <td>
+                            <td class="text-nowrap">
                                 {% if ab.lbr %}
                                     <span class="text-danger text-nowrap">{{ab.tgl_absen}}</span>
                                 {% else %}
                                     {{ab.tgl_absen}}
                                 {% endif %}
                             </td>
-                            <td>{{ab.masuk |safe}}</td>
-                            <td>{{ab.keluar |safe}}</td>
-                            <td>{{ab.kembali |safe}}</td>
-                            <td>{{ab.pulang |safe}}</td>
-                            <td>{{ab.tj |safe}}</td>
-                            <td class="tx-inverse whitespace-nowrap">{{ab.ket |safe}}</td>
+                            <td class="text-nowrap">{{ab.masuk |safe}}</td>
+                            <td class="text-nowrap">{{ab.keluar |safe}}</td>
+                            <td class="text-nowrap">{{ab.kembali |safe}}</td>
+                            <td class="text-nowrap">{{ab.pulang |safe}}</td>
+                            <td class="text-nowrap">{{ab.tj |safe}}</td>
+                            <td class="text-nowrap" class="tx-inverse whitespace-nowrap">{{ab.ket |safe}}</td>
                         </tr>
                         {% endfor %}
                             
@@ -137,23 +137,23 @@
                     <tbody>
                         {% for ab in d.absensi %}
                         <tr class="body">
-                            <td>
+                            <td class="text-nowrap">
                                 {% if ab.lbr %}
                                     <span class="text-danger">{{ab.tgl_absen}}</span>
                                 {% else %}
                                     {{ab.tgl_absen}}
                                 {% endif %}
                             </td>
-                            <td>{{ab.masuk |safe}}</td>
-                            <td>{{ab.keluar |safe}}</td>
-                            <td>{{ab.kembali |safe}}</td>
-                            <td>{{ab.pulang |safe}}</td>
-                            <td>{{ab.masuk_b |safe}}</td>
-                            <td>{{ab.keluar_b |safe}}</td>
-                            <td>{{ab.kembali_b |safe}}</td>
-                            <td>{{ab.pulang_b |safe}}</td>
-                            <td>{{ab.tj |safe}}</td>
-                            <td class="tx-inverse whitespace-nowrap">{{ab.ket |safe}}</td>
+                            <td class="text-nowrap">{{ab.masuk |safe}}</td>
+                            <td class="text-nowrap">{{ab.keluar |safe}}</td>
+                            <td class="text-nowrap">{{ab.kembali |safe}}</td>
+                            <td class="text-nowrap">{{ab.pulang |safe}}</td>
+                            <td class="text-nowrap">{{ab.masuk_b |safe}}</td>
+                            <td class="text-nowrap">{{ab.keluar_b |safe}}</td>
+                            <td class="text-nowrap">{{ab.kembali_b |safe}}</td>
+                            <td class="text-nowrap">{{ab.pulang_b |safe}}</td>
+                            <td class="text-nowrap">{{ab.tj |safe}}</td>
+                            <td class="tx-inverse text-nowrap">{{ab.ket |safe}}</td>
                         </tr>
                         {% endfor %}
                             

@@ -975,6 +975,7 @@ def print_laporan_divisi(r):
             sid = dakses.pegawai.status.pk
             data = [] 
         divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=dvs)
+        lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
         for p in divisi:
             for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=p.pk):
                 dari = datetime.strptime(str(dr),'%d-%m-%Y').date()
@@ -984,6 +985,7 @@ def print_laporan_divisi(r):
                     "nik":p.nik,
                     "divisi":p.divisi,
                     "dari":dari,
+                    "b":1,
                     "sampai":sampai,
                     "kehadiran":0,
                     "selisih":0,
@@ -1141,6 +1143,14 @@ def print_laporan_divisi(r):
                         'ln': ab.libur_nasional
                     }
                     obj["absensi"].append(absen)
+                if obj["b"] > 0:
+                    if len([l for l in lh if l.status_pegawai.pk == a.pegawai.status.pk]) > 0:
+                        obj["b"] = 1
+                    else:
+                        if a.masuk_b is not None or a.pulang_b is not None or a.istirahat_b is not None or a.kembali_b is not None or a.istirahat2_b is not None or a.kembali2_b is not None:
+                            obj["b"] = 0
+                        else:
+                            obj["b"] = 1
                 obj["kehadiran"] = kehadiran
                 obj["terlambat"] = trlmbt
                 tselisih = str(tselisih).split(".")
