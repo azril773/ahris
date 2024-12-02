@@ -30,7 +30,7 @@ def laporan(r,sid):
         sall = status_pegawai_db.objects.using(r.session["ccabang"]).all()
         divisi = divisi_db.objects.using(r.session["ccabang"]).all()
         shift = shift_db.objects.using(r.session["ccabang"]).all()
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(divisi_id__in=aksesdivisi)
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
@@ -87,6 +87,7 @@ def laporan_json(r):
             kwft = 0
             urh = 0
             bs = 0
+            insentif = 0
             ijin = 0
             af = 0
             ct = 0 #keterangan absensi
@@ -103,6 +104,11 @@ def laporan_json(r):
                         if a.masuk > a.jam_masuk:
                             if a.keterangan_ijin is None:
                                 terlambat += 1
+                    if a.insentif is not None:
+                        if a.insentif == 0:
+                            pass
+                        else:
+                            insentif += int(a.insentif)
                     if a.keterangan_ijin is not None:
                         if re.search("(sdp)",a.keterangan_ijin,re.I):
                             sdp += 1
@@ -166,6 +172,7 @@ def laporan_json(r):
                 "cm":cm if cm > 0 else "",
                 "wft":wft if wft > 0 else "",
                 "ktn":ktn if ktn > 0 else "",
+                "insentif":insentif if insentif > 0 else 0,
                 "ijin":ijin if ijin > 0 else "",
                 "af":af if af > 0 else "",
                 "ct":ct if ct > 0 else "",
@@ -198,6 +205,7 @@ def laporan_json(r):
             kwft = 0
             urh = 0
             bs = 0
+            insentif = 0
             ijin = 0
             af = 0
             ct = 0 #keterangan absensi
@@ -217,6 +225,11 @@ def laporan_json(r):
                         if a.masuk > a.jam_masuk:
                             if a.keterangan_ijin is None:
                                 terlambat += 1
+                    if a.insentif is not None:
+                        if a.insentif == 0:
+                            pass
+                        else:
+                            insentif += int(a.insentif)
                     if a.keterangan_ijin is not None:
                         if re.search("(sdp)",a.keterangan_ijin,re.I):
                             sdp += 1
@@ -278,6 +291,7 @@ def laporan_json(r):
                 "cm":cm if cm > 0 else "",
                 "wft":wft if wft > 0 else "",
                 "ktn":ktn if ktn > 0 else "",
+                "insentif":insentif if insentif > 0 else 0,
                 "ijin":ijin if ijin > 0 else "",
                 "af":af if af > 0 else "",
                 "ct":ct if ct > 0 else "",
@@ -302,7 +316,7 @@ def laporan_json(r):
                     sdp=dt["sdp"] if dt["sdp"] != "" else 0,
                     ijin=dt["ijin"] if dt["ijin"] != "" else 0,
                     af=dt['af'] if dt["af"] != "" else 0,
-                    insentif=0,
+                    insentif=dt["insentif"],
                     cm=dt["cm"] if dt["cm"] != "" else 0,
                     keterangan=''
                 ).save(using=r.session["ccabang"])
@@ -318,7 +332,7 @@ def laporan_json(r):
                     sdp=dt["sdp"] if dt["sdp"] != "" else 0,
                     ijin=dt["ijin"] if dt["ijin"] != "" else 0,
                     af=dt['af'] if dt["af"] != "" else 0,
-                    insentif=0,
+                    insentif=dt["insentif"],
                     cm=dt["cm"] if dt["cm"] != "" else 0,
                     keterangan=''
                 )

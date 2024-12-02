@@ -754,6 +754,23 @@ class rekap_lembur_db(models.Model):
 
 
 
+
+class data_ijin_db(models.Model):
+    # nik = models.IntegerField(default=0)
+    # userid = models.CharField(max_length=100, null=True)
+    pegawai = models.ForeignKey(pegawai_db,on_delete=models.CASCADE)
+    periode = models.IntegerField(default=0)
+    tahun = models.IntegerField(null=True)
+    sb = models.IntegerField(default=0, null=True)
+    sdl = models.IntegerField(default=0, null=True)
+    sdp = models.IntegerField(default=0, null=True)
+    ijin = models.IntegerField(default=0, null=True)
+    alfa = models.IntegerField(default=0, null=True)
+    insentif = models.IntegerField(default=0, null=True)
+    ket = models.TextField(null=True)
+
+
+
 class rekap_db(models.Model):
     pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE, null=True)
     status = models.ForeignKey(status_pegawai_db,on_delete=models.CASCADE, null=True)
