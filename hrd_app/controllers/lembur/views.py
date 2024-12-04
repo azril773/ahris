@@ -412,20 +412,24 @@ def tambah_lembur(r):
                                     for x in range(int(looping) - 1):
                                         a2_ist = b_ist[x] + timedelta(minutes=30)
                                         b_ist.append(a2_ist)
-                                    if absen_kmb <= a_ist:
-                                        selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
-                                        tist = selisihkmb.total_seconds() / 3600
-                                        tist = round(abs(float(decimal_ist) - tist),2)
-                                        decimal_part = abs(int(tist) - tist)
-                                        if decimal_part <= 0.5:
-                                            tist = int(tist) + 0.5
-                                        else:
-                                            tist = math.ceil(tist)    
+                                    # if absen_kmb <= a_ist:
+                                    #     selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
+                                    #     tist = selisihkmb.total_seconds() / 3600
+                                    #     tist = round(abs(float(decimal_ist) - tist),2)
+                                    #     decimal_part = abs(int(tist) - tist)
+                                    #     if decimal_part <= 0.5:
+                                    #         tist = int(tist) + 0.5
+                                    #     else:
+                                    #         tist = math.ceil(tist)    
 
                  
-                                        pemotong_ist = -abs(float(decimal_ist) - tist)
+                                    #     pemotong_ist = -abs(float(decimal_ist) - tist)
+                                    #     pemotong_ist2 = 0
+                                    #     s_ist.append(pemotong_ist)
+                                    # else:
+                                    if a_ist >=  absen_kmb:
+                                        pemotong_ist = 0
                                         pemotong_ist2 = 0
-                                        s_ist.append(pemotong_ist)
                                     else:
                                         for b in b_ist:                             
                                             if absen_kmb > b:
@@ -455,23 +459,22 @@ def tambah_lembur(r):
                                 for x in range(int(looping) - 1):
                                     a2_ist = b_ist[x] + timedelta(minutes=30)
                                     b_ist.append(a2_ist)
-                                if absen_kmb <= a_ist:
-                                        selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
+                                if a_ist > absen_kmb:
+                                        # selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
 
 
-                                        tist = selisihkmb.total_seconds() / 3600
-                                        tist = round(abs(float(decimal_ist) - tist),2)
+                                        # tist = selisihkmb.total_seconds() / 3600
+                                        # tist = round(abs(float(decimal_ist) - tist),2)
 
 
-                                        decimal_part = abs(int(tist) - tist)
-                                        if decimal_part <= 0.5:
-                                            tist = int(tist) + 0.5
-                                        else:
-                                            tist = math.ceil(tist)    
-
-                 
-                                        pemotong_ist = -abs(float(decimal_ist) - tist)
-                                        s_ist.append(pemotong_ist)
+                                        # decimal_part = abs(int(tist) - tist)
+                                        # if decimal_part <= 0.5:
+                                        #     tist = int(tist) + 0.5
+                                        # else:
+                                        #     tist = math.ceil(tist)    
+                                        pemotong_ist = 0
+                                        pemotong_ist2 = 0
+                                        # s_ist.append(pemotong_ist)
                                 else:
                                     for b in b_ist:                             
                                         if absen_kmb > b:

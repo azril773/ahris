@@ -92,7 +92,7 @@
                             <th scope="col">Kmbl. / Kmbl. 2</th>
                             <th scope="col">Pulang</th>
                             <th scope="col">Total Jam</th>
-                            <th scope="col">Keterangan</th>
+                            <th scope="col" style="width: 200px;">Keterangan</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -110,7 +110,7 @@
                             <td class="text-nowrap">{{ab.kembali |safe}}</td>
                             <td class="text-nowrap">{{ab.pulang |safe}}</td>
                             <td class="text-nowrap">{{ab.tj |safe}}</td>
-                            <td class="text-nowrap" class="tx-inverse whitespace-nowrap">{{ab.ket |safe}}</td>
+                            <td class="">{{ab.ket |safe}}</td>
                         </tr>
                         {% endfor %}
                             
