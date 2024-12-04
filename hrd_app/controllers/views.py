@@ -90,7 +90,7 @@ def ganti_cabang(r):
         return JsonResponse({"status":"error","msg":"Gagal mengganti cabang"},status=401)
     cabang = cabang_db.objects.filter(cabang=cabang)
     if akses_cabang_db.objects.filter(cabang_id=cabang[0].pk).exists():
-        r.session["ccabang"] = cabang
+        r.session["ccabang"] = cabang[0].cabang
         return JsonResponse({"status":"success","msg":"Berhasil mengganti cabang"},status=200)
     else:
         return JsonResponse({"status":"error","msg":"Gagal mengganti cabang"},status=401)
