@@ -1393,8 +1393,24 @@ def pabsen(req):
                                             keterangan = 'OFF Pengganti Tgl Merah',                         
                                             add_by = 'Program',
                                         ).save(using=req.session["ccabang"])    
+                            # JIKA HARI OFF TIDAK BERTEPATAN HARI LIBUR NASIONAL
                             else:
-                                pass
+                                if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
+                                    if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
+                                        pass
+                                    else:
+                                        if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
+                                            pass
+                                        else:    
+                                            opg_db(
+                                                pegawai_id = ab.pegawai_id,
+                                                opg_tgl = ab.tgl_absen,   
+                                                keterangan = 'OFF Pengganti Tgl Merah',                         
+                                                add_by = 'Program',
+                                            ).save(using=req.session["ccabang"])
+                                # TAPI JIKA TIDAK MASUK HANYA MENDAPATKAN 1 OPG
+                                else:
+                                    pass
                         
                         # Karyawan
                         # JIKA MASUK HANYA MENDAPATKAN 1 OPG DAN INSENTIF
