@@ -29,7 +29,7 @@
                 </div>
                 <!-- Button Proses Data -->
             <a href="{% url 'absensi' sid %}" class="btn btn-info mg-b-6">KEMBALI</a>&nbsp; &nbsp;
-
+            <input type="hidden" name="" id="now" value="{{tgl}}">
             <!-- Button Cari Data Absen -->
             <button data-target="#tambah_jam_absen" data-toggle="modal" class="btn btn-warning mg-b-6">TAMBAH JAM ABSEN</button>  &nbsp; &nbsp;
             <a href="{% url 'pu' tgl pegawai.userid sid %}" class="btn btn-success mg-b-6">PROSES ULANG ABSENSI</a>  &nbsp; &nbsp;
@@ -286,6 +286,7 @@
         paging: false,
         processing: true,
     });
+    const now = $("#now").val()
     const tableraw = $("#rawtable").DataTable({
         ajax: {
             url: "{% url 'get_raw_json' %}",
@@ -306,11 +307,19 @@
                     let html = ''
                     moment.locale("id")
                     const display = moment(data,"YYYY-MM-DD").format("dddd D MMMM YYYY","de")
-                    html = `<span>${display}</span>`
+                    const date = moment(data,"YYYY-MM-DD").format("YYYY-MM-DD")
+                    const now = $("#now").val()
+                    if(date == now){
+                        html = `<span class="text-success">${display}</span>`
+                    }else{
+                        html = `<span>${display}</span>`
+                    }
                     return html
                 }
             },
-            {data: "jam_absen"},
+            {
+                data: "jam_absen"
+            },
             {
                 data: "punch",
             },
