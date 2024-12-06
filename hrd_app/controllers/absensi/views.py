@@ -1618,7 +1618,7 @@ def pabsen(req):
                     opg_get= opg_db.objects.using(req.session["ccabang"]).get(id=o['id'])
                     # jika tidak masuk dan tidak ada pulang
                     if ab.masuk is None and ab.pulang is None and ab.masuk_b is None and ab.pulang_b is None:
-                        topg = datetime.strftime(o['diambil_tgl'], '%d-%m-%Y')
+                        topg = datetime.strftime(o['opg_tgl'], '%d-%m-%Y')
                         ab.keterangan_absensi = f'OPG-({topg})'
                         ab.save(using=req.session["ccabang"])                                
                         
@@ -2158,7 +2158,7 @@ def get_raw_json(r):
     userid = r.POST.get('userid')
     tgl = datetime.strptime(r.POST.get('tgl'),"%Y-%m-%d")
     tmin = tgl - timedelta(days=1)
-    tplus = tgl + timedelta(days=1)
+    tplus = tgl + timedelta(days=2)
     raw = data_raw_db.objects.using(r.session["ccabang"]).filter(userid=userid,jam_absen__range=[tmin,tplus]).order_by("jam_absen")
     draw = []
     for i in raw:
