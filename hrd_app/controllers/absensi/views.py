@@ -784,14 +784,13 @@ def pabsen(req):
             pegawai.append(data)        
             luserid.append(p.userid)
             for tgl in rangetgl:
-                if absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen=tgl, pegawai_id=p.id).exists():
+                if absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen=tgl, pegawai_id=p.pk).exists():
                     pass
                 else:
-                    tabsen = absensi_db(
+                    absensi_db(
                         tgl_absen = tgl,
-                        pegawai_id = p.id
-                    )
-                    tabsen.save(using=req.session["ccabang"])
+                        pegawai_id = p.pk
+                    ).save(using=req.session["ccabang"])
     else:
         for p in pegawai_db.objects.using(req.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi,status__id=sid):
             if p.jabatan is None:
@@ -840,14 +839,13 @@ def pabsen(req):
             pegawai.append(data)        
             luserid.append(p.userid)
             for tgl in rangetgl:
-                if absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen=tgl, pegawai_id=p.id).exists():
+                if absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen=tgl, pegawai_id=p.pk).exists():
                     pass
                 else:
-                    tabsen = absensi_db(
+                    absensi_db(
                         tgl_absen = tgl,
-                        pegawai_id = p.id
-                    )
-                    tabsen.save(using=req.session['ccabang'])
+                        pegawai_id = p.pk
+                    ).save(using=req.session['ccabang'])
     
     dmesin = []
     # ambil data mesin simpan di att dan dmesin array
@@ -1003,7 +1001,7 @@ def pabsen(req):
     opg_all = []
     dl = []
     dl_idp = []
-    
+    ijindl = []
     lsopg = []
     
     # list status pegawai yang dapat opg
@@ -1094,6 +1092,16 @@ def pabsen(req):
         }
         dl.append(data)
         dl_idp.append(n.pegawai_id)
+
+    for ij in ijin_db.objects.using(r.session["ccabang"]).filter(tgl_ijin__range=((dari - timedelta(days=1)).date(),(sampai + timedelta(days=1)).date())):
+        if re.search('(dinas luar|dl)',ij.ijin.jenis_ijin,re.IGNORECASE) is not None:
+            data = {
+                "tgl":ij.tgl_ijin,
+                "idp":ij.pegawai.pk,
+                "ijin":ij.ijin
+            }
+            ijindl.append(data)
+
 
     for k in kompen_db.objects.using(req.session["ccabang"]).all():
         data = {
@@ -1200,56 +1208,57 @@ def pabsen(req):
         # jika tidak ada masuk dan pulang   
         else:
             # jika dinas luar
-            if ab.pegawai_id in dl_idp:
-                
-                # jika off dia hari ini
-                if str(a.pegawai.hari_off) == str(nh):
-                    # jika dia bisa mendapatkan opg
-                    if a.pegawai.status_id in lsopg:
-                        # jika dia geser dari hari off ke hari lain
-                        if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
-                            pass
-                        # jika dia tidak geser dari hari off ke hari lain
-                        else:
-                            # ini rencana jika cronjob jalan
-                            if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                                pass
+            if len(ijindl) > 0:
+                for il in ijindl:
+                    if il["tgl"] == ab.tgl_absen and int(il["idp"]) == int(ab.pegawai.pk):
+                        # jika off dia hari ini
+                        if str(a.pegawai.hari_off) == str(nh):
+                            # jika dia bisa mendapatkan opg
+                            if a.pegawai.status_id in lsopg:
+                                # jika dia geser dari hari off ke hari lain
+                                if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
+                                    pass
+                                # jika dia tidak geser dari hari off ke hari lain
+                                else:
+                                    # ini rencana jika cronjob jalan
+                                    if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                                        pass
+                                    else:
+                                        # ini kalo tidak jalan
+                                        opg_db(
+                                            pegawai_id = ab.pegawai_id,
+                                            opg_tgl = ab.tgl_absen,   
+                                            keterangan = 'OFF Pengganti Reguler',                         
+                                            add_by = 'Program',
+                                        ).save(using=req.session['ccabang'])
                             else:
-                                # ini kalo tidak jalan
-                                opg_db(
-                                    pegawai_id = ab.pegawai_id,
-                                    opg_tgl = ab.tgl_absen,   
-                                    keterangan = 'OFF Pengganti Reguler',                         
-                                    add_by = 'Program',
-                                ).save(using=req.session['ccabang'])
-                    else:
-                        pass
-                else:
-                    # jika on off
-                    if str(a.pegawai.hari_off) == 'On Off':
-                        ab.keterangan_absensi = 'OFF'
-                        ab.save(using=req.session["ccabang"])
-                    else:
-                        pass
-                    
-                if str(a.pegawai.hari_off2) == str(nh):
-                    if a.pegawai.status_id in lsopg:
-                        if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
-                            pass
-                        else:
-                            if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
                                 pass
+                        else:
+                            # jika on off
+                            if str(a.pegawai.hari_off) == 'On Off':
+                                ab.keterangan_absensi = 'OFF'
+                                ab.save(using=req.session["ccabang"])
                             else:
-                                opg_db(
-                                    pegawai_id = ab.pegawai_id,
-                                    opg_tgl = ab.tgl_absen,   
-                                    keterangan = 'OFF Pengganti Reguler',                         
-                                    add_by = 'Program',
-                                ).save(using=req.session['ccabang'])
-                    else:
-                        pass
-                else:
-                    pass    
+                                pass
+                            
+                        if str(a.pegawai.hari_off2) == str(nh):
+                            if a.pegawai.status_id in lsopg:
+                                if next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
+                                    pass
+                                else:
+                                    if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                                        pass
+                                    else:
+                                        opg_db(
+                                            pegawai_id = ab.pegawai_id,
+                                            opg_tgl = ab.tgl_absen,   
+                                            keterangan = 'OFF Pengganti Reguler',                         
+                                            add_by = 'Program',
+                                        ).save(using=req.session['ccabang'])
+                            else:
+                                pass
+                        else:
+                            pass    
             else:
                 # jika dia hari ini off
                 if (a.masuk is not None or a.pulang is not None) or (a.masuk_b is not None or a.pulang_b is not None):
@@ -1592,7 +1601,7 @@ def pabsen(req):
                 else:
                     pass
         # opg
-        for o in opg:
+        for o in opg_all:
             if a.pegawai_id == o['idp']:
                 # cek jika di dalam data opg diambil pada tanggal saat ini
                 if o['diambil_tgl'] == ab.tgl_absen:
