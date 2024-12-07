@@ -2286,7 +2286,7 @@ def pu(r,tgl,userid,sid):
             'idp' : ga.pegawai_id, 
             'dari_tgl' : ga.dari_tgl,
             'ke_tgl' : ga.ke_tgl,
-            'keterangan' : ga.keterangan
+            'keterangan' : ga.keterangan 
         } 
         geser_all.append(data)
 
