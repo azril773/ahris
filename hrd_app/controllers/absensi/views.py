@@ -1102,7 +1102,7 @@ def pabsen(req):
         opg.append(data)
     
     # data dinas luar
-    for n in dinas_luar_db.objects.using(req.session["ccabang"]).select_related('pegawai').all(tgl_dinas__range=(dari.date(),sampai.date())):
+    for n in dinas_luar_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(tgl_dinas__range=(dari.date(),sampai.date())):
         data = {
             'idp': n.pegawai_id,
             'tgl_dinas':n.tgl_dinas,
