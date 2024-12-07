@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from django.db import connection
 from multiprocessing import Pool
 from ..models import *
+import pandas as pd
 from datetime import date, datetime, timedelta
 def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddtor):
     dt = ddt
@@ -2688,3 +2689,5 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                     mesin = b['mesin'],
                     keterangan = b['ket']             
                 ).save(using=cabang) 
+            
+
