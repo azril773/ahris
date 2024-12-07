@@ -1834,7 +1834,9 @@ def nonaktif(r):
 
             p.delete()
         except Exception as e:
+            print(e)
             transaction.set_rollback(True,using=r.session["ccabang"])
+            return JsonResponse({"status":"error","msg":"Terjadi kesalahan"})
     status = 'ok'
     return JsonResponse({"status": status})
 

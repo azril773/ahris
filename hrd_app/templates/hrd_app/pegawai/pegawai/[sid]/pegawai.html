@@ -287,7 +287,11 @@
                         
                 },
                 error: function (error) {
-                    alert('Terjadi kesalahan sistem, hubungi IT.')
+                    if(error.responseJSON?.msg){
+                        alert(error.responseJSON.msg)
+                    }else{
+                        alert('Terjadi kesalahan sistem, hubungi IT.')
+                    }
                 }
             });
 
