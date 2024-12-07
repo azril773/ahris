@@ -280,7 +280,7 @@ def tasiksetabsensi():
     #                     pegawai_id = p.pk
     #                 ).save(using='tasik')
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="16",minute="00",second="00"
+    year="*",month="*",day='*',hour="02",minute="00",second="00"
 )
 scheduler.add_job(tasiksetabsensi,trigger=trigger)
 scheduler.start()
