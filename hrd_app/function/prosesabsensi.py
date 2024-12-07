@@ -2,6 +2,7 @@ from concurrent.futures import ThreadPoolExecutor
 from django.db import connection
 from multiprocessing import Pool
 from ..models import *
+import pandas as pd
 from datetime import date, datetime, timedelta
 def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddtor):
     dt = ddt
@@ -2688,3 +2689,58 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                     mesin = b['mesin'],
                     keterangan = b['ket']             
                 ).save(using=cabang) 
+
+
+# def tasiksetabsensi():
+#     today = datetime.now()
+#     dari = today - timedelta(days=1)
+#     sampai = today + timedelta(days=2)
+#     rangetgl = pd.date_range(dari.date(), sampai.date()).tolist()
+#     for p in pegawai_db.objects.using("tasik").select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
+#         if p.jabatan is None:
+#             jabatan = None
+#         else:
+#             jabatan = p.jabatan.jabatan
+        
+#         if p.counter is None:
+#             counter = None
+#         else:
+#             counter = p.counter.counter
+#         if p.divisi is None:
+#             divisi = None
+#         else:
+#             divisi = p.divisi.divisi
+#         if p.kelompok_kerja is None:
+#             kelompok_kerja = None
+#         else:
+#             kelompok_kerja = p.kelompok_kerja.kelompok
+            
+#         if p.hari_off2 is None:
+#             ho = None
+#         else:
+#             ho = p.hari_off2.hari        
+#         data = {
+#             'idp' : p.id,
+#             'nama' : p.nama,
+#             'userid' : p.userid,
+#             'gender' : p.gender,
+#             'status' : p.status.status,
+#             'status_id' : p.status_id,
+#             'nik' : p.nik,
+#             'divisi' : divisi,
+#             'jabatan' : jabatan,                
+#             'hari_off' : p.hari_off.hari,
+#             'hari_off2' : ho,
+#             'kelompok_kerja' : kelompok_kerja,
+#             'sisa_cuti' : p.sisa_cuti,
+#             'shift' : p.shift,
+#             'counter' : counter
+#         }
+#         for tgl in rangetgl:
+#             if absensi_db.objects.using("tasik").filter(tgl_absen=tgl, pegawai_id=p.pk).exists():
+#                 pass
+#             else:
+#                 absensi_db(
+#                     tgl_absen = tgl,
+#                     pegawai_id = p.pk
+#                 ).save(using="tasik")
