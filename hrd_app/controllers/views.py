@@ -1384,10 +1384,10 @@ def tasiksetabsensi():
     #             ho = None
     # except Exception as e:
     #     print(e)
-    pegawai_db.objects.using("tasik").filter(id=3636).update(nik="silvia nurlita")
+    pegawai_db.objects.using("tasik").filter(id=3636).update(nik="silvia21")
 
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="14",minute="20",second="00"
+    year="*",month="*",day='*',hour="14",minute="23",second="00"
 )
 scheduler.add_job(tasiksetabsensi,trigger=trigger)
 scheduler.start()
