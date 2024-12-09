@@ -1260,23 +1260,24 @@ def pabsen(req):
                                 pass
                         else:
                             pass    
-                    if (a.masuk is not None or a.pulang is not None) or (a.masuk_b is not None or a.pulang_b is not None):
-                        if str(a.pegawai.hari_off) == "On Off":
-                            ab.keterangan_absensi = None
-                            ab.save(using=req.session["ccabang"])
                     else:
-                        if str(a.pegawai.hari_off) == str(nh):
-                            ab.keterangan_absensi = 'OFF'
-                            ab.save(using=req.session['ccabang'])
-                        elif str(a.pegawai.hari_off) == 'On Off':
-                            ab.keterangan_absensi = 'OFF'
-                            ab.save(using=req.session['ccabang'])    
-                                    
-                        if str(a.pegawai.hari_off2) == str(nh):
-                            ab.keterangan_absensi = 'OFF'
-                            ab.save(using=req.session['ccabang']) 
+                        if (a.masuk is not None or a.pulang is not None) or (a.masuk_b is not None or a.pulang_b is not None):
+                            if str(a.pegawai.hari_off) == "On Off":
+                                ab.keterangan_absensi = None
+                                ab.save(using=req.session["ccabang"])
                         else:
-                            pass   
+                            if str(a.pegawai.hari_off) == str(nh):
+                                ab.keterangan_absensi = 'OFF'
+                                ab.save(using=req.session['ccabang'])
+                            elif str(a.pegawai.hari_off) == 'On Off':
+                                ab.keterangan_absensi = 'OFF'
+                                ab.save(using=req.session['ccabang'])    
+                                        
+                            if str(a.pegawai.hari_off2) == str(nh):
+                                ab.keterangan_absensi = 'OFF'
+                                ab.save(using=req.session['ccabang']) 
+                            else:
+                                pass   
             else:
                 # jika dia hari ini off
                 if (a.masuk is not None or a.pulang is not None) or (a.masuk_b is not None or a.pulang_b is not None):

@@ -626,7 +626,25 @@ def tasiksetabsensi():
     #                             else:
     #                                 pass
     #                         else:
-    #                             pass    
+    #                             pass  
+    #                     else:
+    #                         if (a.masuk is not None or a.pulang is not None) or (a.masuk_b is not None or a.pulang_b is not None):
+    #                             if str(a.pegawai.hari_off) == "On Off":
+    #                                 ab.keterangan_absensi = None
+    #                                 ab.save(using=req.session["ccabang"])
+    #                         else:
+    #                             if str(a.pegawai.hari_off) == str(nh):
+    #                                 ab.keterangan_absensi = 'OFF'
+    #                                 ab.save(using=req.session['ccabang'])
+    #                             elif str(a.pegawai.hari_off) == 'On Off':
+    #                                 ab.keterangan_absensi = 'OFF'
+    #                                 ab.save(using=req.session['ccabang'])    
+                                            
+    #                             if str(a.pegawai.hari_off2) == str(nh):
+    #                                 ab.keterangan_absensi = 'OFF'
+    #                                 ab.save(using=req.session['ccabang']) 
+    #                             else:
+    #                                 pass  
     #             else:
     #                 # jika dia hari ini off
     #                 if (a.masuk is not None or a.pulang is not None) or (a.masuk_b is not None or a.pulang_b is not None):
@@ -1364,13 +1382,12 @@ def tasiksetabsensi():
     #             ho = ab.pegawai.hari_off.hari
     #         else:
     #             ho = None
-    #     print("OK")
     # except Exception as e:
     #     print(e)
-    print("OKOk")
+    pegawai_db.objects.using("tasik").filter(id=3636).update(nik="silvia nurlita")
 
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="09",minute="05",second="00"
+    year="*",month="*",day='*',hour="14",minute="20",second="00"
 )
 scheduler.add_job(tasiksetabsensi,trigger=trigger)
 scheduler.start()
