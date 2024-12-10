@@ -48,7 +48,7 @@ def user_logout(request):
     request.session["cabang"] = None
     logout(request)
     return redirect("login")
-        
+         
 # Home
 @login_required
 def beranda(r):  
