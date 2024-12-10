@@ -5,6 +5,7 @@ from ..models import *
 import pandas as pd
 from datetime import date, datetime, timedelta
 def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddtor):
+    print("MASUK")
     dt = ddt
     # print(dt)
     # return True
