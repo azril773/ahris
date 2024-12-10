@@ -348,8 +348,8 @@ def edit_pegawai(r,idp):
                 "nama":pd.nama,
                 "kota":pd.kota_id,
                 "nama_koka":pd.kota.nama_koka,
-                "dari_tahun":pd.dari_tahun.strftime("%d-%m-%Y"),
-                "sampai_tahun":pd.sampai_tahun.strftime("%d-%m-%Y"),
+                "dari_tahun":pd.dari_tahun,
+                "sampai_tahun":pd.sampai_tahun,
                 "jurusan":pd.jurusan,
                 "gelar":pd.gelar
             }
@@ -360,8 +360,8 @@ def edit_pegawai(r,idp):
                 "perusahaan":pn.perusahaan,
                 "kota":pn.kota_id,
                 "nama_koka":pn.kota.nama_koka,
-                "dari_tahun":pn.dari_tahun.strftime("%d-%m-%Y"),
-                "sampai_tahun":pn.sampai_tahun.strftime("%d-%m-%Y"),
+                "dari_tahun":pn.dari_tahun,
+                "sampai_tahun":pn.sampai_tahun,
                 "jabatan":pn.jabatan
             }
             pgl.append(obj)
@@ -525,8 +525,8 @@ def epegawai(r,idp):
                         pegawai_id=int(idp),
                         perusahaan=pgl['perusahaan'],
                         kota_id=pgl['kota'],
-                        dari_tahun=datetime.strptime(pgl['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                        sampai_tahun=datetime.strptime(pgl['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        dari_tahun=pgl["dari_tahun"],
+                        sampai_tahun=pgl["sampai_tahun"],
                         jabatan=pgl['jabatan']
                     ).save(using=r.session["ccabang"])
 
@@ -539,8 +539,8 @@ def epegawai(r,idp):
                         pendidikan=pdk['pendidikan'],
                         nama=pdk['nama'],
                         kota_id=pdk['kota'],
-                        dari_tahun=datetime.strptime(pdk['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                        sampai_tahun=datetime.strptime(pdk['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        dari_tahun=pdk['dari_tahun'],
+                        sampai_tahun=pdk['sampai_tahun'],
                         jurusan=pdk['jurusan'],
                         gelar=pdk['gelar']
                     ).save(using=r.session["ccabang"])
@@ -809,8 +809,8 @@ def tambah_pegawai(r):
                         pegawai_id=int(pgw.pk),
                         perusahaan=pgl['perusahaan'],
                         kota_id=pgl['kota'],
-                        dari_tahun=datetime.strptime(pgl['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                        sampai_tahun=datetime.strptime(pgl['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        dari_tahun=pgl['dari_tahun'],
+                        sampai_tahun=pgl['sampai_tahun'],
                         jabatan=pgl['jabatan']
                     ).save(using=r.session["ccabang"])
                 
@@ -820,8 +820,8 @@ def tambah_pegawai(r):
                         pendidikan=pdk['pendidikan'],
                         nama=pdk['nama'],
                         kota_id=pdk['kota'],
-                        dari_tahun=datetime.strptime(pdk['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                        sampai_tahun=datetime.strptime(pdk['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        dari_tahun=pdk['dari_tahun'],
+                        sampai_tahun=pdk['sampai_tahun'],
                         jurusan=pdk['jurusan'],
                         gelar=pdk['gelar']
                     ).save(using=r.session["ccabang"])
@@ -934,7 +934,7 @@ def general_data(r,idp):
             'userid':pg.userid,
             'divisi':pg.divisi,
             'counter':pg.counter,
-            'jabatan':pg.jabatan.jabatan,
+            'jabatan':pg.jabatan.jabatan if pg.jabatan is not None else "-",
             'tgl_masuk':pg.tgl_masuk,
             'off':pg.hari_off.hari,
             'kkerja':pg.kelompok_kerja,
@@ -2684,8 +2684,8 @@ def tambah_pegawai_non_validasi(r):
                             pegawai_id=int(pgw.pk),
                             perusahaan=pgl['perusahaan'],
                             kota_id=pgl['kota'],
-                            dari_tahun=datetime.strptime(pgl['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                            sampai_tahun=datetime.strptime(pgl['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                            dari_tahun=pgl['dari_tahun'],
+                            sampai_tahun=pgl['sampai_tahun'],
                             jabatan=pgl['jabatan']
                         ).save(using=r.session["ccabang"])
                     
@@ -2695,14 +2695,14 @@ def tambah_pegawai_non_validasi(r):
                             pendidikan=pdk['pendidikan'],
                             nama=pdk['nama'],
                             kota_id=pdk['kota'],
-                            dari_tahun=datetime.strptime(pdk['dari_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                            sampai_tahun=datetime.strptime(pdk['sampai_tahun'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                            dari_tahun=pdk['dari_tahun'],
+                            sampai_tahun=pdk['sampai_tahun'],
                             jurusan=pdk['jurusan'],
                             gelar=pdk['gelar']
                         ).save(using=r.session["ccabang"])
                     status = "ok"
             except Exception as e:
-                
+                print(e)
                 transaction.set_rollback(True,using=r.session["ccabang"])
                 return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)

@@ -519,8 +519,9 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <div class="flex gap-3 mb-3">
-          <div class="w-1/2">
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <label for="pendidikanModalPendidikan" class="form-label">Pendidikan:</label>
             <select name="pendidikanModalPendidikan" id="pendidikanModalPendidikan">
               <option value="">Pilih Pendidikan</option>
               <option value="SMP">SMP</option>
@@ -528,12 +529,14 @@
               <option value="KULIAH">Kuliah</option>
             </select>
           </div>
-          <div class="w-1/2">
+          <div class="col-md-6">
+            <label for="namaModalPendidikan" class="form-label">Sekolah:</label>
             <input type="text" class="form-control" name="namaModalPendidikan" placeholder="Nama Sekolah" id="namaModalPendidikan">
           </div>
         </div>
-        <div class="flex gap-3 mb-3">
-          <div class="w-1/2">
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <label for="kotaModalPendidikan" class="form-label">Kota / Kabupaten:</label>
             <select name="kotaModalPendidikan" id="kotaModalPendidikan">
               <option value="">Pilih Kota/Kabupaten</option>
               {% for k in kota_kabupaten %}
@@ -541,20 +544,28 @@
               {% endfor %}
             </select>
           </div>
-          <div class="w-1/2">
-            <input type="text" class="form-control tgl2" name="dari_tahun" placeholder="Dari Tahun" id="dari_tahunModalPendidikan">
+          <div class="col-md-6">
+            <label for="dari_tahunModalPendidikan" class="form-label">Dari:</label>
+            <select name="dari_tahunModalPendidikan" id="dari_tahunModalPendidikan">
+              <option value="">Pilih tahun</option>
+            </select>
           </div>
         </div>
-        <div class="flex gap-3 mb-3">
-          <div class="w-1/2">
-            <input type="text" class="form-control tgl2" name="sampai_tahun" placeholder="Sampai Tahun" id="sampai_tahunModalPendidikan">
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <label for="sampai_tahunModalPendidikan" class="form-label">Sampai:</label>
+            <select name="sampai_tahunModalPendidikan" id="sampai_tahunModalPendidikan">
+              <option value="">Pilih tahun</option>
+            </select>
           </div>
-          <div class="w-1/2">
+          <div class="col-md-6">
+            <label for="jurusanModalPendidikan" class="form-label">Jurusan:</label>
             <input type="text" class="form-control" name="jurusan" placeholder="Jurusan" id="jurusanModalPendidikan">
           </div>
         </div>
-        <div class="flex gap-3 mb-3">
-          <div class="w-full">
+        <div class="row mt-3">
+          <div class="col-md-12">
+            <label for="gelarModalPendidikan" class="form-label">Gelar:</label>
             <input type="text" class="form-control" name="gelar" placeholder="Gelar" id="gelarModalPendidikan">
           </div>
         </div>
@@ -577,11 +588,13 @@
         </button>
       </div>
       <div class="modal-body">
-        <div class="flex gap-3 mb-3">
-          <div class="w-1/2">
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <label for="perusahaan" class="form-label">Perusahaan:</label>
             <input type="text" class="form-control" name="perusahaan" placeholder="Perusahaan" id="perusahaan">
           </div>
-          <div class="w-1/2">
+          <div class="col-md-6">
+            <label for="kotaModalPengalaman" class="form-label">Kota / Kabupaten:</label>
             <select name="kotaModalPengalaman" id="kotaModalPengalaman">
               <option value="">Pilih Kota/Kabupaten</option>
               {% for k in kota_kabupaten %}
@@ -590,16 +603,23 @@
             </select>
           </div>
         </div>
-        <div class="flex gap-3 mb-3">
-          <div class="w-1/2">
-            <input type="text" class="form-control tgl2" name="dari" placeholder="Dari" id="dariModalPengalaman">
+        <div class="row mt-3">
+          <div class="col-md-6">
+            <label for="dariModalPengalaman" class="form-label">Dari:</label>
+            <select name="dariModalPengalaman" id="dariModalPengalaman">
+              <option value="">Pilih tahun</option>
+            </select>
           </div>
-          <div class="w-1/2">
-            <input type="text" class="form-control tgl2" name="sampai" placeholder="Sampai" id="sampaiModalPengalaman">
+          <div class="col-md-6">
+            <label for="sampaiModalPengalaman" class="form-label">Sampai:</label>
+            <select name="sampaiModalPengalaman" id="sampaiModalPengalaman">
+              <option value="">Pilih tahum</option>
+            </select>
           </div>
         </div>
-        <div class="flex gap-3 mb-3">
-          <div class="w-full">
+        <div class="row mt-3">
+          <div class="col-md-12">
+            <label for="jabatanModalPengalaman">Jabatan:</label>
             <input type="text" class="form-control" name="jabatan" placeholder="jabatan" id="jabatanModalPengalaman">
           </div>
         </div>
@@ -659,6 +679,94 @@
   const kotaModalPendidikan = $("#kotaModalPendidikan").selectize()
   const pendidikanSelectize = $("#pendidikanModalPendidikan").selectize()
   const kotaModalPengalaman = $("#kotaModalPengalaman").selectize()
+  const dariModalPendidikanSelectize = $("#dari_tahunModalPendidikan").selectize({
+    valueField:"tahun",
+    labelField:"tahun",
+    searchField:["tahun"],
+    options:[
+      {tahun:2016},
+      {tahun:2017},
+      {tahun:2018},
+      {tahun:2019},
+      {tahun:2020},
+      {tahun:2021},
+      {tahun:2022},
+      {tahun:2023},
+      {tahun:2024},
+      {tahun:2025},
+      {tahun:2026},
+      {tahun:2027},
+      {tahun:2028},
+      {tahun:2029},
+      {tahun:2030}
+    ]
+  })
+  const sampaiModalPendidikanSelectize = $("#sampai_tahunModalPendidikan").selectize({
+    valueField:"tahun",
+    labelField:"tahun",
+    searchField:["tahun"],
+    options:[
+      {tahun:2016},
+      {tahun:2017},
+      {tahun:2018},
+      {tahun:2019},
+      {tahun:2020},
+      {tahun:2021},
+      {tahun:2022},
+      {tahun:2023},
+      {tahun:2024},
+      {tahun:2025},
+      {tahun:2026},
+      {tahun:2027},
+      {tahun:2028},
+      {tahun:2029},
+      {tahun:2030}
+    ]
+  })
+  const dariModalPengalamanSelectize = $("#dariModalPengalaman").selectize({
+    valueField:"tahun",
+    labelField:"tahun",
+    searchField:["tahun"],
+    options:[
+      {tahun:2016},
+      {tahun:2017},
+      {tahun:2018},
+      {tahun:2019},
+      {tahun:2020},
+      {tahun:2021},
+      {tahun:2022},
+      {tahun:2023},
+      {tahun:2024},
+      {tahun:2025},
+      {tahun:2026},
+      {tahun:2027},
+      {tahun:2028},
+      {tahun:2029},
+      {tahun:2030}
+    ]
+  })
+  const sampaiModalPengalamanSelectize = $("#sampaiModalPengalaman").selectize({
+    valueField:"tahun",
+    labelField:"tahun",
+    searchField:["tahun"],
+    options:[
+      {tahun:2016},
+      {tahun:2017},
+      {tahun:2018},
+      {tahun:2019},
+      {tahun:2020},
+      {tahun:2021},
+      {tahun:2022},
+      {tahun:2023},
+      {tahun:2024},
+      {tahun:2025},
+      {tahun:2026},
+      {tahun:2027},
+      {tahun:2028},
+      {tahun:2029},
+      {tahun:2030}
+    ]
+  })
   const tambahPendidikanModal = $("#tambahPendidikan")
   const tambahPengalamanModal = $("#tambahPengalaman")
   localStorage.removeItem("data_pendidikan")
@@ -669,8 +777,8 @@
     const nama = $("#namaModalPendidikan").val()
     const kota = $("#kotaModalPendidikan").val()
     const nama_koka = $("#kotaModalPendidikan").find(":selected").text()
-    const dari_tahun = moment($("#dari_tahunModalPendidikan").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
-    const sampai_tahun = moment($("#sampai_tahunModalPendidikan").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
+    const dari_tahun = $("#dari_tahunModalPendidikan").val()
+    const sampai_tahun = $("#sampai_tahunModalPendidikan").val()
     const jurusan = $("#jurusanModalPendidikan").val()
     const gelar = $("#gelarModalPendidikan").val()
     const json = JSON.parse(localStorage.getItem("data_pendidikan")) ? JSON.parse(localStorage.getItem("data_pendidikan")) : []
@@ -679,7 +787,10 @@
     console.log(json)
     if(json.length > 0){
       const check = json.filter(e => e.pendidikan == pendidikan)
-      if(check.length > 0) return false
+      if(check.length > 0){
+        alert("Pendidikan sudah ada")
+        return false
+      }
     }
 
     const obj = {
@@ -695,6 +806,8 @@
     $("#kotaModalPendidikan").val("")
     pendidikanSelectize[0].selectize.clear()
     kotaModalPendidikan[0].selectize.clear()
+    dariModalPendidikanSelectize[0].selectize.clear()
+    sampaiModalPendidikanSelectize[0].selectize.clear()
     $("#dari_tahunModalPendidikan").val("")
     $("#sampai_tahunModalPendidikan").val("")
     $("#jurusanModalPendidikan").val("")
@@ -707,12 +820,16 @@
     const kota = $("#kotaModalPengalaman").val()
     const nama_koka = $("#kotaModalPengalaman").find(":selected").text()
     console.log(nama_koka,"sd")
-    const dari_tahun = moment($("#dariModalPengalaman").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
-    const sampai_tahun = moment($("#sampaiModalPengalaman").val(),"DD-MM-YYYY").format("DD-MM-YYYY")
+    const dari_tahun =$("#dariModalPengalaman").val()
+    const sampai_tahun =$("#sampaiModalPengalaman").val()
     const jabatan = $("#jabatanModalPengalaman").val()
     const json = JSON.parse(localStorage.getItem("data_pengalaman")) ? JSON.parse(localStorage.getItem("data_pengalaman")) : []
     if(perusahaan == "" || nama == "" || kota == "" || dari_tahun  == "" || sampai_tahun == "") return false
-    
+    const check = json.filter(e => e.perusahaan == perusahaan)
+    if(check.length > 0) {
+      alert("Nama Perusahaan sudah ada")
+      return false
+    }
 
     const obj = {
       perusahaan,kota,nama_koka,dari_tahun,sampai_tahun,jabatan:jabatan ? jabatan : "-",id:0
@@ -725,6 +842,8 @@
     $("#perusahaan").val("")
     $("#kotaModalPengalaman").val("")
     kotaModalPengalaman[0].selectize.clear()
+    dariModalPengalamanSelectize[0].selectize.clear()
+    sampaiModalPengalamanSelectize[0].selectize.clear()
     $("#dariModalPengalaman").val("")
     $("#sampaiModalPengalaman").val("")
     $("#jabatanModalPengalaman").val("")
@@ -749,20 +868,24 @@
     localStorage.setItem("data_pihak",JSON.stringify(json))
     tambahPh(json)
   })
-  $("#pendidikan").on("click",".hapusPendidikan",function(e){
-    const id = $(e.target).attr("data-id")
-    const json = JSON.parse(localStorage.getItem("data_pendidikan"))
-    json.splice(id,1)
-    localStorage.setItem("data_pendidikan",JSON.stringify(json))
-    tambahPdk(json)
+  $(document).on("click","#pendidikan .hapusPendidikan",function(e){
+    if($(e.target).is("button")){
+      const id = $(e.target).attr("data-id")
+      const json = JSON.parse(localStorage.getItem("data_pendidikan"))
+      json.splice(id,1)
+      localStorage.setItem("data_pendidikan",JSON.stringify(json))
+      tambahPdk(json)
+    }
   })
 
-  $("#pengalaman").on("click",".hapusPengalaman",function(e){
-    const id = $(e.target).attr("data-id")
-    const json = JSON.parse(localStorage.getItem("data_pengalaman"))
-    json.splice(id,1)
-    localStorage.setItem("data_pengalaman",JSON.stringify(json))
-    tambahPgl(json)
+  $(document).on("click","#pengalaman .hapusPengalaman",function(e){
+    if($(e.target).is("button")){
+      const id = $(e.target).attr("data-id")
+      const json = JSON.parse(localStorage.getItem("data_pengalaman"))
+      json.splice(id,1)
+      localStorage.setItem("data_pengalaman",JSON.stringify(json))
+      tambahPgl(json)
+    }
   })
 
   $(".hapusPengalaman").on("click",function(e){
@@ -1054,28 +1177,33 @@ if($(e.target).is("button")){
         <div class="row mg-b-10">
                             <div class="col-lg-3">
                               <div class="form-group">
+                              <label class="form-label">Perusahaan:</label>
                                 <input type="text" value="${e.perusahaan}" class="form-control" placeholder="Perusahaan">
                               </div>
                           </div>
                               <div class="col-lg-3">
                                   <div class="form-group">
+                                  <label class="form-label">Kota / Kabupaten:</label>
                                     <input type="text" name="kota" id="kota" value="${e.nama_koka}" class="form-control" placeholder="Kota">
                                   </div>
                               </div>
                               <div class="col-lg-2">
                                   <div class="form-group">
-                                    <input type="text" name="dtahun" id="dtahun_pgl" value="${moment(e.dari_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Dari Tahun">
+                                  <label class="form-label">Dari:</label>
+                                    <input type="text" name="dtahun" id="dtahun_pgl" value="${e.dari_tahun}" class="form-control tgl2" placeholder="Dari Tahun">
                                   </div>
                               </div> 
   
                               <div class="col-lg-2">
                                 <div class="form-group">
-                                  <input type="text" name="stahun" id="stahun_pgl" value="${moment(e.sampai_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Sampai Tahun">
+                                <label class="form-label">Sampai:</label>
+                                  <input type="text" name="stahun" id="stahun_pgl" value="${e.sampai_tahun}" class="form-control tgl2" placeholder="Sampai Tahun">
                                 </div>
                               </div> 
   
                               <div class="col-lg-3">
                                   <div class="form-group">
+                                  <label class="form-label">Jabatan:</label>
                                     <input type="text" name="jabatan" id="jabatan" value="${e.jabatan}" class="form-control" placeholder="Jabatan">
                                   </div>
                               </div>
@@ -1100,41 +1228,48 @@ if($(e.target).is("button")){
           <div class="row mg-b-10">
                             <div class="col-lg-3">
                               <div class="form-group">
+                              <label class="form-label">Pendidikan:</label>
                                 <input type="text" name="pendidikan" id="pendidikan" value="${e.pendidikan}" class="form-control" placeholder="Pendidikan">
                               </div>
                           </div>
                               <div class="col-lg-3">
                                   <div class="form-group">
+                                  <label class="form-label">Sekolah:</label>
                                     <input type="text" name="lembaga" id="lembaga" value="${e.nama}" class="form-control" placeholder="Nama Lembaga Pendidikan">
                                   </div>
                               </div>
   
                               <div class="col-lg-2">
                                   <div class="form-group">
+                                  <label class="form-label">Kota / Kabupaten:</label>
                                     <input type="text" name="kota" id="kota_lembaga" value="${e.nama_koka}" class="form-control" placeholder="Kota">   
                                   </div>
                               </div>
   
                               <div class="col-lg-2">
                                   <div class="form-group">
-                                    <input type="text" name="dtahun" id="dtahun_lembaga" value="${moment(e.dari_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Dari Tahun">
+                                  <label class="form-label">Dari:</label>
+                                    <input type="text" name="dtahun" id="dtahun_lembaga" value="${e.dari_tahun}" class="form-control tgl2" placeholder="Dari Tahun">
                                   </div>
                               </div> 
   
                               <div class="col-lg-2">
                                 <div class="form-group">
-                                  <input type="text" name="stahun" id="stahun_lembaga" value="${moment(e.sampai_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Sampai Tahun">
+                                <label class="form-label">Sampai:</label>
+                                  <input type="text" name="stahun" id="stahun_lembaga" value="${e.sampai_tahun}" class="form-control tgl2" placeholder="Sampai Tahun">
                                 </div>
                               </div> 
   
                               <div class="col-lg-3">
                                   <div class="form-group">
+                                  <label class="form-label">Jurusan:</label>
                                     <input type="text" name="jurusan" id="jurusan" value="${e.jurusan}" class="form-control" placeholder="Jurusan">
                                   </div>
                               </div>
   
                               <div class="col-lg-3">
                                 <div class="form-group">
+                                <label class="form-label">Gelar:</label>
                                   <input type="text" name="gelar" id="gelar" value="${e.gelar}" class="form-control" placeholder="Gelar">
                                 </div>
                               </div>

@@ -469,6 +469,7 @@
                                                 <option value="Kakak">Kakak</option>
                                                 <option value="Adik">Adik</option>
                                                 <option value="Istri">Istri</option>
+                                                <option value="Istri">Suami</option>
                                                 <option value="Anak">Anak</option>
                                                 <option value="Sepupu">Sepupu</option>
                                                 <option value="Ipar">Ipar</option>
@@ -959,29 +960,29 @@ pihak.forEach(e => {
       <div class="row mg-b-10">
                           <div class="col-lg-3">
                             <div class="form-group">
-                              <input type="text" name="perusahaan" id="perusahaan" value="${e.perusahaan}" class="form-control" placeholder="Perusahaan">
+                              <input type="text" disabled name="perusahaan" id="perusahaan" value="${e.perusahaan}" class="form-control" placeholder="Perusahaan">
                             </div>
                         </div>
                             <div class="col-lg-3">
                                 <div class="form-group">
-                                  <input type="text" name="kota" id="kota" value="${e.nama_koka}" class="form-control" placeholder="Kota">
+                                  <input type="text" disabled name="kota" id="kota" value="${e.nama_koka}" class="form-control" placeholder="Kota">
                                 </div>
                             </div>
                             <div class="col-lg-2">
                                 <div class="form-group">
-                                  <input type="text" name="dtahun" id="dtahun_pgl" value="${moment(e.dari_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Dari Tahun">
+                                  <input type="text" disabled name="dtahun" id="dtahun_pgl" value="${moment(e.dari_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Dari Tahun">
                                 </div>
                             </div> 
 
                             <div class="col-lg-2">
                               <div class="form-group">
-                                <input type="text" name="stahun" id="stahun_pgl" value="${moment(e.sampai_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Sampai Tahun">
+                                <input type="text" disabled name="stahun" id="stahun_pgl" value="${moment(e.sampai_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Sampai Tahun">
                               </div>
                             </div> 
 
                             <div class="col-lg-3">
                                 <div class="form-group">
-                                  <input type="text" name="jabatan" id="jabatan" value="${e.jabatan}" class="form-control" placeholder="Jabatan">
+                                  <input type="text" disabled name="jabatan" id="jabatan" value="${e.jabatan}" class="form-control" placeholder="Jabatan">
                                 </div>
                             </div>
                             <div class="col-lg-3">
@@ -1005,42 +1006,42 @@ pihak.forEach(e => {
         <div class="row mg-b-10">
                           <div class="col-lg-3">
                             <div class="form-group">
-                              <input type="text" name="pendidikan" id="pendidikan" value="${e.pendidikan}" class="form-control" placeholder="Pendidikan">
+                              <input type="text" disabled name="pendidikan" id="pendidikan" value="${e.pendidikan}" class="form-control" placeholder="Pendidikan">
                             </div>
                         </div>
                             <div class="col-lg-3">
                                 <div class="form-group">
-                                  <input type="text" name="lembaga" id="lembaga" value="${e.nama}" class="form-control" placeholder="Nama Lembaga Pendidikan">
+                                  <input type="text" disabled name="lembaga" id="lembaga" value="${e.nama}" class="form-control" placeholder="Nama Lembaga Pendidikan">
                                 </div>
                             </div>
 
                             <div class="col-lg-2">
                                 <div class="form-group">
-                                  <input type="text" name="kota" id="kota_lembaga" value="${e.nama_koka}" class="form-control" placeholder="Kota">   
+                                  <input type="text" disabled name="kota" id="kota_lembaga" value="${e.nama_koka}" class="form-control" placeholder="Kota">   
                                 </div>
                             </div>
 
                             <div class="col-lg-2">
                                 <div class="form-group">
-                                  <input type="text" name="dtahun" id="dtahun_lembaga" value="${moment(e.dari_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Dari Tahun">
+                                  <input type="text" disabled name="dtahun" id="dtahun_lembaga" value="${moment(e.dari_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Dari Tahun">
                                 </div>
                             </div> 
 
                             <div class="col-lg-2">
                               <div class="form-group">
-                                <input type="text" name="stahun" id="stahun_lembaga" value="${moment(e.sampai_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Sampai Tahun">
+                                <input type="text" disabled name="stahun" id="stahun_lembaga" value="${moment(e.sampai_tahun,"DD-MM-YYYY").format("DD-MM-YYYY")}" class="form-control tgl2" placeholder="Sampai Tahun">
                               </div>
                             </div> 
 
                             <div class="col-lg-3">
                                 <div class="form-group">
-                                  <input type="text" name="jurusan" id="jurusan" value="${e.jurusan}" class="form-control" placeholder="Jurusan">
+                                  <input type="text" disabled name="jurusan" id="jurusan" value="${e.jurusan}" class="form-control" placeholder="Jurusan">
                                 </div>
                             </div>
 
                             <div class="col-lg-3">
                               <div class="form-group">
-                                <input type="text" name="gelar" id="gelar" value="${e.gelar}" class="form-control" placeholder="Gelar">
+                                <input type="text" disabled name="gelar" id="gelar" value="${e.gelar}" class="form-control" placeholder="Gelar">
                               </div>
                             </div>
                             <div class="col-lg-3">

@@ -284,8 +284,8 @@ class pengalaman_db(models.Model):
     pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE)
     perusahaan = models.CharField(max_length=50, null=False)
     kota = models.ForeignKey(kota_kabupaten_db,on_delete=models.CASCADE, null=False)
-    dari_tahun = models.DateField(null=False)
-    sampai_tahun = models.DateField(null=False)
+    dari_tahun = models.IntegerField()
+    sampai_tahun = models.IntegerField()
     jabatan = models.CharField(max_length=50, null=False)    
 
     def __int__(self):
@@ -305,8 +305,8 @@ class pendidikan_db(models.Model):
     pendidikan = models.CharField(max_length=100,choices=pendidikan_choices,null=False)
     nama = models.CharField(max_length=100, null=False)
     kota = models.ForeignKey(kota_kabupaten_db,on_delete=models.CASCADE, null=False)
-    dari_tahun = models.DateField(null=False)
-    sampai_tahun = models.DateField(null=False)
+    dari_tahun = models.IntegerField()
+    sampai_tahun = models.IntegerField()
     jurusan = models.CharField(max_length=50, null=True)    
     gelar = models.CharField(max_length=50, null=True)    
 
@@ -962,8 +962,8 @@ class pengalaman_db_arsip(models.Model):
     pegawai = models.ForeignKey(pegawai_db_arsip, on_delete=models.CASCADE)
     perusahaan = models.CharField(max_length=50, null=False)
     kota = models.ForeignKey(kota_kabupaten_db,on_delete=models.CASCADE, null=False)
-    dari_tahun = models.DateField(null=False)
-    sampai_tahun = models.DateField(null=False)
+    dari_tahun = models.IntegerField()
+    sampai_tahun = models.IntegerField()
     jabatan = models.CharField(max_length=50, null=False)    
 
     def __int__(self):
@@ -983,8 +983,8 @@ class pendidikan_db_arsip(models.Model):
     pendidikan = models.CharField(max_length=100,choices=pendidikan_choices,null=False)
     nama = models.CharField(max_length=100, null=False)
     kota = models.ForeignKey(kota_kabupaten_db,on_delete=models.CASCADE, null=False)
-    dari_tahun = models.DateField(null=False)
-    sampai_tahun = models.DateField(null=False)
+    dari_tahun = models.IntegerField()
+    sampai_tahun = models.IntegerField()
     jurusan = models.CharField(max_length=50, null=True)    
     gelar = models.CharField(max_length=50, null=True)    
 

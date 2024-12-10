@@ -151,13 +151,13 @@ class data_pribadi(ImportExportModelAdmin):
 class kontak_lain(ImportExportModelAdmin):
     list_display =  ("pegawai","hubungan",'nama')
 
-@admin.register(pendidikan_db)
-class pendidikan(ImportExportModelAdmin):
-    list_display = ("pegawai","nama","kota","dari_tahun","sampai_tahun","jurusan","gelar")
+# @admin.register(pendidikan_db)
+# class pendidikan(ImportExportModelAdmin):
+#     list_display = ("pegawai","nama","kota","dari_tahun","sampai_tahun","jurusan","gelar")
 
-@admin.register(pengalaman_db)
-class pengalaman_db(ImportExportModelAdmin):
-    list_display = ("pegawai","perusahaan","kota","dari_tahun","sampai_tahun","jabatan")
+# @admin.register(pengalaman_db)
+# class pengalaman_db(ImportExportModelAdmin):
+#     list_display = ("pegawai","perusahaan","kota","dari_tahun","sampai_tahun","jabatan")
 
 @admin.register(kota_kabupaten_db)
 class kota_kabupaten(ImportExportModelAdmin):
