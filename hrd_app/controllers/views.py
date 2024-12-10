@@ -1395,7 +1395,7 @@ def tasiksetabsensi():
 #     year="*",month="*",day='*',hour="16",minute="27",second="00"
 # )
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="03",minute="00",second="00"
+    year="*",month="*",day='*',hour="01",minute="00",second="00"
 )
 trigger1 = CronTrigger(
     year="*",month="*",day='*',hour="03",minute="30",second="00"
