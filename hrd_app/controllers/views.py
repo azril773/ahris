@@ -287,7 +287,7 @@ def tasiksetabsensi():
         today = datetime.now()
         tgl = today - timedelta(days=1)
         dari = datetime.strptime(datetime.strftime(tgl,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
-        sampai = datetime.strptime(datetime.strftime(today,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
+        sampai = datetime.strptime(datetime.strftime(today,"%Y-%m-%d 23:59:59"),"%Y-%m-%d %H:%M:%S")
         dmesin = []
         for m in mesin_db.objects.using('tasik').filter(status='Active'):
             ip = m.ipaddress
@@ -1395,7 +1395,7 @@ def tasiksetabsensi():
 #     year="*",month="*",day='*',hour="16",minute="27",second="00"
 # )
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="01",minute="00",second="00"
+    year="*",month="*",day='*',hour="03",minute="00",second="00"
 )
 trigger1 = CronTrigger(
     year="*",month="*",day='*',hour="03",minute="30",second="00"
