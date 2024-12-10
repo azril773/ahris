@@ -1420,7 +1420,7 @@ def tasiksetabsensi():
         return e
     # pegawai_db.objects.using("tasik").filter(id=3636).update(nik="silvia21")
 # trigger = CronTrigger(
-#     year="*",month="*",day='*',hour="16",minute="27",second="00"
+#     year="*",month="*",day='*',hour="16",minute="27",second="00"  
 # )
 trigger = CronTrigger(
     year="*",month="*",day='*',hour="09",minute="30",second="00"
