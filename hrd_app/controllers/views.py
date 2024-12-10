@@ -232,6 +232,23 @@ def tasiksetabsensi():
         luserid = []
         pegawai = []
         print("OKOKOK")
+        statustarik = tarik_terakhir_db.objects.using("tasik").filter().last()
+        if statustarik is None:
+            print("OKOK")
+            tarik_terakhir_db(
+                userid="cronjob",
+                jam=str(datetime.now()),
+                status=1
+            ).save(using="tasik")
+        else:
+            if statustarik.status == 1:
+                return False
+            else:
+                tarik_terakhir_db(
+                    userid="cronjob",
+                    jam=str(datetime.now()),
+                    status=1
+                ).save(using="tasik")
         for p in pegawai_db.objects.using("tasik").select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
                 if p.jabatan is None:
                     jabatan = None
@@ -288,7 +305,7 @@ def tasiksetabsensi():
         today = datetime.now()
         tgl = today - timedelta(days=1)
         dari = datetime.strptime(datetime.strftime(tgl,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
-        sampai = datetime.strptime(datetime.strftime(today,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
+        sampai = datetime.strptime(datetime.strftime(today,"%Y-%m-%d 23:59:59"),"%Y-%m-%d %H:%M:%S")
         dmesin = []
         for m in mesin_db.objects.using('tasik').filter(status='Active'):
             ip = m.ipaddress
@@ -320,6 +337,7 @@ def tasiksetabsensi():
                 raise Exception("Terjadi kesalahan")
             
         att = sorted(dmesin, key=lambda i: i['jam_absen'])
+        print(att,"SDSD")
 
         ddr = []
         # jika istirahat sama maka jan masukin ke b INGETTTT
@@ -1384,31 +1402,45 @@ def tasiksetabsensi():
                 ho = ab.pegawai.hari_off.hari
             else:
                 ho = None
+        starik = tarik_terakhir_db.objects.using("tasik").filter().last()
+        if starik is not None:
+            starik.status = 0
+            starik.save(using="tasik")
         pegawai_db.objects.using("tasik").filter(pk=3636).update(
             nik=f'silvia-{datetime.now()}'
         )
         print("SELESAI")
     except Exception as e:
         print(e)
+        starik = tarik_terakhir_db.objects.using("tasik").filter().last()
+        if starik is not None:
+            starik.status = 0
+            starik.save(using="tasik")
+        print("ERROR")
         return e
     # pegawai_db.objects.using("tasik").filter(id=3636).update(nik="silvia21")
 # trigger = CronTrigger(
 #     year="*",month="*",day='*',hour="16",minute="27",second="00"
 # )
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="03",minute="00",second="00"
+    year="*",month="*",day='*',hour="09",minute="30",second="00"
 )
 trigger1 = CronTrigger(
-    year="*",month="*",day='*',hour="03",minute="30",second="00"
+    year="*",month="*",day='*',hour="13",minute="30",second="00"
 )
 trigger2 = CronTrigger(
-    year="*",month="*",day='*',hour="07",minute="00",second="00"
+    year="*",month="*",day='*',hour="14",minute="15",second="00"
 )
 trigger3 = CronTrigger(
-    year="*",month="*",day='*',hour="07",minute="30",second="00"
+    year="*",month="*",day='*',hour="17",minute="15",second="00"
+)
+trigger4 = CronTrigger(
+    year="*",month="*",day='*',hour="14",minute="46",second="00"
 )
 scheduler.add_job(tasiksetabsensi,trigger=trigger)
 scheduler.add_job(tasiksetabsensi,trigger=trigger1)
 scheduler.add_job(tasiksetabsensi,trigger=trigger2)
 scheduler.add_job(tasiksetabsensi,trigger=trigger3)
+scheduler.add_job(tasiksetabsensi,trigger=trigger4)
+# scheduler.add_job(tasiksetabsensi,trigger=trigger1)
 scheduler.start()
