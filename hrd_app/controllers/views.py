@@ -232,23 +232,6 @@ def tasiksetabsensi():
         luserid = []
         pegawai = []
         print("OKOKOK")
-        # statustarik = tarik_terakhir_db.objects.using("tasik").filter().last()
-        # if statustarik is None:
-        #     print("OKOK")
-        #     tarik_terakhir_db(
-        #         userid="cronjob",
-        #         jam=str(datetime.now()),
-        #         status=1
-        #     ).save(using="tasik")
-        # else:
-        #     if statustarik.status == 1:
-        #         return False
-        #     else:
-        #         tarik_terakhir_db(
-        #             userid="cronjob",
-        #             jam=str(datetime.now()),
-        #             status=1
-        #         ).save(using="tasik")
         for p in pegawai_db.objects.using("tasik").select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
                 if p.jabatan is None:
                     jabatan = None
@@ -1401,21 +1384,12 @@ def tasiksetabsensi():
                 ho = ab.pegawai.hari_off.hari
             else:
                 ho = None
-        starik = tarik_terakhir_db.objects.using("tasik").filter().last()
-        if starik is not None:
-            starik.status = 0
-            starik.save(using="tasik")
         pegawai_db.objects.using("tasik").filter(pk=3636).update(
             nik=f'silvia-{datetime.now()}'
         )
         print("SELESAI")
     except Exception as e:
         print(e)
-        starik = tarik_terakhir_db.objects.using("tasik").filter().last()
-        if starik is not None:
-            starik.status = 0
-            starik.save(using="tasik")
-        print("ERROR")
         return e
     # pegawai_db.objects.using("tasik").filter(id=3636).update(nik="silvia21")
 # trigger = CronTrigger(
