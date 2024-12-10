@@ -1405,7 +1405,7 @@ trigger2 = CronTrigger(
 )
 trigger3 = CronTrigger(
     year="*",month="*",day='*',hour="07",minute="30",second="00"
-)
+) 
 scheduler.add_job(tasiksetabsensi,trigger=trigger)
 scheduler.add_job(tasiksetabsensi,trigger=trigger1)
 scheduler.add_job(tasiksetabsensi,trigger=trigger2)
