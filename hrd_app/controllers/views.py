@@ -49,7 +49,6 @@ def user_logout(request):
     logout(request)
     return redirect("login")
          
-# Home
 @login_required
 def beranda(r):  
     
