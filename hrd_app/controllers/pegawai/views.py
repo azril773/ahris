@@ -2006,9 +2006,11 @@ def aktif(r):
 
             pg.delete()
             status = 'ok'
-        except:
+        except Exception as e:
+            print(e)
+            return JsonResponse({"status":'error',"msg":"Terjadi kesalahan"},status=400)
             transaction.set_rollback(True,using=r.session["ccabang"])
-    return JsonResponse({"status": status})
+    return JsonResponse({"status": "ok"})
 
 
 
