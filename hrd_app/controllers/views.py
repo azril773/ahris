@@ -230,7 +230,6 @@ def tasiksetabsensi():
         rangetgl = pd.date_range(dari.date(), sampai.date()).tolist()
         luserid = []
         pegawai = []
-        print("OKOKOK")
         for p in pegawai_db.objects.using("tasik").select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
                 if p.jabatan is None:
                     jabatan = None
@@ -277,7 +276,7 @@ def tasiksetabsensi():
                 luserid.append(p.userid)
                 pegawai.append(data)
                 for tgl in rangetgl:
-                    if absensi_db.objects.using('tasik').filter(tgl_absen=tgl, pegawai_id=p.pk).exists():
+                    if absensi_db.objects.using('tasik').filter(tgl_absen=tgl.date(), pegawai_id=p.pk).exists():
                         pass
                     else:
                         absensi_db(
@@ -1395,7 +1394,7 @@ def tasiksetabsensi():
 #     year="*",month="*",day='*',hour="16",minute="27",second="00"
 # )
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="12",minute="30",second="00"
+    year="*",month="*",day='*',hour="13",minute="28",second="00"
 )
 trigger1 = CronTrigger(
     year="*",month="*",day='*',hour="12",minute="45",second="00"

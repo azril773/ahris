@@ -789,7 +789,7 @@ def pabsen(req):
                 pegawai.append(data)        
                 luserid.append(p.userid)
                 for tgl in rangetgl:
-                    if absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen=tgl, pegawai_id=p.pk).exists():
+                    if absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen=tgl.date(), pegawai_id=p.pk).exists():
                         pass
                     else:
                         absensi_db(
@@ -844,7 +844,7 @@ def pabsen(req):
                 pegawai.append(data)        
                 luserid.append(p.userid)
                 for tgl in rangetgl:
-                    if absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen=tgl, pegawai_id=p.pk).exists():
+                    if absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen=tgl.date(), pegawai_id=p.pk).exists():
                         pass
                     else:
                         absensi_db(
@@ -853,7 +853,6 @@ def pabsen(req):
                         ).save(using=req.session['ccabang'])
         
         dmesin = []
-        print(dari,sampai)
         for m in mesin_db.objects.using(req.session["ccabang"]).filter(status='Active'):
             ip = m.ipaddress
             # conn = None
