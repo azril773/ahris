@@ -741,25 +741,6 @@ def pabsen(req):
         return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
     divisi = [div.divisi for div in aksesdivisi]
 
-
-
-    # statustarik = tarik_terakhir_db.objects.using("tasik").filter().last()
-    # if statustarik is None:
-    #     tarik_terakhir_db(
-    #         userid=userp[0].pegawai.userid,
-    #         jam=str(datetime.now()),
-    #         status=1
-    #     ).save(using="tasik")
-    # else:
-    #     if statustarik.status == 1:
-    #         messages.error(req,"Ada user yang sedang proses data mesin")
-    #         return redirect("absensi",sid=int(sid))
-    #     else:
-    #         tarik_terakhir_db(
-    #             userid=userp[0].pegawai.userid,
-    #             jam=str(datetime.now()),
-    #             status=1
-    #         ).save(using="tasik")
     try:
         if int(sid) == 0:
             for p in pegawai_db.objects.using(req.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi):
@@ -897,11 +878,7 @@ def pabsen(req):
                 conn.enable_device()
                 conn.disconnect()
             except Exception as e:
-                # starik = tarik_terakhir_db.objects.using("tasik").filter().last()
-                # if starik is not None:
-                #     starik.status = 0
-                #     starik.save(using="tasik")
-                messages.error(req,"Terjadi kesalahan")
+                messages.error(req,"Terjadi kesalahan. Silahkan coba lagi")
                 return redirect("absensi",sid=int(sid))
         att = sorted(dmesin, key=lambda i: i['jam_absen'])
 
@@ -2014,10 +1991,6 @@ def pabsen(req):
                 ho = None
 
     except Exception as e:
-        # starik = tarik_terakhir_db.objects.using("tasik").filter().last()
-        # if starik is not None:
-        #     starik.status = 0
-        #     starik.save(using="tasik")
         messages.error(req,"Terjadi kesalahan")
         return redirect("absensi",sid=int(sid))
     

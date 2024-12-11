@@ -315,7 +315,7 @@ def tasiksetabsensi():
                 conn.enable_device()
                 conn.disconnect()
             except Exception as e:
-                
+                # print(e)
                 raise Exception("Terjadi kesalahan")
             
         att = sorted(dmesin, key=lambda i: i['jam_absen'])
@@ -1386,22 +1386,22 @@ def tasiksetabsensi():
         pegawai_db.objects.using("tasik").filter(pk=3636).update(
             nik=f'silvia-{datetime.now()}'
         )
-        print("SELESAI")
+        # print("SELESAI")
     except Exception as e:
-        print(e)
+        # print(e)
         return e
     # pegawai_db.objects.using("tasik").filter(id=3636).update(nik="silvia21")
 # trigger = CronTrigger(
 #     year="*",month="*",day='*',hour="16",minute="27",second="00"
 # )
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="03",minute="00",second="00"
+    year="*",month="*",day='*',hour="09",minute="12",second="00"
 )
 trigger1 = CronTrigger(
-    year="*",month="*",day='*',hour="03",minute="30",second="00"
+    year="*",month="*",day='*',hour="09",minute="14",second="00"
 )
 trigger2 = CronTrigger(
-    year="*",month="*",day='*',hour="07",minute="00",second="00"
+    year="*",month="*",day='*',hour="09",minute="16",second="00"
 )
 trigger3 = CronTrigger(
     year="*",month="*",day='*',hour="07",minute="30",second="00"
