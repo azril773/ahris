@@ -1394,11 +1394,19 @@ def tasiksetabsensi():
 #     year="*",month="*",day='*',hour="16",minute="27",second="00"
 # )
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="13",minute="28",second="00"
+    year="*",month="*",day='*',hour="03",minute="00",second="00"
 )
 trigger1 = CronTrigger(
-    year="*",month="*",day='*',hour="12",minute="45",second="00"
+    year="*",month="*",day='*',hour="03",minute="30",second="00"
+)
+trigger2 = CronTrigger(
+    year="*",month="*",day='*',hour="07",minute="00",second="00"
+)
+trigger3 = CronTrigger(
+    year="*",month="*",day='*',hour="07",minute="30",second="00"
 )
 scheduler.add_job(tasiksetabsensi,trigger=trigger)
 scheduler.add_job(tasiksetabsensi,trigger=trigger1)
+scheduler.add_job(tasiksetabsensi,trigger=trigger2)
+scheduler.add_job(tasiksetabsensi,trigger=trigger3)
 scheduler.start()
