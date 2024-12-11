@@ -872,6 +872,7 @@ def pabsen(req):
                         ).save(using=req.session['ccabang'])
         
         dmesin = []
+        print(dari,sampai)
         for m in mesin_db.objects.using(req.session["ccabang"]).filter(status='Active'):
             ip = m.ipaddress
             # conn = None
@@ -881,7 +882,9 @@ def pabsen(req):
                 conn.disable_device()
                 # Data absensi
                 absensi = conn.get_attendance()
+                # print(absensi)
                 for a in absensi:
+                    # print(a.timestamp)
                     if dari <= a.timestamp <= sampai:   
                         # users = conn.get_users()
                         if str(a.user_id) in luserid:     
@@ -901,7 +904,8 @@ def pabsen(req):
                 # if starik is not None:
                 #     starik.status = 0
                 #     starik.save(using="tasik")
-                messages.error(req,"Terjadi kesalahan")
+                print(e)
+                messages.error(req,"Terjadi kesalahan, Silahkan coba lagi")
                 return redirect("absensi",sid=int(sid))
         att = sorted(dmesin, key=lambda i: i['jam_absen'])
 
@@ -2018,6 +2022,7 @@ def pabsen(req):
         # if starik is not None:
         #     starik.status = 0
         #     starik.save(using="tasik")
+        print(e)
         messages.error(req,"Terjadi kesalahan")
         return redirect("absensi",sid=int(sid))
     
