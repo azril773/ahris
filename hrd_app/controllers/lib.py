@@ -14,7 +14,6 @@ import requests
 # SUPPORT
 from openpyxl.styles import Alignment, Font
 from collections import namedtuple
-from openpyxl import Workbook
 import math
 import json
 import time
@@ -22,7 +21,7 @@ import pandas as pd
 # import redis
 import re
 from decimal import *
-
+from concurrent.futures import ThreadPoolExecutor
 # PYZK / FINGER MACHINE
 from zk import ZK, const
 from struct import pack
