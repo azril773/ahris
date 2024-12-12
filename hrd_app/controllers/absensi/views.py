@@ -793,7 +793,7 @@ def pabsen(req):
                         pass
                     else:
                         absensi_db(
-                            tgl_absen = tgl,
+                            tgl_absen = tgl.date(),
                             pegawai_id = p.pk
                         ).save(using=req.session["ccabang"])
         else:
@@ -848,7 +848,7 @@ def pabsen(req):
                         pass
                     else:
                         absensi_db(
-                            tgl_absen = tgl,
+                            tgl_absen = tgl.date(),
                             pegawai_id = p.pk
                         ).save(using=req.session['ccabang'])
         
