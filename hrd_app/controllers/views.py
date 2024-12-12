@@ -280,7 +280,7 @@ def tasiksetabsensi():
                         pass
                     else:
                         absensi_db(
-                            tgl_absen = tgl,
+                            tgl_absen = tgl.date(),
                             pegawai_id = p.pk
                         ).save(using='tasik')
         today = datetime.now()
