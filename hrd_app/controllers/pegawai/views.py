@@ -486,7 +486,7 @@ def epegawai(r,idp):
                 return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
             else:
                 
-                pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid).update(
+                pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(pgw.pk)).update(
                     nama=nama,
                     email=email,
                     gender=gender,
