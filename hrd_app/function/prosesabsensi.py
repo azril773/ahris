@@ -161,7 +161,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                                 
                                 
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-                        if a["punch"] == 0 and jam_absen.hour >= 4 and jam_absen.hour < 18 :
+                        if a["punch"] == 0 and jam_absen.hour >= 3 and jam_absen.hour < 18 :
                             if ab.masuk is not None:
                                 if ab.masuk.hour > 18:
                                     ab.masuk_b = jam_absen.time()
