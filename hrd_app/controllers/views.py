@@ -28,6 +28,7 @@ from struct import pack
 from zk import user as us
 import codecs  
 # MODEL / DATABASE
+import hrd_app as app
 from ..models import *
 from django.core.serializers import serialize # Create your views here.
 
@@ -220,9 +221,9 @@ from apscheduler.triggers.cron import CronTrigger
 # Pegawai
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-scheduler = BackgroundScheduler()
+# scheduler = BackgroundScheduler()
 
-def tasiksetabsensi():
+# def tasiksetabsensi():
     # try:
     #     today = datetime.now()
     #     dari = today + timedelta(days=1)
@@ -1382,9 +1383,9 @@ def tasiksetabsensi():
     #             ho = ab.pegawai.hari_off.hari
     #         else:
     #             ho = None
-    pegawai_db.objects.using("tasik").filter(pk=3636).update(
-        nik=f'silvia-{datetime.now()}'
-    )
+    # pegawai_db.objects.using("tasik").filter(pk=3636).update(
+    #     nik=f'silvia-{datetime.now()}'
+    # )
         # print("SELESAI")
     # except Exception as e:
     #     # print(e)
@@ -1393,9 +1394,9 @@ def tasiksetabsensi():
 # trigger = CronTrigger(
 #     year="*",month="*",day='*',hour="16",minute="27",second="00"
 # )
-trigger = CronTrigger(
-    year="*",month="*",day='*',hour="09",minute="27",second="45"
-)
+# trigger = CronTrigger(
+#     year="*",month="*",day='*',hour="09",minute="27",second="45"
+# )
 # trigger1 = CronTrigger(
 #     year="*",month="*",day='*',hour="03",minute="30",second="00"
 # )
@@ -1406,8 +1407,8 @@ trigger = CronTrigger(
 #     year="*",month="*",day='*',hour="07",minute="30",second="00"
 # )
 # scheduler.remove_all_jobs()
-scheduler.add_job(tasiksetabsensi,trigger=trigger)
-scheduler.start()
+# scheduler.add_job(tasiksetabsensi,trigger=trigger)
+# scheduler.start()
 # scheduler.add_job(tasiksetabsensi,trigger=trigger1)
 # scheduler.add_job(tasiksetabsensi,trigger=trigger2)
 # scheduler.add_job(tasiksetabsensi,trigger=trigger3)
