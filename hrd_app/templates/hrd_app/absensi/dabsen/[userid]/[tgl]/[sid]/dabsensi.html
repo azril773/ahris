@@ -267,7 +267,37 @@
                 data: "punch",
                 render: (data,type,row,meta) => {
                     html = ''
-                    html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>${row.ket}</span>`
+                    if(row.ket != null){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>${row.ket}</span>`
+                    }else if(data == '0'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Masuk</span>`
+                    }else if(data == '1'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Pulang</span>`
+                    }else if(data == '2'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Istirahat</span>`
+                    }else if(data == '3'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Kembali</span>`
+                    }else if(data == '4'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Istirahat 2</span>`
+                    }else if(data == '5'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Kembali 2</span>`
+                    }else if(data == '6'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Masuk Malam</span>`
+                    }else if(data == '7'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Pulang Malam</span>`
+                    }else if(data == '8'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Istirahat Malams</span>`
+                    }else if(data == '9'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Kembali Malam</span>`
+                    }else if(data == '10'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Masuk B</span>`
+                    }else if(data == '11'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Pulang B</span>`
+                    }else if(data == '12'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Istirahat B</span>`
+                    }else if(data == '13'){
+                        html = `<span data-target='#edit_punch' data-toggle='modal' data-id='${row.id}' style='color:#0d6efd;cursor:pointer;'>Kembali B</span>`
+                    }
                     return html
                 }
             },

@@ -627,7 +627,7 @@ class absensi_db(models.Model):
     keterangan_ijin = models.TextField(null=True)
     keterangan_lain = models.TextField(null=True)
     libur_nasional = models.CharField(max_length=100, null=True)
-    insentif = models.IntegerField(default=0)
+    insentif = models.IntegerField(default=0,null=True)
     
     jam_masuk = models.TimeField(null=True)
     lama_istirahat = models.DecimalField(max_digits=5, decimal_places=2, null=True)
@@ -1150,7 +1150,7 @@ class absensi_db_arsip(models.Model):
     keterangan_ijin = models.TextField(null=True)
     keterangan_lain = models.TextField(null=True)
     libur_nasional = models.CharField(max_length=100, null=True)
-    insentif = models.IntegerField(default=0)
+    insentif = models.IntegerField(default=0,null=True)
     
     jam_masuk = models.TimeField(null=True)
     lama_istirahat = models.DecimalField(max_digits=5, decimal_places=2, null=True)

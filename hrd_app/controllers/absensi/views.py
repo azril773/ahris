@@ -1055,7 +1055,6 @@ def proses(data):
     for kmpn in kompen:
         if a.pegawai_id == kmpn["idp"]:
             if kmpn["tgl_kompen"] == a.tgl_absen:
-                print("OKOKO")
                 if ab.jam_masuk is not None and ab.jam_pulang is None:
                     if ab.masuk is not None and ab.pulang is not None:
                         if ab.pulang > ab.masuk:
@@ -1748,7 +1747,6 @@ def pabsen(req):
                     ho = None
                 else:
                     ho = p.hari_off2.hari        
-                
                 data = {
                     'idp' : p.id,
                     'nama' : p.nama,
@@ -1770,67 +1768,68 @@ def pabsen(req):
                 pegawai.append(data)        
                 luserid.append(p.userid)
                 for tgl in rangetgl:
+                    print(tgl)
                     if absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen=tgl.date(), pegawai_id=p.pk).exists():
                         pass
                     else:
                         absensi_db(
                             tgl_absen = tgl.date(),
                             pegawai_id = p.pk
-                        ).save(using=cabang)
+                        ).save(using=req.session["ccabang"])
+        dmesin = []
         try:
             with ThreadPoolExecutor(max_workers=3) as ex:
                 for m in mesin_db.objects.using(req.session["ccabang"]).filter(status="Active"):
                     results = {ex.submit(prosesmesin,[m.ipaddress,m.nama,dari,sampai,luserid])}
                     for future in results:
                         rslt = future.result()
-                        print(rslt)
+                        for r in rslt:
+                            dmesin.append(r)
         except Exception as e:
-            print(e,"ERROR LUAR")
-            messages.error(req,"Terjadi kesalahan")
+            messages.error(req,"Terjadi kesalahan sdskd")
             return redirect("absensi",sid=sid)
-        print(results)
-        # att = sorted(dmesin, key=lambda i: i['jam_absen'])
+        att = sorted(dmesin, key=lambda i: i['jam_absen'])
 
-        # ddr = []
-        # for d in data_raw_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
-        #     data = {
-        #         "userid": d.userid,
-        #         "jam_absen": str(d.jam_absen),
-        #         "punch": d.punch,
-        #         "mesin": d.mesin
-        #     }
+        ddr = []
+        for d in data_raw_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
+            data = {
+                "userid": d.userid,
+                "jam_absen": str(d.jam_absen),
+                "punch": d.punch,
+                "mesin": d.mesin
+            }
 
-        #     ddr.append(data)              
+            ddr.append(data)              
         
-        # ddt = []
-        # ddtor = []
+        ddt = []
+        ddtor = []
         
-        # # ambil data trans simpan di ddt
-        # for d2 in data_trans_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
-        #     data = {
-        #         "userid": d2.userid,
-        #         "jam_absen": d2.jam_absen,
-        #         "punch": d2.punch,
-        #         "mesin": d2.mesin,
-        #         "ket": d2.keterangan
-        #     }
-        #     ddtor.append(data)
-        #     ddt.append(data)
+        # ambil data trans simpan di ddt
+        for d2 in data_trans_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
+            data = {
+                "userid": d2.userid,
+                "jam_absen": d2.jam_absen,
+                "punch": d2.punch,
+                "mesin": d2.mesin,
+                "ket": d2.keterangan
+            }
+            ddtor.append(data)
+            ddt.append(data)
             
-        # status_lh = [st.status_pegawai.pk for st in status_pegawai_lintas_hari_db.objects.using(req.session["ccabang"]).all()]
+        status_lh = [st.status_pegawai.pk for st in status_pegawai_lintas_hari_db.objects.using(req.session["ccabang"]).all()]
         # # proses data simpan di dt array
         # # obj 
-        # jamkerja = jamkerja_db.objects.using(req.session["ccabang"]).select_related('kk').all()
-        # now = datetime.now()
-        # hari = now.strftime("%A")
-        # hari = nama_hari(hari)
+        jamkerja = jamkerja_db.objects.using(req.session["ccabang"]).select_related('kk').all()
+        now = datetime.now()
+        hari = now.strftime("%A")
+        hari = nama_hari(hari)
 
 
         # if req.session["ccabang"] != "tasik":
         #     prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)
         # else:
         #     print(datetime.now())
-        #     prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)    
+        prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)    
         #     print(datetime.now())
 
             
@@ -1963,14 +1962,11 @@ def pabsen(req):
             data = absensi_db.objects.using(req.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()))
         elif int(sid) > 0:
             data = absensi_db.objects.using(req.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()),pegawai__status_id=sid)
-        print(datetime.now())
         with ThreadPoolExecutor(max_workers=3) as executor:
             for a in data:
                 reesult = list(executor.map(proses,[(a,ijin,libur,cuti,geser,geser_all,kompen,opg,lmbr,opg_all,dl,dl_idp,ijindl,lsopg,status_ln,req.session["ccabang"],req.user.username)]))
-        print(datetime.now())
-        print("SELESAI",reesult)
     except Exception as e:
-        print(e)
+        print(e,"PSKDOSKDO")
         messages.error(req,"Terjadi kesalahan")
         return redirect("absensi",sid=int(sid))
     
