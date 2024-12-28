@@ -1825,11 +1825,10 @@ def pabsen(req):
         hari = nama_hari(hari)
 
 
-        # if req.session["ccabang"] != "tasik":
-        #     prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)
-        # else:
-        #     print(datetime.now())
-        prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)    
+        if req.session["ccabang"] != "tasik":
+            prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)
+        else:
+            prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)    
         #     print(datetime.now())
 
             
