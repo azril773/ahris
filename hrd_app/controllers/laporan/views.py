@@ -145,7 +145,7 @@ def laporan_json(r):
                             ct += 1
                         elif re.search("opg",a.keterangan_absensi,re.I):
                             opg += 1
-                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None:
+                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and a.libur_nasional is None:
                         if a.masuk is not None and a.pulang is not None or a.masuk_b is not None and a.pulang_b is not None:
                             pass
                         else:
@@ -268,7 +268,7 @@ def laporan_json(r):
                             ct += 1
                         elif re.search("opg",a.keterangan_absensi,re.I):
                             opg += 1
-                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None:
+                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and a.libur_nasional is None:
                         if a.masuk is not None and a.pulang is not None or a.masuk_b is not None and a.pulang_b is not None:
                             pass
                         else:
