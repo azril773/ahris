@@ -345,7 +345,7 @@ def laporan_json(r):
                 if rekap.ijin != ijin:
                     datai.append({"periode":bulan,"tahun":tahun,"pegawai_id":dt["id"],"cabang":r.session["ccabang"],"col":"ijin","data":ijin})
     # print(datai)
-    requests.post("http://localhost:8006/app/api/update-ijin",{"data":json.dumps(datai)})
+    # requests.post("http://localhost:8006/app/api/update-ijin",{"data":json.dumps(datai)})
 
 
     return JsonResponse({"data":data},status=200)
