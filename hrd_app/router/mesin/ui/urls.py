@@ -8,4 +8,5 @@ urlpatterns = [
     path('rmesin/<int:userid>/<int:id>/<int:uid>', views.rmesin, name='rmesin'),
     path("datamesin/",views.datamesin,name="datamesin"),
     path("cdatamesin/",views.cdatamesin,name="cdatamesin"),
+    path("listdata/",views.listdata,name="listdata"),
 ]
