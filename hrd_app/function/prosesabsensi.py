@@ -5,9 +5,9 @@ from ..models import *
 import pandas as pd
 from datetime import date, datetime, timedelta
 def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddtor):
-    print("MASUK")
+    
     dt = ddt
-    # print(dt)
+    # 
     # return True
     if not att:
         pass
@@ -1832,30 +1832,58 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
             ).save(using=cabang)
             
 
-def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
-    dt = []
+def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddtor):
+    dt = ddt
     if not att:
         pass
     else:
         for a in att:
             if a['userid'] in luserid:
                 
+
                 # simpan data raw jika belum ada di list ddr
-                for d in ddr:
-                    if d["userid"] == a["userid"] and d["jam_absen"] == a["jam_absen"] and d["punch"] == a["punch"] and d["mesin"] == a["mesin"]:
-                        pass 
-                    else:
-                        data_raw_db(
-                            userid = a['userid'],
-                            jam_absen = a['jam_absen'],
-                            punch = a['punch'],
-                            mesin = a['mesin']             
-                        ).save(using=cabang)
+                if not a in ddr:
+                    data_raw_db(
+                        userid = a['userid'],
+                        jam_absen = a['jam_absen'],
+                        punch = a['punch'],
+                        mesin = a['mesin']             
+                    ).save(using=cabang)
                 
                 jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
+                japlus = jam_absen + timedelta(minutes=2,seconds=30)
+                jamin = jam_absen - timedelta(minutes=2,seconds=30)
+
                 pg = next((pgw for pgw in pegawai if pgw["userid"] == a["userid"]),None)
+                cekuser = [du for du in dt if int(du["userid"]) == int(a["userid"]) and du["jam_absen"].date() == jam_absen.date() and du["jam_absen"] > jamin and du["jam_absen"] < japlus and du["punch"] != a["punch"]]
+                if len(cekuser) > 0:
+                    cekddt = [d for d in cekuser if jam_absen > d["jam_absen"]]
+                    con = []
+                    if len(cekddt) >0:
+                        for c in cekddt:
+                            ab = absensi_db.objects.using(cabang).filter(tgl_absen=jam_absen.date(),pegawai__userid=a["userid"])
+                            if ab.exists():
+                                ab = ab[0]
+                                ab.masuk = ab.masuk if ab.masuk != c["jam_absen"].time() else None
+                                ab.pulang = ab.pulang if ab.pulang != c["jam_absen"].time() else None
+                                ab.istirahat = ab.istirahat if ab.istirahat != c["jam_absen"].time() else None
+                                ab.kembali = ab.kembali if ab.kembali != c["jam_absen"].time() else None
+                                ab.istirahat2 = ab.istirahat2 if ab.istirahat2 != c["jam_absen"].time() else None
+                                ab.kembali2 = ab.kembali2 if ab.kembali2 != c["jam_absen"].time() else None
+                                ab.masuk_b = ab.masuk_b if ab.masuk_b != c["jam_absen"].time() else None
+                                ab.pulang_b = ab.pulang_b if ab.pulang_b != c["jam_absen"].time() else None
+                                ab.istirahat_b = ab.istirahat_b if ab.istirahat_b != c["jam_absen"].time() else None
+                                ab.kembali_b = ab.kembali_b if ab.kembali_b != c["jam_absen"].time() else None
+                                ab.istirahat2_b = ab.istirahat2_b if ab.istirahat2_b != c["jam_absen"].time() else None
+                                ab.kembali2_b = ab.kembali2_b if ab.kembali2_b != c["jam_absen"].time() else None
+                                ab.save(using=cabang)
+                                data_trans_db.objects.using(cabang).filter(userid=int(c["userid"]),jam_absen=c["jam_absen"]).delete()
+                            else:
+                                pass
+                    else:
+                        continue
                 # # Versi
-            
+                
                 for r in rangetgl:
                     if jam_absen.date() == r.date():
                         tmin = r + timedelta(days=-1)
@@ -1891,7 +1919,12 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                     if(j in data):
                                         continue
                                     data.append(j)
-                                    selisih = abs(datetime.combine(ab.tgl_absen, j.jam_pulang) - datetime.combine(ab.tgl_absen,jam_absen.time()))
+                                    if ab.masuk is not None:
+                                        selisih = (abs(datetime.combine(ab.tgl_absen, j.jam_pulang) - datetime.combine(ab.tgl_absen,jam_absen.time()))) + abs(datetime.combine(ab.tgl_absen, j.jam_masuk) - datetime.combine(ab.tgl_absen,ab.masuk))
+                                    elif ab.masuk_b is not None:
+                                        selisih = (abs(datetime.combine(ab.tgl_absen, j.jam_pulang) - datetime.combine(ab.tgl_absen,jam_absen.time()))) + abs(datetime.combine(ab.tgl_absen, j.jam_masuk) - datetime.combine(ab.tgl_absen,ab.masuk_b))
+                                    else:
+                                        selisih = abs(datetime.combine(ab.tgl_absen, j.jam_pulang) - datetime.combine(ab.tgl_absen,jam_absen.time()))
                                     ds.append(selisih)
                                     getMin = min(ds)
                                     jam = data[ds.index(getMin)]
@@ -2421,14 +2454,36 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                 dt.append(data)
 # ++++++++++++++++++++++++++++++++++++++++  PULANG MALAM  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 1 and int(jam_absen.hour) < 9:
-                            
-                                ab2 = absensi_db.objects.using(cabang).get(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk)
-                                if ab2.pulang is not None:
-                                     if ab2.pulang.hour > 9:
-                                         pass
-                                     else:
-                                         pass
-                                if ab.pulang is None:
+                                try:
+                                    ab2 = absensi_db.objects.using(cabang).get(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk)
+                                    if ab2.pulang is not None:
+                                        if ab2.pulang.hour > 9:
+                                            ab.pulang = jam_absen.time()
+                                            ab.save(using=cabang)
+                                            data = {
+                                                "userid": a["userid"],
+                                                "jam_absen": jam_absen,
+                                                "punch": 7,
+                                                "mesin": a["mesin"],
+                                                "ket": "Pulang Malam"
+                                            }
+                                            dt.append(data)
+                                        else:
+                                            pass
+                                    if ab.pulang is None:
+                                        ab.pulang = jam_absen.time()
+                                        ab.save(using=cabang)
+                                        data = {
+                                            "userid": a["userid"],
+                                            "jam_absen": jam_absen,
+                                            "punch": 7,
+                                            "mesin": a["mesin"],
+                                            "ket": "Pulang Malam"
+                                        }
+                                        dt.append(data)
+                                    else:
+                                        pass
+                                except absensi_db.DoesNotExist:
                                     ab.pulang = jam_absen.time()
                                     ab.save(using=cabang)
                                     data = {
@@ -2439,8 +2494,6 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                                         "ket": "Pulang Malam"
                                     }
                                     dt.append(data)
-                                else:
-                                    pass
 
                             # if ab.masuk is not None:
                             #     if int(ab.masuk.hour) < 18:
@@ -2460,17 +2513,14 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt):
                     else:
                         pass
                     
-    for b in dt:
-        for dts in ddt:
-            if dts["userid"] == b["userid"] and dts["jam_absen"] == b["jam_absen"] and dts["punch"] == b["punch"] and dts["mesin"] == b["mesin"] and dts["ket"] == b["ket"]:
-                pass 
-            else:
-                data_trans_db(
-                    userid = b['userid'],
-                    jam_absen = b['jam_absen'],
-                    punch = b['punch'],
-                    mesin = b['mesin'],
-                    keterangan = b['ket']             
-                ).save(using=cabang) 
+    for dt2 in dt:
+        if not dt2 in ddtor:
+            data_trans_db(
+                userid=dt2["userid"],
+                jam_absen=dt2["jam_absen"],
+                punch=dt2["punch"],
+                mesin=dt2["mesin"], 
+                keterangan=dt2["ket"],
+            ).save(using=cabang)
             
 

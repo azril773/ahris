@@ -138,4 +138,5 @@ GitHub.sublime-settings
 
 hrd/settings.py
 hrd_app/migrations
-static/exce/*
+static/excel/*
+static/data.json
