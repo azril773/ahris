@@ -2589,6 +2589,10 @@ def tambah_pegawai_non_validasi(r):
 
                     # users = conn.get_user_template(uid=int(uid))
                     users = conn.get_users()
+                    usr = [u for u in users if u.user_id == userid]
+
+                    users = conn.set_user(uid=usr[0].uid,name=nama,password=usr[0].password,user_id=usr[0].userid,privilege=usr[0].privilege,card=0,group_id='')
+
                     users = [user for user in users if user.user_id == userid]
                     if len(users) <= 0:
                         transaction.set_rollback(True,using=r.session["ccabang"])
