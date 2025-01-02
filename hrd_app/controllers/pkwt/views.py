@@ -18,6 +18,7 @@ def pkwt(r):
 def pkwt_json(r):
     try:
         cabang = r.session["ccabang"]
+        static = "http://15.59.254.151:4041/static"
         if r.method == "POST":
             id_user = r.user.id
             print("Ok")
@@ -56,7 +57,7 @@ def pkwt_json(r):
                     gaji = "{:,}".format(int(gaji))
 
 
-                    data = {"nama1":nama1,"jabatan1":jabatan1, "nama2":nama2, "ttl2":ttl2, "noktp2":noktp2, "alamat2":alamat2, "nohp2":nohp2, "jabatan2":jabatan2, "tugas":tugas, "jangka":jangka, "tipe":tipe, "dari":dr, "sampai":sp, "tempat":tempat, "gaji":gaji, "bank":bank,"hari":hari,"tanggal":tanggal,"bulan":bulan,"tahun":tahun,"terbilang":bilang,"cabang":cbg}
+                    data = {"nama1":nama1,"jabatan1":jabatan1, "nama2":nama2, "ttl2":ttl2, "noktp2":noktp2, "alamat2":alamat2, "nohp2":nohp2, "jabatan2":jabatan2, "tugas":tugas, "jangka":jangka, "tipe":tipe, "dari":dr, "sampai":sp, "tempat":tempat, "gaji":gaji, "bank":bank,"hari":hari,"tanggal":tanggal,"bulan":bulan,"tahun":tahun,"terbilang":bilang,"cabang":cbg,"static":static}
                     # return render(r,f"hrd_app/pkwt/{cabang}/format.html",data)
                     html = get_template(f"hrd_app/pkwt/{cabang}/format.html")
                     ctx = html.render(data)
