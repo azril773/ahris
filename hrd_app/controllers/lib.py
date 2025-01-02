@@ -11,6 +11,7 @@ from django.template.loader import get_template
 from django.contrib import messages 
 from json import dumps
 import requests
+import weasyprint
 # SUPPORT
 from openpyxl.styles import Alignment, Font
 from collections import namedtuple
@@ -303,3 +304,51 @@ def pengaturan(r):
     else:    
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
+
+def terbilang(bil):
+    angka = [
+        "",
+        "Satu",
+        "Dua",
+        "Tiga",
+        "Empat",
+        "Lima",
+        "Enam",
+        "Tujuh",
+        "Delapan",
+        "Sembilan",
+        "Sepuluh",
+        "Sebelas",
+    ]
+    Hasil = " "
+    n = int(bil)
+    if n >= 0 and n <= 11:
+        Hasil = angka[n]
+    elif n < 20:
+        Hasil = terbilang(n - 10) + " Belas "
+    elif n < 100:
+        Hasil = terbilang(n / 10) + " Puluh " + terbilang(n % 10)
+    elif n < 200:
+        Hasil = " Seratus " + terbilang(n - 100)
+    elif n < 1000:
+        Hasil = terbilang(n / 100) + " Ratus " + terbilang(n % 100)
+    elif n < 2000:
+        Hasil = " Seribu " + terbilang(n - 1000)
+    elif n < 1000000:
+        Hasil = terbilang(n / 1000) + " Ribu " + terbilang(n % 1000)
+    elif n < 1000000000:
+        Hasil = terbilang(n / 1000000) + " Juta " + terbilang(n % 1000000)
+    elif n < 1000000000000:
+        Hasil = terbilang(n / 1000000000) + " Milyar " + terbilang(n % 1000000000)
+    elif n < 1000000000000000:
+        Hasil = (
+            terbilang(n / 1000000000000) + " Triliyun " + terbilang(n % 1000000000000)
+        )
+    elif n < 1000000000000000000:
+        Hasil = (
+            terbilang(n / 1000000000000000) + " Kuadraliun " + terbilang(n % 1000000000000000)
+        )
+    else:
+        Hasil = ":("
+
+    return Hasil
