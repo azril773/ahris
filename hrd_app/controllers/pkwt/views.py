@@ -18,7 +18,7 @@ def pkwt(r):
 def pkwt_json(r):
     try:
         cabang = r.session["ccabang"]
-        static = "http://15.59.254.151:4041/static"
+        static = "http://localhost:8006/static"
         if r.method == "POST":
             id_user = r.user.id
             print("Ok")
