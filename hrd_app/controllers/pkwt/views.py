@@ -8,6 +8,7 @@ def pkwt(r):
         if akses.akses == 'hrd' or akses.akses == 'admin' or akses.akses == "root":
             data = {
                 "dsid":akses.sid.pk,
+                "cabang":r.session["cabang"],
                 "sid":akses.sid.pk
             }
             return render(r,"hrd_app/pkwt/pkwt.html",data)
@@ -17,7 +18,7 @@ def pkwt(r):
 def pkwt_json(r):
     try:
         cabang = r.session["ccabang"]
-        static = "http://localhost:8006/static"
+        static = "http://15.59.254.151:4041/static"
         if r.method == "POST":
             id_user = r.user.id
             print("Ok")
