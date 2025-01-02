@@ -797,7 +797,7 @@ def tasiksetabsensi():
                             else:
                                 # if str(a.pegawai.hari_off) == str(nh):
                                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-                                    if geseroff_db.objects.using("cirebon").using("cirebon").filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+                                    if geseroff_db.objects.using("cirebon").filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
                                         pass
                                     else:
                                         
@@ -1385,14 +1385,14 @@ def tasiksetabsensi():
                 ho = ab.pegawai.hari_off.hari
             else:
                 ho = None
-        pegawai_db.objects.using("cirebon").filter(pk=3636).update(
-            nik=f'silvia-{datetime.now()}'
-        )
-        print("SELESAI")
+        # pegawai_db.objects.using("cirebon").filter(pk=3636).update(
+        #     nik=f'silvia-{datetime.now()}'
+        # )
+        # print("SELESAI")
     except Exception as e:
         # print(e)
         return e
-    pegawai_db.objects.using("cirebon").filter(id=3636).update(nik="silvia21")
+    # pegawai_db.objects.using("cirebon").filter(id=3636).update(nik="silvia21")
 trigger = CronTrigger(
     year="*",month="*",day='*',hour="09",minute="30",second="00"
 )
