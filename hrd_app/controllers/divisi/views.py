@@ -95,12 +95,12 @@ def hapus_divisi(r):
         nama_user = r.user.username
         
         hid = r.POST.get('hid')
-        
+        print(pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=int(hid), aktif=1))
         if pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=int(hid), aktif=1).exists():
             status = 'pegawai memiliki divisi ini'
         else:        
-            ndiv = divisi_db.objects.using(r.session["ccabang"]).get(id=int(hid))            
             
+            ndiv = divisi_db.objects.using(r.session["ccabang"]).filter(id=int(hid)).last()
             thapus = histori_hapus_db(
                 delete_by = nama_user,
                 delete_item = f'hapus divisi : {ndiv.divisi}'
@@ -108,6 +108,7 @@ def hapus_divisi(r):
             thapus.save(using=r.session["ccabang"])
             
             ndiv.delete(using=r.session["ccabang"])
+            print("OK")
             
             status = 'ok'
         

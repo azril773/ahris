@@ -2631,9 +2631,9 @@ def tambah_pegawai_non_validasi(r):
                     conn.enable_device()
 
                 except Exception as e:
-                    
+                    print(e)
                     transaction.set_rollback(True,using=r.session["ccabang"])
-                    return JsonResponse({"status":"error","msg":e},status=500)
+                    return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=500)
                 finally:
                     if conn:
                         conn.disconnect()
