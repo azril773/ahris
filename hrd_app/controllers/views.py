@@ -290,7 +290,7 @@ def tasiksetabsensi():
         dr = datetime.now() - timedelta(days=1)
         sp = dr + timedelta(days=1)
         dari = datetime.strptime(datetime.strftime(dr,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
-        sampai = datetime.strptime(datetime.strftime(sp,"%Y-%m-%d 23:59:59"),"%Y-%m-%d %H:%M:%S")
+        sampai = datetime.strptime(datetime.strftime(sp,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
         dmesin = []
         for m in mesin_db.objects.using('cirebon').filter(status='Active'):
             print(m)
