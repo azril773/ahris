@@ -1292,34 +1292,34 @@ class kompen_db_arsip(models.Model):
 #         managed = False
 #         db_table = "payroll_app_pegawai_db"
 
-# class counter_payroll_db(models.Model):
-#     counter = models.CharField(max_length=100)
+class counter_payroll_db(models.Model):
+    counter = models.CharField(max_length=100)
 
-#     def __str__(self):
-#         return self.counter
+    def __str__(self):
+        return self.counter
 
-#     class Meta:
-#         managed=False
-#         db_table="payroll_app_counter_db"   
+    class Meta:
+        managed=False
+        db_table="payroll_app_counter_db"   
 
 
 
-# class status_pegawai_payroll_app_db(models.Model):
-#     status = models.CharField(max_length=100)
+class status_pegawai_payroll_app_db(models.Model):
+    status = models.CharField(max_length=100)
 
-#     def __str__(self):
-#         return self.status
+    def __str__(self):
+        return self.status
 
-#     class Meta:
-#         managed=False
-#         db_table="payroll_app_status_pegawai_db"     
+    class Meta:
+        managed=False
+        db_table="payroll_app_status_pegawai_db"     
 
-# class divisi_payroll_db(models.Model):
-#     divisi = models.CharField(max_length=100)
+class divisi_payroll_db(models.Model):
+    divisi = models.CharField(max_length=100)
 
-#     def __str__(self) -> str:
-#         return self.divisi
+    def __str__(self) -> str:
+        return self.divisi
     
-#     class Meta:
-#         managed=False
-#         db_table="payroll_app_divisi_db" 
+    class Meta:
+        managed=False
+        db_table="payroll_app_divisi_db" 
