@@ -1388,13 +1388,14 @@ def tasiksetabsensi():
         # pegawai_db.objects.using("cirebon").filter(pk=3636).update(
         #     nik=f'silvia-{datetime.now()}'
         # )
-        # print("SELESAI")
+        print("SELESAI")
+        scheduler.remove_all_jobs()
     except Exception as e:
         # print(e)
         return e
     # pegawai_db.objects.using("cirebon").filter(id=3636).update(nik="silvia21")
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="08",minute="51",second="00"
+    year="*",month="*",day='*',hour="09",minute="22",second="00"
 )
 # trigger = CronTrigger(
 #     year="*",month="*",day='*',hour="09",minute="27",second="45"
