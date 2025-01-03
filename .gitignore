@@ -136,8 +136,8 @@ GitHub.sublime-settings
 !.vscode/extensions.json 
 .history
 
-# hrd/settings.py
-# hrd_app/migrations
-# static/excel/*
-# static/pdf/*
-# static/data.json
+hrd/settings.py
+hrd_app/migrations
+static/excel/*
+static/pdf/*
+static/data.json
