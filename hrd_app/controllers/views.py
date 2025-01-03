@@ -228,6 +228,7 @@ scheduler = BackgroundScheduler()
 def tasiksetabsensi():
     try:
         today = datetime.now()
+        print(today)
         dari = today
         sampai = today + timedelta(days=2)
         rangetgl = pd.date_range(dari, sampai).tolist()
@@ -286,12 +287,13 @@ def tasiksetabsensi():
                             tgl_absen = tgl.date(),
                             pegawai_id = p.pk
                         ).save(using='cirebon')
-        today = datetime.now() + timedelta(days=1)
-        tgl = today + timedelta(days=1)
-        dari = datetime.strptime(datetime.strftime(tgl,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
-        sampai = datetime.strptime(datetime.strftime(today,"%Y-%m-%d 23:59:59"),"%Y-%m-%d %H:%M:%S")
+        dr = datetime.now() - timedelta(days=1)
+        sp = dr + timedelta(days=1)
+        dari = datetime.strptime(datetime.strftime(dr,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
+        sampai = datetime.strptime(datetime.strftime(sp,"%Y-%m-%d 23:59:59"),"%Y-%m-%d %H:%M:%S")
         dmesin = []
         for m in mesin_db.objects.using('cirebon').filter(status='Active'):
+            print(m)
             ip = m.ipaddress
             # conn = None
             zk = ZK(str(ip), port=4370, timeout=65)
@@ -301,6 +303,7 @@ def tasiksetabsensi():
                 conn.disable_device()
                 # Data absensi
                 absensi = conn.get_attendance()
+                # print(absensi)
                 for a in absensi:
                     if dari <= a.timestamp <= sampai:   
                         # users = conn.get_users()
@@ -319,7 +322,6 @@ def tasiksetabsensi():
             except Exception as e:
                 # print(e)
                 raise Exception("Terjadi kesalahan")
-            
         att = sorted(dmesin, key=lambda i: i['jam_absen'])
 
         ddr = []
@@ -382,7 +384,7 @@ def tasiksetabsensi():
             lsopg.append(s.status_id)
         
         # geser off all 
-        for ga in geseroff_db.objects.using("cirebon").using("cirebon").all():
+        for ga in geseroff_db.objects.using("cirebon").all():
             data = {
                 'id' : ga.id,
                 'idp' : ga.pegawai_id, 
@@ -1389,13 +1391,12 @@ def tasiksetabsensi():
         #     nik=f'silvia-{datetime.now()}'
         # )
         print("SELESAI")
-        scheduler.remove_all_jobs()
     except Exception as e:
         # print(e)
         return e
     # pegawai_db.objects.using("cirebon").filter(id=3636).update(nik="silvia21")
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="09",minute="22",second="00"
+    year="*",month="*",day='*',hour="09",minute="*",second="00"
 )
 # trigger = CronTrigger(
 #     year="*",month="*",day='*',hour="09",minute="27",second="45"
