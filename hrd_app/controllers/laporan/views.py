@@ -145,11 +145,13 @@ def laporan_json(r):
                             ct += 1
                         elif re.search("opg",a.keterangan_absensi,re.I):
                             opg += 1
-                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and (a.masuk is not None and a.pulang is not None or a.masuk_b is not None and a.pulang_b is not None):
-                        pass
-                        # af += 1
+                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and a.libur_nasional is None:
+                        if a.masuk is not None and a.pulang is not None or a.masuk_b is not None and a.pulang_b is not None:
+                            pass
+                        else:
+                            af += 1
                     else:
-                        af += 1
+                        pass
 
             
             obj = {
@@ -266,11 +268,13 @@ def laporan_json(r):
                             ct += 1
                         elif re.search("opg",a.keterangan_absensi,re.I):
                             opg += 1
-                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and (a.masuk is not None and a.pulang is not None or a.masuk_b is not None and a.pulang_b is not None):
-                        pass
-                        # af += 1
+                    elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and a.libur_nasional is None:
+                        if a.masuk is not None and a.pulang is not None or a.masuk_b is not None and a.pulang_b is not None:
+                            pass
+                        else:
+                            af += 1
                     else:
-                        af += 1
+                        pass
             obj = {
                 "id" : pgw.id,
                 "status":pgw.status.pk,
@@ -303,39 +307,47 @@ def laporan_json(r):
                 "dl":dl if dl > 0 else ""
             }
             data.append(obj)
-        for dt in data:
-            if not rekap_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(dt["id"]),periode=int(bulan),tahun=int(tahun)).exists():
-                rekap_db(
-                    pegawai_id=dt["id"],
-                    status_id=dt["status"],
-                    tharikerja=dt["total_hari"] if dt["total_hari"] != "" else 0,
-                    periode=bulan,
-                    tahun=tahun,
-                    sb=dt['sb'] if dt["sb"] != "" else 0,
-                    sdl=dt["sdl"] if dt["sdl"] != "" else 0,
-                    sdp=dt["sdp"] if dt["sdp"] != "" else 0,
-                    ijin=dt["ijin"] if dt["ijin"] != "" else 0,
-                    af=dt['af'] if dt["af"] != "" else 0,
-                    insentif=dt["insentif"],
-                    cm=dt["cm"] if dt["cm"] != "" else 0,
-                    keterangan=''
-                ).save(using=r.session["ccabang"])
-            else:
-                rekap_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(dt["id"]),periode=int(bulan),tahun=int(tahun)).update(
-                    pegawai_id=dt["id"],
-                    status_id=dt["status"],
-                    tharikerja=dt["total_hari"] if dt["total_hari"] != "" else 0,
-                    periode=bulan,
-                    tahun=tahun,
-                    sb=dt['sb'] if dt["sb"] != "" else 0,
-                    sdl=dt["sdl"] if dt["sdl"] != "" else 0,
-                    sdp=dt["sdp"] if dt["sdp"] != "" else 0,
-                    ijin=dt["ijin"] if dt["ijin"] != "" else 0,
-                    af=dt['af'] if dt["af"] != "" else 0,
-                    insentif=dt["insentif"],
-                    cm=dt["cm"] if dt["cm"] != "" else 0,
-                    keterangan=''
-                )
+    datai = []
+    print(data)
+    for dt in data:
+        if not rekap_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(dt["id"]),periode=int(bulan),tahun=int(tahun)).exists():
+            rekap_db(
+                pegawai_id=dt["id"],
+                status_id=dt["status"],
+                tharikerja=dt["total_hari"] if dt["total_hari"] != "" else 0,
+                periode=bulan,
+                tahun=tahun,
+                sb=dt['sb'] if dt["sb"] != "" else 0,
+                sdl=dt["sdl"] if dt["sdl"] != "" else 0,
+                sdp=dt["sdp"] if dt["sdp"] != "" else 0,
+                ijin=dt["ijin"] if dt["ijin"] != "" else 0,
+                af=dt['af'] if dt["af"] != "" else 0,
+                insentif=dt["insentif"],
+                cm=dt["cm"] if dt["cm"] != "" else 0,
+                keterangan=''
+            ).save(using=r.session["ccabang"])
+        else:
+            rekap = rekap_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(dt["id"]),periode=int(bulan),tahun=int(tahun)).last()
+            if rekap is not None:
+                sb = dt['sb'] if dt["sb"] != "" else 0
+                sdl = dt['sdl'] if dt["sdl"] != "" else 0
+                sdp = dt['sdp'] if dt["sdp"] != "" else 0
+                af = dt['af'] if dt["af"] != "" else 0
+                ijin = dt['ijin'] if dt["ijin"] != "" else 0
+                if rekap.sb != sb:
+                    datai.append({"periode":bulan,"tahun":tahun,"pegawai_id":dt["id"],"cabang":r.session["ccabang"],"col":"sb","data":sb})
+                if rekap.sdp != sdp:
+                    datai.append({"periode":bulan,"tahun":tahun,"pegawai_id":dt["id"],"cabang":r.session["ccabang"],"col":"sdp","data":sdp})
+                if rekap.sdl != sdl:
+                    datai.append({"periode":bulan,"tahun":tahun,"pegawai_id":dt["id"],"cabang":r.session["ccabang"],"col":"sdl","data":sdl})
+                if rekap.af != af:
+                    datai.append({"periode":bulan,"tahun":tahun,"pegawai_id":dt["id"],"cabang":r.session["ccabang"],"col":"af","data":af})
+                if rekap.ijin != ijin:
+                    datai.append({"periode":bulan,"tahun":tahun,"pegawai_id":dt["id"],"cabang":r.session["ccabang"],"col":"ijin","data":ijin})
+    # print(datai)
+    # requests.post("http://localhost:8006/app/api/update-ijin",{"data":json.dumps(datai)})
+
+
     return JsonResponse({"data":data},status=200)
 
 

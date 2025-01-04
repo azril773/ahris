@@ -1,0 +1,129 @@
+{% extends "hrd_app/master/base.html" %} {% block breadcrumb %} 
+
+<div class="br-pagebody">  
+    <div id="msg"></div>
+    <div class="br-section-wrapper">
+        <!-- Pesan Error -->
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <form action="" id="formpilihmesin" method="post">
+        <div class="row">
+            <div class="col-md-5">
+                <label for="userid" class="form-label tx-inverse">Masukan Userid :</label>
+                <input type="text" name="userid" id="userid" style="width: 100%;" class="form-control">
+                <span class="tx-inverse text-danger">Pisahkan menggunakan tanda ","</span>
+                <span class="tx-inverse text-danger">ex. 99992, 99998, ...</span>
+            </div>
+            <div class="col-md-5">
+                <label for="mesin" class="form-label tx-inverse">Pilih Mesin</label>
+                <select name="mesin" class='mr-2' id="mesin" style="width: 100%;">
+                    <option value="">Pilih Mesin</option>
+                    {% for m in mesin %}
+                        <option value="{{m.pk}}" data-nama="{{m.nama}}">{{m.nama}} - {{m.ipaddress}}</option>
+                    {% endfor %}
+                </select>
+            </div>     
+            <div class="col-md-2 mt-4">
+                <button type='submit' class="btn btn-primary mr-2">Cari</button> 
+            </div>
+            </div>
+        </form>
+
+        <br>        
+        <br>
+
+        <div id="loader"></div>            
+     
+        <!-- Table -->
+        <div class="table-wrapper">
+            <div id="namamesin" class="tx-inverse tx-bold"></div>
+            <table id="tabelku" class="table display responsive" style="width:100%">
+            <thead>
+                <tr>
+                    <th wrap>Userid</th>
+                    <th>Nama</th>
+                    <th>Mesin</th>
+                </tr>
+            </thead>
+            </table>
+        </div>
+    </div>
+
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %} {% block hrd_ajax %}
+<script>
+    $("#mesin").selectize()
+    const mesinSelectize = $("#mesincari").selectize()
+    const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+    $("#formpilihmesin").on("submit",function(e){
+        e.preventDefault()
+        const mesin = $("#mesin").val() ? $("#mesin").val() : undefined
+        const userid = $("#userid").val() ? $("#userid").val() : undefined
+        $("#namamesin").text(`Mesin ${$("#mesin").text()}`)
+        $("#tabelku").DataTable().destroy()
+        $("#tabelku").DataTable({
+            ajax:{
+                url:`/hrd/listdata_json`,
+                method:'post',
+                data:{mesin,userid},
+                headers:{"X-CSRFToken":token},
+                error:(err) => {
+                    $("#msg p").remove()
+                    if(err.responseJSON?.msg){
+                        $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    }else{
+                        $("#msg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                    }
+                }
+            },
+            columns:[
+                {data:"userid"},
+                {data:"nama"},
+                {
+                    data:"mesin"
+                },
+            ],
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+            },
+            destroy: true,
+            ordering: false,
+            paging: false,
+            scrollX:"100%",
+            scrollY: 300,
+            processing: true,
+        })
+        $("#msg p").remove()
+        $("#pilih_tgl_proses").modal("hide")
+    })
+</script>
+{% endblock hrd_ajax %}

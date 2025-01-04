@@ -98,6 +98,9 @@ urlpatterns = [
     path("",include("hrd_app.router.shift.ui.urls")),
     path("",include("hrd_app.router.shift.backend.urls")),
     
+    path("",include("hrd_app.router.pkwt.ui.urls")),
+    path("",include("hrd_app.router.pkwt.backend.urls")),
+    
 
     path('pengaturan', views.pengaturan, name='pengaturan'),
 

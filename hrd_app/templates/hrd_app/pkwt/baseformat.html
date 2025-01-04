@@ -1,0 +1,325 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Format PKWT</title>
+    <style>
+      ol {
+        counter-reset: item;
+        margin-left: 0;
+        padding-left: 0;
+      }
+      li {
+        display: block;
+        margin-bottom: 0.5em;
+        margin-left: 1em;
+      }
+      li::before {
+        display: inline-block;
+        content: "("counter(item)")";
+        counter-increment: item;
+        width: 20px;
+        margin-left: -1em;
+      }
+      .format-text {
+        color: black;
+        font-family: sans-serif
+      }
+    </style>
+    <link rel="stylesheet" href="{% static "bootstrap/css/bootstrap.min.css"%}">
+  </head>
+  <body>
+    <code class="format-text">
+    <h3 style="text-align: center;"><b>PERJANJIAN KERJA WAKTU TERTENTU (PKWT)</b></h3>
+    <p>
+      Pada hari {{hari}}, tanggal {{tanggal}} Bulan {{bulan}} Tahun {{tahun}},
+      kami yang bertanda tangan di bawah ini:
+    </p>
+    <ol>
+      <li>
+        <table>
+          <tr>
+            <td>Nama</td>
+            <td>:</td>
+            <td>{{nama1}}</td>
+          </tr>
+          <tr>
+            <td>Jabatan</td>
+            <td>:</td>
+            <td>{{jabatan1}}</td>
+          </tr>
+        </table>
+        Bertindak dalam jabatannya untuk dan atas nama PT. Asia Tritunggal Jaya
+        cabang Cirebon yang selanjutnya disebut sebagai <b>“PIHAK PERTAMA”</b>.
+      </li>
+      <li>
+        <table>
+          <tr>
+            <td>Nama</td>
+            <td>:</td>
+            <td>{{nama2}}</td>
+          </tr>
+          <tr>
+            <td>Tempat Tanggal Lahir</td>
+            <td>:</td>
+            <td>{{ttl2}}</td>
+          </tr>
+          <tr>
+            <td>Nomor KTP</td>
+            <td>:</td>
+            <td>{{noktp2}}</td>
+          </tr>
+          <tr>
+            <td>Alamat</td>
+            <td>:</td>
+            <td>{{alamat2}}</td>
+          </tr>
+          <tr>
+            <td>No HP</td>
+            <td>:</td>
+            <td>{{nohp2}}</td>
+          </tr>
+        </table>
+      </li>
+    </ol>
+
+    <p>
+      Dalam hal ini bertindak untuk dan atas nama diri sendiri, yang selanjutnya
+      dalam Perjanjian Kerja Waktu Tertentu (PKWT) ini disebut sebagai
+      <b>“PIHAK KEDUA”</b> .
+    </p>
+
+    <p>
+      Kedua belah pihak dengan ini menyatakan bahwa Pihak Pertama menerima Pihak
+      Kedua sebagai karyawan perusahaan Pihak Pertama dengan status Karyawan
+      Kerja Waktu Tertentu dan Pihak Kedua menyatakan bersedia untuk bekerja di
+      perusahaan Pihak Pertama dan mengikuti semua Peraturan Perusahaan dengan
+      status sebagai Karyawan Kerja Waktu tertentu.
+    </p>
+    <p>
+      Kedua belah pihak sepakat untuk mengikatkan diri dan tunduk dalam suatu
+      perjanjian sebagaimana diatur dalam pasal 59 Undang–Undang Tenaga Kerja
+      No. 13 tahun 2003 tentang ketenagakerjaan yang disebut sebagai
+      <b>“Perjanjian Kerja Waktu Tertentu”</b> dengan ketentuan - ketentuan
+      sebagai berikut:
+    </p>
+    <h6 style="text-align: center"><b>PASAL 1</b></h6>
+    <p>
+      Jangka waktu perjanjian selama {{jangka}} ( {{tipe}} ) bulan / tahun,
+      berlaku mulai tanggal, {{dari}} sampai dengan tanggal, {{sampai}} jika
+      dipandang perlu oleh Pihak Pertama dengan persetujuan Pihak Kedua
+      Perjanjian Kerja Waktu Tertentu (PKWT) ini dapat diperpanjang dan atau
+      diperbaharui.
+    </p>
+    <h6 style="text-align: center"><b>PASAL 2</b></h6>
+    <p>
+      Pihak Kedua bekerja pada Pihak Pertama dan diberikan jabatan dengan
+      posisi/sebaga {{jabatan2}} yang mempunyai tugas utama yaitu {{tugas}} dan
+      tugas-tugas lain yang ditetapkan oleh atasannya baik secara langsung
+      maupun tidak langsung.
+    </p>
+    <h6 style="text-align: center"><b>PASAL 3</b></h6>
+    <ol>
+      <li>
+        Pihak Pertama menempatkan Pihak Kedua di wilayah kerja perusahaan Pihak
+        Pertama di {{tempat}}
+      </li>
+      <li>
+        Pihak Pertama dapat menempatkan Pihak Kedua di cabang lain PT. Asia
+        Tritunggal Jaya.
+      </li>
+      <li>
+        Pihak Pertama dapat melakukan rotasi, mutasi, promosi dan demosi kepada
+        Pihak Kedua jika ada kebutuhan baik di cabang yang sama atau cabang
+        lainnya di PT. Asia Tritunggal Jaya.
+      </li>
+      <li>
+        Apabila pihak kedua menolak untuk dirotasi, mutasi, promosi dan demosi
+        dapat dikategorikan sebagai menolak perintah kerja dan dapat
+        dikualifikasi sebagai pengunduran diri.
+      </li>
+    </ol>
+
+    <h6 style="text-align: center"><b>PASAL 4</b></h6>
+    <p>
+      Pihak Kedua Sanggup untuk menunda pernikahan dan atau kehamilan (karyawan
+      wanita) minimal 1 (satu) tahun terhitung sejak Perjanjian kerja ini
+      ditandatangani.
+    </p>
+    <h6 style="text-align: center"><b>PASAL 5</b></h6>
+    <ol>
+      <li>
+        Pihak Pertama memberikan gaji sebagai upah kerja Pihak Kedua sebesar Rp
+        {{gaji}},-({{terbilang}}), yang akan diberikan setiap awal bulan melalui
+        transfer lewat rekening bank {{bank}}
+      </li>
+      <li>
+        Pihak Pertama juga akan memberikan THR sesuai dengan peraturan perundang
+        - undangan yang berlaku.
+      </li>
+      <li>
+        Pihak Kedua juga akan mendapatkan upah lembur apabila jam kerja melebihi
+        waktu yang ditentukan atas permintaan Pihak Pertama sesuai dengan Surat
+        Perintah Kerja Lembur (SPKL).
+      </li>
+    </ol>
+    <h6 style="text-align: center"><b>PASAL 6</b></h6>
+    <ol>
+      <li>
+        Pihak Pertama menetapkan jam kerja bagi Pihak Kedua yang diatur
+        berdasarkan lingkup kerja Pihak Kedua yaitu sebagai berikut:
+        {% block jamkerja %}{% endblock jamkerja %}
+      </li>
+      <li>
+        Pihak Pertama dapat menentukan jam kerja lain jika diperlukan dengan
+        mengingat rasa kemanusiaan dan Pihak Kedua dapat diberikan uang lembur.
+      </li>
+      <li>
+        Pihak Kedua wajib melakukan absensi kehadiran baik pada saat masuk, ke
+        luar istirahat ,masuk kembali setelah istirahat dan pada saat pulang.
+      </li>
+    </ol>
+    <h6 style="text-align: center"><b>PASAL 7</b></h6>
+    <ol>
+      <li>
+        Pihak Kedua mempunyai hak cuti selama 12 (dua belas hari) setelah Pihak
+        Kedua bekerja selama 12 (dua belas) bulan berturut-turut.
+      </li>
+      <li>
+        Ketentuan pengambilan cuti tahunan diatur secara bergilir oleh Pihak
+        Pertama dan atau atas pengajuan Pihak Kedua.
+      </li>
+      <li>
+        Khusus untuk karyawan wanita berhak atas cuti khusus yaitu: 1,5 (satu
+        setengah) bulan sebelum melahirkan dan 1,5 (satu setengah) bulan sesudah
+        melahirkan menurut perhitungan dokter kandungan atau Bidan.
+      </li>
+    </ol>
+    <h6 style="text-align: center"><b>PASAL 8</b></h6>
+    <ol>
+      <li>
+        Pihak Kedua tidak boleh merangkap pekerjaan / tugas rutin lain diluar
+        perusahaan Pihak Pertama, kecuali memperoleh ijin resmi tertulis
+        terlebih dahulu dari perusahaan Pihak Pertama.
+      </li>
+      <li>
+        Pihak Kedua harus menjaga citra dan kewibawaan / pribadi dan perusahaan
+        Pihak Pertama, didalam tempat bertugas / kantor maupun di masyarakat
+        umum dan mentaati ketentuan rahasia perusahaan Pihak Pertama.
+      </li>
+      <li>
+        Pihak Kedua diharapkan dapat mendayagunakan seluruh pengetahuan dan
+        keahlian Pihak Kedua demi kemajuan perusahaan Pihak Pertama pada umumnya
+        dan bagi diri Pihak Kedua sendiri pada khususnya, serta menjadi contoh
+        yang baik bagi rekan kerja dan pihak lain yang berhubungan baik langsung
+        maupun tidak langsung dengan Pihak Kedua.
+      </li>
+      <li>
+        Pihak Kedua wajib hadir ditempat kerja sekurang - kurangnya 5 (lima)
+        menit sebelum jam kerja dimulai, sesuai jam kerja yang sudah ditentukan
+        Pihak Pertama sebagaimana diatur dalam Pasal 6 ayat (1) dan siap
+        melaksanakan tugas tepat pada waktu dimulainya jam kerja sampai dengan
+        berakhirnya jam kerja.
+      </li>
+      <li>
+        Pihak Kedua hanya boleh meninggalkan tempat kerja setelah usai jam
+        kerja, kecuali atas ijin dari atasan.
+      </li>
+      <li>
+        Pihak Kedua wajib memberitahukan kepada atasan dengan alasan yang dapat
+        dipertanggungjawabkan sesuai dengan Peraturan Perusahaan, apabila oleh
+        karena suatu alasan Pihak Kedua tidak dapat hadir ditempat kerja untuk
+        memperoleh ijin.
+      </li>
+      <li>
+        Pihak Kedua wajib memberitahukan kepada atasan dengan alasan yang dapat
+        dipertanggungjawabkan, apabila oleh karena suatu alasan Pihak Kedua
+        terlambat masuk kerja atau pulang sebelum waktunya.
+      </li>
+      <li>
+        Pihak Kedua diwajibkan mengenakan kartu identitas karyawan yang sah
+        sesuai dengan standar perusahaan selama menjalankan aktivitas kerja di
+        tempat kerja.
+      </li>
+      <li>
+        Pihak Kedua wajib bertingkah laku sopan, menjauhi pelecehan terhadap
+        atasan/bawahan, rekan kerja atau pihak lain dan menjaga suasana
+        keakraban di dalam lingkungan kerja maupun di dalam lingkungan
+        masyarakat.
+      </li>
+    </ol>
+    <h6 style="text-align: center"><b>PASAL 9</b></h6>
+    <p>
+      Apabila Pihak Kedua dengan sengaja atau karena kelalainya mengakibatkan
+      Pihak Pertama mengalami kerugian baik materil atau imateriil, maka Pihak
+      Kedua harus bersedia mengganti kerugian yang diderita oleh Pihak Pertama.
+    </p>
+    <h6 style="text-align: center"><b>PASAL 1</b>0</h6>
+    <ol>
+      <div class="">
+        <li>
+          Perjanjian Kerja Waktu Tertentu (PKWT) ini berakhir sebelum jangka
+          waktu berakhir apabila:
+          <ol style="margin-top: 5px">
+            <li>Pihak Kedua meninggal dunia</li>
+            <li>
+              Adanya putusan pengadilan dan atau penetapan lembaga penyelesaian
+              hubungan industrial yang telah mempunyai kekuatan hukum tetap.
+            </li>
+            <li>
+              Diakhiri lieh salah satu Pihak ( Pihak Pertama atau Pihak Kedua)
+              karena adanya keadaan memaksa.
+            </li>
+            <li>
+              Tidak mencapai target sesuai ketentuan yang telah ditetapkan lieh
+              Pihak Pertama.
+            </li>
+            <li>
+              Dikualifikasikan sebagai Pengunduran diri secara Sukarela adalah
+              apabila Pihak Kedua, mangkir selama 5 (lima) hari kerja atau
+              berturut-turut tanpa keterangan secara tertulis yang dilengkapi
+              dengan bukti yang sah dan telah dipanggil dengan patut dan
+              tertulis sebanyak 2 (dua) kali.
+            </li>
+          </ol>
+        </li>
+      </div>
+      <li>
+        Dengan berakhirnya Perjanjian Kerja Waktu Tertentu yang diakhiri oleh
+        salah satu pihak, maka kewajiban Pihak Pertama akan putus secara
+        material pada hari dan tanggal ditetapkan.
+      </li>
+    </ol>
+    <h6 style="text-align: center"><b>PASAL 1</b>1</h6>
+    <ol>
+      <li>
+        Pihak Kedua bersedia dengan sukarela untuk dipanggil dan bermusyawarah
+        apabila ditemukan adanya permasalahan tentang penyimpangan yang terjadi
+        dan diduga dilakukan oleh Pihak Kedua, baik sebelum berakhirnya
+        Perjanjian Kerja Waktu Tertentu maupun setelah berakhirnya Perjanjian
+        Kerja Waktu Tertentu.
+      </li>
+      <li>
+        Apabila Pihak Kedua tidak hadir dalam pemanggilan yang telah ditentukan
+        dalam ayat 1(satu), maka Pihak Kedua dianggap telah beritikad buruk dan
+        akan di proses sesuai hukum yang berlaku.
+      </li>
+      <li>
+        Segala ketentuan yang belum diatur dalam perjanjian ini akan diatur
+        selanjutnya dalam adendum yang merupakan bagian yang tidak terpisahkan
+        dari perjanjian ini dan akan diputuskan secara bersama. Demikian
+        Perjanjian Kerja Waktu Tertentu ini dibuat dan ditandatangani oleh kedua
+        belah pihak dalam keadaan sehat jasmani, rohani untuk dapat dilaksanakan
+        dengan sebaik-baiknya sebagaimana mestinya.
+      </li>
+    </ol>
+    <div class="d-flex justify-content-between mt-3 mx-4">
+      <div class=""><b>Pihak Pertama</b></div>
+      <div class=""><b>Pihak Kedua</b></div>
+    </div>
+  </code>
+    <script src="{% static "bootstrap/js/bootstrap.min.js" %}"></script>
+  </body>
+</html>

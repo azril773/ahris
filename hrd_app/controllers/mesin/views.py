@@ -1007,7 +1007,76 @@ def getmesin(r):
         }
 
     return JsonResponse({"status":"success","msg":"Berhasil mengambil mesin","data":data},status=200)
-            
+
+
+@login_required
+def listdata(r):
+    id_user = r.user.id
+    akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+    if akses is not None:
+        if akses.akses == "root" or akses.akses == "admin":
+            mesin = mesin_db.objects.using(r.session["ccabang"]).all()
+            sid = akses.sid_id
+            data = {
+                "dsid":sid,
+                "sid":sid,
+                "akses":akses.akses,
+                "mesin":mesin
+            }
+            return render(r,"hrd_app/mesin/listdata.html",data)
+
+        else:
+            messages.error(r,"Anda tidak memiliki akses")
+            return redirect("beranda")
+    else:
+        messages.error(r,"Akses anda belum ditentukan")
+        return redirect("beranda")
+
+
+@login_required
+def listdata_json(r):
+    try:
+        iduser = r.user.id
+        data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
+        akses = data_akses.akses 
+        mesin = r.POST.get("mesin")
+        userid = r.POST.get("userid")
+        if mesin is None:
+            return JsonResponse({"status":"error","msg":"Silahkan pilih mesin terlebih dahulu"},status=400)
+        if akses == "admin" or akses == "root":
+            if userid is not None:
+                luserid = userid.split(",")
+                luserid = [iduser.strip() for iduser in luserid]
+            mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(mesin)).last()
+            if mesin is None:
+                return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
+            zk = ZK(mesin.ipaddress,4370)
+            conn = zk.connect()
+            conn.disable_device()
+            users = conn.get_users()
+            data = []
+            for user in users:
+                if userid is not None:
+                    if user.user_id in luserid:
+                        obj = {
+                            "userid":user.user_id,
+                            "nama":user.name,
+                            "mesin":f"{mesin.ipaddress} - {mesin.nama}"
+                        }
+                        data.append(obj)
+                else:
+                    obj = {
+                        "userid":user.user_id,
+                        "nama":user.name,
+                        "mesin":f"{mesin.ipaddress} - {mesin.nama}"
+                    }
+                    data.append(obj)
+            conn.disconnect()
+            data = sorted(data,key=lambda i: i["userid"])
+        return JsonResponse({"status":"success","msg":"Berhasil mengambil mesin","data":data},status=200)
+    except Exception as e:
+        print(e)
+        return JsonResponse({"status":'error',"msg":"Terjadi kesalahan"},status=400)
 # @login_required
 # def get_mesin(r,mesin):
 

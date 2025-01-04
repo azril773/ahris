@@ -7,6 +7,39 @@ def pegawai(r,sid):
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
+        # for p in pegawai_db.objects.using(r.session["ccabang"]).all():
+        #     if p.aktif == 0:
+        #         pegawai_db_arsip(
+        #             nama=p.nama,
+        #             email=p.email,
+        #             no_telp=p.no_telp,
+        #             userid=p.userid,
+        #             gender=p.gender,
+        #             status=p.status,
+        #             nik=p.nik,
+        #             divisi=p.divisi,
+        #             jabatan=p.jabatan,
+        #             no_rekening=p.no_rekening,
+        #             no_bpjs_ks=p.no_bpjs_ks,
+        #             no_bpjs_tk=p.no_bpjs_tk,
+        #             payroll_by=p.payroll_by,
+        #             ks_premi=p.ks_premi,
+        #             tk_premi=p.tk_premi,
+        #             aktif=p.aktif,
+        #             tgl_masuk=p.tgl_masuk,
+        #             tgl_aktif=p.tgl_aktif,
+        #             tgl_nonaktif=p.tgl_nonaktif,
+        #             hari_off=p.hari_off,
+        #             hari_off2=p.hari_off2,
+        #             kelompok_kerja=p.kelompok_kerja,
+        #             sisa_cuti=p.sisa_cuti,
+        #             cuti_awal=p.cuti_awal,
+        #             shift=p.shift,
+        #             counter=p.counter,
+        #             rekening=p.rekening,
+        #             add_by=r.user.username,
+        #         ).save(using=r.session["ccabang"])
+        #         p.delete(using=r.session["ccabang"])
         # excel = pd.read_excel("static/ahris.xlsx")
         # data = []
         # for i in excel.iloc[:,0]:
@@ -486,7 +519,7 @@ def epegawai(r,idp):
                 return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
             else:
                 
-                pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid).update(
+                pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(pgw.pk)).update(
                     nama=nama,
                     email=email,
                     gender=gender,
@@ -2556,6 +2589,10 @@ def tambah_pegawai_non_validasi(r):
 
                     # users = conn.get_user_template(uid=int(uid))
                     users = conn.get_users()
+                    usr = [u for u in users if u.user_id == userid]
+
+                    conn.set_user(uid=usr[0].uid,name=nama,password=usr[0].password,user_id=usr[0].user_id,privilege=usr[0].privilege,card=0,group_id='')
+
                     users = [user for user in users if user.user_id == userid]
                     if len(users) <= 0:
                         transaction.set_rollback(True,using=r.session["ccabang"])
@@ -2594,9 +2631,9 @@ def tambah_pegawai_non_validasi(r):
                     conn.enable_device()
 
                 except Exception as e:
-                    
+                    print(e)
                     transaction.set_rollback(True,using=r.session["ccabang"])
-                    return JsonResponse({"status":"error","msg":e},status=500)
+                    return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=500)
                 finally:
                     if conn:
                         conn.disconnect()

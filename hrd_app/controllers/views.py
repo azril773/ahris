@@ -28,6 +28,7 @@ from struct import pack
 from zk import user as us
 import codecs  
 # MODEL / DATABASE
+import hrd_app as app
 from ..models import *
 from django.core.serializers import serialize # Create your views here.
 
@@ -145,6 +146,8 @@ from hrd_app.controllers.ypc.views import *
 
 from hrd_app.controllers.shift.views import *
 
+from hrd_app.controllers.pkwt.views import *
+
 # df = pd.read_csv("absensi.csv")
 #     data = []
 #     userids = []
@@ -225,12 +228,13 @@ scheduler = BackgroundScheduler()
 def tasiksetabsensi():
     try:
         today = datetime.now()
-        dari = today - timedelta(days=1)
+        print(today)
+        dari = today
         sampai = today + timedelta(days=2)
-        rangetgl = pd.date_range(dari.date(), sampai.date()).tolist()
+        rangetgl = pd.date_range(dari, sampai).tolist()
         luserid = []
         pegawai = []
-        for p in pegawai_db.objects.using("tasik").select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
+        for p in pegawai_db.objects.using("cirebon").select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").all():
                 if p.jabatan is None:
                     jabatan = None
                 else:
@@ -276,19 +280,20 @@ def tasiksetabsensi():
                 luserid.append(p.userid)
                 pegawai.append(data)
                 for tgl in rangetgl:
-                    if absensi_db.objects.using('tasik').filter(tgl_absen=tgl.date(), pegawai_id=p.pk).exists():
+                    if absensi_db.objects.using('cirebon').filter(tgl_absen=tgl.date(), pegawai_id=p.pk).exists():
                         pass
                     else:
                         absensi_db(
                             tgl_absen = tgl.date(),
                             pegawai_id = p.pk
-                        ).save(using='tasik')
-        today = datetime.now()
-        tgl = today - timedelta(days=1)
-        dari = datetime.strptime(datetime.strftime(tgl,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
-        sampai = datetime.strptime(datetime.strftime(today,"%Y-%m-%d 23:59:59"),"%Y-%m-%d %H:%M:%S")
+                        ).save(using='cirebon')
+        dr = datetime.now() - timedelta(days=1)
+        sp = dr + timedelta(days=1)
+        dari = datetime.strptime(datetime.strftime(dr,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
+        sampai = datetime.strptime(datetime.strftime(sp,"%Y-%m-%d 00:00:00"),"%Y-%m-%d %H:%M:%S")
         dmesin = []
-        for m in mesin_db.objects.using('tasik').filter(status='Active'):
+        for m in mesin_db.objects.using('cirebon').filter(status='Active'):
+            print(m)
             ip = m.ipaddress
             # conn = None
             zk = ZK(str(ip), port=4370, timeout=65)
@@ -298,6 +303,7 @@ def tasiksetabsensi():
                 conn.disable_device()
                 # Data absensi
                 absensi = conn.get_attendance()
+                # print(absensi)
                 for a in absensi:
                     if dari <= a.timestamp <= sampai:   
                         # users = conn.get_users()
@@ -316,7 +322,6 @@ def tasiksetabsensi():
             except Exception as e:
                 # print(e)
                 raise Exception("Terjadi kesalahan")
-            
         att = sorted(dmesin, key=lambda i: i['jam_absen'])
 
         ddr = []
@@ -324,7 +329,7 @@ def tasiksetabsensi():
         
             
         # ambil data raw simpan di ddr
-        for d in data_raw_db.objects.using("tasik").filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
+        for d in data_raw_db.objects.using("cirebon").filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
             data = {
                 "userid": d.userid,
                 "jam_absen": str(d.jam_absen),
@@ -338,7 +343,7 @@ def tasiksetabsensi():
         ddtor = []
         
         # ambil data trans simpan di ddt
-        for d2 in data_trans_db.objects.using("tasik").filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
+        for d2 in data_trans_db.objects.using("cirebon").filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
             data = {
                 "userid": d2.userid,
                 "jam_absen": d2.jam_absen,
@@ -349,16 +354,16 @@ def tasiksetabsensi():
             ddtor.append(data)
             ddt.append(data)
             
-        status_lh = [st.status_pegawai.pk for st in status_pegawai_lintas_hari_db.objects.using("tasik").all()]
+        status_lh = [st.status_pegawai.pk for st in status_pegawai_lintas_hari_db.objects.using("cirebon").all()]
         # proses data simpan di dt array
         # obj 
-        jamkerja = jamkerja_db.objects.using("tasik").select_related('kk').all()
+        jamkerja = jamkerja_db.objects.using("cirebon").select_related('kk').all()
         now = datetime.now()
         hari = now.strftime("%A")
         hari = nama_hari(hari)
 
 
-        prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,"tasik",ddt,ddtor)
+        prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,"cirebon",ddt,ddtor)
 
         ijin = []  
         libur = []
@@ -375,11 +380,11 @@ def tasiksetabsensi():
         lsopg = []
         
         # list status pegawai yang dapat opg
-        for s in list_status_opg_db.objects.using("tasik").all():
+        for s in list_status_opg_db.objects.using("cirebon").all():
             lsopg.append(s.status_id)
         
         # geser off all 
-        for ga in geseroff_db.objects.using("tasik").using("tasik").all():
+        for ga in geseroff_db.objects.using("cirebon").all():
             data = {
                 'id' : ga.id,
                 'idp' : ga.pegawai_id, 
@@ -390,7 +395,7 @@ def tasiksetabsensi():
             geser_all.append(data)
 
         # opg all
-        for oa in opg_db.objects.using("tasik").all():
+        for oa in opg_db.objects.using("cirebon").all():
             data = {
                 'id':oa.id,
                 'idp': oa.pegawai_id,
@@ -402,7 +407,7 @@ def tasiksetabsensi():
 
 
         # data ijin
-        for i in ijin_db.objects.using("tasik").select_related('ijin','pegawai').filter(tgl_ijin__range=(dari.date(),sampai.date())):
+        for i in ijin_db.objects.using("cirebon").select_related('ijin','pegawai').filter(tgl_ijin__range=(dari.date(),sampai.date())):
             data = {
                 "ijin" : i.ijin.jenis_ijin,
                 "tgl_ijin" : i.tgl_ijin,
@@ -412,7 +417,7 @@ def tasiksetabsensi():
             ijin.append(data)
         
         # data libur nasional
-        for l in libur_nasional_db.objects.using("tasik").filter(tgl_libur__range=(dari.date(),sampai.date())):
+        for l in libur_nasional_db.objects.using("cirebon").filter(tgl_libur__range=(dari.date(),sampai.date())):
             data = {
                 'libur' : l.libur,
                 'tgl_libur' : l.tgl_libur,
@@ -422,7 +427,7 @@ def tasiksetabsensi():
             libur.append(data)  
             
         # data cuti
-        for c in cuti_db.objects.using("tasik").select_related('pegawai').filter(tgl_cuti__range=(dari.date(),sampai.date())):
+        for c in cuti_db.objects.using("cirebon").select_related('pegawai').filter(tgl_cuti__range=(dari.date(),sampai.date())):
             data = {
                 'id': c.id,
                 'idp' : c.pegawai_id,
@@ -432,7 +437,7 @@ def tasiksetabsensi():
             cuti.append(data)
             
         # data geser off
-        for g in geseroff_db.objects.using("tasik").select_related('pegawai').filter(ke_tgl__range=(dari.date(),sampai.date())):
+        for g in geseroff_db.objects.using("cirebon").select_related('pegawai').filter(ke_tgl__range=(dari.date(),sampai.date())):
             data = {
                 'id' : g.id,
                 'idp' : g.pegawai_id, 
@@ -441,9 +446,9 @@ def tasiksetabsensi():
                 'keterangan' : g.keterangan
             } 
             geser.append(data)
-        status_ln = [st.status.pk for st in list_status_opg_libur_nasional_db.objects.using("tasik").all()]
+        status_ln = [st.status.pk for st in list_status_opg_libur_nasional_db.objects.using("cirebon").all()]
         # data opg
-        for o in opg_db.objects.using("tasik").select_related('pegawai').filter(diambil_tgl__range=(dari.date(),sampai.date()), status=0):
+        for o in opg_db.objects.using("cirebon").select_related('pegawai').filter(diambil_tgl__range=(dari.date(),sampai.date()), status=0):
             data = {
                 'id':o.id,
                 'idp': o.pegawai_id,
@@ -454,7 +459,7 @@ def tasiksetabsensi():
             opg.append(data)
         
         # data dinas luar
-        for n in dinas_luar_db.objects.using("tasik").select_related('pegawai').filter(tgl_dinas__range=(dari.date(),sampai.date())):
+        for n in dinas_luar_db.objects.using("cirebon").select_related('pegawai').filter(tgl_dinas__range=(dari.date(),sampai.date())):
             data = {
                 'idp': n.pegawai_id,
                 'tgl_dinas':n.tgl_dinas,
@@ -464,7 +469,7 @@ def tasiksetabsensi():
             dl_idp.append(n.pegawai_id)
         dariij = dari - timedelta(days=1)
         sampaiij = sampai + timedelta(days=1)
-        for ij in ijin_db.objects.using("tasik").filter(tgl_ijin__range=(dariij.date(),sampaiij.date())):
+        for ij in ijin_db.objects.using("cirebon").filter(tgl_ijin__range=(dariij.date(),sampaiij.date())):
             if re.search('(dinas luar|dl)',ij.ijin.jenis_ijin,re.IGNORECASE) is not None:
                 data = {
                     "tgl":ij.tgl_ijin,
@@ -474,7 +479,7 @@ def tasiksetabsensi():
                 ijindl.append(data)
 
 
-        for k in kompen_db.objects.using("tasik").all():
+        for k in kompen_db.objects.using("cirebon").all():
             data = {
                 "idl":k.pk,
                 "idp":k.pegawai_id,
@@ -485,7 +490,7 @@ def tasiksetabsensi():
             kompen.append(data)
             
         # data absensi
-        data = absensi_db.objects.using("tasik").select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari,sampai))
+        data = absensi_db.objects.using("cirebon").select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari,sampai))
         cache = []
         for a in data:
             day = a.tgl_absen.strftime("%A")
@@ -543,7 +548,7 @@ def tasiksetabsensi():
                                         opg_tgl = ab.tgl_absen,   
                                         keterangan = 'OFF Pengganti Reguler',                         
                                         add_by = 'Program',
-                                    ).save(using="tasik")
+                                    ).save(using="cirebon")
                     else:
                         pass
                 else:
@@ -563,7 +568,7 @@ def tasiksetabsensi():
                                     opg_tgl = ab.tgl_absen,   
                                     keterangan = 'OFF Pengganti Reguler',                         
                                     add_by = 'Program',
-                                ).save(using="tasik")
+                                ).save(using="cirebon")
                     else:
                         pass
                 else:
@@ -571,7 +576,7 @@ def tasiksetabsensi():
                     
                 if str(a.pegawai.hari_off) == "On Off":
                     ab.keterangan_absensi = None
-                    ab.save(using="tasik")
+                    ab.save(using="cirebon")
                         
             # jika tidak ada masuk dan pulang   
             else:
@@ -598,14 +603,14 @@ def tasiksetabsensi():
                                                 opg_tgl = ab.tgl_absen,   
                                                 keterangan = 'OFF Pengganti Reguler',                         
                                                 add_by = 'Program',
-                                            ).save(using="tasik")
+                                            ).save(using="cirebon")
                                 else:
                                     pass
                             else:
                                 # jika on off
                                 if str(a.pegawai.hari_off) == 'On Off':
                                     ab.keterangan_absensi = 'OFF'
-                                    ab.save(using="tasik")
+                                    ab.save(using="cirebon")
                                 else:
                                     pass
                                 
@@ -622,7 +627,7 @@ def tasiksetabsensi():
                                                 opg_tgl = ab.tgl_absen,   
                                                 keterangan = 'OFF Pengganti Reguler',                         
                                                 add_by = 'Program',
-                                            ).save(using="tasik")
+                                            ).save(using="cirebon")
                                 else:
                                     pass
                             else:
@@ -631,18 +636,18 @@ def tasiksetabsensi():
                             if (a.masuk is not None or a.pulang is not None) or (a.masuk_b is not None or a.pulang_b is not None):
                                 if str(a.pegawai.hari_off) == "On Off":
                                     ab.keterangan_absensi = None
-                                    ab.save(using="tasik")
+                                    ab.save(using="cirebon")
                             else:
                                 if str(a.pegawai.hari_off) == str(nh):
                                     ab.keterangan_absensi = 'OFF'
-                                    ab.save(using="tasik")
+                                    ab.save(using="cirebon")
                                 elif str(a.pegawai.hari_off) == 'On Off':
                                     ab.keterangan_absensi = 'OFF'
-                                    ab.save(using="tasik")    
+                                    ab.save(using="cirebon")    
                                             
                                 if str(a.pegawai.hari_off2) == str(nh):
                                     ab.keterangan_absensi = 'OFF'
-                                    ab.save(using="tasik") 
+                                    ab.save(using="cirebon") 
                                 else:
                                     pass  
                 else:
@@ -650,18 +655,18 @@ def tasiksetabsensi():
                     if (a.masuk is not None or a.pulang is not None) or (a.masuk_b is not None or a.pulang_b is not None):
                         if str(a.pegawai.hari_off) == "On Off":
                             ab.keterangan_absensi = None
-                            ab.save(using="tasik")
+                            ab.save(using="cirebon")
                     else:
                         if str(a.pegawai.hari_off) == str(nh):
                             ab.keterangan_absensi = 'OFF'
-                            ab.save(using="tasik")
+                            ab.save(using="cirebon")
                         elif str(a.pegawai.hari_off) == 'On Off':
                             ab.keterangan_absensi = 'OFF'
-                            ab.save(using="tasik")    
+                            ab.save(using="cirebon")    
                                     
                         if str(a.pegawai.hari_off2) == str(nh):
                             ab.keterangan_absensi = 'OFF'
-                            ab.save(using="tasik") 
+                            ab.save(using="cirebon") 
                         else:
                             pass   
                 # jika hari ini dia adalah off nya
@@ -672,7 +677,7 @@ def tasiksetabsensi():
                 ab.libur_nasional = None
                 if l['tgl_libur'] == ab.tgl_absen:                            
                     ab.libur_nasional = l['libur']
-                    ab.save(using="tasik")
+                    ab.save(using="cirebon")
                     
                     # Hari Minggu
                     if str(nh) == 'Minggu':
@@ -694,7 +699,7 @@ def tasiksetabsensi():
                                                     opg_tgl = ab.tgl_absen,   
                                                     keterangan = 'OFF Pengganti Reguler',                         
                                                     add_by = 'Program',
-                                                ).save(using="tasik")
+                                                ).save(using="cirebon")
                                     else:
                                         pass    
                                 else:
@@ -716,11 +721,11 @@ def tasiksetabsensi():
                                 #                     opg_tgl = ab.tgl_absen,   
                                 #                     keterangan = 'OFF Pengganti Reguler',                         
                                 #                     add_by = 'Program',
-                                #                 ).save(using="tasik")
+                                #                 ).save(using="cirebon")
                                                 
-                                #                 # ditasik tidak ada insentif dihari minggu jika masuk
+                                #                 # dicirebon tidak ada insentif dihari minggu jika masuk
                                 #                 # ab.insentif = l['insentif_karyawan']
-                                #                 # ab.save(using="tasik")
+                                #                 # ab.save(using="cirebon")
                                 #     else:
                                 #         pass    
                                 # else:
@@ -748,7 +753,7 @@ def tasiksetabsensi():
                                                     opg_tgl = ab.tgl_absen,   
                                                     keterangan = 'OFF Pengganti Reguler',                         
                                                     add_by = 'Program',
-                                                ).save(using="tasik")
+                                                ).save(using="cirebon")
                                                 
                                             if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
                                                 pass
@@ -758,7 +763,7 @@ def tasiksetabsensi():
                                                     opg_tgl = ab.tgl_absen,   
                                                     keterangan = 'OFF Pengganti Tgl Merah',                         
                                                     add_by = 'Program',
-                                                ).save(using="tasik")
+                                                ).save(using="cirebon")
                                     # TAPI JIKA TIDAK MASUK HANYA MENDAPATKAN 1 OPG
                                     else:
                                         if next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
@@ -769,7 +774,7 @@ def tasiksetabsensi():
                                                 opg_tgl = ab.tgl_absen,   
                                                 keterangan = 'OFF Pengganti Tgl Merah',                         
                                                 add_by = 'Program',
-                                            ).save(using="tasik")    
+                                            ).save(using="cirebon")    
                                 # JIKA HARI OFF TIDAK BERTEPATAN HARI LIBUR NASIONAL
                                 else:
                                     if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
@@ -784,7 +789,7 @@ def tasiksetabsensi():
                                                     opg_tgl = ab.tgl_absen,   
                                                     keterangan = 'OFF Pengganti Tgl Merah',                         
                                                     add_by = 'Program',
-                                                ).save(using="tasik")
+                                                ).save(using="cirebon")
                                     # TAPI JIKA TIDAK MASUK HANYA MENDAPATKAN 1 OPG
                                     else:
                                         pass
@@ -794,7 +799,7 @@ def tasiksetabsensi():
                             else:
                                 # if str(a.pegawai.hari_off) == str(nh):
                                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-                                    if geseroff_db.objects.using("tasik").using("tasik").filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
+                                    if geseroff_db.objects.using("cirebon").filter(dari_tgl=ab.tgl_absen, pegawai_id=ab.pegawai_id).exists():
                                         pass
                                     else:
                                         
@@ -806,10 +811,10 @@ def tasiksetabsensi():
                                             #     opg_tgl = ab.tgl_absen,   
                                             #     keterangan = 'OFF Pengganti Reguler',                         
                                             #     add_by = 'Program',
-                                            # ).save(using="tasik")
+                                            # ).save(using="cirebon")
                                             
                                             ab.insentif = l['insentif_karyawan']
-                                            ab.save(using="tasik")
+                                            ab.save(using="cirebon")
                                 else:
                                     pass    
                                 # else:
@@ -826,7 +831,7 @@ def tasiksetabsensi():
                         ij = i['ijin']
                         ket = i['keterangan']
                         ab.keterangan_ijin = f'{ij}-({ket})'
-                        ab.save(using="tasik")
+                        ab.save(using="cirebon")
                     else:
                         pass
                 else:
@@ -924,7 +929,7 @@ def tasiksetabsensi():
                         nama_user = "prog"
                         ab.total_jam_kerja = round(tjk,1)
                         ab.edit_by = nama_user
-                        ab.save(using="tasik")
+                        ab.save(using="cirebon")
 
             
 
@@ -948,19 +953,19 @@ def tasiksetabsensi():
                             # jika jam kerja kurang dari 4 jam
                             if int(selisih.hour) <= 4:
                                 ab.keterangan_absensi = c['keterangan']
-                                ab.save(using="tasik")
+                                ab.save(using="cirebon")
                             # jika jam kerja lebih dari 4 jam
                             else:
-                                cuti_db.objects.using("tasik").get(id=int(c['id'])).delete()
-                                pg = pegawai_db.objects.using("tasik").get(pk=ab.pegawai_id)
+                                cuti_db.objects.using("cirebon").get(id=int(c['id'])).delete()
+                                pg = pegawai_db.objects.using("cirebon").get(pk=ab.pegawai_id)
                                 sc = pg.sisa_cuti
                                 ab.keterangan_absensi = ""
-                                ab.save(using="tasik")
+                                ab.save(using="cirebon")
                                 pg.sisa_cuti = sc + 1
-                                pg.save(using="tasik")          
+                                pg.save(using="cirebon")          
                         else:
                             ab.keterangan_absensi = c['keterangan']
-                            ab.save(using="tasik")
+                            ab.save(using="cirebon")
                     else:
                         pass
                 else:
@@ -974,14 +979,14 @@ def tasiksetabsensi():
                         if (ab.masuk is None and ab.pulang is None) or (ab.masuk_b is None and ab.pulang_b is None):
                             drt = datetime.strftime(g['dari_tgl'], '%d-%m-%Y')
                             ab.keterangan_absensi = f'Geser OFF-({drt})' 
-                            ab.save(using="tasik")
+                            ab.save(using="cirebon")
                         # jika ada geser off dan dia masuk
                         else:
-                            geseroff_db.objects.using("tasik").get(id=int(g['id'])).delete()    
+                            geseroff_db.objects.using("cirebon").get(id=int(g['id'])).delete()    
                     elif g["dari_tgl"] == ab.tgl_absen:
                         if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
                             ab.keterangan_absensi = None
-                            ab.save(using="tasik")
+                            ab.save(using="cirebon")
                         else:
                             pass
                     else:
@@ -992,21 +997,21 @@ def tasiksetabsensi():
                     # cek jika di dalam data opg diambil pada tanggal saat ini
                     if o['diambil_tgl'] == ab.tgl_absen:
                         
-                        opg_get= opg_db.objects.using("tasik").get(id=o['id'])
+                        opg_get= opg_db.objects.using("cirebon").get(id=o['id'])
                         # jika tidak masuk dan tidak ada pulang
                         if ab.masuk is None and ab.pulang is None and ab.masuk_b is None and ab.pulang_b is None:
                             topg = datetime.strftime(o['opg_tgl'], '%d-%m-%Y')
                             ab.keterangan_absensi = f'OPG-({topg})'
-                            ab.save(using="tasik")                                
+                            ab.save(using="cirebon")                                
                             
                             opg_get.status = 1
                             opg_get.edit_by ='Program'
-                            opg_get.save(using="tasik")
+                            opg_get.save(using="cirebon")
                         # jika masuk dan pulang
                         else:
                             opg_get.diambil_tgl = None
                             opg_get.edit_by = 'Program'
-                            opg_get.save(using="tasik")
+                            opg_get.save(using="cirebon")
                                 
                     else:
                         pass
@@ -1019,7 +1024,7 @@ def tasiksetabsensi():
                     if n['tgl_dinas'] == ab.tgl_absen:
                         ket = n['keterangan']
                         ab.keterangan_absensi = f'Dinas Luar-({ket})'
-                        ab.save(using="tasik")
+                        ab.save(using="cirebon")
                     else:
                         pass    
                 else:
@@ -1367,7 +1372,7 @@ def tasiksetabsensi():
             ab.total_jam_kerja = tjk + tjk_b
             ab.total_jam_istirahat = tji + tji_b
             ab.total_jam_istirahat2 = tji2 + tji2_b
-            ab.save(using="tasik")
+            ab.save(using="cirebon")
             if ab.pegawai.counter is not None:
                 ct = ab.pegawai.counter.counter
             else:
@@ -1382,31 +1387,32 @@ def tasiksetabsensi():
                 ho = ab.pegawai.hari_off.hari
             else:
                 ho = None
-        pegawai_db.objects.using("tasik").filter(pk=3636).update(
-            nik=f'silvia-{datetime.now()}'
-        )
-        # print("SELESAI")
+        # pegawai_db.objects.using("cirebon").filter(pk=3636).update(
+        #     nik=f'silvia-{datetime.now()}'
+        # )
+        print("SELESAI")
     except Exception as e:
         # print(e)
         return e
-    # pegawai_db.objects.using("tasik").filter(id=3636).update(nik="silvia21")
-# trigger = CronTrigger(
-#     year="*",month="*",day='*',hour="16",minute="27",second="00"
-# )
+    # pegawai_db.objects.using("cirebon").filter(id=3636).update(nik="silvia21")
 trigger = CronTrigger(
-    year="*",month="*",day='*',hour="03",minute="00",second="00"
+    year="*",month="*",day='*',hour="08",minute="00",second="00"
 )
-trigger1 = CronTrigger(
-    year="*",month="*",day='*',hour="03",minute="30",second="00"
-)
-trigger2 = CronTrigger(
-    year="*",month="*",day='*',hour="07",minute="00",second="00"
-)
-trigger3 = CronTrigger(
-    year="*",month="*",day='*',hour="07",minute="30",second="00"
-)
+# trigger = CronTrigger(
+#     year="*",month="*",day='*',hour="09",minute="27",second="45"
+# )
+# trigger1 = CronTrigger(
+#     year="*",month="*",day='*',hour="03",minute="30",second="00"
+# )
+# trigger2 = CronTrigger(
+#     year="*",month="*",day='*',hour="07",minute="00",second="00"
+# )
+# trigger3 = CronTrigger(
+#     year="*",month="*",day='*',hour="07",minute="30",second="00"
+# )
+# scheduler.remove_all_jobs()
 scheduler.add_job(tasiksetabsensi,trigger=trigger)
-scheduler.add_job(tasiksetabsensi,trigger=trigger1)
-scheduler.add_job(tasiksetabsensi,trigger=trigger2)
-scheduler.add_job(tasiksetabsensi,trigger=trigger3)
 scheduler.start()
+# scheduler.add_job(cirebonsetabsensi,trigger=trigger1)
+# scheduler.add_job(cirebonsetabsensi,trigger=trigger2)
+# scheduler.add_job(cirebonsetabsensi,trigger=trigger3)
