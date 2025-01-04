@@ -168,7 +168,7 @@ def proses_registrasi(r):
             if password != kpassword:
                 messages.error(r,"Password tidak cocok")
                 return redirect("registrasi",idcabang=cabang)
-            with transaction.atomic():
+            with transaction.atomic(using=r.session["ccabang"]):
                 try:
 
                     # jika divisi ada kata "all"
