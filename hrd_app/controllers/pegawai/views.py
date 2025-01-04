@@ -2056,10 +2056,8 @@ def pegawai_json(r, sid):
         id_user = r.user.id
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
-        
         if int(sid) == 0:
             for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi):
-                
                 if p.tgl_masuk is None:
                     tmasuk = None
                 else:
@@ -2152,8 +2150,7 @@ def pegawai_json(r, sid):
                     'sid':p.status_id,
                 }
                 data.append(pg)       
-                               
-        return JsonResponse({"data": data})
+        return JsonResponse({"data": data},status=200)
 
 
 @login_required
