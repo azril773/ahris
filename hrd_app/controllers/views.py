@@ -203,7 +203,7 @@ from hrd_app.controllers.pkwt.views import *
 #                         istirahat=dt["istirahat"],
 #                         kembali=dt["kembali"],
 #                         istirahat2=dt["istirahat2"],
-#                         kembali2=dt["kembali2"],
+#                          kembali2=dt["kembali2"],
 #                         keterangan_absensi=dt["keterangan_absensi"],
 #                         keterangan_ijin=dt["keterangan_ijin"],
 #                         total_jam_kerja=dt["total_jam_kerja"],
