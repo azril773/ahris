@@ -170,6 +170,7 @@ def proses_registrasi(r):
                 return redirect("registrasi")
             with transaction.atomic():
                 try:
+                    
                     # jika divisi ada kata "all"
                     # result = [rsl for rsl in divisi if re.match("(?i)all",rsl)]
 
