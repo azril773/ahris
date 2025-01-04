@@ -167,10 +167,10 @@ def proses_registrasi(r):
             # nama_depan = r.POST.get("nama_depan")
             if password != kpassword:
                 messages.error(r,"Password tidak cocok")
-                return redirect("registrasi")
+                return redirect("registrasi",idcabang=cabang)
             with transaction.atomic():
                 try:
-                    
+
                     # jika divisi ada kata "all"
                     # result = [rsl for rsl in divisi if re.match("(?i)all",rsl)]
 
