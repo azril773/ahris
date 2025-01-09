@@ -299,37 +299,38 @@ def akses_divisi(r):
         dsid = dakses.sid_id
         if akses == 'root' or akses == 'it':
         
-            userid = r.POST.get("userd")
+            userids = r.POST.getlist("userd[]")
             divisid = r.POST.getlist("divisid[]")
             # nama_depan = r.POST.get("nama_depan")
             with transaction.atomic():
                 try:
                     result = [rsl for rsl in divisid if re.match("(?i)all",rsl)]
-                    user = User.objects.filter(pk=userid)
-                    if not user.exists():
-                        messages.error(r,"User tidak ada")
-                        return redirect("registrasi",idcabang=caid)
-                    else:
-                        user = user[0]
-                        if not cabang_db.objects.filter(id=int(caid)):
-                            messages.error(r,"Cabang tidak ada")
+                    for userid in userids:
+                        user = User.objects.filter(pk=userid)
+                        if not user.exists():
+                            messages.error(r,"User tidak ada")
                             return redirect("registrasi",idcabang=caid)
-                        cabang = cabang_db.objects.get(id=int(caid))
-                        
-                        akses_divisi_db.objects.using(cabang.cabang).filter(user_id=user.pk).delete()
-                        if len(result) > 0:
-                            divisir = divisi_db.objects.using(cabang.cabang).all()
                         else:
-                            divisir = divisi_db.objects.using(cabang.cabang).filter(id__in=divisid)
+                            user = user[0]
+                            if not cabang_db.objects.filter(id=int(caid)):
+                                messages.error(r,"Cabang tidak ada")
+                                return redirect("registrasi",idcabang=caid)
+                            cabang = cabang_db.objects.get(id=int(caid))
+                            
+                            akses_divisi_db.objects.using(cabang.cabang).filter(user_id=user.pk).delete()
+                            if len(result) > 0:
+                                divisir = divisi_db.objects.using(cabang.cabang).all()
+                            else:
+                                divisir = divisi_db.objects.using(cabang.cabang).filter(id__in=divisid)
 
-                        for div in divisir:
-                            if akses_divisi_db.objects.using(cabang.cabang).filter(user_id=user.pk,divisi_id=div.pk).exists():
-                                continue
-                            akses_divisi_db(
-                                user_id=user.pk,
-                                divisi_id=div.pk
-                            ).save(using=cabang.cabang)
-                        return redirect("registrasi",idcabang=caid)
+                            for div in divisir:
+                                if akses_divisi_db.objects.using(cabang.cabang).filter(user_id=user.pk,divisi_id=div.pk).exists():
+                                    continue
+                                akses_divisi_db(
+                                    user_id=user.pk,
+                                    divisi_id=div.pk
+                                ).save(using=cabang.cabang)
+                            return redirect("registrasi",idcabang=caid)
                 except Exception as e:
                     messages.error(r,e)
                     transaction.set_rollback(True)
@@ -408,33 +409,32 @@ def akses_cabang(r):
         if r.user.is_staff:
             
             caid = r.POST.get("cabang")
-            userid = r.POST.get("userc")
+            userids = r.POST.getlist("userc[]")
             cabang = r.POST.getlist("cabang[]")
-            print(cabang)
             # nama_depan = r.POST.get("nama_depan")
             with transaction.atomic():
                 try:
-                    user = User.objects.filter(pk=userid)
-                    if not user.exists():
-                        messages.error(r,"User tidak ada")
-                        return redirect("registrasi")
-                    else:
-                        result = [c for c in cabang if re.match("(?i)all",c)]
-                        
-                        akses_cabang_db.objects.filter(user_id=int(user[0].pk)).delete()
-                        if len(result) > 0:
-                            cabangs = [c.pk for c in cabang_db.objects.all()]
+                    for userid in userids:
+                        user = User.objects.filter(pk=userid)
+                        if not user.exists():
+                            messages.error(r,"User tidak ada")
+                            return redirect("registrasi")
                         else:
-                            cabangs = cabang
-                        print(cabangs)
-                        for cbg in cabangs:
-                            akses_cabang_db(
-                                user_id=user[0].pk,
-                                cabang_id=int(cbg),
-                                add_by=r.user.username,
-                                edit_by=r.user.username
-                            ).save()
-                    return redirect("registrasi",idcabang=caid)
+                            result = [c for c in cabang if re.match("(?i)all",c)]
+                            
+                            akses_cabang_db.objects.filter(user_id=int(user[0].pk)).delete()
+                            if len(result) > 0:
+                                cabangs = [c.pk for c in cabang_db.objects.all()]
+                            else:
+                                cabangs = cabang
+                            for cbg in cabangs:
+                                akses_cabang_db(
+                                    user_id=user[0].pk,
+                                    cabang_id=int(cbg),
+                                    add_by=r.user.username,
+                                    edit_by=r.user.username
+                                ).save()
+                        return redirect("registrasi",idcabang=caid)
                 except Exception as e:
                     messages.error(r,e)
                     transaction.set_rollback(True)
