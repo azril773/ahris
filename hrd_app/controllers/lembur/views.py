@@ -83,7 +83,7 @@ def lembur(r, sid):
         return render(r,'hrd_app/lembur/lembur/[sid]/lembur.html', data)
         
     else:    
-        messages.info(r, 'Data akses Anda belum di tentukan.')        
+        messages.error(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
@@ -162,7 +162,7 @@ def lembur_belum_proses(r, sid):
         return render(r,'hrd_app/lembur/belum_proses/[sid]/belum_proses.html', data)
         
     else:    
-        messages.info(r, 'Data akses Anda belum di tentukan.')        
+        messages.error(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
@@ -230,7 +230,7 @@ def cari_lembur(r):
         return render(r,'hrd_app/lembur/cari_lembur.html', data)
         
     else:    
-        messages.info(r, 'Data akses Anda belum di tentukan.')        
+        messages.error(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
@@ -272,7 +272,7 @@ def tambah_lembur(r):
     # pengolahan lembur
     aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
     if lembur_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_lembur=tgl).exists():
-        messages.info(r, 'Duplikat Data.') 
+        messages.error(r, 'Duplikat Data.') 
     else:
         
         # jika absensi ada
@@ -390,7 +390,7 @@ def tambah_lembur(r):
                             
                             if ab.istirahat2 is None and ab.kembali2 is None:
                                 if ab.kembali < ab.istirahat:
-                                    messages.info(r, 'Jam istirahat lebih besar dari jam kembali istirahat.')
+                                    messages.error(r, 'Jam istirahat lebih besar dari jam kembali istirahat.')
                                 else:                                    
                                     # -------------------------------------------------
                                     # istirahat 1
@@ -484,7 +484,7 @@ def tambah_lembur(r):
                                             pass 
                                 
                                 if ab.kembali2 < ab.istirahat2:
-                                    messages.info(r, 'Jam istirahat 2 lebih besar dari jam kembali istirahat 2.')
+                                    messages.error(r, 'Jam istirahat 2 lebih besar dari jam kembali istirahat 2.')
                                 else:
                                     # -------------------------------------------------
                                     # istirahat 2
@@ -584,7 +584,7 @@ def tambah_lembur(r):
                         return redirect('lembur_bproses', int(sid))          
                     
                 else:
-                    messages.info(r, 'Absen Tidak Lengkap.')
+                    messages.error(r, 'Absen Tidak Lengkap.')
                 
        
             # Tanpa istirahat (di jadwal kerja)
@@ -645,7 +645,7 @@ def tambah_lembur(r):
                     # pengelolaan lembur
                     if lebih == 0:
                         if ab.pulang < ab.masuk:
-                            messages.info(r, 'Jam Masuk lebih besar dari Jam Pulang.') 
+                            messages.error(r, 'Jam Masuk lebih besar dari Jam Pulang.') 
                         else:
                             # -------------------------------------------------
                             # pemotong jam masuk
@@ -753,7 +753,7 @@ def tambah_lembur(r):
                         return redirect('lembur_bproses', int(sid))             
                                    
                 else:
-                    messages.info(r, 'Absen Tidak Lengkap.')
+                    messages.error(r, 'Absen Tidak Lengkap.')
         
         # jika tidak ada absensi
         else:            
@@ -888,7 +888,7 @@ def proses_ulang_lembur(r, idl):
                                         
                 # pengelolaan lembur
                 if ab.pulang < ab.masuk:
-                    messages.info(r, 'Jam Masuk lebih besar dari Jam Pulang.') 
+                    messages.error(r, 'Jam Masuk lebih besar dari Jam Pulang.') 
                 else:
                     # -------------------------------------------------
                     # pemotong jam masuk
@@ -965,7 +965,7 @@ def proses_ulang_lembur(r, idl):
                     lb.save(using=r.session["ccabang"])                        
                                 
             else:
-                messages.info(r, 'Absen Tidak Lengkap.')
+                messages.error(r, 'Absen Tidak Lengkap.')
     
         # Dengan Istirahat (di jadwal kerja)
         else:
@@ -982,7 +982,7 @@ def proses_ulang_lembur(r, idl):
                     
                 # pengolahan lembur                
                 if ab.pulang < ab.masuk:
-                    messages.info(r, 'Jam Masuk lebih besar dari Jam Pulang.')
+                    messages.error(r, 'Jam Masuk lebih besar dari Jam Pulang.')
                 else:
                     # -------------------------------------------------
                     # pemotong jam masuk
@@ -1043,7 +1043,7 @@ def proses_ulang_lembur(r, idl):
                         
                         if ab.istirahat2 is None and ab.kembali2 is None:
                             if ab.kembali < ab.istirahat:
-                                messages.info(r, 'Jam istirahat lebih besar dari jam kembali istirahat.')
+                                messages.error(r, 'Jam istirahat lebih besar dari jam kembali istirahat.')
                             else:                                    
                                 # -------------------------------------------------
                                 # istirahat 1
@@ -1133,7 +1133,7 @@ def proses_ulang_lembur(r, idl):
                                         pass 
                             
                             if ab.kembali2 < ab.istirahat2:
-                                messages.info(r, 'Jam istirahat 2 lebih besar dari jam kembali istirahat 2.')
+                                messages.error(r, 'Jam istirahat 2 lebih besar dari jam kembali istirahat 2.')
                             else:
                                 # -------------------------------------------------
                                 # istirahat 2
@@ -1213,7 +1213,7 @@ def proses_ulang_lembur(r, idl):
                     lb.edit_by = nama_user
                     lb.save(using=r.session["ccabang"])             
             else:
-                messages.info(r, 'Absen Tidak Lengkap.')
+                messages.error(r, 'Absen Tidak Lengkap.')
     
     # jika tidak ada absensi
     else:   
@@ -1985,7 +1985,7 @@ def status_pegawai_lembur(r):
         return render(r,'hrd_app/status_pegawai/status_pegawai_lembur/status_pegawai_lembur.html', data)
         
     else:    
-        messages.info(r, 'Data akses Anda belum di tentukan.')        
+        messages.error(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
 
@@ -2071,7 +2071,7 @@ def status_pegawai_libur_nasional(r):
         return render(r,'hrd_app/status_pegawai/status_pegawai_libur_nasional.html', data)
         
     else:    
-        messages.info(r, 'Data akses Anda belum di tentukan.')        
+        messages.error(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
     
@@ -2154,7 +2154,7 @@ def status_pegawai_opg(r):
         return render(r,'hrd_app/status_pegawai/status_pegawai_opg.html', data)
         
     else:    
-        messages.info(r, 'Data akses Anda belum di tentukan.')        
+        messages.error(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
     

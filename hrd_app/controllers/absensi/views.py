@@ -1995,11 +1995,19 @@ def get_raw_json(r):
 @login_required
 def hapus_jam(r):
     if r.headers['x-requested-with'] == 'XMLHttpRequest':
-        id = r.POST.get('id')
-        if id is not None:
-            data_trans_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete()
+        id_user = r.user.id
+        akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=int(id_user)).last()
+        if akses is not None:
+            if akses.akses == "root" or akses.akses == "it": 
+                id = r.POST.get('id')
+                if id is not None:
+                    data_trans_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete()
+                else:
+                    pass
+            else:
+                return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
         else:
-            pass
+            return JsonResponse({"status":"error","msg":"Akses anda belum ditentukan"},status=400)
     return JsonResponse({"ok":"ok"})
 
 @login_required

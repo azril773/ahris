@@ -518,10 +518,12 @@ def tambah_cuti(r):
 def edit_sisa_cuti(r):
     
     nama_user = r.user.username
-    
+
     idp = r.POST.get('idp')
     scuti = r.POST.get('scuti')
     aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+    id_user = r.user.id
+    akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
     modul = r.POST.get('modul')
     try:
         pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=int(idp),divisi_id__in=aksesdivisi)
@@ -529,11 +531,17 @@ def edit_sisa_cuti(r):
         return JsonResponse({"status":'error',"msg":"Pegawai tidak ada"},status=400)
     
     if modul == 'ecuti':
-        pg.sisa_cuti = int(scuti)
-        pg.save(using=r.session["ccabang"])
+        if akses.akses == 'root' or akses.akses == 'it':
+            pg.sisa_cuti = int(scuti)
+            pg.save(using=r.session["ccabang"])
+        else:
+            return JsonResponse({'status':"error","msg":"Anda tidak memiliki akses untuk edit sisa cuti"},status=400)
     elif modul == 'reset_cuti':
-        pg.sisa_cuti = 12
-        pg.save(using=r.session["ccabang"])   
+        if akses.akses == 'root' or akses.akses == "it":
+            pg.sisa_cuti = 12
+            pg.save(using=r.session["ccabang"])   
+        else:
+            return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses untuk reset cuti"},status=400)
     else:
         for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if p.tgl_masuk is None:
@@ -553,9 +561,8 @@ def edit_sisa_cuti(r):
                 else:
                     pass                         
     
-    status = 'ok'
     
-    return JsonResponse({"status": status})
+    return JsonResponse({"status": "success","msg":"Berhasil edit cuti"})
 
 
 @login_required
