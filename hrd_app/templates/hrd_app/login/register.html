@@ -155,7 +155,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <label for="userd" class="text-dark">Username</label> <br>
-                                <select name="userd" id="userd" class='mb-2'>
+                                <select name="userd[]" id="userd" class='mb-2'>
                                     <option value="">Pilih User</option>
                                     {% for user in users %}
                                         <option value="{{user.pk}}">{{user.username}}</option>
@@ -242,7 +242,7 @@
                         <div class="row">
                             <div class="col-6">
                                 <label for="userc" class="text-dark">Username</label> <br>
-                                <select name="userc" id="userc" class='mb-2'>
+                                <select name="userc[]" id="userc" class='mb-2'>
                                     <option value="">Pilih User</option>
                                     {% for user in users %}
                                         <option value="{{user.pk}}">{{user.username}}</option>
@@ -306,9 +306,13 @@
 
 <script>
     $("#user").selectize()
-    $("#userd").selectize()
+    $("#userd").selectize({
+        maxItems:null
+    })
     $("#userl").selectize()
-    $("#userc").selectize()
+    $("#userc").selectize({
+        maxItems:null
+    })
     $("#divisi").selectize({
         maxItems:null
     })
