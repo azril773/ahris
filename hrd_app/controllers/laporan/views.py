@@ -1409,14 +1409,14 @@ def print_laporan_shift(r):
         date = [datetime.today().date()]
     shiftdata = shift_db.objects.using(r.session["ccabang"]).filter(id__in=shift)
     result = []
-    shifts = [int(sh) for sh in shift]
+    shifts = [sh.shift for sh in shiftdata]
     for d in date:    
         obj = {}
         for s in shiftdata:
-            obj[s.pk] = {"shift":s.shift,"divisi":{}}
-        absensi = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(jam_kerja__shift_id__in=shifts,tgl_absen=d)
+            obj[s.shift] = {"shift":s.shift,"divisi":{}}
+        absensi = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(shift__in=shifts,tgl_absen=d)
         for ab in absensi:
-            shift = ab.jam_kerja.shift_id
+            shift = ab.shift
             div = obj[shift]["divisi"].keys()
             if ab.pegawai.divisi.pk in div:
                 if ab.masuk is not None and ab.pulang is not None:
@@ -1436,9 +1436,9 @@ def print_laporan_shift(r):
 
                 if ab.keterangan_absensi is None and ab.keterangan_ijin is None and ab.keterangan_lain is None:
                     obj[shift]["divisi"][ab.pegawai.divisi.pk]["tanpa_keterangan"] += 1
-                if re.match("/(?i)^m$/",ab.jam_kerja.shift.shift):
+                if re.match("/^m$/",ab.jam_kerja.shift.shift,re.IGNORECASE):
                     obj[shift]["divisi"][ab.pegawai.divisi.pk]["m"] += 1
-                elif re.match("/(?i)^mf$/",ab.jam_kerja.shift.shift):
+                elif re.match("/^mf$/",ab.jam_kerja.shift.shift,re.IGNORECASE):
                     obj[shift]["divisi"][ab.pegawai.divisi.pk]["mf"] += 1
             else:
                 obj[shift]["divisi"][ab.pegawai.divisi.pk] = {
@@ -1455,11 +1455,11 @@ def print_laporan_shift(r):
         data = []
         for s2 in shiftdata:
             dv = []
-            for key in obj[s2.pk]["divisi"].keys():
-                dv.append(obj[s2.pk]["divisi"][key])
-            obj[s2.pk]["divisi_count"] = len(dv)
-            obj[s2.pk]["divisi"] = dv
-            data.append(obj[s2.pk])
+            for key in obj[s2.shift]["divisi"].keys():
+                dv.append(obj[s2.shift]["divisi"][key])
+            obj[s2.shift]["divisi_count"] = len(dv)
+            obj[s2.shift]["divisi"] = dv
+            data.append(obj[s2.shift])
         result.append({"tanggal":d,"data":data})
 
     print(result)

@@ -167,13 +167,13 @@ def tambah_jam_kerja(r):
 
         for h in hari:
             if h.lower() == 'semua hari':
-                hari = ["Semua Hari"]
+                hari = ["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]
                 break
                 
 
 
         if len(hari) >= 7:
-            hari = ["Semua Hari"]
+            hari = ["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]
         if not shift_db.objects.using(r.session["ccabang"]).filter(id=int(shift)).exists():
             return JsonResponse({"status":'error',"msg":"Shift tidak ada"},status=400)
         
@@ -181,14 +181,11 @@ def tambah_jam_kerja(r):
             
             for h in hari:
                 if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),jam_masuk=jam_masuk,jam_pulang=jam_pulang,hari=h).exists():
-                    return JsonResponse({"status":'error',"msg":"Jam masuk atau pulang harus berbeda"},status=400)
+                    continue
+                    # return JsonResponse({"status":'error',"msg":f'Jam masuk atau pulang harus berbeda ({h})'},status=400)
                 # if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),hari=h).exists():
                 #     continue
                 
-                if h.lower() == 'semua hari':
-                    if jamkerja_db.objects.using(r.session["ccabang"]).filter(~Q(hari='semua hari'),jam_masuk=jam_masuk,jam_pulang=jam_pulang,kk_id=int(kk)).exists():
-                        break
-
                 jamkerja_db(
                     kk_id=kk,
                     jam_masuk=jam_masuk,
@@ -214,22 +211,18 @@ def edit_jam_kerja(r):
         hari = r.POST.getlist("hari[]")
         for h in hari:
             if h.lower() == 'semua hari':
-                hari = ["Semua Hari"]
+                hari = ["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]
                 break
                 
         
         if not shift_db.objects.using(r.session["ccabang"]).filter(id=int(shift)).exists():
             return JsonResponse({"status":'error',"msg":"Shift tidak ada"},status=400)
         if len(hari) >= 7:
-            hari = ["Semua Hari"]
+            hari = ["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]
         jamkerja_db.objects.using(r.session["ccabang"]).filter(id=int(eid)).delete()
         for h in hari:
             # if jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=int(kk),hari=h).exists():
             #     continue
-            
-            if h.lower() == 'semua hari':
-                if jamkerja_db.objects.using(r.session["ccabang"]).filter(~Q(hari='semua hari'),kk_id=int(kk)).exists():
-                    break
             jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=kk,jam_masuk=jam_masuk,jam_pulang=jam_pulang,hari=h).delete()
             jamkerja_db(
                 kk_id=kk,

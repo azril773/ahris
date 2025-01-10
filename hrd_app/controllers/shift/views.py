@@ -9,7 +9,7 @@ def shift(r):
         shift = shift_db.objects.using(r.session["ccabang"]).all()
         akses = akses[0]
         data = {
-            'dsid':akses.pegawai.status_id,
+            'dsid':akses.sid_id,
             "shift":shift,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],

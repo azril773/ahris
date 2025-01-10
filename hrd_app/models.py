@@ -634,8 +634,7 @@ class absensi_db(models.Model):
     lama_istirahat2 = models.DecimalField(max_digits=5, decimal_places=2, null=True)
     jam_pulang = models.TimeField(null=True)
     jam_istirahat = models.TimeField(null=True) 
-    jam_kerja = models.ForeignKey(jamkerja_db,on_delete=models.CASCADE,null=True)
-    
+    shift = models.CharField(max_length=100, null=True)
     total_jam_kerja = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=0)
     total_jam_istirahat = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=0)
     total_jam_istirahat2 = models.DecimalField(max_digits=5, decimal_places=2, null=True, default=0)
@@ -811,6 +810,8 @@ class kompen_db(models.Model):
         verbose_name = 'Kompensasi'
         verbose_name_plural = 'Kompensasi'        
         
+
+
         
 # Histori Hapus
 # ==================================================================        

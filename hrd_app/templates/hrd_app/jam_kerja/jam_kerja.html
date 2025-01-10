@@ -598,7 +598,7 @@
                     'hid': hid.value,
                 },
                 headers:{"X-CSRFToken":token},
-                success: function (response) { 
+                success: function (e) { 
                     
                     $("#msginfo p").remove()
                     $("#msginfo").append(`<p class="alert alert-success">${e.msg}</p>`)
@@ -610,7 +610,11 @@
                 },
                 error: function (err) {
                     $("#msginfo p").remove()
-                    $("#msginfo").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    if(err.responseJSON?.msg){
+                        $("#msginfo").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    }else{
+                        $("#msginfo").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                    }
                 }
             });
 

@@ -87,7 +87,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                                     ab.jam_masuk = jam.jam_masuk
                                     ab.jam_pulang = jam.jam_pulang
                                     ab.lama_istirahat = jam.lama_istirahat
-                                    ab.jam_kerja_id = jam.pk
+                                    ab.shift = jam.shift.shift
                             elif a['punch'] == 1:
                                 jkp = [jk for jk in jamkerja if jk.kk_id == ab.pegawai.kelompok_kerja.pk and jk.jam_pulang >= bb_msk.time() and jk.jam_pulang <= ba_msk.time() and jk.hari == hari]
                                 data = []
@@ -109,7 +109,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                                     ab.jam_masuk = jam.jam_masuk
                                     ab.jam_pulang = jam.jam_pulang
                                     ab.lama_istirahat = jam.lama_istirahat
-                                    ab.jam_kerja_id = jam.pk
+                                    ab.shift = jam.shift.shift
                                 
                                 
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -1910,7 +1910,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                     ab.jam_masuk = jam.jam_masuk
                                     ab.jam_pulang = jam.jam_pulang
                                     ab.lama_istirahat = jam.lama_istirahat
-                                    ab.jam_kerja_id = jam.pk
+                                    ab.shift = jam.shift.shift
                             elif a['punch'] == 1:
                                 jkp = [jk for jk in jamkerja if jk.kk_id == ab.pegawai.kelompok_kerja.pk and jk.jam_pulang >= bb_msk.time() and jk.jam_pulang <= ba_msk.time() and jk.hari == hari]
                                 data = []
@@ -1931,7 +1931,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                     ab.jam_masuk = jam.jam_masuk
                                     ab.jam_pulang = jam.jam_pulang
                                     ab.lama_istirahat = jam.lama_istirahat
-                                    ab.jam_kerja_id = jam.pk
+                                    ab.shift = jam.shift.shift
                                 
                                 
 # ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++

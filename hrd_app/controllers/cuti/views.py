@@ -11,7 +11,7 @@ def cuti(r, sid):
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        today = date.today()
+        today = datetime.today()
         pa = periode_skrg()
         dari = datetime.strptime(pa[0].date().strftime("%d-%m-%Y"),"%d-%m-%Y").date()
         sampai = datetime.strptime(pa[1].date().strftime("%d-%m-%Y"),"%d-%m-%Y").date()
@@ -42,6 +42,19 @@ def cuti(r, sid):
             sid_lembur = 0
         pegawai = []
             
+
+        # libur = libur_nasional_db.objects.using(r.session["ccabang"]).filter(libur__iregex="lebaran idul fitri").last()
+        # ac = awal_cuti_db.objects.using(r.session['ccabang']).last()
+        # print(ac)
+        # date = datetime.now().date()
+        # if libur is not None:
+        #     if ac is not None:
+        #         if ac.tgl < libur.tgl_libur:
+        #             bulan10 = ac.tgl + relativedelta(months=10)
+        #             lastday = monthrange(bulan10.year,bulan10.month)
+        #             expired = datetime.strptime(f'{bulan10.year}-{bulan10.month}-{lastday[1]}',"%Y-%m-%d").date()
+        #             print(expired)
+        
         for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {

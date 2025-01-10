@@ -13,6 +13,7 @@ from json import dumps
 import requests
 import weasyprint
 from dateutil.relativedelta import relativedelta
+from calendar import monthrange
 # SUPPORT
 from openpyxl.styles import Alignment, Font
 from collections import namedtuple
