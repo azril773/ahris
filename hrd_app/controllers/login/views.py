@@ -305,6 +305,7 @@ def akses_divisi(r):
             with transaction.atomic():
                 try:
                     result = [rsl for rsl in divisid if re.match("(?i)all",rsl)]
+                    print(userids)
                     for userid in userids:
                         user = User.objects.filter(pk=userid)
                         if not user.exists():
@@ -330,7 +331,7 @@ def akses_divisi(r):
                                     user_id=user.pk,
                                     divisi_id=div.pk
                                 ).save(using=cabang.cabang)
-                            return redirect("registrasi",idcabang=caid)
+                    return redirect("registrasi",idcabang=caid)
                 except Exception as e:
                     messages.error(r,e)
                     transaction.set_rollback(True)
@@ -434,7 +435,7 @@ def akses_cabang(r):
                                     add_by=r.user.username,
                                     edit_by=r.user.username
                                 ).save()
-                        return redirect("registrasi",idcabang=caid)
+                    return redirect("registrasi",idcabang=caid)
                 except Exception as e:
                     messages.error(r,e)
                     transaction.set_rollback(True)

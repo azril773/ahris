@@ -1,503 +1,666 @@
-{% extends "hrd_app/master/base.html" %}
-
-{% block breadcrumb %}
+{% extends "hrd_app/master/base.html" %} {% block breadcrumb %}
 
 <!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
     Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
 </marquee></div> -->
 
-<div class="br-pagebody">  
-
-    <div class="br-section-wrapper">
-        
+<div class="br-pagebody">
+  <div class="br-section-wrapper">
     <!-- alert berhasil -->
-    <div class="alert alert-info alert-dismissible" role="alert" id="berhasil" style="display: none;">
-        <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <span id="pesan_berhasil"></span>
+    <div
+      class="alert alert-info alert-dismissible"
+      role="alert"
+      id="berhasil"
+      style="display: none"
+    >
+      <button type="button" class="close" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <span id="pesan_berhasil"></span>
     </div>
-  
+
     <!-- alert gagal-->
-    <div class="alert alert-danger alert-dismissible" role="alert" id="alert" style="display: none;">
-        <button type="button" class="close" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <span id="pesan_gagal"></span>
+    <div
+      class="alert alert-danger alert-dismissible"
+      role="alert"
+      id="alert"
+      style="display: none"
+    >
+      <button type="button" class="close" aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+      <span id="pesan_gagal"></span>
     </div>
 
-        <!-- Absensi -->
-        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Data Cuti &nbsp; ({{dari}} - {{sampai}})</h6>
-    
-        <!-- Info absensi -->        
-        <div class="d-flex align-items-center justify-content-start">     
-            <div class="mg-r-auto">
-                            
-            <!-- Button Tambah Cuti -->
-            <button data-target="#tambahCuti" data-toggle="modal" class="btn btn-primary mg-b-6">Ambil Cuti</button>
+    <!-- Absensi -->
+    <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">
+      Data Cuti &nbsp; ({{dari}} - {{sampai}})
+    </h6>
 
-            <!-- Button Reset Cuti -->
-            <button data-target="#resetAllCuti" data-toggle="modal" class="btn btn-warning mg-b-6">Reset All Cuti</button> &nbsp; &nbsp;
+    <!-- Info absensi -->
+    <div class="d-flex align-items-center justify-content-start">
+      <div class="mg-r-auto">
+        <!-- Button Tambah Cuti -->
+        <button
+          data-target="#tambahCuti"
+          data-toggle="modal"
+          class="btn btn-primary mg-b-6"
+        >
+          Ambil Cuti
+        </button>
 
-            {% include 'hrd_app/master/modul_absensi.html' %} 
-
-            </div>          
-        </div>
-
-        <br>        
-
-        <div class="d-flex align-items-center justify-content-start">
-            <div class="col-md-12 pd-x-0">  
-                {% if sid == 0 %}
-                    <a href="{% url 'cuti' 0 %}" class="btn btn-info mg-b-8">Semua Data</a> &nbsp; 
-                    
-                    {% for s in status %}  
-                        <a href="{% url 'cuti' s.id %}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp; 
-                    {% endfor %}
-                {% else %}
-                    <a href="{% url 'cuti' 0 %}" class="btn btn-outline-info mg-b-8">Semua Data</a> &nbsp; 
-                    
-                    {% for s in status %}  
-                        {% if s.id == sid %}
-                            <a href="{% url 'cuti' s.id %}" class="btn btn-info mg-b-8">{{s.status}}</a> &nbsp;
-                        {% else %}     
-                            <a href="{% url 'cuti' s.id %}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp;
-                        {% endif %}    
-                    {% endfor %}
-                {% endif %}
-
-            </div>            
-        </div>
-
-        <br>
-
-        <div id="loader"></div>            
-
-        <!-- Table -->
-        <div class="table-wrapper">
-            <table id="tabelku" class="table display responsive" style="width:100%">
-            <thead>
-                <tr>
-                  <th>Nama</th>
-                  <th>Nik</th>
-                  <th>Userid</th>
-                  <th>Divisi</th>
-                  <th>Sisa Cuti</th>
-                  <th>Action</th>
-                </tr>
-            </thead>
-            </table>
-        </div>
-
-        <!-- Modal -->
-        <div id="tambahCuti" class="modal fade">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content bd-0 tx-14">
-                    <div class="modal-header pd-y-20 pd-x-25">
-                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Cuti</h6>          
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>          
-                    </div>
-                    
-                    <form id="tambahForm">
-                        {% csrf_token %}
-                        <div class="form-layout form-layout-1">
-                            <div class="row mg-b-8">
-                
-                                <div class="col-lg-6">
-                                    <div class="form-group mg-b-10-force">
-                                        <label class="form-control-label tx-inverse">Tanggal Cuti:</label>
-                                        <input type="text" name="tgl" id="tgl" class="form-control tgl1 multis" placeholder="Tanggal Cuti" required>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-6">
-                                    <div class="form-group mg-b-10-force">
-                                        <label class="form-control-label tx-inverse">Pegawai:</label>
-                                        <select name="pegawai" id="pegawai" class="" data-placeholder='Pilih' required>
-                                            <option label="Pilih Pegawai"></option>
-                                            {% for p in pegawai %}
-                                            <option value="{{p.idp}}">{{p.nama}}/{{p.nik}} - {{p.userid}}</option>
-                                            {% endfor %}
-                                        </select>
-                                    </div>
-                                </div>
-
-                                <div class="col-lg-12">
-                                    <div class="form-group mg-b-10-force">
-                                        <label class="form-control-label tx-inverse">Keterangan:</label>
-                                        <input type="text" name="ket" id="ket" class="form-control" placeholder="Keterangan Cuti">
-                                    </div>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <button type="submit" id="submit_buttonTambah" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
-                                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
-                                </div>        
-                            </div>                        
-                        </div>            
-                    </form>            
-                    
-                </div>
-            </div><!-- modal-dialog -->
-        </div>
-
-        <div id="resetAllCuti" class="modal fade">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content bd-0 tx-14">
-                    <div class="modal-header pd-y-20 pd-x-25">
-                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Reset All Cuti</h6>          
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>          
-                    </div>
-                    
-                    <form id="resetAllForm">
-                        {% csrf_token %}
-                        <div class="form-layout form-layout-1">
-                            <div class="row mg-b-8">
-                
-                                <div class="col-lg-12">
-                                    <div class="form-group mg-b-10-force">
-                                        <p class="hitam">Tindakan ini akan mereset semua cuti pegawai = 12, Apakah Anda Yakin ?</p>
-                                    </div>
-                                </div>
-
-                                <div class="modal-footer">
-                                    <button type="submit" id="submit_buttonAll" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Reset Cuti</button>
-                                    <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Tutup Form</button>
-                                </div>        
-                            </div>                        
-                        </div>            
-                    </form>            
-                    
-                </div>
-            </div><!-- modal-dialog -->
-        </div>
-        
-        <div id="resetCuti" class="modal fade">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content bd-0 tx-14">
-                    <div class="modal-header pd-y-20 pd-x-25">
-                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Reset Cuti</h6>          
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>          
-                    </div>
-                    
-                    <form id="resetForm">
-                        {% csrf_token %}
-                        <div class="form-layout form-layout-1">
-                            <div class="row mg-b-8">
-                
-                                <div class="col-lg-12">
-                                    <div class="form-group mg-b-10-force">
-                                        <p class="hitam">Tindakan ini akan mereset semua cuti pegawai = 12, Apakah Anda Yakin ?</p>
-                                    </div>
-                                </div>
-
-                                <input type="hidden" class="form-control" name="idp2" id="idp2">
-
-                                <div class="modal-footer">
-                                    <button type="submit" id="submit_buttonReset" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Reset Cuti</button>
-                                    <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Tutup Form</button>
-                                </div>        
-                            </div>                        
-                        </div>            
-                    </form>            
-                    
-                </div>
-            </div><!-- modal-dialog -->
-        </div>
-
-        <div id="editCuti" class="modal fade">
-            <div class="modal-dialog modal-lg" role="document">
-                <div class="modal-content bd-0 tx-14">
-                    <div class="modal-header pd-y-20 pd-x-25">
-                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Edit Cuti</h6>          
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>          
-                    </div>
-                    
-                    <form id="editForm">
-                        {% csrf_token %}
-                        <div class="form-layout form-layout-1">
-                            <div class="row mg-b-8">
-                
-                                <div class="col-lg-12">
-                                    <div class="form-group mg-b-10-force">
-                                        <label class="form-control-label tx-inverse">Sisa Cuti:</label>
-                                        <input type="text" name="scuti" id="scuti" class="form-control" placeholder="Sisa Cuti" required>
-                                    </div>
-                                </div>
-
-                                <input type="hidden" class="form-control" name="idp" id="idp">
-
-                                <div class="modal-footer">
-                                    <button type="submit" id="submit_buttonEdit" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Simpan</button>
-                                    <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
-                                </div>        
-                            </div>                        
-                        </div>            
-                    </form>            
-                    
-                </div>
-            </div><!-- modal-dialog -->
-        </div>
-
+        <!-- Button Reset Cuti -->
+        <button
+          data-target="#resetAllCuti"
+          data-toggle="modal"
+          class="btn btn-warning mg-b-6"
+        >
+          Reset All Cuti
+        </button>
+        &nbsp; &nbsp; {% include 'hrd_app/master/modul_absensi.html' %}
+      </div>
     </div>
 
-</div><!-- br-pagebody -->
+    <br />
 
-{% endblock breadcrumb %}
+    <div class="d-flex align-items-center justify-content-start">
+      <div class="col-md-12 pd-x-0">
+        {% if sid == 0 %}
+        <a href="{% url 'cuti' 0 %}" class="btn btn-info mg-b-8">Semua Data</a>
+        &nbsp; {% for s in status %}
+        <a href="{% url 'cuti' s.id %}" class="btn btn-outline-info mg-b-8"
+          >{{s.status}}</a
+        >
+        &nbsp; {% endfor %} {% else %}
+        <a href="{% url 'cuti' 0 %}" class="btn btn-outline-info mg-b-8"
+          >Semua Data</a
+        >
+        &nbsp; {% for s in status %} {% if s.id == sid %}
+        <a href="{% url 'cuti' s.id %}" class="btn btn-info mg-b-8"
+          >{{s.status}}</a
+        >
+        &nbsp; {% else %}
+        <a href="{% url 'cuti' s.id %}" class="btn btn-outline-info mg-b-8"
+          >{{s.status}}</a
+        >
+        &nbsp; {% endif %} {% endfor %} {% endif %}
+      </div>
+    </div>
 
-{% block hrd_ajax %}
+    <br />
 
-<script>    
-    /* tabel */
-    sid = "{{dsid}}"
-    const pegawai = $('#pegawai').selectize();
+    <div id="loader"></div>
 
-    const epegawai = $('#epegawai').selectize();
-    var table = $('#tabelku').DataTable({
-        "ajax": "{% url 'pegawai_json' sid %}",
+    <!-- Table -->
+    <div class="table-wrapper">
+      <table id="tabelku" class="table display responsive" style="width: 100%">
+        <thead>
+          <tr>
+            <th>Nama</th>
+            <th>Nik</th>
+            <th>Userid</th>
+            <th>Divisi</th>
+            <th>Sisa Cuti</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
 
-        columns: [
+    <!-- Modal -->
+    <div id="tambahCuti" class="modal fade">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+          <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">
+              Form Cuti
+            </h6>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
 
-            { data: 'nama' },
-            { data: 'nik' },
-            { data: 'userid' },
-            { data: 'divisi' },
-            { data: 'sisa_cuti' },
-            { 
-                data: null,
-                "render": function(data, type, row, meta){
-                    data = '<a href="../cuti/'+sid+'/'+row.idp+'" class="btn btn-sm btn-info mb-1 tx-12">Detail Cuti</a> &nbsp; <button data-target="#editCuti" data-toggle="modal" class="btn btn-sm btn-warning mb-1 tx-12" data-idp='+row.idp+'>Edit Sisa Cuti</button> &nbsp; <button data-target="#resetCuti" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-idp='+row.idp+'>Reset Cuti</button>';
-                    return data;
-                } 
-            },
-            
-        ],   
+          <form id="tambahForm">
+            {% csrf_token %}
+            <div class="form-layout form-layout-1">
+              <div class="row mg-b-8">
+                <div class="col-lg-6">
+                  <div class="form-group mg-b-10-force">
+                    <label class="form-control-label tx-inverse"
+                      >Tanggal Cuti:</label
+                    >
+                    <input
+                      type="text"
+                      name="tgl"
+                      id="tgl"
+                      class="form-control tgl1 multis"
+                      placeholder="Tanggal Cuti"
+                      required
+                    />
+                  </div>
+                </div>
 
-        "rowCallback": function (row, data) {
-            $('td', row).eq(0).addClass('hitam');
-            $('td', row).eq(1).addClass('hitam');
-            $('td', row).eq(2).addClass('hitam');
-            $('td', row).eq(3).addClass('hitam');
-            $('td', row).eq(4).addClass('hitam');
-            $('td', row).eq(5).addClass('hitam');
+                <div class="col-lg-6">
+                  <div class="form-group mg-b-10-force">
+                    <label class="form-control-label tx-inverse"
+                      >Pegawai:</label
+                    >
+                    <select
+                      name="pegawai"
+                      id="pegawai"
+                      class=""
+                      data-placeholder="Pilih"
+                      required
+                    >
+                      <option label="Pilih Pegawai"></option>
+                      {% for p in pegawai %}
+                      <option value="{{p.idp}}">
+                        {{p.nama}}/{{p.nik}} - {{p.userid}}
+                      </option>
+                      {% endfor %}
+                    </select>
+                  </div>
+                </div>
+
+                <div class="col-lg-12">
+                  <div class="form-group mg-b-10-force">
+                    <label class="form-control-label tx-inverse"
+                      >Keterangan:</label
+                    >
+                    <input
+                      type="text"
+                      name="ket"
+                      id="ket"
+                      class="form-control"
+                      placeholder="Keterangan Cuti"
+                    />
+                  </div>
+                </div>
+
+                <div class="modal-footer">
+                  <button
+                    type="submit"
+                    id="submit_buttonTambah"
+                    class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium"
+                  >
+                    Simpan
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium"
+                    data-dismiss="modal"
+                  >
+                    Batalkan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- modal-dialog -->
+    </div>
+
+    <div id="resetAllCuti" class="modal fade">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+          <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">
+              Form Reset All Cuti
+            </h6>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div id="msgrac"></div>
+            </div>
+          </div>
+          <form id="resetAllForm">
+            {% csrf_token %}
+            <div class="form-layout form-layout-1">
+              <div class="row mg-b-8">
+                <div class="col-lg-12">
+                  <div class="form-group mg-b-10-force">
+                    <p class="hitam">
+                      Tindakan ini akan mereset semua cuti pegawai = 12, Apakah
+                      Anda Yakin ?
+                    </p>
+                  </div>
+                </div>
+
+                <div class="modal-footer">
+                  <button
+                    type="submit"
+                    id="submit_buttonAll"
+                    class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium"
+                  >
+                    Reset Cuti
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium"
+                    data-dismiss="modal"
+                  >
+                    Tutup Form
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- modal-dialog -->
+    </div>
+
+    <div id="resetCuti" class="modal fade">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+          <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">
+              Form Reset Cuti
+            </h6>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div id="msgrc"></div>
+            </div>
+          </div>
+          <form id="resetForm">
+            {% csrf_token %}
+            <div class="form-layout form-layout-1">
+              <div class="row mg-b-8">
+                <div class="col-lg-12">
+                  <div class="form-group mg-b-10-force">
+                    <p class="hitam">
+                      Tindakan ini akan mereset semua cuti pegawai = 12, Apakah
+                      Anda Yakin ?
+                    </p>
+                  </div>
+                </div>
+
+                <input
+                  type="hidden"
+                  class="form-control"
+                  name="idp2"
+                  id="idp2"
+                />
+
+                <div class="modal-footer">
+                  <button
+                    type="submit"
+                    id="submit_buttonReset"
+                    class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium"
+                  >
+                    Reset Cuti
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium"
+                    data-dismiss="modal"
+                  >
+                    Tutup Form
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- modal-dialog -->
+    </div>
+
+    <div id="editCuti" class="modal fade">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bd-0 tx-14">
+          <div class="modal-header pd-y-20 pd-x-25">
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">
+              Form Edit Cuti
+            </h6>
+            <button
+              type="button"
+              class="close"
+              data-dismiss="modal"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="row">
+            <div class="col-md-12">
+              <div id="msgec"></div>
+            </div>
+          </div>
+          <form id="editForm">
+            {% csrf_token %}
+            <div class="form-layout form-layout-1">
+              <div class="row mg-b-8">
+                <div class="col-lg-12">
+                  <div class="form-group mg-b-10-force">
+                    <label class="form-control-label tx-inverse"
+                      >Sisa Cuti:</label
+                    >
+                    <input
+                      type="text"
+                      name="scuti"
+                      id="scuti"
+                      class="form-control"
+                      placeholder="Sisa Cuti"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <input type="hidden" class="form-control" name="idp" id="idp" />
+
+                <div class="modal-footer">
+                  <button
+                    type="submit"
+                    id="submit_buttonEdit"
+                    class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium"
+                  >
+                    Simpan
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium"
+                    data-dismiss="modal"
+                  >
+                    Batalkan
+                  </button>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+      <!-- modal-dialog -->
+    </div>
+  </div>
+</div>
+<!-- br-pagebody -->
+
+{% endblock breadcrumb %} {% block hrd_ajax %}
+
+<script>
+  /* tabel */
+  sid = "{{dsid}}";
+  const pegawai = $("#pegawai").selectize();
+
+  const epegawai = $("#epegawai").selectize();
+  var table = $("#tabelku").DataTable({
+    ajax: "{% url 'pegawai_json' sid %}",
+
+    columns: [
+      { data: "nama" },
+      { data: "nik" },
+      { data: "userid" },
+      { data: "divisi" },
+      { data: "sisa_cuti" },
+      {
+        data: null,
+        render: function (data, type, row, meta) {
+          data =
+            '<a href="../cuti/' +
+            sid +
+            "/" +
+            row.idp +
+            '" class="btn btn-sm btn-info mb-1 tx-12">Detail Cuti</a> &nbsp; <button data-target="#editCuti" data-toggle="modal" class="btn btn-sm btn-warning mb-1 tx-12" data-idp=' +
+            row.idp +
+            '>Edit Sisa Cuti</button> &nbsp; <button data-target="#resetCuti" data-toggle="modal" class="btn btn-sm btn-danger mb-1 tx-12" data-idp=' +
+            row.idp +
+            ">Reset Cuti</button>";
+          return data;
         },
+      },
+    ],
 
-        destroy: true,
-        ordering: true,
-        paging: false,
-        scrollX: '100%',
-        scrollY: 300,
-        processing: true,
+    rowCallback: function (row, data) {
+      $("td", row).eq(0).addClass("hitam");
+      $("td", row).eq(1).addClass("hitam");
+      $("td", row).eq(2).addClass("hitam");
+      $("td", row).eq(3).addClass("hitam");
+      $("td", row).eq(4).addClass("hitam");
+      $("td", row).eq(5).addClass("hitam");
+    },
 
-        "language": {
-            searchPlaceholder: 'Cari...',
-            sSearch: '',
-            loadingRecords: '&nbsp;',
-            processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
-            emptyTable: "&nbsp;",
+    destroy: true,
+    ordering: true,
+    paging: false,
+    scrollX: "100%",
+    scrollY: 300,
+    processing: true,
 
-            paginate: {
-                previous: '<i class="cs-chevron-left"></i>',
-                next: '<i class="cs-chevron-right"></i>',
-            },
-        },
+    language: {
+      searchPlaceholder: "Cari...",
+      sSearch: "",
+      loadingRecords: "&nbsp;",
+      processing:
+        '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+      emptyTable: "&nbsp;",
 
-    });   
-   
-    /* Tambah Cuti */
-    $("#submit_buttonTambah").on('click', e => {
-        e.preventDefault()
+      paginate: {
+        previous: '<i class="cs-chevron-left"></i>',
+        next: '<i class="cs-chevron-right"></i>',
+      },
+    },
+  });
 
-        const tgl = document.getElementById('tgl')
-        const idp = document.getElementById('pegawai')
-        const ket = document.getElementById('ket')
-        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
-        
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'tcuti' %}",
-            data: {
-                'csrfmiddlewaretoken': csrf[0].value,
-                'tgl': tgl.value,
-                'idp': idp.value,
-                'ket': ket.value,
-            },
-            success: function (response) { 
-                
-                if (response.status == 'ok') { 
-                    console.log(response.status)       
-                } else if(response.status == 'duplikat'){
-                    alert('Duplikat Data, proses dibatalkan.')
-                } else if(response.status == 'ada ijin'){
-                    alert('Terdapat ijin lainnya, proses dibatalkan.')
-                } else if(response.status == 'ada opg'){
-                    alert('Terdapat opg, proses dibatalkan.')
-                } else if(response.status == 'ada geseroff'){
-                    alert('Terdapat geser off, proses dibatalkan.')
-                } else if(response.status == 'pegawai masuk'){
-                    alert('Pegawai ybs masuk, proses dibatalkan.')
-                } 
-                
-                table.ajax.reload(null, false);
+  /* Tambah Cuti */
+  $("#submit_buttonTambah").on("click", (e) => {
+    e.preventDefault();
 
-                $('#tambahCuti').modal('hide');
-                $("#tambahForm")[0].reset();
-                pegawai[0].selectize.clear();                
-                      
-            },
-            error: function (err) {
-                alert(err.responseJSON.msg)
-            }
-        });
+    const tgl = document.getElementById("tgl");
+    const idp = document.getElementById("pegawai");
+    const ket = document.getElementById("ket");
+    const csrf = document.getElementsByName("csrfmiddlewaretoken");
 
+    $.ajax({
+      type: "POST",
+      url: "{% url 'tcuti' %}",
+      data: {
+        csrfmiddlewaretoken: csrf[0].value,
+        tgl: tgl.value,
+        idp: idp.value,
+        ket: ket.value,
+      },
+      success: function (response) {
+        if (response.status == "ok") {
+          console.log(response.status);
+        } else if (response.status == "duplikat") {
+          alert("Duplikat Data, proses dibatalkan.");
+        } else if (response.status == "ada ijin") {
+          alert("Terdapat ijin lainnya, proses dibatalkan.");
+        } else if (response.status == "ada opg") {
+          alert("Terdapat opg, proses dibatalkan.");
+        } else if (response.status == "ada geseroff") {
+          alert("Terdapat geser off, proses dibatalkan.");
+        } else if (response.status == "pegawai masuk") {
+          alert("Pegawai ybs masuk, proses dibatalkan.");
+        }
+
+        table.ajax.reload(null, false);
+
+        $("#tambahCuti").modal("hide");
+        $("#tambahForm")[0].reset();
+        pegawai[0].selectize.clear();
+      },
+      error: function (err) {
+        alert(err.responseJSON.msg);
+      },
     });
+  });
 
-    /* Edit Cuti */
-    $("#submit_buttonEdit").on('click', e => {
-        e.preventDefault()
+  /* Edit Cuti */
+  $("#submit_buttonEdit").on("click", (e) => {
+    e.preventDefault();
 
-        const idp = document.getElementById('idp')
-        const scuti = document.getElementById('scuti')
-        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
-        
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'ecuti' %}",
-            data: {
-                'csrfmiddlewaretoken': csrf[0].value,
-                'idp': idp.value,
-                'scuti': scuti.value,
-                'modul':'ecuti'
-            },
-            success: function (response) { 
-                
-                if (response.status == 'ok') { 
-                    console.log(response.status)       
-                } 
-                
-                table.ajax.reload(null, false);
+    const idp = document.getElementById("idp");
+    const scuti = document.getElementById("scuti");
+    const csrf = document.getElementsByName("csrfmiddlewaretoken");
 
-                $('#editCuti').modal('hide');
-                $("#editForm")[0].reset();                   
-                      
-            },
-            error: function (err) {
-                alert(err.responseJSON.msg)
-            }
-        });
+    $.ajax({
+      type: "POST",
+      url: "{% url 'ecuti' %}",
+      data: {
+        csrfmiddlewaretoken: csrf[0].value,
+        idp: idp.value,
+        scuti: scuti.value,
+        modul: "ecuti",
+      },
+      success: function (response) {
+        $("#msgec p").remove();
+        if (response.status == "ok") {
+          console.log(response.status);
+        }
 
+        table.ajax.reload(null, false);
+
+        $("#editCuti").modal("hide");
+        $("#editForm")[0].reset();
+      },
+      error: function (err) {
+        $("#msgec p").remove();
+        if (err.responseJSON?.msg) {
+          $("#msgec").append(
+            `<p class="alert alert-danger">${err.responseJSON.msg}</p>`
+          );
+        } else {
+          $("#msgec").append(
+            `<p class="alert alert-danger">Terjadi Kesalahan</p>`
+          );
+        }
+      },
     });
+  });
 
-    /* Reset Cuti */
-    $("#submit_buttonReset").on('click', e => {
-        e.preventDefault()
+  /* Reset Cuti */
+  $("#submit_buttonReset").on("click", (e) => {
+    e.preventDefault();
 
-        const idp2 = document.getElementById('idp2')
-        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
-        
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'ecuti' %}",
-            data: {
-                'csrfmiddlewaretoken': csrf[0].value,
-                'idp': idp2.value,
-                'modul':'reset_cuti'
-            },
-            success: function (response) { 
-                
-                if (response.status == 'ok') { 
-                    console.log(response.status)       
-                } 
-                
-                table.ajax.reload(null, false);
+    const idp2 = document.getElementById("idp2");
+    const csrf = document.getElementsByName("csrfmiddlewaretoken");
 
-                $('#resetCuti').modal('hide');
-                $("#resetForm")[0].reset();                   
-                      
-            },
-            error: function (err) {
-                alert(err.responseJSON.msg)
-            }
-        });
+    $.ajax({
+      type: "POST",
+      url: "{% url 'ecuti' %}",
+      data: {
+        csrfmiddlewaretoken: csrf[0].value,
+        idp: idp2.value,
+        modul: "reset_cuti",
+      },
+      success: function (response) {
+        $("#msgrc p").remove();
+        if (response.status == "ok") {
+          console.log(response.status);
+        }
 
+        table.ajax.reload(null, false);
+
+        $("#resetCuti").modal("hide");
+        $("#resetForm")[0].reset();
+      },
+      error: function (err) {
+        $("#msgrc p").remove();
+        if (err.responseJSON?.msg) {
+          $("#msgrc").append(
+            `<p class="alert alert-danger">${err.responseJSON.msg}</p>`
+          );
+        } else {
+          $("#msgrc").append(
+            `<p class="alert alert-danger">Terjadi Kesalahan</p>`
+          );
+        }
+      },
     });
+  });
 
+  /* Reset All Cuti */
+  $("#submit_buttonAll").on("click", (e) => {
+    e.preventDefault();
 
-    /* Reset All Cuti */
-    $("#submit_buttonAll").on('click', e => {
-        e.preventDefault()
+    const csrf = document.getElementsByName("csrfmiddlewaretoken");
 
-        const csrf = document.getElementsByName('csrfmiddlewaretoken')       
-        
-        $.ajax({
-            type: 'POST',
-            url: "{% url 'ecuti' %}",
-            data: {
-                'csrfmiddlewaretoken': csrf[0].value,
-                'modul':'reset_all_cuti'
-            },
-            success: function (response) { 
-                
-                if (response.status == 'ok') { 
-                    console.log(response.status)       
-                } 
-                
-                table.ajax.reload(null, false);
+    $.ajax({
+      type: "POST",
+      url: "{% url 'ecuti' %}",
+      data: {
+        csrfmiddlewaretoken: csrf[0].value,
+        modul: "reset_all_cuti",
+      },
+      success: function (response) {
+        $("#msgrac p").remove();
+        if (response.status == "ok") {
+          console.log(response.status);
+        }
 
-                $('#resetAllCuti').modal('hide');
-                $("#resetAllForm")[0].reset();                   
-                      
-            },
-            error: function (err) {
-                alert(err.responseJSON.msg)
-            }
-        });
+        table.ajax.reload(null, false);
 
+        $("#resetAllCuti").modal("hide");
+        $("#resetAllForm")[0].reset();
+      },
+      error: function (err) {
+        $("#msgrac p").remove();
+        if (err.responseJSON?.msg) {
+          $("#msgrac").append(
+            `<p class="alert alert-danger">${err.responseJSON.msg}</p>`
+          );
+        } else {
+          $("#msgrac").append(
+            `<p class="alert alert-danger">Terjadi Kesalahan</p>`
+          );
+        }
+      },
     });
+  });
 
-
-    $("#submit_button").on("click", function() {
-        var $this = $(this);
-        $this.attr('disabled', true);
-    });
-
+  $("#submit_button").on("click", function () {
+    var $this = $(this);
+    $this.attr("disabled", true);
+  });
 </script>
 
 <!-- Modal Script -->
 <script>
+  $("#editCuti").on("show.bs.modal", function (e) {
+    var idp = $(e.relatedTarget).data("idp");
 
-    $('#editCuti').on('show.bs.modal', function (e) {
-      
-      var idp = $(e.relatedTarget).data('idp');
-      
-      //populate the textbox
-      $(e.currentTarget).find('input[name="idp"]').val(idp);
-      
-    });
+    //populate the textbox
+    $(e.currentTarget).find('input[name="idp"]').val(idp);
+  });
 
-    $('#resetCuti').on('show.bs.modal', function (e) {
-      
-      var idp2 = $(e.relatedTarget).data('idp');
-      
-      //populate the textbox
-      $(e.currentTarget).find('input[name="idp2"]').val(idp2);
-      
-    });
+  $("#resetCuti").on("show.bs.modal", function (e) {
+    var idp2 = $(e.relatedTarget).data("idp");
 
+    //populate the textbox
+    $(e.currentTarget).find('input[name="idp2"]').val(idp2);
+  });
 </script>
 
 <!-- Select2 -->
 <script>
-    $(function(){
-    'use strict'        
-
-        
-
-    });
+  $(function () {
+    "use strict";
+  });
 </script>
 
 {% endblock hrd_ajax %}
