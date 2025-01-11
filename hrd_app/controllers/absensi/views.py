@@ -964,7 +964,7 @@ def pabsen(req):
     status_lh = [st.status_pegawai.pk for st in status_pegawai_lintas_hari_db.objects.using(req.session["ccabang"]).all()]
     # # proses data simpan di dt array
     # # obj 
-    jamkerja = jamkerja_db.objects.using(req.session["ccabang"]).select_related('kk').all()
+    jamkerja = jamkerja_db.objects.using(req.session["ccabang"]).select_related('kk',"shift").all()
     now = datetime.now()
     hari = now.strftime("%A")
     hari = nama_hari(hari)
