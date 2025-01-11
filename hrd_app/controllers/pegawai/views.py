@@ -2079,10 +2079,10 @@ def pegawai_json(r, sid):
                 else:
                     kelompok_kerja = None     
                 email = p.email  
-                if p.tgl_masuk is not None:
-                    expired_cuti = p.tgl_masuk + relativedelta(month=10)
+                if p.expired is not None:
+                    expired_cuti = p.expired
                 else:
-                    expired_cuti = None
+                    expired_cuti = "-"
                 pg = {
                     'idp':p.id,
                     'nama':p.nama,
@@ -2131,10 +2131,10 @@ def pegawai_json(r, sid):
                     kelompok_kerja = p.kelompok_kerja.kelompok
                 else:
                     kelompok_kerja = None  
-                if p.tgl_masuk is not None:
-                    expired_cuti = p.tgl_masuk + relativedelta(month=10)
+                if p.expired is not None:
+                    expired_cuti = p.expired
                 else:
-                    expired_cuti = None
+                    expired_cuti = "-"
                 email = p.email
                 pg = { 
                     'idp':p.id,

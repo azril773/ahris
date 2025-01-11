@@ -1,0 +1,333 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        <!-- Pesan Error -->
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Pengaturan -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Pengaturan {{modul_aktif}}</h6>
+    
+        <!-- Modul Pengaturan -->        
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">   
+                
+                <button data-target="#tambah" data-toggle="modal" class="btn btn-primary mg-b-6">Tambah Pegawai</button> &nbsp;
+                
+                {% include 'hrd_app/master/modul_pengaturan.html' %}
+            </div>          
+        </div>
+
+        <br>
+
+        <div id="loader"></div>    
+        <div id="msg"></div>
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table id="tabelku" class="table display responsive" style="width:100%">
+            <thead>
+                <tr>
+                <th nowrap>Pegawai</th>
+                <th>Action</th>
+                </tr>
+            </thead>
+            </table>
+        </div>
+        
+        <!-- Modal -->
+        <div id="tambah" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Tambah {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                <div id="tmsg"></div>
+                <form id="tambahForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Pegawai:</label>
+                                <select name="tpegawai" id="tpegawai">
+                                    <option value="">Pilih Pegawai</option>
+                                    {% for p in pegawai %}
+                                        <option value="{{p.pk}}">{{p.nama}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="edit" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Edit {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                <div id="emsg"></div>
+                <form id="editForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+                        <input type="hidden" name="" id="eid">
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Pegawai:</label>
+                                <select name="epgeawai" id="epegawai">
+                                    <option value="">Pilih Pegawai</option>
+                                    {% for p in pegawai %}
+                                        <option value="{{p.pk}}">{{p.nama}}</option>
+                                    {% endfor %}
+                                </select>
+                                
+                            </div>
+                        </div>                        
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Edit</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="hapus" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Hapus {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form id="hapusForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-12">
+                            <p class="hitam">Apakah Anda Yakin ?</p>
+                            <input type="hidden" name="hapus_id" id="hapus_id" class="form-control">
+                        </div>
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Hapus</button>
+                        <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+    </div>
+
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>
+
+
+
+    $("#pegawai").selectize()
+    const epegawai = $("#epegawai").selectize()
+    const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+    const tpegawai = $("#tpegawai").selectize({
+        maxItems:null
+    })
+
+    const tabelku = $("#tabelku").DataTable({
+        ajax:{
+            url:"{% url 'pegawai_cuti_json' %}",
+            method:"post",
+            headers:{"X-CSRFToken":token},
+            error:(err) => {
+                $("#msg p").remove()
+                if(err.responseJSON?.msg){
+                    $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                }else{
+                    $("#msg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                }
+            }
+        },
+        columns:[
+            {data:"nama"},
+            {data:"id",
+                render:(data,type,row,meta) => {
+                    return `<button class="btn btn-primary" data-target="#edit" data-toggle="modal" data-idp="${row.idp}" data-id="${row.id}">Edit</button>&nbsp;<button class="btn btn-danger" data-target="#hapus" data-toggle="modal" data-id="${row.id}">Hapus</button>`
+                }
+            }
+        ],
+        "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+        },
+        columnDefs:[
+            {targets:[1],className:"dt-center",width:"150px"}
+        ]
+
+    })
+
+
+    $("#tambahForm").on("submit",function(e){
+        console.log(e)
+        e.preventDefault()
+        const pegawai = $("#tpegawai").val() ? $("#tpegawai").val() : undefined
+        console.log(pegawai)
+        $.ajax({
+            url:"/hrd/tpegawai_cuti_json",
+            method:"post",
+            data:{pegawai:pegawai},
+            headers:{"X-CSRFToken":token},
+            success:(e) => {
+                $("#tmsg p").remove()
+                tabelku.ajax.reload()
+                console.log(e)
+                tpegawai[0].selectize.clear()
+                console.log(e.failed.length)
+                if(e.failed.length > 0){
+                    $("#tmsg").append(`<p class="alert alert-info">Terdapat data yang gagal disimpan</p>`)
+                    tpegawai[0].selectize.setValue(e.failed)
+                }else{
+                    $("#tambah").modal("hide")
+                }
+            },
+
+            error: (err) => {
+                $("#tmsg p").remove()
+                if(err.responseJSON?.msg){
+                    $("#tmsg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                }else{
+                    $("#tmsg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                }
+            }
+        })
+    })
+
+    $("#editForm").on("submit",function(e){
+        console.log(e)
+        e.preventDefault()
+        const eid = $("#eid").val() ? $("#eid").val() : undefined
+        const eidp = $("#epegawai").val() ? $("#epegawai").val() : undefined
+        console.log(eidp)
+        $.ajax({
+            url:"{% url 'epegawai_cuti_json' %}",
+            method:"post",
+            data:{eid,eidp},
+            headers:{"X-CSRFToken":token},
+            success:(e) => {
+                $("#emsg p").remove()
+                console.log(e)
+                tabelku.ajax.reload()
+                $("#edit").modal("hide")
+            },
+            error:(err) => {
+                $("#emsg p").remove()
+                if(err.responseJSON?.msg){
+                    $("#emsg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                }else{
+                    $("#emsg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                }
+            }
+        })
+    })
+
+    $("#hapusForm").on('submit',function(e){
+        e.preventDefault()
+        const id = $("#hapus_id").val() ? $("#hapus_id").val() : undefined
+        $.ajax({
+            url:"{% url 'dpegawai_cuti_json' %}",
+            method:"post",
+            data:{id},
+            headers:{"X-CSRFToken":token},
+            success:(e) => {
+                tabelku.ajax.reload()
+                $("#hapus").modal("hide")
+            },
+            error:(err) => {
+                $("#dmsg p").remove()
+                if(err.responseJSON?.msg){
+                    $("#dmsg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                }else{
+                    $("#dmsg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                }
+            }
+        })
+    })
+
+
+    $("#edit").on("show.bs.modal",function(e){
+        const idp = $(e.relatedTarget).data("idp")
+        const id = $(e.relatedTarget).data("id")
+        $("#eid").val(id)
+        epegawai[0].selectize.setValue(idp)
+    })
+
+    $("#hapus").on("show.bs.modal",function(e){
+        const id = $(e.relatedTarget).data("id")
+        $("#hapus_id").val(id)
+    })
+</script>
+
+{% endblock hrd_ajax %}

@@ -148,6 +148,8 @@ from hrd_app.controllers.shift.views import *
 
 from hrd_app.controllers.pkwt.views import *
 
+from hrd_app.controllers.pegawai_cuti.views import *
+
 # df = pd.read_csv("absensi.csv")
 #     data = []
 #     userids = []

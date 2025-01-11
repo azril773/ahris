@@ -43,25 +43,65 @@ def cuti(r, sid):
         pegawai = []
             
 
-        # libur = libur_nasional_db.objects.using(r.session["ccabang"]).filter(libur__iregex="lebaran idul fitri").last()
-        # ac = awal_cuti_db.objects.using(r.session['ccabang']).last()
-        # print(ac)
-        # date = datetime.now().date()
-        # if libur is not None:
-        #     if ac is not None:
-        #         if ac.tgl < libur.tgl_libur:
-        #             bulan10 = ac.tgl + relativedelta(months=10)
-        #             lastday = monthrange(bulan10.year,bulan10.month)
-        #             expired = datetime.strptime(f'{bulan10.year}-{bulan10.month}-{lastday[1]}',"%Y-%m-%d").date()
-        #             print(expired)
-        
+        libur = libur_nasional_db.objects.using(r.session["ccabang"]).filter(libur__iregex="lebaran idul fitri").last()
+        if not libur:
+            return JsonResponse({"status":'error',"msg":"Libur nasional lebaran tidak ada"},status=400)
+        date = datetime.now().date()
+        tgllibur = libur.tgl_libur + relativedelta(months=10)
+        lastday = monthrange(tgllibur.year,tgllibur.month)
+        tgl = datetime.strptime(f'{tgllibur.year}-{tgllibur.month}-{lastday[1]}',"%Y-%m-%d").date()
         for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
+            if r.session["ccabang"] == "cirebon":
+                pgw = pegawai_cuti_lama.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk).last()
+                if pgw is not None:
+                    p.tgl_cuti = libur.tgl_libur
+                    p.expired = tgl
+                    p.save(using=r.session["ccabang"])
+                else:
+                    if p.tgl_masuk is not None:
+                        # jika sudah lebih dari satu tahun
+                        today = date.today()
+                        tmasuk = p.tgl_masuk
+                        
+                        mkerja = today - tmasuk
+                        if int(mkerja.days) > 360:      
+                            tgl_masuk = p.tgl_masuk
+                            today = datetime.now()
+                            year = today.year
+                            tgl_masuk = datetime.strptime(f'{year}-{tgl_masuk.month}-{tgl_masuk.day}',"%Y-%m-%d")
+                            tgl_cuti = tgl_masuk.date()
+                            if today.date() < tgl_masuk.date():
+                                new_tglmasuk = tgl_masuk.date() - relativedelta(years=1)
+                                tgl_cuti = new_tglmasuk
+                                if p.pk == 10:
+                                    print(new_tglmasuk)
+                                exp = new_tglmasuk + relativedelta(months=10)
+                            else:
+                                exp = tgl_masuk + relativedelta(months=10)
+                            if p.tgl_cuti is not None:
+                                if p.tgl_cuti < tgl_cuti:
+                                    p.tgl_cuti = tgl_cuti
+                                    p.expired = exp
+                                    p.sisa_cuti = 12
+                                    p.save(using=r.session["ccabang"])
+                                else:
+                                    pass
+                            else:
+                                p.tgl_cuti = tgl_cuti
+                                p.sisa_cuti = 12
+                                p.expired = exp
+                                p.save(using=r.session["ccabang"])
+                        else:
+                            exp = "-"
+                    else:
+                        exp = "-"
+
             if int(sid) == 0:
                 data = {
                     'idp':p.id,
                     'nama':p.nama,
                     'nik':p.nik,
-                    'userid':p.userid
+                    'userid':p.userid,
                 }    
                 pegawai.append(data)
             else:
@@ -70,7 +110,7 @@ def cuti(r, sid):
                         'idp':p.id,
                         'nama':p.nama,
                         'nik':p.nik,
-                        'userid':p.userid
+                        'userid':p.userid,
                     }    
                     pegawai.append(data)
                 else:
@@ -239,24 +279,63 @@ def cuti_json(r, dr, sp, sid):
 def dcuti_json(r, idp):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
+
+        if r.session["ccabang"] == "cirebon":
         
-        data = []
-        
-        ac = awal_cuti_db.objects.using(r.session["ccabang"]).last()
-        tac = ac.tgl
-        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
-        for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__gte=tac, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi):
-                        
-            ct = {
-                'id':i.id,
-                'tgl_cuti':datetime.strftime(i.tgl_cuti, '%d-%m-%Y'),
-                'ket':i.keterangan,
-                'cuti_ke':i.cuti_ke,
-                'edit':i.edit_by,
-                'etgl':datetime.strftime(i.edit_date, '%d-%m-%Y')
-            }
-            data.append(ct)
-                               
+            data = []
+            
+            libur = libur_nasional_db.objects.using(r.session["ccabang"]).filter(libur__iregex="lebaran idul fitri").last()
+            if not libur:
+                return JsonResponse({'status':'error',"msg":"Libur nasional "})
+            tac = libur.tgl_libur
+            aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(idp)).last()
+            if not pegawai:
+                return JsonResponse({"status":'error',"msg":"Pegawai tidak ada"},status=400)
+
+            pc = pegawai_cuti_lama.objects.using(r.session['ccabang']).filter(pegawai_id=int(idp)).last()
+            if pc is not None:
+                for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__gte=tac, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi):
+                                
+                    ct = {
+                        'id':i.id,
+                        'tgl_cuti':datetime.strftime(i.tgl_cuti, '%d-%m-%Y'),
+                        'ket':i.keterangan,
+                        'cuti_ke':i.cuti_ke,
+                        'edit':i.edit_by,
+                        'etgl':datetime.strftime(i.edit_date, '%d-%m-%Y')
+                    }
+                    data.append(ct) 
+            else:
+                for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__gte=pegawai.tgl_cuti, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi):
+                                
+                    ct = {
+                        'id':i.id,
+                        'tgl_cuti':datetime.strftime(i.tgl_cuti, '%d-%m-%Y'),
+                        'ket':i.keterangan,
+                        'cuti_ke':i.cuti_ke,
+                        'edit':i.edit_by,
+                        'etgl':datetime.strftime(i.edit_date, '%d-%m-%Y')
+                    }
+                    data.append(ct) 
+        else:
+            data = []
+            
+            ac = awal_cuti_db.objects.using(r.session["ccabang"]).filter().last()
+            if not ac:
+                return JsonResponse({'status':'error',"msg":"Awal cuti tidak ada "})
+            tac = ac.tgl
+            aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+            for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__gte=tac, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi):                
+                ct = {
+                    'id':i.id,
+                    'tgl_cuti':datetime.strftime(i.tgl_cuti, '%d-%m-%Y'),
+                    'ket':i.keterangan,
+                    'cuti_ke':i.cuti_ke,
+                    'edit':i.edit_by,
+                    'etgl':datetime.strftime(i.edit_date, '%d-%m-%Y')
+                }
+                data.append(ct) 
         return JsonResponse({"data": data})
 
 

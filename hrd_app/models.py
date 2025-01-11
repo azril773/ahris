@@ -193,6 +193,8 @@ class pegawai_db(models.Model):
     tgl_masuk = models.DateField(null=True, blank=True)
     tgl_aktif = models.DateTimeField(null=True, blank=True)
     tgl_nonaktif = models.DateTimeField(null=True, blank=True)
+    tgl_cuti = models.DateField(null=True)
+    expired = models.DateField(null=True)
 
     hari_off = models.ForeignKey(hari_db, on_delete=models.CASCADE)
     hari_off2 = models.ForeignKey(hari_db, on_delete=models.CASCADE, related_name='hari_off2',null=True, blank=True)
@@ -810,7 +812,18 @@ class kompen_db(models.Model):
         verbose_name = 'Kompensasi'
         verbose_name_plural = 'Kompensasi'        
         
-
+class pegawai_cuti_lama(models.Model):
+    pegawai = models.ForeignKey(pegawai_db,on_delete=models.CASCADE,null=True)
+    add_by = models.CharField(max_length=100,null=True)
+    edit_by = models.CharField(max_length=100,null=True)
+    add_date = models.DateTimeField(null=True)
+    edit_date = models.DateTimeField(null=True)
+    def __str__(self):
+        return self.pegawai.nama
+    
+    class Meta:
+        verbose_name = "Pegawai Aturan Cuti Lama"
+        verbose_name_plural = "Pegawai Aturan Cuti Lama"
 
         
 # Histori Hapus
