@@ -1332,6 +1332,7 @@
       $("#msgt p").remove()
       $("#msgt").append(`<p class="alert alert-info">Silahkan isi tanggal lembur dan pilih pegawai dengan benar</p>`)
     }else{
+      $("#msgt p").remove()
       getjamkerja(tgl,pegawai)
     }
   }
