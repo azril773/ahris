@@ -176,7 +176,7 @@
     $("#jenis_ijin").selectize()
     sid = "{{sid}}"
     const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
-    $("#tableku").DataTable({
+    const table = $("#tableku").DataTable({
         ajax:{
             url:"{% url 'tlengkap_json' sid %}",
             method:"post",
