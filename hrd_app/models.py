@@ -1276,35 +1276,35 @@ class kompen_db_arsip(models.Model):
     
 # ++++++++++++++++++++++++++++++++++
 # # Payroll
-# class pegawai_payroll_db(models.Model):
-#     nama = models.CharField(max_length=200, null=True)
-#     userid = models.CharField(max_length=100, unique=True, null=True)
-#     gender = models.CharField(max_length=10, null=True)
+class pegawai_payroll_db(models.Model):
+    nama = models.CharField(max_length=200, null=True)
+    userid = models.CharField(max_length=100, unique=True, null=True)
+    gender = models.CharField(max_length=10, null=True)
 
-#     status = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE)
-#     nik = models.CharField(max_length=100, null=True)
-#     divisi = models.ForeignKey(divisi_db, on_delete=models.CASCADE)
+    status = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE)
+    nik = models.CharField(max_length=100, null=True)
+    divisi = models.ForeignKey(divisi_db, on_delete=models.CASCADE)
 
-#     no_rekening = models.CharField(max_length=50, null=True, blank=True)
-#     no_bpjs_ks = models.CharField(max_length=50, null=True, blank=True)
-#     no_bpjs_tk = models.CharField(max_length=50, null=True, blank=True)
-#     payroll_by = models.CharField(max_length=50, choices=pilihan_pengelola, default='HRD')
+    no_rekening = models.CharField(max_length=50, null=True, blank=True)
+    no_bpjs_ks = models.CharField(max_length=50, null=True, blank=True)
+    no_bpjs_tk = models.CharField(max_length=50, null=True, blank=True)
+    payroll_by = models.CharField(max_length=50, choices=pilihan_pengelola, default='HRD')
 
-#     ks_premi = models.IntegerField(default=0)
-#     tk_premi = models.IntegerField(default=0)
+    ks_premi = models.IntegerField(default=0)
+    tk_premi = models.IntegerField(default=0)
 
-#     aktif = models.IntegerField(null=True)
-#     tgl_masuk = models.DateField(null=True, blank=True)
-#     status_payroll = models.IntegerField()
+    aktif = models.IntegerField(null=True)
+    tgl_masuk = models.DateField(null=True, blank=True)
+    status_payroll = models.IntegerField()
 
-#     add_by = models.CharField(max_length=100, null=True, blank=True)
-#     edit_by = models.CharField(max_length=100, null=True, blank=True)
-#     created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
-#     update_at = models.DateTimeField(auto_now=True, null=True)
+    add_by = models.CharField(max_length=100, null=True, blank=True)
+    edit_by = models.CharField(max_length=100, null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    update_at = models.DateTimeField(auto_now=True, null=True)
 
-#     class Meta:
-#         managed = False
-#         db_table = "payroll_app_pegawai_db"
+    class Meta:
+        managed = False
+        db_table = "payroll_app_pegawai_db"
 
 class counter_payroll_db(models.Model):
     counter = models.CharField(max_length=100)
