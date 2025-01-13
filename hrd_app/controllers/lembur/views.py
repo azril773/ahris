@@ -2211,3 +2211,25 @@ def hstatus_pegawai_opg(r):
     except:
         return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
 
+
+
+@login_required
+def get_jam_kerja(r):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        tgl = r.POST.get("tgl")
+        pegawai = r.POST.get("pegawai")
+
+        if not tgl or not pegawai:
+            return JsonResponse({"status":'error',"msg":"harap isi tanggal lembur dan pilh pegawai dengan benar"},status=400)
+
+        if not pegawai_db.objects.using(r.session['ccabang']).filter(pk=int(pegawai)).exists():
+            return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
+        try:
+            date = datetime.strptime(datetime.strftime(datetime.strptime(tgl,"%d-%m-%Y"),"%Y-%m-%d"),"%Y-%m-%d")
+            absen = absensi_db.objects.using(r.session["ccabang"]).filter(tgl_absen=date.date(),pegawai_id=pegawai).last()
+            if not absen:
+                return JsonResponse({"status":"error","msg":"Tidak ada jadwal kerja. Silahkan cek absensi pegawai tersebut"},status=400)
+            data = f"{absen.jam_masuk} - {absen.jam_pulang} / Istirahat : {absen.lama_istirahat} Jam"
+            return JsonResponse({"status":"success",'msg':"Berhasil","data":data},status=200)
+        except Exception as e:
+            return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=400)

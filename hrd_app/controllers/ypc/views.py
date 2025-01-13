@@ -17,6 +17,7 @@ def tlengkap(r,sid):
             sid_lembur = sid_lembur.status_pegawai.pk
         except:
             sid_lembur = 0
+        jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
@@ -26,11 +27,14 @@ def tlengkap(r,sid):
             'sid': sid,
             # 'sid': sid,
             'sil': sid_lembur,
+            "jenis_ijin":jenis_ijin,
             # "pegawai":pegawai,
             'modul_aktif' : 'Laporan'
         }
-        return render(r,"hrd_app/ypc/tlengkap.html",data)
-
+        if r.session["ccabang"] == "cirebon":
+            return render(r,"hrd_app/ypc/tlengkap_non.html",data)
+        else:
+            return render(r,"hrd_app/ypc/tlengkap.html",data)
 
 @login_required
 def tketerangan(r,sid):
@@ -120,7 +124,10 @@ def tlengkap_json(r,sid):
             if (ab.masuk is not None and ab.pulang is not None and ab.istirahat is not None and ab.kembali is not None) or (ab.masuk_b is not None and ab.pulang_b is not None and ab.istirahat_b is not None and ab.kembali_b is not None):
                 pass
             else:
+                if ab.keterangan_absensi is not None or ab.keterangan_ijin is not None or ab.keterangan_lain is not None:
+                    continue
                 obj = {
+                    "id":ab.pk,
                     "tanggal":ab.tgl_absen,
                     "pegawai":ab.pegawai.nama,
                     "nik":ab.pegawai.nik,

@@ -156,7 +156,7 @@
               <span aria-hidden="true">&times;</span>
             </button>
           </div>
-
+          <div id="msgt"></div>
           <form action="{% url 'tlembur' %}" method="post">
             {% csrf_token %}
             <div class="form-layout form-layout-1">
@@ -169,7 +169,7 @@
                     <input
                       type="text"
                       name="tgl"
-                      id="tgl"
+                      id="tglt"
                       class="form-control tgl1"
                       placeholder="Tanggal Lembur"
                       required
@@ -184,7 +184,7 @@
                     >
                     <select
                       name="pegawai"
-                      id="pegawai"
+                      id="pegawait"
                       class=""
                       data-placeholder="Pilih"
                       required="required"
@@ -267,6 +267,15 @@
                       class="form-control"
                       placeholder="Istirahat 2 (Jam)"
                       required
+                    />
+                  </div>
+                </div>
+                <div class="col-lg-12">
+                  <div class="form-group mg-b-10-force">
+                    <label class="form-control-label tx-inverse"
+                      >Jam Kerja:</label
+                    >
+                    <p id="jam_kerja" class="tx-inverse tx-bold"
                     />
                   </div>
                 </div>
@@ -780,7 +789,9 @@
 <script>
   /* tabel */
 
-  const pegawaiSelectize = $("#pegawai").selectize({});
+  const pegawaiSelectize = $("#pegawait").selectize({
+    onChange:changePegawai
+  });
 
   const periodeSelectize = $("#periode").selectize();
   const cperiodeSelectize = $("#cperiode").selectize();
@@ -791,7 +802,7 @@
   prd = "{{prd}}";
   thn = "{{thn}}";
   sid = "{{sid}}";
-
+  const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
   var table = $("#tabelku").DataTable({
     ajax: "{% url 'lembur_json' sid prd thn %}",
 
@@ -1290,6 +1301,50 @@
   document.getElementById("ist_1").defaultValue = 0;
   document.getElementById("ist_2").defaultValue = 0;
   document.getElementById("blembur_id").defaultValue = 0;
+
+  function getjamkerja(tgl,pegawai){
+    $.ajax({
+      url:`/hrd/get_jam_kerja`,
+      method:"post",
+      data:{tgl,pegawai},
+      headers:{"X-CSRFToken":token},
+      success:(e) => {
+        $("#jam_kerja").html("")
+        if(e.data){
+          $("#jam_kerja").html(e.data)
+        }
+      },
+      error:(err) => {
+        $("#jam_kerja").html("")
+        if(err.responseJSON?.msg){
+          $("#jam_kerja").html(`<span class="text-danger">${err.responseJSON.msg}</span>`)
+        }else{
+          $("#jam_kerja").html(`<span class="text-danger">Terjadi Kesalahan</span>`)
+        }
+      }
+    })
+  }
+
+  function changePegawai(value){
+    const tgl = $("#tglt").val()
+    const pegawai = $("#pegawait").val()
+    if(!tgl || !pegawai){
+      $("#msgt p").remove()
+      $("#msgt").append(`<p class="alert alert-info">Silahkan isi tanggal lembur dan pilih pegawai dengan benar</p>`)
+    }else{
+      getjamkerja(tgl,pegawai)
+    }
+  }
+  $("#tglt").on("change",function(e){
+    const tgl = $("#tglt").val()
+    const pegawai = $("#pegawait").val()
+    if(!tgl || !pegawai){
+      $("#msgt p").remove()
+      $("#msgt").append(`<p class="alert alert-info">Silahkan isi tanggal lembur dan pilih pegawai dengan benar</p>`)
+    }else{
+      getjamkerja(tgl,pegawai)
+    }
+  })
 </script>
 
 <!-- Select2 -->

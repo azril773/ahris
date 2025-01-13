@@ -163,8 +163,17 @@ def detail_cuti(r, sid, idp):
         except:
             sid_lembur = 0
         
-        ac = awal_cuti_db.objects.using(r.session["ccabang"]).last()
-        tac = ac.tgl       
+        ac = awal_cuti_db.objects.using(r.session["ccabang"]).filter().last()
+        if not ac:
+            messages.error(r,"Awal cuti tidak ada")
+            return redirect("cuti",sid=sid)
+        if r.session["ccabang"] == 'cirebon':
+            if pegawai_cuti_lama.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp)).exists():
+                tac = ac.tgl       
+            else:
+                tac = pg.tgl_cuti
+        else:
+            tac = ac.tgl       
         
         data = {
             'akses' : akses,

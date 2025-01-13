@@ -12,7 +12,7 @@ urlpatterns = [
     path('lembur_bproses_json/<int:sid>', views.lembur_belum_proses_json, name='lembur_bproses_json'),
 
 
-
+    path("get_jam_kerja",views.get_jam_kerja,name="get_jam_kerja"),
     path('tkompen', views.tambah_kompen, name='tkompen'),
     path('bkompen', views.batal_kompen, name='bkompen'),
 ]

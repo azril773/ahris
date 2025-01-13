@@ -48,7 +48,9 @@
             <button data-target="#divisimodal" data-toggle="modal" class="btn btn-outline-danger mg-b-6">Per Divisi PDF</button>  &nbsp;
             <button data-target="#divisiexcelmodal" data-toggle="modal" class="btn btn-outline-success mg-b-6">Per Divisi Excel</button>  &nbsp; &nbsp; &nbsp;
             <button data-target="#shiftmodal" data-toggle="modal" class="btn btn-outline-success mg-b-6">Shift</button>  &nbsp; &nbsp; &nbsp;
-
+            {% if ccabang == 'cirebon' %}
+                <button data-target="#excelcirebon" data-toggle="modal" class="btn btn-outline-success mg-b-6">Excel Cirebon</button>  &nbsp; &nbsp; &nbsp;
+            {% endif %}
             <!-- Button lainnya -->
             {% include 'hrd_app/master/modul_absensi.html' %} 
 
@@ -284,6 +286,49 @@
                         <div class="col-6">
                             <label for="dari">Sampai</label>
                             <input type="text" name="sampai" id="sampaidivisiexcel" class="form-control tgl1">
+                        </div>
+                        <input type="hidden" name="sid" id="sid" class="form-control" value="{{sid}}">
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Cari Data</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+        <div id="excelcirebon" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Print Per Divisi Excel</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                <form action="{% url "print_laporan_divisi_excel_cirebon" %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+                        <div class="col-12 mb-2">
+                            <label for="divisiexcelcirebon">Pilih Divisi Excel</label>
+                            <select name="divisi" id="divisiexcelcirebon">
+                                <option value="">Pilih Divisi Excel</option>
+                                {% for p in divisi %}
+                                    <option value="{{p.pk}}">{{p.divisi}}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-6">
+                            <label for="dari">Dari</label>
+                            <input type="text" name="dari" id="daridivisiexcelcirebon" class="form-control tgl1">
+                        </div>
+                        <div class="col-6">
+                            <label for="dari">Sampai</label>
+                            <input type="text" name="sampai" id="sampaidivisiexcelcirebon" class="form-control tgl1">
                         </div>
                         <input type="hidden" name="sid" id="sid" class="form-control" value="{{sid}}">
         
