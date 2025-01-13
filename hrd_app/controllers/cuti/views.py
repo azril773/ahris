@@ -43,18 +43,18 @@ def cuti(r, sid):
         pegawai = []
             
 
-        libur = libur_nasional_db.objects.using(r.session["ccabang"]).filter(libur__iregex="lebaran idul fitri").last()
-        if not libur:
-            return JsonResponse({"status":'error',"msg":"Libur nasional lebaran tidak ada"},status=400)
+        ac = awal_cuti_db.objects.using(r.session["ccabang"]).filter().last()
+        if not ac:
+            return JsonResponse({"status":'error',"msg":"Awal cuti tidak ada"},status=400)
         date = datetime.now().date()
-        tgllibur = libur.tgl_libur + relativedelta(months=10)
-        lastday = monthrange(tgllibur.year,tgllibur.month)
-        tgl = datetime.strptime(f'{tgllibur.year}-{tgllibur.month}-{lastday[1]}',"%Y-%m-%d").date()
+        tglac = ac.tgl + relativedelta(months=10)
+        lastday = monthrange(tglac.year,tglac.month)
+        tgl = datetime.strptime(f'{tglac.year}-{tglac.month}-{lastday[1]}',"%Y-%m-%d").date()
         for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if r.session["ccabang"] == "cirebon":
                 pgw = pegawai_cuti_lama.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk).last()
                 if pgw is not None:
-                    p.tgl_cuti = libur.tgl_libur
+                    p.tgl_cuti = ac.tgl
                     p.expired = tgl
                     p.save(using=r.session["ccabang"])
                 else:
@@ -293,10 +293,10 @@ def dcuti_json(r, idp):
         
             data = []
             
-            libur = libur_nasional_db.objects.using(r.session["ccabang"]).filter(libur__iregex="lebaran idul fitri").last()
-            if not libur:
-                return JsonResponse({'status':'error',"msg":"Libur nasional "})
-            tac = libur.tgl_libur
+            ac = awal_cuti_db.objects.using(r.session["ccabang"]).filter().last()
+            if not ac:
+                return JsonResponse({'status':'error',"msg":"Awal cuti tidak ada "})
+            tac = ac.tgl
             aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
             pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(idp)).last()
             if not pegawai:
