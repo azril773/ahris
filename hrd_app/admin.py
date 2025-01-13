@@ -235,5 +235,27 @@ class MultiDBModelAdmin(admin.ModelAdmin):
 class CirebonAdmin(MultiDBModelAdmin):
     using = "cirebon"
 
+class TasikAdmin(MultiDBModelAdmin):
+    using = "tasik"
+
+class SumedangAdmin(MultiDBModelAdmin):
+    using = "sumedang"
+
+class CihideungAdmin(MultiDBModelAdmin):
+    using = "cihideung"
+class GarutAdmin(MultiDBModelAdmin):
+    using = "garut"
+
+
 cirebon = admin.AdminSite("cirebon")
+tasik = admin.AdminSite("tasik")
+sumedang = admin.AdminSite("sumedang")
+garut = admin.AdminSite("garut")
+cihideung = admin.AdminSite("cihideung")
+
+
 cirebon.register(awal_cuti_db,CirebonAdmin)
+tasik.register(awal_cuti_db,TasikAdmin)
+sumedang.register(awal_cuti_db,TasikAdmin)
+garut.register(awal_cuti_db,TasikAdmin)
+cihideung.register(awal_cuti_db,TasikAdmin)
