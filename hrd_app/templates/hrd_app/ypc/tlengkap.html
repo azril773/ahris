@@ -85,6 +85,7 @@
                 <th>Keluar (B)</th>
                 <th>Kembali (B)</th>
                 <th>Pulang (B)</th>
+                <th>Action</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -135,9 +136,44 @@
 
 </div><!-- br-pagebody -->
 
+<div id="editIjin" class="modal fade" style="width:100%">
+    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content bd-0 tx-14">
+        <div class="modal-header pd-y-20 pd-x-25">
+        <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Ubah Keterangan</h6>          
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>          
+        </div>
+        <div id="msgtket"></div>
+        <form id="ubah_ket" method="post">
+            {% csrf_token %}
+            <div class="form-layout form-layout-1">
+                <label for="ket">Daftar Ijin</label>
+                <select name="jenis_ijin" id="jenis_ijin" class="mb-4">
+                    <option value="">Pilih Ijin</option>
+                    {% for j in jenis_ijin %}
+                        <option value="{{j.id}}">{{j.jenis_ijin}}</option>
+                    {% endfor %}
+                </select>
+                <label for="ket">Keterangan Tambah</label>
+                {% comment %} <label for="ket">Keterangan Tambahan</label> {% endcomment %}
+                <textarea name="ket" class="form-control" id="ket" style="width: 600px;"></textarea>
+                <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+                <input type="hidden" name="id" id="idAb" class="form-control">
+                <div class="mt-3 d-flex justify-content-end gap-3">
+                    <button type="submit" class="btn btn-primary mr-2">Ubah</button>
+                    <button class="btn btn-secondary" data-dismiss="modal">Batalkan</button>
+                </div>
+            </div>            
+        </form>              
+    </div>
+    </div><!-- modal-dialog -->
+</div>
 {% endblock breadcrumb %}
 {% block hrd_ajax %}
 <script>
+    $("#jenis_ijin").selectize()
     sid = "{{sid}}"
     const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
     $("#tableku").DataTable({
@@ -162,6 +198,12 @@
             {data:"istirahat_b"},
             {data:"kembali_b"},
             {data:"pulang_b"},
+            {
+                data:null,
+                render:(data,type,row,meta) => {
+                    return `<button class="btn btn-warning" data-target="#editIjin" data-toggle="modal" data-id="${row.id}">Edit</button>`    
+                }
+            },
         ],
         "rowCallback": function (row, data) {
             if(data.sln == 1){
@@ -229,6 +271,12 @@
                 {data:"istirahat_b"},
                 {data:"kembali_b"},
                 {data:"pulang_b"},
+                {
+                    data:null,
+                    render:(data,type,row,meta) => {
+                        return `<button class="btn btn-warning" data-target="#editIjin" data-toggle="modal" data-id="${row.id}">Edit</button>`    
+                    }
+                },
             ],
             "rowCallback": function (row, data) {
                 if(data.sln == 1){
@@ -269,6 +317,46 @@
             },
         })
         $("#pilih_tgl_cari").modal("hide")
+    })
+    
+
+    $("#editIjin").on('show.bs.modal', function(e){
+        var id = $(e.relatedTarget).data('id');
+        $("#idAb").val(id);
+        console.log(id)
+    });
+
+    $("#ubah_ket").on("submit", (e) => {
+        e.preventDefault();
+        const token = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        var jenis_ijin = $("#jenis_ijin").val();
+        var ket = $("#ket").val();
+        var id = $("#idAb").val();
+        var sid = "{{sid}}";
+        $.ajax({
+            url: "{% url 'edit_ijin' %}",
+            type: "POST",
+            headers: {'X-CSRFToken': token},
+            data: {
+                'jenis_ijin': jenis_ijin,
+                'ket': ket,
+                'id': id,
+                'sid': sid
+            },
+            success: function(data){
+                $("#msgtket p").remove()
+                $("#editIjin").modal('hide')
+                table.ajax.reload();
+            },
+            error:(err) => {
+                $("#msgtket p").remove()
+                if(err.responseJSON?.msg){
+                    $("#msgtket").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                }else{
+                    $("#msgtket").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                }
+            }
+        })
     })
 </script>
 {% endblock hrd_ajax %}

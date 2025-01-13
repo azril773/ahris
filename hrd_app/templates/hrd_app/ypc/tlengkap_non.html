@@ -258,6 +258,12 @@
                 {data:"istirahat"},
                 {data:"kembali"},
                 {data:"pulang"},
+                {
+                    data:null,
+                    render:(data,type,row,meta) => {
+                        return `<button class="btn btn-warning" data-target="#editIjin" data-toggle="modal" data-id="${row.id}">Edit</button>`    
+                    }
+                },
             ],
             "rowCallback": function (row, data) {
                 if(data.sln == 1){
