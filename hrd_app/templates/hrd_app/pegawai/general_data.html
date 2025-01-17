@@ -148,54 +148,77 @@
             </div>
 
             <div class="col-lg-6">
-                <div class="form-layout form-layout-2">
+              <div class="row">
+                <div class="col-lg-12">
+                  <div class="form-layout form-layout-2">
+                      <div class="row no-gutters">
+  
+                        <div class="col-md-8">
+                          <div class="form-group">
+                            <label class="form-control-label tx-gray-800">Rekening:</label>
+                            <span class="tx-inverse tx-13">{{rekening}}</span>
+                          </div>
+                        </div>
+  
+                        <div class="col-md-4 mg-t--1 mg-md-t-0">
+                          <div class="form-group mg-md-l--1">
+                            <label class="form-control-label tx-gray-800">Payroll BY:</label>
+                            <span class="tx-inverse tx-13">{{payroll}}</span>
+                          </div>
+                        </div>
+  
+                        <div class="col-md-3 mg-t--1 mg-md-t-0">
+                          <div class="form-group mg-md-l--1">
+                            <label class="form-control-label tx-gray-800">BPJS KS:</label>
+                            <span class="tx-inverse tx-13">{{nks}}</span>
+                          </div>
+                        </div>
+  
+                        <div class="col-md-3 mg-t--1 mg-md-t-0">
+                          <div class="form-group mg-md-l--1">
+                            <label class="form-control-label tx-gray-800">BPJS TK:</label>
+                            <span class="tx-inverse tx-13">{{ntk}}</span>
+                          </div>
+                        </div>
+  
+                        <div class="col-md-3 mg-t--1 mg-md-t-0">
+                          <div class="form-group mg-md-l--1">
+                            <label class="form-control-label tx-gray-800">Premi TK:</label>
+                            <span class="tx-inverse tx-13">Rp. {{ptk}}</span>
+                          </div>
+                        </div>
+  
+                        <div class="col-md-3 mg-t--1 mg-md-t-0">
+                          <div class="form-group mg-md-l--1">
+                            <label class="form-control-label tx-gray-800">Premi KS:</label>
+                            <span class="tx-inverse tx-13">Rp. {{pks}}</span>
+                          </div>
+                        </div>
+  
+                      </div>
+                      
+                    </div>
+                </div>
+                <div class="col-lg-12 mt-3">
+                  <div class="form-layout form-layout-2">
                     <div class="row no-gutters">
 
-                      <div class="col-md-8">
-                        <div class="form-group">
-                          <label class="form-control-label tx-gray-800">Rekening:</label>
-                          <span class="tx-inverse tx-13">{{rekening}}</span>
-                        </div>
-                      </div>
-
-                      <div class="col-md-4 mg-t--1 mg-md-t-0">
-                        <div class="form-group mg-md-l--1">
-                          <label class="form-control-label tx-gray-800">Payroll BY:</label>
-                          <span class="tx-inverse tx-13">{{payroll}}</span>
-                        </div>
-                      </div>
-
-                      <div class="col-md-3 mg-t--1 mg-md-t-0">
-                        <div class="form-group mg-md-l--1">
-                          <label class="form-control-label tx-gray-800">BPJS KS:</label>
-                          <span class="tx-inverse tx-13">{{nks}}</span>
-                        </div>
-                      </div>
-
-                      <div class="col-md-3 mg-t--1 mg-md-t-0">
-                        <div class="form-group mg-md-l--1">
-                          <label class="form-control-label tx-gray-800">BPJS TK:</label>
-                          <span class="tx-inverse tx-13">{{ntk}}</span>
-                        </div>
-                      </div>
-
-                      <div class="col-md-3 mg-t--1 mg-md-t-0">
-                        <div class="form-group mg-md-l--1">
-                          <label class="form-control-label tx-gray-800">Premi TK:</label>
-                          <span class="tx-inverse tx-13">Rp. {{ptk}}</span>
-                        </div>
-                      </div>
-
-                      <div class="col-md-3 mg-t--1 mg-md-t-0">
-                        <div class="form-group mg-md-l--1">
-                          <label class="form-control-label tx-gray-800">Premi KS:</label>
-                          <span class="tx-inverse tx-13">Rp. {{pks}}</span>
+                      <div class="col-md-3">
+                        <div class="form-group d-flex justify-content-center">
+                          <div class="">
+                            <label class="form-control-label tx-gray-800">Foto:</label>
+                            {% if pp %}
+                              <img src="{{pp}}" style="width: 100px;height:100px" style="object-fit:cover;" alt="">
+                            {% endif %}
+                          </div>
                         </div>
                       </div>
 
                     </div>
                     
                   </div>
+                </div>
+              </div>
             </div>
         </div>
              

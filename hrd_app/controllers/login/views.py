@@ -477,3 +477,57 @@ def superuser(r):
         else:
             messages.error(r,"Anda tidak memiliki akses")
             return redirect("registrasi",idcabang=cabang)
+        
+
+@login_required
+def ganti_password(r):
+    id_user = r.user.id
+    akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+    if akses is not None:
+        dsid = akses.sid_id
+        sid = akses.sid_id
+        data = {
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
+            'dsid': dsid,
+            'sid': sid,
+        }
+        return render(r,"hrd_app/login/ganti_password.html",data)
+    else:
+        messages.error(r,"Akses anda belum ditentukan")
+        return redirect("beranda")
+    
+@login_required
+def ganti_password_json(r):
+    id_user = r.user.id
+    akses =akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+    if akses is not None:
+        pwLama = r.POST.get("pwLama")
+        pwBaru = r.POST.get("pwBaru")
+        konfirmasi = r.POST.get("konfirmasi")
+
+        userLama = User.objects.using(r.session["ccabang"]).filter(pk=id_user).last()
+        if not userLama:
+            return JsonResponse({"status":"error","msg":"User tidak ada"},status=400)
+        auth = hashers.check_password(pwLama,userLama.password)
+        if auth is not None:
+            if pwBaru == konfirmasi:
+                # Root user
+                user = User.objects.filter(pk=id_user).last()
+                user.set_password(pwBaru)
+                user.save()
+                cabang = akses_cabang_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+                for c in cabang:
+                    # Cabang user
+                    userCabang = User.objects.using(c.cabang).filter(pk=id_user).last()
+                    userCabang.set_password(pwBaru)
+                    userCabang.save(using=c.cabang)
+
+                return JsonResponse({"status":"success","msg":"Berhasil update password"},status=200)
+            else:
+                return JsonResponse({"status":"error","msg":"Password tidak sama"},status=400)
+        else:
+            return JsonResponse({"status":"error",'msg':"Password lama salah"},status=400)
+    else:
+        return JsonResponse({"status":"error","msg":"Akses anda belum ditentukan"},status=400)

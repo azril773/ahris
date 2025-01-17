@@ -127,4 +127,3 @@ def hapus_libur_nasional(r):
         status = 'ok'
         
         return JsonResponse({"status": status})
-

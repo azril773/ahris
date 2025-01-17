@@ -74,10 +74,9 @@ def admesin(r,id):
                 userid = [{"userid":u.user_id,"uid":u.uid} for u in users if u.user_id not in dm]
 
                 conn.enable_device() 
+                conn.disconnect()
             except Exception as e:
                 messages.error(r,"Proccess terminate: {}".format(e))
-            finally:
-                conn.disconnect()
 
 
         data = {       
@@ -260,12 +259,10 @@ def tambah_data_pegawai(r):
                         level=level
                     ).save(using=r.session["ccabang"])
                 conn.enable_device()
+                conn.disconnect()
 
         except Exception as e:
             return JsonResponse({"status":"error","msg":e},status=500)
-        finally:
-            if conn:
-                conn.disconnect()
         if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
             return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
         if email != "":
@@ -448,12 +445,10 @@ def add_data(r,id):
                     ).save(using=r.session["ccabang"])
 
         conn.enable_device()
+        conn.disconnect()
 
     except Exception as e:
         messages.error(r, "Process terminate : {}".format(e))
-    finally:
-        if conn:
-            conn.disconnect()
     return redirect("amesin")
 
 
@@ -522,11 +517,9 @@ def cpalldata(r):
                     if ft is not None:
                         fingers.append(ft)
             conn.enable_device()
+            conn.disconnect()
         except Exception as e:
             messages.error(r,"Process terminate : {}".format(e))
-        finally:
-            if conn:
-                conn.disconnect()
 
 
         
@@ -544,11 +537,9 @@ def cpalldata(r):
                             fts.append(f)
                     conn.save_user_template(du,fts)        
                 conn.enable_device()
+                conn.disconnect()
             except Exception as e:
                 messages.error(r,"Proccess terminate : {}".format(e))
-            finally:
-                if conn:
-                    conn.disconnect()
 
     return redirect("cdatamesin")
 
@@ -588,11 +579,9 @@ def cppegawai(r):
                     if ft is not None:
                         fingers.append(ft)
             conn.enable_device()
+            conn.disconnect()
         except Exception as e:
             messages.error(r,"Process terminate : {}".format(e))
-        finally:
-            if conn:
-                conn.disconnect()
 
 
         
@@ -617,11 +606,9 @@ def cppegawai(r):
 
 
                 conn.enable_device()
+                conn.disconnect()
             except Exception as e:
                 messages.error(r,"Proccess terminate : {}".format(e))
-            finally:
-                if conn:
-                    conn.disconnect()
 
 
 
@@ -660,11 +647,9 @@ def cpdivisi(r):
                     if ft is not None:
                         fingers.append(ft)
             conn.enable_device()
+            conn.disconnect()
         except Exception as e:
             messages.error(r,"Process terminate : {}".format(e))
-        finally:
-            if conn:
-                conn.disconnect()
 
 
         for m in mesin_tujuan:
@@ -688,11 +673,9 @@ def cpdivisi(r):
 
 
                 conn.enable_device()
+                conn.disconnect()
             except Exception as e:
                 messages.error(r,"Proccess terminate : {}".format(e))
-            finally:
-                if conn:
-                    conn.disconnect()
 
 
 
@@ -737,10 +720,9 @@ def adduser_machine(r):
 
 
             conn.enable_device()
+            conn.disconnect()
         except Exception as e:
             messages.error(r,"Proccess terminate : {}".format(e))
-        finally:
-            conn.disconnect()
     return redirect("cdatamesin")
 
 
@@ -778,12 +760,9 @@ def edituser_machine(r):
                 conn.set_user(uid=user[0].uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
 
             conn.enable_device()
-
+            conn.disconnect()
         except Exception as e:
             messages.error(r,"Proccess terminate : {}".format(e))
-        finally:
-            if conn:
-                conn.disconnect()
     return redirect("cdatamesin")   
 
 
@@ -808,11 +787,9 @@ def deleteuser_machine(r):
                 for userid in userids:
                     conn.delete_user(user_id=int(userid))
                 conn.enable_device()
+                conn.disconnect()
             except Exception as e:
                 messages.error(r,"Proccess terminate : {}".format(e))
-            finally:
-                if conn:
-                    conn.disconnect()
     return redirect("cdatamesin")
 
 @login_required
@@ -836,11 +813,9 @@ def deleteuser_machineu(r):
                 for userid in userids:
                     conn.delete_user(user_id=int(userid))
                 conn.enable_device()
+                conn.disconnect()
             except Exception as e:
                 messages.error(r,"Proccess terminate : {}".format(e))
-            finally:
-                if conn:
-                    conn.disconnect()
     return redirect("cdatamesin")
 
 
@@ -861,11 +836,9 @@ def hapusabsen(r,id):
 
 
             conn.enable_device()
+            conn.disconnect()
         except Exception as e:
             messages.error(r,e)
-        finally:
-            if conn:
-                conn.disconnect()
 
     return redirect("amesin")
 
@@ -887,11 +860,9 @@ def sesuaikanjam(r,id):
             messages.success(r,"Berhasil sesuaikan jam mesin" + mesin.nama)
 
             conn.enable_device()
+            conn.disconnect()
         except Exception as e:
             messages.error(r,e)
-        finally:
-            if conn:
-                conn.disconnect()
 
     return redirect("amesin")
 
@@ -913,11 +884,9 @@ def clearbuffer(r,id):
             messages.success(r,"Berhasil membersihkan buffer mesin" + mesin.nama)
 
             conn.enable_device()
+            conn.disconnect()
         except Exception as e:
             messages.error(r,e)
-        finally:
-            if conn:
-                conn.disconnect()
 
     return redirect("amesin")
 

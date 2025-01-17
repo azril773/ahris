@@ -13,6 +13,7 @@ def callback(r):
     access = oauth.oidc.get("http://localhost:8002/application/o/userinfo/",token=token)
     result = access.json()
     r.session["user"] = result
+    # return render(r,)
 urlpatterns = [
     path('adminnya/', admin.site.urls),
     path('callback/', callback),

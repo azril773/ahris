@@ -1,0 +1,707 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        <div id="msg"></div>
+        <!-- Pesan Error -->
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Absensi -->
+        <h6 class="tx-gray-800 tx-uppercase tx-inverse tx-bold tx-14 mg-b-10">History Pegawai</h6>
+    
+        <!-- Info absensi -->        
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">                               
+            <a href="{% url "pegawai" sid %}" class="btn btn-primary mg-b-6">Data Pegawai</a>            
+            </div>          
+        </div>
+
+        <br>        
+
+
+        <br>
+
+        <div id="loader"></div>            
+     
+        <!-- Table -->
+        {% csrf_token %}
+        <div class="table-wrapper">
+            <table id="tabelku" class="table display responsive" style="width:100%">
+            <thead>
+                <tr>
+                    <th class="dt-left" wrap>Nama</th>
+                    <th class="dt-left">NIK</th>
+                    <th class="dt-left">Userid</th>
+                    <th class="dt-left">Divisi</th>
+                    <th class="dt-left">Tanggal Masuk</th>
+                    <th class="dt-left">Detail</th>
+                    <th class="dt-left">Pribadi</th>
+                    <th class="dt-left">Keluarga & Pihak</th>
+                    <th class="dt-left">Pengalaman & Pendidikan</th>
+                    <th class="dt-left">Edit By</th>
+                    <th class="dt-left">Edit Date</th>
+
+                </tr>
+            </thead>
+            </table>
+        </div>
+
+    </div>
+
+</div><!-- br-pagebody -->
+
+<!-- Detail Modal -->
+<div class="modal fade" id="detailModal" tabindex="-1" aria-labelledby="detailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title tx-inverse" id="detailModalLabel">Detail Data</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="table-wrapper" style="width: 100%%;">
+                <form id="detailForm">
+                    <div class="row">
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="nama" class="form-label tx-inverse text-capitalize">nama</label>
+                            <input type="text" name="nama" class="form-control" disabled value="-" id="nama">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="email" class="form-label tx-inverse text-capitalize">email</label>
+                            <input type="text" name="email" class="form-control" disabled value="-" id="email">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="no_telp" class="form-label tx-inverse text-capitalize">no_telp</label>
+                            <input type="text" name="no_telp" class="form-control" disabled value="-" id="no_telp">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="userid" class="form-label tx-inverse text-capitalize">userid</label>
+                            <input type="text" name="userid" class="form-control" disabled value="-" id="userid">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="gender" class="form-label tx-inverse text-capitalize">gender</label>
+                            <input type="text" name="gender" class="form-control" disabled value="-" id="gender">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="status" class="form-label tx-inverse text-capitalize">status</label>
+                            <input type="text" name="status" class="form-control" disabled value="-" id="status">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="nik" class="form-label tx-inverse text-capitalize">nik</label>
+                            <input type="text" name="nik" class="form-control" disabled value="-" id="nik">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="divisi" class="form-label tx-inverse text-capitalize">divisi</label>
+                            <input type="text" name="divisi" class="form-control" disabled value="-" id="divisi">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="jabatan" class="form-label tx-inverse text-capitalize">jabatan</label>
+                            <input type="text" name="jabatan" class="form-control" disabled value="-" id="jabatan">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="no_rekening" class="form-label tx-inverse text-capitalize">no rekening</label>
+                            <input type="text" name="no_rekening" class="form-control" disabled value="-" id="no_rekening">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="no_bpjs_ks" class="form-label tx-inverse text-capitalize">no bpjs ks</label>
+                            <input type="text" name="no_bpjs_ks" class="form-control" disabled value="-" id="no_bpjs_ks">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="no_bpjs_tk" class="form-label tx-inverse text-capitalize">no bpjs tk</label>
+                            <input type="text" name="no_bpjs_tk" class="form-control" disabled value="-" id="no_bpjs_tk">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="payroll_by" class="form-label tx-inverse text-capitalize">payroll by</label>
+                            <input type="text" name="payroll_by" class="form-control" disabled value="-" id="payroll_by">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="ks_premi" class="form-label tx-inverse text-capitalize">ks premi</label>
+                            <input type="text" name="ks_premi" class="form-control" disabled value="-" id="ks_premi">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="tk_premi" class="form-label tx-inverse text-capitalize">tk premi</label>
+                            <input type="text" name="tk_premi" class="form-control" disabled value="-" id="tk_premi">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="aktif" class="form-label tx-inverse text-capitalize">aktif</label>
+                            <input type="text" name="aktif" class="form-control" disabled value="-" id="aktif">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="tgl_masuk" class="form-label tx-inverse text-capitalize">tgl masuk</label>
+                            <input type="text" name="tgl_masuk" class="form-control" disabled value="-" id="tgl_masuk">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="tgl_aktif" class="form-label tx-inverse text-capitalize">tgl aktif</label>
+                            <input type="text" name="tgl_aktif" class="form-control" disabled value="-" id="tgl_aktif">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="tgl_nonaktif" class="form-label tx-inverse text-capitalize">tgl nonaktif</label>
+                            <input type="text" name="tgl_nonaktif" class="form-control" disabled value="-" id="tgl_nonaktif">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="hari_off" class="form-label tx-inverse text-capitalize">hari off</label>
+                            <input type="text" name="hari_off" class="form-control" disabled value="-" id="hari_off">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="hari_off2" class="form-label tx-inverse text-capitalize">hari off2</label>
+                            <input type="text" name="hari_off2" class="form-control" disabled value="-" id="hari_off2">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="kelompok_kerja" class="form-label tx-inverse text-capitalize">kelompok kerja</label>
+                            <input type="text" name="kelompok_kerja" class="form-control" disabled value="-" id="kelompok_kerja">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="sisa_cuti" class="form-label tx-inverse text-capitalize">sisa cuti</label>
+                            <input type="text" name="sisa_cuti" class="form-control" disabled value="-" id="sisa_cuti">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="cuti_awal" class="form-label tx-inverse text-capitalize">cuti awal</label>
+                            <input type="text" name="cuti_awal" class="form-control" disabled value="-" id="cuti_awal">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="shift" class="form-label tx-inverse text-capitalize">shift</label>
+                            <input type="text" name="shift" class="form-control" disabled value="-" id="shift">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="counter" class="form-label tx-inverse text-capitalize">counter</label>
+                            <input type="text" name="counter" class="form-control" disabled value="-" id="counter">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="profile_picture" class="form-label tx-inverse text-capitalize">profile picture</label>
+                            <input type="text" name="profile_picture" class="form-control" disabled value="-" id="profile_picture">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="edit_by" class="form-label tx-inverse text-capitalize">edit by</label>
+                            <input type="text" name="edit_by" class="form-control" disabled value="-" id="edit_by">
+                        </div>
+                        <div class="col-md-3 tx-inverse mt-3">
+                            <label for="edit_date" class="form-label tx-inverse text-capitalize">edit date</label>
+                            <input type="text" name="edit_date" class="form-control" disabled value="-" id="edit_date">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Detail Modal -->
+
+<!-- Pribadi Modal -->
+<div class="modal fade" id="pribadiModal" tabindex="-1" aria-labelledby="pribadiModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title tx-inverse" id="pribadiModalLabel">Detail Pribadi</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <form id="pribadiForm">
+                <div class="row">
+                    <div class="col-md-3 tx-inverse mt-3">
+                        <label for="ppegawai" class="form-label tx-inverse text-capitalize">pegawai</label>
+                        <input type="text" class="form-control" disabled value="-" name="ppegawai" id="ppegawai">
+                    </div>
+                    <div class="col-md-3 tx-inverse mt-3">
+                        <label for="palamat" class="form-label tx-inverse text-capitalize">alamat</label>
+                        <input type="text" class="form-control" disabled value="-" name="palamat" id="palamat">
+                    </div>
+                    <div class="col-md-3 tx-inverse mt-3">
+                        <label for="pphone" class="form-label tx-inverse text-capitalize">phone</label>
+                        <input type="text" class="form-control" disabled value="-" name="pphone" id="pphone">
+                    </div>
+                    <div class="col-md-3 tx-inverse mt-3">
+                        <label for="pemail" class="form-label tx-inverse text-capitalize">email</label>
+                        <input type="text" class="form-control" disabled value="-" name="pemail" id="pemail">
+                    </div>
+                    <div class="col-md-3 tx-inverse mt-3">
+                        <label for="pkota_lahir" class="form-label tx-inverse text-capitalize">kota lahir</label>
+                        <input type="text" class="form-control" disabled value="-" name="pkota_lahir" id="pkota_lahir">
+                    </div>
+                    <div class="col-md-3 tx-inverse mt-3">
+                        <label for="ptgl_lahir" class="form-label tx-inverse text-capitalize">tgl lahir</label>
+                        <input type="text" class="form-control" disabled value="-" name="ptgl_lahir" id="ptgl_lahir">
+                    </div>
+                    <div class="col-md-3 tx-inverse mt-3">
+                        <label for="ptinggi_badan" class="form-label tx-inverse text-capitalize">tinggi badan</label>
+                        <input type="text" class="form-control" disabled value="-" name="ptinggi_badan" id="ptinggi_badan">
+                    </div>
+                    <div class="col-md-3 tx-inverse mt-3">
+                        <label for="pberat_badan" class="form-label tx-inverse text-capitalize">berat badan</label>
+                        <input type="text" class="form-control" disabled value="-" name="pberat_badan" id="pberat_badan">
+                    </div>
+                    <div class="col-md-3 tx-inverse mt-3">
+                        <label for="pgol_darah" class="form-label tx-inverse text-capitalize">gol darah</label>
+                        <input type="text" class="form-control" disabled value="-" name="pgol_darah" id="pgol_darah">
+                    </div>
+                    <div class="col-md-3 tx-inverse mt-3">
+                        <label for="pagama" class="form-label tx-inverse text-capitalize">agama</label>
+                        <input type="text" class="form-control" disabled value="-" name="pagama" id="pagama">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Pribadi Modal -->
+
+<!-- Keluarga & Pihak Modal -->
+<div class="modal fade" id="kpModal" tabindex="-1" aria-labelledby="kpModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title tx-inverse" id="kpModalLabel">Keluarga & Kontak Lain</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <h6 class="tx-inverse tx-bold"> Data Keluarga</h6>
+            <table class="table" id="keluargaTable" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th nowrap class="text-capitalize">Pegawai</th>
+                        <th nowrap class="text-capitalize">hubungan</th>
+                        <th nowrap class="text-capitalize">nama</th>
+                        <th nowrap class="text-capitalize">tanggal lahir</th>
+                        <th nowrap class="text-capitalize">gender</th>
+                        <th nowrap class="text-capitalize">gol darah</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            &nbsp;
+            &nbsp;
+            <h6 class="tx-inverse tx-bold"> Data Kontak Lain</h6>
+            <table class="table" id="pihakTable" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th nowrap class="text-capitalize">Pegawai</th>
+                        <th nowrap class="text-capitalize">hubungan</th>
+                        <th nowrap class="text-capitalize">nama</th>
+                        <th nowrap class="text-capitalize">gender</th>
+                        <th nowrap class="text-capitalize">phone</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Pribadi Modal -->
+
+<!-- Pengalaman & Pendidikan Modal -->
+<div class="modal fade" id="ppModal" tabindex="-1" aria-labelledby="ppModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title tx-inverse" id="ppModalLabel">Keluarga & Pihak</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <h6 class="tx-inverse tx-bold"> Data Perusahaan</h6>
+            <table class="table" id="pengalamanTable" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th nowrap class="text-capitalize">Pegawai</th>
+                        <th nowrap class="text-capitalize">perusahaan</th>
+                        <th nowrap class="text-capitalize">kota</th>
+                        <th nowrap class="text-capitalize">dari tahun</th>
+                        <th nowrap class="text-capitalize">sampai tahun</th>
+                        <th nowrap class="text-capitalize">jabatan</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            &nbsp;
+            &nbsp;
+            <h6 class="tx-inverse tx-bold"> Data Pendidikan</h6>
+            <table class="table" id="pendidikanTable" style="width: 100%;">
+                <thead>
+                    <tr>
+                        <th nowrap class="text-capitalize">Pegawai</th>
+                        <th nowrap class="text-capitalize">pendidikan</th>
+                        <th nowrap class="text-capitalize">kota</th>
+                        <th nowrap class="text-capitalize">nama</th>
+                        <th nowrap class="text-capitalize">dari tahun</th>
+                        <th nowrap class="text-capitalize">sampai tahun</th>
+                        <th nowrap class="text-capitalize">jurusan</th>
+                        <th nowrap class="text-capitalize">gelar</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+<!-- Pengalaman & Pendidikan Modal -->
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>
+    sid = "{{sid}}"
+    idp = "{{idp}}"
+    const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+   $("#tabelku").DataTable({
+    ajax:{
+        url:"{% url 'detail_history_json' sid idp  %}",
+        method:"post",
+        headers:{"X-CSRFToken":token},
+        error:(err) => {
+            console.log(err)
+            $("#msg p").remove()
+            if(err.responseJSON?.msg){
+                $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+            }else{
+                $("#msg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+            }
+        }
+    },
+    columns: [
+        {
+            data:"nama"
+        },
+        {data:"nik"},
+        {data:"userid"},
+        {data:"divisi"},
+        {data:"tgl_masuk"},
+        {
+            data:null,
+            render:(data,type,row,meta) => {
+                return `<a href="#" data-target="#detailModal" data-toggle="modal" data-id="${row.id}">Detail</a>`
+            }
+        },
+        {
+            data:null,
+            render:(data,type,row,meta) => {
+                return `<a href="#" data-target="#pribadiModal" data-toggle="modal"  data-id="${row.id}">Pribadi</a>`
+            },
+        },
+        {
+            data:null,
+            render:(data,type,row,meta) => {
+                return `<a href="#kpModal" data-target="#" data-toggle="modal" data-id="${row.id}">Keluarga & Pihak</a>`
+            },
+        },
+        {
+            data:null,
+            render:(data,type,row,meta) => {
+                return `<a href="#" data-target="#ppModal" data-toggle="modal" data-id="${row.id}">Pengalaman & Pendidikan</a>`
+            },
+        },
+        {data:"edit_by"},
+        {data:"edit_date"},
+        ],
+        "rowCallback":function (row, data) {
+            $('td', row).eq(0).addClass('hitam');
+            $('td', row).eq(1).addClass('hitam');
+            $('td', row).eq(2).addClass('hitam');
+            $('td', row).eq(3).addClass('hitam');
+            $('td', row).eq(4).addClass('hitam');
+            $('td', row).eq(5).addClass('hitam');
+            $('td', row).eq(6).addClass('hitam');
+            $('td', row).eq(7).addClass('hitam');
+            $('td', row).eq(8).addClass('hitam');
+            $('td', row).eq(9).addClass('hitam');
+            $('td', row).eq(10).addClass('hitam');
+    },
+    destroy: true,
+    ordering: false,
+    paging: false,
+    scrollX:"100%",
+    scrollY: 300,
+    processing: true,
+
+    columnDefs:[
+        {targets:[0,1,2,3,4,5,6,7,8,9,10],className:"dt-left"},
+    ],
+   })
+</script>
+
+<script>
+    $("#detailModal").on("show.bs.modal",function(e){
+        const id = $(e.relatedTarget).data("id")
+        $("#detailTable").DataTable().destroy()
+        $.ajax({
+            url:"{% url 'detail_data_json' %}",
+            method:"post",
+            data:{id},
+            headers:{"X-CSRFToken":token},
+            success:(e) => {
+                $("#detailForm").trigger("reset")
+                if(e.data){
+                    if(e.data.length > 0){
+                        $("#nama").val(e.data[0].nama)
+                        $("#email").val(e.data[0].email)
+                        $("#no_telp").val(e.data[0].no_telp)
+                        $("#userid").val(e.data[0].userid)
+                        $("#gender").val(e.data[0].gender)
+                        $("#status").val(e.data[0].status)
+                        $("#nik").val(e.data[0].nik)
+                        $("#divisi").val(e.data[0].divisi)
+                        $("#jabatan").val(e.data[0].jabatan)
+                        $("#no_rekening").val(e.data[0].no_rekening)
+                        $("#no_bpjs_ks").val(e.data[0].no_bpjs_ks)
+                        $("#no_bpjs_tk").val(e.data[0].no_bpjs_tk)
+                        $("#payroll_by").val(e.data[0].payroll_by)
+                        $("#ks_premi").val(e.data[0].ks_premi)
+                        $("#tk_premi").val(e.data[0].tk_premi)
+                        $("#aktif").val(e.data[0].aktif)
+                        $("#tgl_masuk").val(e.data[0].tgl_masuk)
+                        $("#tgl_aktif").val(e.data[0].tgl_aktif)
+                        $("#tgl_nonaktif").val(e.data[0].tgl_nonaktif)
+                        $("#hari_off").val(e.data[0].hari_off)
+                        $("#hari_off2").val(e.data[0].hari_off2)
+                        $("#kelompok_kerja").val(e.data[0].kelompok_kerja)
+                        $("#sisa_cuti").val(e.data[0].sisa_cuti)
+                        $("#cuti_awal").val(e.data[0].cuti_awal)
+                        $("#shift").val(e.data[0].shift)
+                        $("#counter").val(e.data[0].counter)
+                        $("#profile_picture").val(e.data[0].profile_picture)
+                        $("#edit_by").val(e.data[0].edit_by)
+                        $("#edit_date").val(e.data[0].edit_date)
+                    }
+                }
+            }
+        })
+    })
+
+
+    $("#pribadiModal").on("show.bs.modal",function(e){
+        const id = $(e.relatedTarget).data('id')
+        $.ajax({
+            url:"{% url 'history_pribadi_json' %}",
+            method:"post",
+            data:{id},
+            headers:{"X-CSRFToken":token},
+            success:(e) => {
+                console.log(e)
+                $("#pribadiForm").trigger("reset")
+                if(e.data){
+                    if(e.data.length > 0){
+                        $("#ppegawai").val(e.data[0].pegawai)
+                        $("#palamat").val(e.data[0].alamat)
+                        $("#pphone").val(e.data[0].phone)
+                        $("#pemail").val(e.data[0].email)
+                        $("#pkota_lahir").val(e.data[0].kota_lahir)
+                        $("#ptgl_lahir").val(e.data[0].tgl_lahir)
+                        $("#ptinggi_badan").val(e.data[0].tinggi_badan)
+                        $("#pberat_badan").val(e.data[0].berat_badan)
+                        $("#pgol_darah").val(e.data[0].gol_darah)
+                        $("#pagama").val(e.data[0].agama)
+                    }
+                }
+            }
+        })
+    })
+
+    $("#kpModal").on("show.bs.modal",function(e){
+        const id = $(e.relatedTarget).data("id")
+        console.log(id)
+        $("#keluargaTable").DataTable().destroy()
+        $("#pihakTable").DataTable().destroy()
+        $("#keluargaTable").DataTable({
+            ajax:{
+                url:"{% url 'keluarga_data_json' %}",
+                method:"post",
+                data:{id},
+                headers:{"X-CSRFToken":token}
+            },
+            columns:[
+            {data:"pegawai"},
+            {data:"hubungan"},
+            {data:"nama"},
+            {data:"tgl_lahir"},
+            {data:"gender"},
+            {data:"gol_darah"},
+            ],
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+            },
+            
+            ordering: false,
+            paging: false,
+            scrollX:"100%",
+            info:false,
+            scrollY: 150,
+            destroy:true,
+            processing: true,
+            searching:false
+        })
+        $("#pihakTable").DataTable({
+            ajax:{
+                url:"{% url 'pihak_data_json' %}",
+                method:"post",
+                data:{id},
+                headers:{"X-CSRFToken":token}
+            },
+            columns:[
+                {data:"pegawai"},
+                {data:"hubungan"},
+                {data:"nama"},
+                {data:"gender"},
+                {data:"phone"},
+            ],
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+            },
+            columnDefs:[
+            {targets:[0,1,2,3,4],className:"text-nowrap"}
+            ],
+            destroy:true,
+            ordering: false,
+            paging: false,
+            scrollX:"100%",
+            scrollY: 150,
+            info:false,
+            processing: true,
+            searching:false
+        })
+    })
+
+    $("#ppModal").on("show.bs.modal",function(e){
+        const id = $(e.relatedTarget).data('id')
+        
+        $("#pengalamanTable").DataTable().destroy()
+        $("#pendidikanTable").DataTable().destroy()
+        $("#pengalamanTable").DataTable({
+            ajax:{
+                url:"{% url 'pengalaman_data_json' %}",
+                method:"post",
+                data:{id},
+                headers:{"X-CSRFToken":token}
+            },
+            columns:[
+            {data:"pegawai"},
+            {data:"perusahaan"},
+            {data:"kota"},
+            {data:"dari_tahun"},
+            {data:"sampai_tahun"},
+            {data:"jabatan"},
+            ],
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+            },
+            
+            ordering: false,
+            paging: false,
+            scrollX:"100%",
+            info:false,
+            scrollY: 150,
+            destroy:true,
+            processing: true,
+            searching:false
+        })
+        $("#pendidikanTable").DataTable({
+            ajax:{
+                url:"{% url 'pendidikan_data_json' %}",
+                method:"post",
+                data:{id},
+                headers:{"X-CSRFToken":token}
+            },
+            columns:[
+                {data:"pegawai"},
+                {data:"pendidikan"},
+                {data:"nama"},
+                {data:"kota"},
+                {data:"dari_tahun"},
+                {data:"sampai_tahun"},
+                {data:"jurusan"},
+                {data:"gelar"},
+            ],
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+                $('td', row).eq(6).addClass('hitam');
+                $('td', row).eq(7).addClass('hitam');
+            },
+            columnDefs:[
+            {targets:[0,1,2,3,4],className:"text-nowrap"}
+            ],
+            destroy:true,
+            ordering: false,
+            paging: false,
+            scrollX:"100%",
+            scrollY: 150,
+            info:false,
+            processing: true,
+            searching:false
+        })
+    })
+</script>
+{% endblock hrd_ajax %}

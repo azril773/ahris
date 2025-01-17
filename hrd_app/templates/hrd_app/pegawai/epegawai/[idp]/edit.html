@@ -263,7 +263,15 @@
                                   <input class="form-control" type="text" name="ptk" id="ptk" value="{{pg.tk_premi}}">
                                 </div>
                               </div> 
-                              
+                              {% if pg.profile_picture %}
+                              <div class="col-lg-3">
+                                <div class="preview" id="preview">
+                                    <img src="{% static pg.profile_picture %}" style="width:100%;height:100%" alt="">                                    
+                                  </div>
+                              </div>
+                              {% else %}
+                              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Laborum a minima nihil quam ullam excepturi, libero nam corporis quisquam cumque rem sapiente obcaecati numquam beatae dignissimos, ea consequatur. Debitis, asperiores.
+                              {% endif %}
                             </div>
                         </div>
                     </section>
@@ -1061,6 +1069,7 @@ pihak.forEach(e => {
   
     function finished(e){
       const token = document.querySelector("[name=csrfmiddlewaretoken]").value
+      const id = $("#id").val()
       const nama = $("#nama").val()
       const gender = $("#gender").val()
       const tgl_masuk = moment($("#tgl_masuk").val(),"DD-MM-YYYY").format("YYYY-MM-DD")

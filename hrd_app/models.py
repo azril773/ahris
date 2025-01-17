@@ -203,6 +203,7 @@ class pegawai_db(models.Model):
     cuti_awal = models.IntegerField(null=True)
     shift = models.CharField(max_length=100, null=True, blank=True)
     counter = models.ForeignKey(counter_db, on_delete=models.CASCADE, null=True, blank=True)
+    profile_picture = models.CharField(max_length=100,null=True)
     
     rekening = models.CharField(max_length=50, null=True, blank=True)
 
@@ -218,6 +219,150 @@ class pegawai_db(models.Model):
     class Meta:
         verbose_name = 'Pegawai'
         verbose_name_plural = 'Pegawai'
+
+class history_pegawai_db(models.Model):
+    pegawai = models.ForeignKey(pegawai_db,on_delete=models.CASCADE,null=True)
+    nama = models.CharField(max_length=200, null=True)
+    email = models.CharField(max_length=200, null=True)
+    no_telp = models.CharField(max_length=100, null=True)
+    userid = models.CharField(max_length=100, null=True)
+    gender = models.CharField(max_length=10, null=True)
+
+    status = models.CharField(max_length=100,null=True)
+    nik = models.CharField(max_length=100, null=True)
+    divisi = models.CharField(max_length=100,null=True)
+    jabatan = models.CharField(max_length=100, null=True)
+
+    no_rekening = models.CharField(max_length=50, null=True, blank=True)
+    no_bpjs_ks = models.CharField(max_length=50, null=True, blank=True)
+    no_bpjs_tk = models.CharField(max_length=50, null=True, blank=True)
+    payroll_by = models.CharField(max_length=50, choices=pilihan_pengelola, default='HRD')
+
+    ks_premi = models.IntegerField(default=0)
+    tk_premi = models.IntegerField(default=0)
+
+    aktif = models.IntegerField(null=True)
+    tgl_masuk = models.DateField(null=True, blank=True)
+    tgl_aktif = models.DateTimeField(null=True, blank=True)
+    tgl_nonaktif = models.DateTimeField(null=True, blank=True)
+    tgl_cuti = models.DateField(null=True)
+    expired = models.DateField(null=True)
+
+    hari_off = models.CharField(max_length=100, null=True)
+    hari_off2 = models.CharField(max_length=100,null=True, blank=True)
+    kelompok_kerja = models.CharField(max_length=200,null=True)
+    sisa_cuti = models.IntegerField(null=True)
+    cuti_awal = models.IntegerField(null=True)
+    shift = models.CharField(max_length=100, null=True, blank=True)
+    counter = models.CharField(max_length=200, null=True, blank=True)
+    profile_picture = models.CharField(max_length=100,null=True)
+    
+    rekening = models.CharField(max_length=50, null=True, blank=True)
+
+    add_by = models.CharField(max_length=100, null=True, blank=True)
+    edit_by = models.CharField(max_length=100, null=True, blank=True)
+    add_date = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    edit_date = models.DateTimeField(auto_now=True, null=True)
+    item_edit = models.CharField(max_length=100, null=True, blank=True)
+
+    def __str__(self):
+        return self.nama
+
+    class Meta:
+        verbose_name = 'Pegawai History'
+        verbose_name_plural = 'Pegawai History'
+
+
+class history_pengalaman_db(models.Model):
+    history = models.ForeignKey(history_pegawai_db,on_delete=models.CASCADE,null=True)
+    pegawai = models.CharField(max_length=200,null=True)
+    perusahaan = models.CharField(max_length=50, null=True)
+    kota = models.CharField(max_length=200, null=True)
+    dari_tahun = models.IntegerField()
+    sampai_tahun = models.IntegerField()
+    jabatan = models.CharField(max_length=50, null=True)    
+
+    def __int__(self):
+        return self.pegawai
+
+    class Meta:
+        verbose_name = 'Pengalaman Kerja History'
+        verbose_name_plural = 'Pengalaman Kerja History'
+
+class history_pendidikan_db(models.Model):
+    history = models.ForeignKey(history_pegawai_db,on_delete=models.CASCADE,null=True)
+    pegawai = models.CharField(max_length=200,null=True)
+    pendidikan = models.CharField(max_length=100,null=True)
+    nama = models.CharField(max_length=100, null=True)
+    kota = models.CharField(max_length=200, null=True)
+    dari_tahun = models.IntegerField()
+    sampai_tahun = models.IntegerField()
+    jurusan = models.CharField(max_length=50, null=True)    
+    gelar = models.CharField(max_length=50, null=True)    
+
+    def __int__(self):
+        return self.pegawai
+
+    class Meta:
+        verbose_name = 'Pendidikan History'
+        verbose_name_plural = 'Pendidikan History'  
+
+
+class history_pribadi_db(models.Model):
+    history = models.ForeignKey(history_pegawai_db,on_delete=models.CASCADE,null=True)
+    pegawai = models.CharField(max_length=200,null=True)
+    alamat = models.TextField(null=True)
+    phone = models.CharField(max_length=20, null=True)
+    email = models.CharField(max_length=50, null=True)
+    kota_lahir = models.CharField(max_length=200,null=True)
+    tgl_lahir = models.DateField(null=True)
+    tinggi_badan = models.FloatField(default=0)
+    berat_badan = models.FloatField(default=0)
+    gol_darah = models.CharField(max_length=5, null=True)
+    agama = models.CharField(max_length=30, null=True)
+    
+
+    def __int__(self):
+        return self.pegawai
+
+    class Meta:
+        verbose_name = 'Data Pribadi History'
+        verbose_name_plural = 'Data Pribadi History'
+        
+        
+class history_keluarga_db(models.Model):
+    history = models.ForeignKey(history_pegawai_db,on_delete=models.CASCADE,null=True)
+    pegawai = models.CharField(max_length=200,null=True)
+    hubungan = models.CharField(max_length=30, null=True)
+    nama = models.CharField(max_length=100, null=True)
+    tgl_lahir = models.DateField(null=True)
+    gender = models.CharField(max_length=10, null=True)
+    gol_darah = models.CharField(max_length=5, null=True)    
+    status_bpjs = models.CharField(max_length=5, null=True)    
+    no_bpjs_ks=models.CharField(max_length=50,null=True)
+
+    def __int__(self):
+        return self.pegawai
+
+    class Meta:
+        verbose_name = 'Data Keluarga History'
+        verbose_name_plural = 'Data Keluarga History'        
+
+
+class history_kontak_lain_db(models.Model):
+    history = models.ForeignKey(history_pegawai_db,on_delete=models.CASCADE,null=True)
+    pegawai = models.CharField(max_length=200,null=True)
+    hubungan = models.CharField(max_length=30, null=True)
+    nama = models.CharField(max_length=100, null=True)
+    gender = models.CharField(max_length=10, null=True)
+    phone = models.CharField(max_length=20, null=True)
+    
+    def __int__(self):
+        return self.pegawai
+
+    class Meta:
+        verbose_name = 'Orang yg dapat dihubungi'
+        verbose_name_plural = 'Orang yg dapat dihubungi'
 
 
 class pribadi_db(models.Model):
@@ -240,7 +385,7 @@ class pribadi_db(models.Model):
         verbose_name = 'Data Pribadi'
         verbose_name_plural = 'Data Pribadi'
         
-        
+status_bpjs = ((0,0),(1,1))
 class keluarga_db(models.Model):
     pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE)
     hubungan = models.CharField(max_length=30, null=True)
@@ -248,7 +393,8 @@ class keluarga_db(models.Model):
     tgl_lahir = models.DateField(null=True)
     gender = models.CharField(max_length=10, null=True)
     gol_darah = models.CharField(max_length=5, null=True)    
-
+    status_bpjs = models.IntegerField(choices=status_bpjs,max_length=5,null=True)
+    no_bpjs_ks = models.CharField(max_length=100,null=True)
     def __int__(self):
         return self.pegawai
 
@@ -473,6 +619,17 @@ class cabang_db(models.Model):
     class Meta:
         verbose_name = "Cabang DB"
         verbose_name_plural = "Cabang DB"
+    
+class pihak_pertama_db(models.Model):
+    pegawai = models.ForeignKey(pegawai_db,on_delete=models.CASCADE,null=True)
+
+    def __str__(self):
+        return self.pegawai.nama
+
+    class Meta:
+        verbose_name = "Pihak Pertama"
+        verbose_name_plural = "Pihak Pertama"
+    
 # Akses
 # ==================================================================
 

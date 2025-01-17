@@ -1604,7 +1604,6 @@ def print_laporan_divisi_excel_cirebon(r):
             obj["t_hari_kerja"].append(t_hari_kerja)
             obj["ket"].append("")
 
-        print(obj)
         df = pd.DataFrame(obj)
         for f in os.listdir("static/excel/"):
             if re.search(".*",f):

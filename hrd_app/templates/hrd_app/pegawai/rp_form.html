@@ -172,9 +172,9 @@
                                   <label class="form-control-label tx-inverse">Shift: <span class="tx-danger">*</span></label>
                                   <select name="shift" id="shift" class="form-control select2-show-search" data-placeholder="" required>
                                     <option label=""></option>
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="Non Shift" selected>Non Shift</option>
+                                    {% for s in shift %}
+                                      <option value="{{s.shift}}">{{s.shift}}</option>
+                                    {% endfor %}
                                 </select>
                                 </div>
                               </div> 
@@ -243,7 +243,16 @@
                                   <input class="form-control" type="text" name="ptk" id="ptk" value="0">
                                 </div>
                               </div> 
-                              
+                              <div class="col-lg-12">
+                                <div class="form-group">
+                                  <label for="foto" class="form-control-label tx-inverse">Foto</label>  
+                                  <input type="file" accept=".jpeg, .jpg, .png" name="foto" id="foto" class="form-control">
+                                </div>
+                              </div>
+                              <div class="col-lg-3">
+                                <div class="preview" id="preview">
+                                </div>
+                              </div>
                             </div>
                         </div>
                     </section>
@@ -355,6 +364,7 @@
                                   <div class="row mg-b-1">
                                     <div class="col-lg-3">
                                         <div class="form-group">
+                                          <label for="thubungan_keluarga" class="form-label tx-inverse">Hubungan</label>
                                             <select name="thubungan_keluarga" id="thubungan_keluarga" class="form-control select2-show-search" data-placeholder="Pilih Hubungan">
                                                 <option label="Pilih Hubungan"></option>            
                                                 <option value="Ayah">Ayah</option>                                                
@@ -373,18 +383,36 @@
 
                                     <div class="col-lg-3">
                                         <div class="form-group">
+                                          <label for="tnama_keluarga" class="form-label tx-inverse">Nama</label>
                                         <input class="form-control" type="text" name="tnama_keluarga" id="tnama_keluarga" placeholder="Nama">    
                                         </div>
                                     </div>
-
+                                    <div class="col-lg-3">
+                                      <div class="form-group">
+                                        <label for="tstatus_bpjs" class="form-label tx-inverse">Status BPJS</label>
+                                        <select name="tstatus_bpjs" id="tstatus_bpjs">
+                                          <option value="">Pilih Status Bpjs</option>
+                                          <option value="0">Tidak Disertakan</option>
+                                          <option value="1">Disertakan</option>
+                                        </select>    
+                                      </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                          <label for="tno_bpjs_ks" class="form-label tx-inverse">No BPJS KS</label>
+                                        <input class="form-control" type="text" name="tno_bpjs_ks" id="tno_bpjs_ks" placeholder="No BPJS KS">    
+                                        </div>
+                                    </div>
                                     <div class="col-lg-2">
                                         <div class="form-group">
+                                          <label for="ttgl_lahir_keluarga" class="form-label tx-inverse">Tanggal Lahir</label>
                                         <input type="text" name="ttgl_lahir_keluarga" id="ttgl_lahir_keluarga" class="form-control tgl3" placeholder="Tgl Lahir">
                                         </div>
                                     </div>
 
                                     <div class="col-lg-2">
                                         <div class="form-group">
+                                          <label for="tgender_keluarga" class="form-label tx-inverse">Gender</label>
                                             <select name="tgender_keluarga" id="tgender_keluarga" class="form-control select2-show-search" data-placeholder="Gender">
                                                 <option label="Gender"></option>
                                                 <option value="Perempuan">Perempuan</option>
@@ -395,6 +423,7 @@
 
                                     <div class="col-lg-2">
                                         <div class="form-group">
+                                          <label for="tgoldarah_keluarga" class="form-label tx-inverse">Gol Darah</label>
                                             <select name="tgoldarah_keluarga" id="tgoldarah_keluarga" class="form-control select2-show-search" data-placeholder="Gol Darah">
                                                 <option label="Gol Darah"></option>
                                                 <option value="O">O</option>
@@ -406,7 +435,7 @@
                                     </div>
 
                                     <div class="col-lg-3">
-                                      <div class="form-group">
+                                      <div class="form-group mt-4">
                                           <button type="button" class="btn btn-primary" id="tambahKeluarga">Tambahkan</button>
                                       </div>
                                   </div>
@@ -642,6 +671,7 @@
     console.log(e)
   })
   $(document).ready(function(){
+    $("#tstatus_bpjs").selectize()
     localStorage.removeItem("data_pihak")
     localStorage.removeItem("data_keluarga")
     localStorage.removeItem("data_pengalaman")
@@ -834,7 +864,6 @@
     const obj = {
       perusahaan,kota,nama_koka,dari_tahun,sampai_tahun,jabatan:jabatan ? jabatan : "-",id:0
     }
-    console.log("ok")
     json.push(obj)
     localStorage.setItem("data_pengalaman",JSON.stringify(json))
     tambahPgl(json)
@@ -903,13 +932,17 @@
       const tgl_lahir_keluarga = $("#ttgl_lahir_keluarga").val()
       const gender = $("#tgender_keluarga").val()
       const goldarah = $("#tgoldarah_keluarga").val()
+      const status_bpjs = $("#tstatus_bpjs").val()
+      const no_bpjs_ks = $("#tno_bpjs_ks").val()
 
       const obj = {
         hubungan,
         nama_keluarga,
         tgl_lahir_keluarga,
         gender,
-        goldarah
+        goldarah,
+        status_bpjs,
+        no_bpjs_ks
       }
 
 
@@ -931,37 +964,60 @@
       $("#keluarga").html("")
       let i = 0
       dataKeluarga.forEach(e => {
+        if(e.status_bpjs == 0){
+          s_bpjs = "Tidak Disertakan"
+        }else if(e.status_bpjs == 1){
+          s_bpjs = "Disertakan"
+        }
         $("#keluarga").append(`
           <div class="row mb-3" id="keluargaList">       
                             <div class="col-lg-12">
                                 <div class="row mg-b-1">
                                   <div class="col-lg-2">
                                       <div class="form-group">
-                                          <input name="thubungan_keluarga" value="${e.hubungan}" disabled id="thubungan_keluarga" class="form-control" />
+                                        <label class="form-label tx-inverse">Hubungan</label>
+                                          <input name="hubungan_keluarga" value="${e.hubungan}" disabled id="hubungan_keluarga" class="form-control" />
                                       </div>
                                   </div>
 
                                   <div class="col-lg-2">
                                       <div class="form-group">
-                                      <input class="form-control" type="text" value="${e.nama_keluarga}" disabled name="tnama_keluarga" id="tnama_keluarga" placeholder="Nama">    
+                                      <label class="form-label tx-inverse">Nama</label>
+                                      <input class="form-control" type="text" value="${e.nama_keluarga}" disabled name="nama_keluarga" id="nama_keluarga" placeholder="Nama">    
+                                      </div>
+                                  </div>
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <label class="form-label tx-inverse">Status BPJS</label>
+                                      <input class="form-control" type="text" value="${s_bpjs}" disabled name="status_bpjs" id="status_bpjs" placeholder="Nama">    
+                                      </div>
+                                  </div>
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <label class="form-label tx-inverse">No BPJS KS</label>
+                                      <input class="form-control" type="text" value="${e.no_bpjs_ks}" disabled name="no_bpjs_ks" id="no_bpjs_ks" placeholder="Nama">    
+                                      </div>
+                                  </div>
+                                  
+
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <label class="form-label tx-inverse">Tanggal Lahir</label>
+                                      <input type="text" name="tgl_lahir_keluarga" value="${e.tgl_lahir_keluarga}" disabled id="tgl_lahir_keluarga" class="form-control tgl3" placeholder="Tgl Lahir">
                                       </div>
                                   </div>
 
                                   <div class="col-lg-2">
                                       <div class="form-group">
-                                      <input type="text" name="ttgl_lahir_keluarga" value="${e.tgl_lahir_keluarga}" disabled id="ttgl_lahir_keluarga" class="form-control tgl3" placeholder="Tgl Lahir">
+                                      <label class="form-label tx-inverse">Gender</label>
+                                       <input name="gender_keluarga" value="${e.gender}" disabled id="gender_keluarga" class="form-control" />
                                       </div>
                                   </div>
 
                                   <div class="col-lg-2">
                                       <div class="form-group">
-                                       <input name="tgender_keluarga" value="${e.gender}" disabled id="tgender_keluarga" class="form-control" />
-                                      </div>
-                                  </div>
-
-                                  <div class="col-lg-2">
-                                      <div class="form-group">
-                                      <input name="tgoldarah_keluarga" value="${e.goldarah}" disabled id="tgoldarah_keluarga" class="form-control" />
+                                      <label class="form-label tx-inverse">Gol Darah</label>
+                                      <input name="goldarah_keluarga" value="${e.goldarah}" disabled id="goldarah_keluarga" class="form-control" />
                                       </div>
                                   </div>
                                   <div class="col-lg-2">
@@ -987,36 +1043,58 @@
       let i = 0
       $("#keluarga").html("")
       json.forEach(e => {
+        if(e.status_bpjs == 0){
+          status_bpjs = "Tidak Disertakan"
+        }else if(e.status_bpjs == 1){
+          status_bpjs = "Disertakan"
+        }
         $("#keluarga").append(`
           <div class="row mb-3" id="keluargaList">       
                             <div class="col-lg-12">
                                 <div class="row mg-b-1">
                                   <div class="col-lg-2">
                                       <div class="form-group">
+                                          <label class="form-label tx-inverse">Hubungan</label>
                                           <input name="thubungan_keluarga" value="${e.hubungan}" disabled id="thubungan_keluarga" class="form-control" />
                                       </div>
                                   </div>
 
                                   <div class="col-lg-2">
                                       <div class="form-group">
+                                      <label class="form-label tx-inverse">Nama</label>
                                       <input class="form-control" type="text" value="${e.nama_keluarga}" disabled name="tnama_keluarga" id="tnama_keluarga" placeholder="Nama">    
+                                      </div>
+                                  </div>
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <label class="form-label tx-inverse">Status BPJS</label>
+                                      <input class="form-control" type="text" value="${status_bpjs}" disabled name="tstatus_bpjs" id="tstatus_bpjs" placeholder="Nama">    
+                                      </div>
+                                  </div>
+                                  <div class="col-lg-2">
+                                      <div class="form-group">
+                                      <label class="form-label tx-inverse">No BPJS KS</label>
+                                      <input class="form-control" type="text" value="${e.no_bpjs_ks}" disabled name="tno_bpjs_ks" id="tno_bpjs_ks" placeholder="Nama">    
                                       </div>
                                   </div>
 
                                   <div class="col-lg-2">
                                       <div class="form-group">
+                                      <label class="form-label tx-inverse">Tanggal Lahir</label>
                                       <input type="text" name="ttgl_lahir_keluarga" value="${e.tgl_lahir_keluarga}" disabled id="ttgl_lahir_keluarga" class="form-control tgl3" placeholder="Tgl Lahir">
                                       </div>
                                   </div>
 
                                   <div class="col-lg-2">
                                       <div class="form-group">
+                                      <label class="form-label tx-inverse">Gender</label>
                                        <input name="tgender_keluarga" value="${e.gender}" disabled id="tgender_keluarga" class="form-control" />
                                       </div>
                                   </div>
 
                                   <div class="col-lg-2">
                                       <div class="form-group">
+                                      <label class="form-label tx-inverse">Gol Darah</label>
                                       <input name="tgoldarah_keluarga" value="${e.goldarah}" disabled id="tgoldarah_keluarga" class="form-control" />
                                       </div>
                                   </div>
@@ -1283,9 +1361,21 @@ if($(e.target).is("button")){
         i++
       })
     }
+
+
+  const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+  $("#foto").on("change",function(e){
+    const reader = new FileReader()
+    reader.onload = (data) => {
+      $("#preview img").remove()
+      $("#preview").append(`<img src="${data.target.result}" style="width:100%;height:100%;" />`)
+    }
+    reader.readAsDataURL(e.target.files[0])
+  })
   
   function tambahData(e){
     // General Data
+    const formData = new FormData()
     const nama = $("#nama").val()
     const gender = $("#gender").val()
     const tgl_masuk = $("#tgl_masuk").val()
@@ -1316,20 +1406,61 @@ if($(e.target).is("button")){
     const berat = $("#berat").val()
     const goldarah = $("#goldarah").val()
     const agama = $("#agama").val()
-
+    
+    
     // Keluarga & Pihak
     const keluarga = localStorage.getItem("data_keluarga")
     const pihak = localStorage.getItem("data_pihak")
     const pengalaman = localStorage.getItem("data_pengalaman")
     const pendidikan = localStorage.getItem("data_pendidikan")
+    
 
+
+    formData.append("nama",nama)
+    formData.append("gender",gender)
+    formData.append("tgl_masuk",tgl_masuk)
+    formData.append("nik",nik)
+    formData.append("userid",userid)
+    formData.append("status",status)
+    formData.append("div",div)
+    formData.append("counter",counter)
+    formData.append("jabatan",jabatan)
+    formData.append("kk",kk)
+    formData.append("shift",shift)
+    formData.append("hr",hr)
+    formData.append("ca",ca)
+    formData.append("rek",rek)
+    formData.append("payroll",payroll)
+    formData.append("nks",nks)
+    formData.append("ntk",ntk)
+    formData.append("pks",pks)
+    formData.append("ptk",ptk)
+    formData.append("alamat",alamat)
+    formData.append("phone",phone)
+    formData.append("email",email)
+    formData.append("kota_lahir",kota_lahir)
+    formData.append("tgl_lahir",tgl_lahir)
+    formData.append("tinggi",tinggi)
+    formData.append("berat",berat)
+    formData.append("goldarah",goldarah)
+    formData.append("agama",agama)
+    formData.append("keluarga",keluarga)
+    formData.append("pihak",pihak)
+    formData.append("pengalaman",pengalaman)
+    formData.append("pendidikan",pendidikan)
+    formData.append("file",$("#foto")[0].files[0])
+    
     idmesin = "{{idmesin}}"
+    formData.append("mesin",idmesin)
     // AJAX 
     const token = document.querySelector("[name=csrfmiddlewaretoken]").value
     $.ajax({
       url:`{% url "tambah_pegawai_non_validasi" %}`,
       method:"post",
-      data:{nama,gender,mesin:idmesin,tgl_masuk,nik,userid,status,div,counter,jabatan,kk,shift,hr,ca,rek,payroll,nks,ntk,pks,ptk,keluarga,pihak,pengalaman,pendidikan,alamat,phone,email,kota_lahir,tgl_lahir,tinggi,berat,goldarah,agama},
+      data:formData,
+      processData:false,
+      contentType:false,
+      mimeType:"multipart/form-data",
       headers:{"X-CSRFToken":token},
       success:(e) => {
         localStorage.removeItem("data_pendidikan")
@@ -1341,8 +1472,13 @@ if($(e.target).is("button")){
       },
       error:(e) => {
         $("#msg p").remove()
-        $("#msg").append(`<p class="alert alert-danger">${e.responseJSON.msg}</p>`)
-        console.log(e)
+        if(err.responseText){
+          const result = JSON.parse(err.responseText)
+          $("#msg").append(`<p class="alert alert-danger">${result?.msg}</p>`)
+        }else{
+          console.log(err)
+          $("#msg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+        }
       }
     })
   }

@@ -12,6 +12,7 @@ from django.contrib import messages
 from json import dumps
 import requests
 import weasyprint
+import os
 from dateutil.relativedelta import relativedelta
 from calendar import monthrange
 # SUPPORT

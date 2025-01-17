@@ -1657,12 +1657,14 @@ def tambah_kompen(r):
                         jp_baru = njp.time()
                         ket = f'Kompen/PJK-Akhir {kompen} Jam'
                     else:
-                        jm_baru = njm.time()
-                        jp_baru = njp.time()
-                        ket = f'Kompen/PJK 1 Hari'            
+                        if sisa_lembur >= 8:
+                            jm_baru = njm.time()
+                            jp_baru = njp.time()
+                            ket = f'Kompen/PJK 1 Hari'
+                        else:
+                            return JsonResponse({"status":'error',"msg":"Sisa lembur harus lebih dari 8"},status=400)            
                     ab.jam_masuk = jm_baru
                     ab.jam_pulang = jp_baru
-                        
                 else:
                     tjk = 0
                     status ='ok'
