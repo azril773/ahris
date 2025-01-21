@@ -1830,7 +1830,9 @@ def nonaktif(r):
                 cuti_awal=p.cuti_awal,
                 shift=p.shift,
                 counter=p.counter,
-
+                tgl_cuti=p.tgl_cuti,
+                expired=p.expired,
+                profile_picture=p.profile_picture,
                 rekening=p.rekening,
 
                 add_by=nama_user,
@@ -2031,6 +2033,9 @@ def aktif(r):
                 payroll_by=p.payroll_by,
                 ks_premi=p.ks_premi,
                 tk_premi=p.tk_premi,
+                tgl_cuti=p.tgl_cuti,
+                expired=p.expired,
+                profile_picture=p.profile_picture,
 
                 aktif=p.aktif,
                 tgl_masuk=p.tgl_masuk,
