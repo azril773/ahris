@@ -1001,7 +1001,7 @@ def print_laporan_divisi(r):
         
         if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
             dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-            sid = dakses.pegawai.status.pk
+            sid = dakses.sid_id
             data = [] 
         divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=dvs)
         lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
@@ -1227,7 +1227,7 @@ def print_laporan_divisi_excel(r):
         
         if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
             dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-            sid = dakses.pegawai.status.pk
+            sid = dakses.sid_id
             data = [] 
         divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=dvs)
         for p in divisi:
