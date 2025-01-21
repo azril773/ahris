@@ -11,7 +11,7 @@ from hrd_app.models import user_db, akses_cabang_db, cabang_db
 import json
 from authlib.integrations.django_client import OAuth
 oauth = OAuth()
-oauth.register("oidc",client_id="oeaBamYe0fkDQjMBV9Rn6Q3AY6DdcJLtAUWOzpkt", client_secret="oLPzw5tZgU1UNgwz3xbmXSmMbdUC9Jbs1S3b7cIusiagsFEBU4aqzKuBjMO6W4Uzx78z0ASNlBTcNTwFSQGvf0x97ZCGWgwSt48L8w9dKj4d9hRFRIWwx8UEVRYd4bHz", authorize_url="http://15.59.254.57:9000/application/o/authorize/", access_token_url="http://15.59.254.57:9000/application/o/token/")
+oauth.register("oidc",client_id="yTxSLkX3oX0MG7beaHZRNBYxbUoiodNPC8Ws0CLu", client_secret="dslsnjgPuVoeBvIoOIo23yH51RMXgimPuu3qfMDToGlRiYgNupGDxSphPlLSzgeAIH1SjthZan1fBo2eCpYYUkMGvih7czYGBv1ywBqjRRlPm4SXZ5BVbOsnSG2E3GiK", authorize_url="http://15.59.254.57:9000/application/o/authorize/",server_metadata_url="http://15.59.254.57:9000/application/o/ahris_test/.well-known/openid-configuration" ,access_token_url="http://15.59.254.57:9000/application/o/token/")
 def login(r):
     return oauth.oidc.authorize_redirect(r,"http://15.59.254.151:4041/callback")
 
