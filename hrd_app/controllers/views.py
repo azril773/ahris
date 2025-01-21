@@ -6,7 +6,7 @@ import hrd_app as app
 from ..models import *
 
 from hrd.urls import oauth
-from authlib.integrations.django_client import OAuth
+from hrd.urls import oauth
 # Functions
 
 
@@ -21,8 +21,9 @@ def user_logout(r):
     r.session["ccabang"] = None
     r.session["cabang"] = None
     r.session["user"] = None
+    result = "http://15.59.254.57:9000/flows/-/default/invalidation/"
     messages.info(r,"Berhasil logout")
-    return redirect("beranda")
+    return redirect(result)
 
 
 
