@@ -796,7 +796,7 @@ def print_laporan_pegawai(r):
         
         if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
             dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-            sid = dakses.pegawai.status.pk
+            sid = dakses.sid_id
             data = [] 
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pgw)
         lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
@@ -983,8 +983,9 @@ def print_laporan_pegawai(r):
             obj["now"] = datetime.now().date()
             data.append(obj)
     except Exception as e:
+        print(e)
         messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))
-        return redirect("laporan",sid=sid)
+        return redirect("laporan",sid=0)
     return render(r,"hrd_app/laporan/print_laporan_pegawai.html",{"data":data})
 
 @authorization(["*"])
