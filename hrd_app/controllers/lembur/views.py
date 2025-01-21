@@ -3,9 +3,9 @@ from hrd_app.controllers.lib import *
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Lembur
-@login_required
+@authorization(["*"])
 def lembur(r, sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -87,9 +87,9 @@ def lembur(r, sid):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def lembur_belum_proses(r, sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -166,9 +166,9 @@ def lembur_belum_proses(r, sid):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def cari_lembur(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -179,7 +179,7 @@ def cari_lembur(r):
         tahun = r.POST.get('tahun')
         sid = r.POST.get('sid')
         bln = nama_bulan(int(periode))
-        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
         lstatus = []
         try:
             sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
@@ -234,9 +234,9 @@ def cari_lembur(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def tambah_lembur(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     sid = r.POST.get('sid')
     dtgl = r.POST.get('tgl')
@@ -270,7 +270,7 @@ def tambah_lembur(r):
         looping = (akhir / 0.5)                  
                     
     # pengolahan lembur
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
     if lembur_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_lembur=tgl).exists():
         messages.error(r, 'Duplikat Data.') 
     else:
@@ -828,9 +828,9 @@ def tambah_lembur(r):
     
     return redirect('lembur', int(sid))
 
-@login_required
+@authorization(["*"])
 def proses_ulang_lembur(r, idl):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     lb = lembur_db.objects.using(r.session["ccabang"]).get(id=int(idl))
     
@@ -868,7 +868,7 @@ def proses_ulang_lembur(r, idl):
                     
     # pengolahan lembur
     # ------------------------------------------------------------- 
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
     # jika absensi ada
     if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(tgl_absen=tgl, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi).exists():
         ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(tgl_absen=tgl, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi)            
@@ -1274,9 +1274,9 @@ def proses_ulang_lembur(r, idl):
     return redirect('lembur', int(sid))
 
 
-@login_required
+@authorization(["*"])
 def batal_lembur(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     idl = r.POST.get('id')
     
@@ -1291,7 +1291,7 @@ def batal_lembur(r):
     sp = pt[1]
     prd = pt[2]
     thn = pt[3]
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
     if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=idp, periode=prd, tahun=thn).exists():
         drk = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(pegawai__divisi_id__in=aksesdivisi,pegawai_id=idp, periode=prd, tahun=thn)
         sisa_lembur_sekarang = drk.sisa_lembur
@@ -1360,9 +1360,9 @@ def batal_lembur(r):
     return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["*"])
 def bayar_lembur(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     idr = r.POST.get('idr')
     blembur = r.POST.get('blembur')
@@ -1440,13 +1440,13 @@ def bayar_lembur(r):
     return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["*"])
 def rekap_lembur_json(r, sid, prd, thn):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
         data = []
-        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
         if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,periode=int(prd), tahun=int(thn)).exists():
         
             for r in rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(periode=int(prd), tahun=int(thn), sisa_lembur__gt=0,pegawai__divisi_id__in=aksesdivisi).order_by('pegawai__divisi__divisi','pegawai__nik'):
@@ -1491,13 +1491,13 @@ def rekap_lembur_json(r, sid, prd, thn):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["*"])
 def lembur_belum_proses_json(r, sid):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest": 
         
         data = []
-        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
         
         for l in lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(status=0,pegawai__divisi_id__in=aksesdivisi).order_by('tgl_lembur','pegawai__divisi__divisi','pegawai__nik'):
             if sid == 0:
@@ -1539,12 +1539,12 @@ def lembur_belum_proses_json(r, sid):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["*"])
 def lembur_json(r, idp, prd, thn):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest": 
         data = []
-        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
         pa = periode_absen(prd,thn)
         dr = pa[0].date()
         sp = pa[1].date()
@@ -1579,9 +1579,9 @@ def lembur_json(r, idp, prd, thn):
 # +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Kompen / PJK
 
-@login_required
+@authorization(["*"])
 def tambah_kompen(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     dtgl = r.POST.get('tgl_kompen')
     idp = r.POST.get('idp')
@@ -1753,9 +1753,9 @@ def tambah_kompen(r):
     return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["*"])
 def batal_kompen(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     idk = r.POST.get('id')
     
@@ -1897,7 +1897,7 @@ def batal_kompen(r):
     return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["*"])
 def kompen_json(r, idp, prd, thn):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest": 
@@ -1923,9 +1923,9 @@ def kompen_json(r, idp, prd, thn):
                                 
         return JsonResponse({"data": data})
 
-@login_required
+@authorization(["*"])
 def kompen(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -1964,9 +1964,9 @@ def kompen(r):
         return render(r,'hrd_app/kompen/kompen.html', data)
 
 
-@login_required
+@authorization(["*"])
 def status_pegawai_lembur(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
@@ -1991,7 +1991,7 @@ def status_pegawai_lembur(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def tstatus_pegawai_lembur(r):
     status = r.POST.get("status")
     
@@ -2001,7 +2001,7 @@ def tstatus_pegawai_lembur(r):
         status_pegawai_lembur_db(status_pegawai_id=int(status)).save(using=r.session["ccabang"])
         return JsonResponse({'status':'berhasil'},safe=False,status=201)
 
-@login_required
+@authorization(["*"])
 def status_pegawai_lembur_json(r):
     result = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).all()
     data = []
@@ -2015,7 +2015,7 @@ def status_pegawai_lembur_json(r):
     
     return JsonResponse({"data":data},status=200,safe=False)
 
-@login_required
+@authorization(["*"])
 def estatus_pegawai_lembur(r):
     status = r.POST.get("status")
     id = r.POST.get('id')
@@ -2027,10 +2027,10 @@ def estatus_pegawai_lembur(r):
     except:
         return JsonResponse({"status":"gagal update"},safe=False,status=400)
 
-@login_required
+@authorization(["*"])
 def hstatus_pegawai_lembur(r):
     id = r.POST.get('id')
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     try:
         get = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(pk=int(id))
         histori_hapus_db(
@@ -2050,9 +2050,9 @@ def hstatus_pegawai_lembur(r):
 
 
 
-@login_required
+
 def status_pegawai_libur_nasional(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
@@ -2078,7 +2078,7 @@ def status_pegawai_libur_nasional(r):
 
     
     
-@login_required
+
 def tstatus_pegawai_libur_nasional(r):
     status = r.POST.get("status")
     
@@ -2088,7 +2088,7 @@ def tstatus_pegawai_libur_nasional(r):
         list_status_opg_libur_nasional_db(status_id=int(status)).save(using=r.session["ccabang"])
         return JsonResponse({'status':'berhasil'},safe=False,status=201)
 
-@login_required
+
 def status_pegawai_libur_nasional_json(r):
     result = list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).all()
     data = []
@@ -2102,7 +2102,7 @@ def status_pegawai_libur_nasional_json(r):
     
     return JsonResponse({"data":data},status=200,safe=False)
 
-@login_required
+
 def estatus_pegawai_libur_nasional(r):
     status = r.POST.get("status")
     id = r.POST.get('id')
@@ -2115,10 +2115,10 @@ def estatus_pegawai_libur_nasional(r):
         
         return JsonResponse({"status":"gagal update"},safe=False,status=400)
 
-@login_required
+
 def hstatus_pegawai_libur_nasional(r):
     id = r.POST.get('id')
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     try:
         get = list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).get(pk=int(id))
         histori_hapus_db(
@@ -2133,9 +2133,9 @@ def hstatus_pegawai_libur_nasional(r):
 
 # status pegawai opg
 
-@login_required
+
 def status_pegawai_opg(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
@@ -2161,7 +2161,7 @@ def status_pegawai_opg(r):
 
     
     
-@login_required
+
 def tstatus_pegawai_opg(r):
     status = r.POST.get("status")
     
@@ -2171,7 +2171,7 @@ def tstatus_pegawai_opg(r):
         list_status_opg_db(status_id=int(status)).save(using=r.session["ccabang"])
         return JsonResponse({'status':'berhasil'},safe=False,status=201)
 
-@login_required
+
 def status_pegawai_opg_json(r):
     result = list_status_opg_db.objects.using(r.session["ccabang"]).all()
     data = []
@@ -2185,7 +2185,7 @@ def status_pegawai_opg_json(r):
     
     return JsonResponse({"data":data},status=200,safe=False)
 
-@login_required
+
 def estatus_pegawai_opg(r):
     status = r.POST.get("status")
     id = r.POST.get('id')
@@ -2198,10 +2198,10 @@ def estatus_pegawai_opg(r):
         
         return JsonResponse({"status":"gagal update"},safe=False,status=400)
 
-@login_required
+
 def hstatus_pegawai_opg(r):
     id = r.POST.get('id')
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     try:
         get = list_status_opg_db.objects.using(r.session["ccabang"]).get(pk=int(id))
         histori_hapus_db(
@@ -2215,7 +2215,7 @@ def hstatus_pegawai_opg(r):
 
 
 
-@login_required
+
 def get_jam_kerja(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         tgl = r.POST.get("tgl")

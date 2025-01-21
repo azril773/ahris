@@ -3,9 +3,9 @@ from hrd_app.controllers.lib import *
 
 # Divisi
 # ++++++++++++++
-@login_required
+@authorization(["root","it"])
 def divisi(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -29,7 +29,7 @@ def divisi(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["root","it"])
 def divisi_json(r):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -47,7 +47,7 @@ def divisi_json(r):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["root","it"])
 def tambah_divisi(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -67,7 +67,7 @@ def tambah_divisi(r):
         return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["root","it"])
 def edit_divisi(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -87,12 +87,12 @@ def edit_divisi(r):
         return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["root","it"])
 def hapus_divisi(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        nama_user = r.user.username
+        nama_user = r.session["user"]["nama"]
         
         hid = r.POST.get('hid')
         print(pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=int(hid), aktif=1))
@@ -115,20 +115,17 @@ def hapus_divisi(r):
         return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["root","it"])
 def sdivisi_payroll(r):
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):
         akses = akses_db.objects.using(r.session["ccabang"]).get(user_id=id_user)
         akses = akses.akses
-        if akses == "root" or akses == "hrd":
-            divisi = divisi_db.objects.using(r.session["ccabang"]).all()
-            for d in divisi:
-                divisi_payroll_db(
-                    id=d.pk,
-                    divisi=d.divisi,
-                ).save(using=f'p{r.session["ccabang"]}')
-        else:
-            pass
+        divisi = divisi_db.objects.using(r.session["ccabang"]).all()
+        for d in divisi:
+            divisi_payroll_db(
+                id=d.pk,
+                divisi=d.divisi,
+            ).save(using=f'p{r.session["ccabang"]}')
     else:
         pass

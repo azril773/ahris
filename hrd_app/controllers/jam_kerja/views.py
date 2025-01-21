@@ -3,9 +3,9 @@ import pandas as pd
 
 # Jam Kerja
 # ++++++++++++++
-@login_required
+@authorization(["*"])
 def jam_kerja(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         # excel = pd.read_excel("static/jam_kerja.xlsx",sheet_name="Sheet1")
         # data = []
@@ -78,7 +78,7 @@ def jam_kerja(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def tambah_kk_json(r):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -107,7 +107,7 @@ def tambah_kk_json(r):
                                 
         return JsonResponse({"status": status, "data":data})
 
-@login_required
+@authorization(["*"])
 def edit_kk_json(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
@@ -124,7 +124,7 @@ def edit_kk_json(r):
         
 
 
-@login_required
+@authorization(["*"])
 def jam_kerja_json(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
@@ -146,7 +146,7 @@ def jam_kerja_json(r):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["*"])
 def tambah_jam_kerja(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -197,7 +197,7 @@ def tambah_jam_kerja(r):
             return JsonResponse({"status":"success","msg":"Berhasil tambah jam kerja"})
 
 
-@login_required
+@authorization(["*"])
 def edit_jam_kerja(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -235,12 +235,12 @@ def edit_jam_kerja(r):
         return JsonResponse({"status":"success","msg":"Berhasil edit jam kerja"})
 
 
-@login_required
+@authorization(["*"])
 def hapus_jam_kerja(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        nama_user = r.user.username
+        nama_user = r.session["user"]["nama"]
         
         hid = r.POST.get('hid')
         

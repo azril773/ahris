@@ -8,16 +8,11 @@ import ast
 from hrd_app.function import prosesabsensi
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Absensi
-@login_required
+@authorization(["*"])
 def absensi(r,sid):
-    iduser = r.user.id
+    iduser = r.session['user']['id']
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-        cache = [
-            {
-                "ab":dakses.akses
-            }
-        ]
         
         today = datetime.today().date()
         akses = dakses.akses
@@ -74,8 +69,7 @@ def absensi(r,sid):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-
-@login_required
+@authorization(["*"])
 def cari_absensi(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
@@ -83,7 +77,7 @@ def cari_absensi(r):
         sid = r.POST.get('sid')
         dari = datetime.strptime(r.POST.get('ctgl1'),'%d-%m-%Y').date()
         sampai = datetime.strptime(r.POST.get('ctgl2'),'%d-%m-%Y').date()
-        id_user = r.user.id
+        id_user = r.session['user']['id']
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         today = datetime.today().date()
@@ -372,9 +366,9 @@ def cari_absensi(r):
         return JsonResponse({"data": data })
 
 
-@login_required
+@authorization(["*"])
 def cari_absensi_sid(r,dr, sp, sid):
-    iduser = r.user.id
+    iduser = r.session['user']['id']
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -415,10 +409,10 @@ def cari_absensi_sid(r,dr, sp, sid):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def absensi_json(r, dr, sp, sid):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        id_user = r.user.id
+        id_user = r.session['user']['id']
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         data = []
@@ -761,8 +755,7 @@ def prosesmesin(dt):
         raise Exception("Terjadi kesalahan")
     return dmesin
     
-
-@login_required
+@authorization(["*"])
 def pabsen(req):    
     
     t1 = req.POST.get('tgl1')
@@ -786,7 +779,7 @@ def pabsen(req):
     luserid = []  
     
     # buat tabel absen
-    id_user = req.user.id
+    id_user = req.session['user']['id']
     aksesdivisi = akses_divisi_db.objects.using(req.session["ccabang"]).filter(user_id=id_user)
     userp = akses_db.objects.select_related("pegawai").using(req.session["ccabang"]).filter(user_id=id_user)
     if not userp.exists():
@@ -908,7 +901,6 @@ def pabsen(req):
             conn.disable_device()
             # dt absensi
             absensi = conn.get_attendance()
-            print(absensi,m.nama)
             for a in absensi:
                 # 
                 if dari <= a.timestamp <= sampai:   
@@ -1098,7 +1090,7 @@ def pabsen(req):
         data = absensi_db.objects.using(req.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()))
     elif int(sid) > 0:
         data = absensi_db.objects.using(req.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()),pegawai__status_id=sid)
-    username = req.user.username
+    username = req.session["user"]["nama"]
     cabang = req.session["ccabang"]
     for a in data:
         ab = a 
@@ -1865,9 +1857,9 @@ def pabsen(req):
 
     return redirect ('absensi',sid=int(sid))   
 
-@login_required
+@authorization(["*"])
 def detail_absensi(r,userid,tgl,sid):
-    iduser = r.user.id
+    iduser = r.session['user']['id']
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -1948,7 +1940,7 @@ def detail_absensi(r,userid,tgl,sid):
             
         return render(r,'hrd_app/absensi/dabsen/[userid]/[tgl]/[sid]/dabsensi.html', data)
     
-@login_required
+@authorization(["*"])
 def get_trans_json(r):
 
         # get raw data absensi
@@ -1969,7 +1961,7 @@ def get_trans_json(r):
     
     return JsonResponse({"data":draw},safe=False)
     
-@login_required
+@authorization(["*"])
 def get_raw_json(r):
 
         # get raw data absensi
@@ -1992,25 +1984,22 @@ def get_raw_json(r):
     return JsonResponse({"data":draw},safe=False)
     
 
-@login_required
+@authorization(["*"])
 def hapus_jam(r):
     if r.headers['x-requested-with'] == 'XMLHttpRequest':
-        id_user = r.user.id
+        id_user = r.session['user']['id']
         akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=int(id_user)).last()
         if akses is not None:
-            if akses.akses == "root" or akses.akses == "it": 
-                id = r.POST.get('id')
-                if id is not None:
-                    data_trans_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete()
-                else:
-                    pass
+            id = r.POST.get('id')
+            if id is not None:
+                data_trans_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete()
             else:
-                return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
+                pass
         else:
             return JsonResponse({"status":"error","msg":"Akses anda belum ditentukan"},status=400)
     return JsonResponse({"ok":"ok"})
 
-@login_required
+@authorization(["*"])
 def tambah_jam(r):
     if r.headers['x-requested-with'] == 'XMLHttpRequest':
         tgl = datetime.strptime(r.POST.get("tgl"),"%Y-%m-%d")
@@ -2027,7 +2016,7 @@ def tambah_jam(r):
         ).save(using=r.session["ccabang"])
         return JsonResponse({"status":"ok"})
     
-@login_required
+@authorization(["*"])
 def ubah_absen(r):
     id = r.POST.get('id')
     absen = r.POST.get('absen')
@@ -2040,10 +2029,10 @@ def ubah_absen(r):
         ab.save(using=r.session["ccabang"])
     return JsonResponse({"ok":"ok"})
 
-@login_required
+@authorization(["*"])
 def pu(r,tgl,userid,sid):
     dt = data_trans_db.objects.using(r.session["ccabang"]).filter(jam_absen__date=tgl,userid=userid).order_by('jam_absen')
-    id_user = r.user.id
+    id_user = r.session['user']['id']
     aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     abs = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").filter(tgl_absen=tgl,pegawai__userid=userid,pegawai__divisi__in=divisi)
@@ -2610,7 +2599,7 @@ def pu(r,tgl,userid,sid):
                     abs.keterangan_lain = f"Kompen/PJK-Akhir {kmpn['kompen']} Jam"
                 else:
                     abs.keterangan_lain = f"Kompen/PJK 1 hari"
-                nama_user = r.user.username
+                nama_user = r.session["user"]["nama"]
                 abs.total_jam_kerja = round(tjk,1)
                 abs.edit_by = nama_user
                 abs.save(using=r.session["ccabang"])
@@ -3057,13 +3046,13 @@ def pu(r,tgl,userid,sid):
     #     red.delete(s)
     return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
 
-@login_required
+@authorization(["*"])
 def edit_ijin(r):
     jenis_ijin = r.POST.get("jenis_ijin")
     ket = r.POST.get("ket")
     id = r.POST.get("id")
     sid = r.POST.get("sid")
-    id_user = r.user.id
+    id_user = r.session['user']['id']
     aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     if jenis_ijin_db.objects.using(r.session["ccabang"]).filter(pk=int(jenis_ijin)).exists():
@@ -3084,7 +3073,7 @@ def edit_ijin(r):
             return redirect("absensi",sid=sid)
     return JsonResponse({"ok":"ok"})
 
-@login_required
+@authorization(["*"])
 def edit_jamkerja(r,userid,tgl,sid):
     masuk = r.POST.get("jam_masuk")
     keluar = r.POST.get("jam_keluar")
@@ -3093,7 +3082,7 @@ def edit_jamkerja(r,userid,tgl,sid):
     if masuk == '' or keluar == "" or lama_ist == "":
         messages.add_message(r,messages.ERROR,"Form harus lengkap")
         return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
-    id_user = r.user.id
+    id_user = r.session['user']['id']
     aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     if absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").filter(pk=int(id),pegawai__divisi__in=divisi).exists():
@@ -3107,7 +3096,7 @@ def edit_jamkerja(r,userid,tgl,sid):
         return redirect("absensi",sid=sid)
     return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
 
-
+@authorization(["*"])
 def absensi_id(r):
     idp = r.POST.get('id')
     tgl = r.POST.get('tgl')

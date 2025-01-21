@@ -165,6 +165,13 @@ class rp_lembur_db(models.Model):
         verbose_name_plural = 'Rupiah Lembur'
           
         
+class user_db(models.Model):
+    sub = models.CharField(max_length=200,null=False)
+    nama = models.CharField(max_length=200,null=False)
+    email = models.CharField(max_length=100,null=True)
+    is_admin = models.BooleanField(null=True)
+
+
 
 pilihan_pengelola = (("Owner", "Owner"),("HRD", "HRD"), ("Lainnya", "Lainnya"))         
           
@@ -636,7 +643,7 @@ class pihak_pertama_db(models.Model):
 pilihan_akses = (("root", "root"),("admin", "admin"),("it", "it"),("user", "user"),("tamu", "tamu"),) 
 
 class akses_db(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(user_db, on_delete=models.CASCADE)
     akses = models.CharField(max_length=100, choices=pilihan_akses, default="user")
     pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE, null=True, blank=True)
     sid = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE, null=True, blank=True)
@@ -1001,7 +1008,7 @@ class histori_hapus_db(models.Model):
 cabang =  (("tasik","tasik"),("sumedang","sumedang"),("cirebon","cirebon"),("garut","garut"),("cihideung","cihideung"))
 
 class akses_cabang_db(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE,null=True)
+    user = models.ForeignKey(user_db, on_delete=models.CASCADE,null=True)
     cabang = models.ForeignKey(cabang_db,on_delete=models.CASCADE,null=False)
     add_by = models.CharField(max_length=100, null=True)
     edit_by = models.CharField(max_length=100, null=True)
