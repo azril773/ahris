@@ -18,6 +18,7 @@ def status_pegawai(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'modul_aktif' : 'Status Pegawai'     
         }
         
@@ -129,6 +130,7 @@ def status_pegawai_lh(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai Lintas Hari'     
         }
@@ -211,6 +213,7 @@ def status_pegawai_payroll(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai Payroll'     
         }

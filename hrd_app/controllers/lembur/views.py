@@ -64,6 +64,7 @@ def lembur(r, sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -143,6 +144,7 @@ def lembur_belum_proses(r, sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -216,6 +218,7 @@ def cari_lembur(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid' : int(sid),
             'status' : lstatus,
@@ -1952,6 +1955,7 @@ def kompen(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'status' : status,
             'dsid': dsid,
             'sid': pgw.status_id,
@@ -1980,6 +1984,7 @@ def status_pegawai_lembur(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai Lembur'     
         }
@@ -2066,6 +2071,7 @@ def status_pegawai_libur_nasional(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai Libur Nasional'     
         }
@@ -2149,6 +2155,7 @@ def status_pegawai_opg(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai OPG'     
         }

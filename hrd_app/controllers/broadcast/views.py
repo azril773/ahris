@@ -35,6 +35,7 @@ def broadcast(r,sid):
             'akses':akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'sid':sid,
             'status':status,
             "sil":sid_lembur,

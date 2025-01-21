@@ -66,6 +66,7 @@ def jam_kerja(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'kk': kk,
             'shift': shift,
             'modul_aktif' : 'Jam Kerja'     

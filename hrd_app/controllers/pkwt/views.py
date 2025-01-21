@@ -21,6 +21,7 @@ def pkwt(r):
             "dsid":akses.sid.pk,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "sid":akses.sid.pk,
             "pegawai":pegawai,
             "jabatan":jabatan,

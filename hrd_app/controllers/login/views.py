@@ -87,6 +87,7 @@ def pilih_cabang(r):
             'akses' : akses,
             # "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "cabang":cabang,
         }
         return render(r,'hrd_app/login/pilih_cabang.html',data)
@@ -119,6 +120,7 @@ def registrasi(r,idcabang):
                 'akses' : akses,
                 "cabang":r.session["cabang"],
                 "ccabang":r.session["ccabang"],
+                "nama":r.session["user"]["nama"],
                 "cp":cabang,
                 "ca":cabangall,
                 "caid":idcabang,
@@ -455,6 +457,7 @@ def ganti_password(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': sid,
         }

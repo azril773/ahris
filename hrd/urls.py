@@ -18,7 +18,6 @@ def login(r):
 
 
 def callback(r):
-    print(r)
     token = oauth.oidc.authorize_access_token(r)
     r.session["token"] = token
     access = oauth.oidc.get(os.environ.get("USERINFO_URL"),token=token)
@@ -41,6 +40,11 @@ def callback(r):
             is_admin=is_admin[0]
         ).save()
         user = user_db.objects.filter(sub=result["sub"]).last()
+    else:
+        user.email = result["email"]
+        user.nama = result["name"]
+        user.is_admin = is_admin[0]
+        user.save()
 
     cbgs = cabang_db.objects.filter(cabang__in=getCabang)
     for c in cbgs:
@@ -52,6 +56,9 @@ def callback(r):
                 nama=result["name"],
                 is_admin=is_admin[0]
             ).save(using=c.cabang)
+        else:
+            user_db.objects.using(c.cabang).filter(sub=result["sub"]).update(email=result["email"],nama=result["name"],is_admin=is_admin[0])
+
         if not akses_cabang_db.objects.filter(cabang_id=c.pk,user_id=user.pk):
             akses_cabang_db(
                 cabang_id=c.pk,
@@ -71,18 +78,23 @@ def callback(r):
     }
     return redirect("/hrd/absensi/0")
 
-def beranda(r):  
+def beranda(r): 
+    print(r.session["user"])
+    auth = False
+    nama = None
+    cabang = ''
+    ccabang = []
     try:
-        user = r.session["user"]
-        auth = True
-        nama = user["nama"]
-        cabang = r.session["cabang"]
-        ccabang = r.session["ccabang"]
+        if r.session["user"] and r.session["ccabang"] and r.session["cabang"]:
+            user = r.session["user"]
+            auth = True
+            nama = user["nama"]
+            cabang = r.session["cabang"]
+            ccabang = r.session["ccabang"]
+        else:
+            pass
     except:
-        auth = False
-        nama = None
-        cabang = ''
-        ccabang = []
+        pass
 
     data = {
         "cabang":cabang,

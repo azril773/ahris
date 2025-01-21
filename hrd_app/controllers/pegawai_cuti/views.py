@@ -11,6 +11,7 @@ def pegawai_cuti(r):
         'akses' : akses.akses,
         "cabang":r.session["cabang"],
         "ccabang":r.session["ccabang"],
+        "nama":r.session["user"]["nama"],
         "pegawai":pegawai,
         'modul_aktif' : 'Pegawai Cuti'     
     }

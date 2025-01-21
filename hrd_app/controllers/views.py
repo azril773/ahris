@@ -6,7 +6,6 @@ import hrd_app as app
 from ..models import *
 
 from hrd.urls import oauth
-from hrd.urls import oauth
 # Functions
 
 
@@ -21,9 +20,9 @@ def user_logout(r):
     r.session["ccabang"] = None
     r.session["cabang"] = None
     r.session["user"] = None
-    result = os.environ.get("INVALIDATION_URL")
+    # result = os.environ.get("INVALIDATION_URL")
     messages.info(r,"Berhasil logout")
-    return redirect(result)
+    return redirect("beranda")
 
 
 

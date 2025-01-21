@@ -13,6 +13,7 @@ def shift(r):
             "shift":shift,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "modul_aktif":"Shift"
         }
         return render(r,"hrd_app/shift/shift.html",data)

@@ -80,6 +80,7 @@ def ijin(r, sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -153,6 +154,7 @@ def cari_ijin(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -220,6 +222,7 @@ def cari_ijin_sid(r, dr, sp, sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -389,6 +392,7 @@ def jenis_ijin(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'modul_aktif' : 'Jenis Ijin'     
         }
         

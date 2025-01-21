@@ -18,6 +18,7 @@ def libur_nasional(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'modul_aktif' : 'Libur Nasional'     
         }
         

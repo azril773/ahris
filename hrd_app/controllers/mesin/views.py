@@ -18,6 +18,7 @@ def amesin(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'modul_aktif' : 'Counter'     
         }
         
@@ -86,6 +87,7 @@ def admesin(r,id):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'id':id,
             'userid':userid,
             'modul_aktif' : 'Counter'
@@ -124,6 +126,7 @@ def rmesin(r,userid,id,uid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             "counter":counter,
             "divisi":divisi,
@@ -382,6 +385,7 @@ def datamesin(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'id':id,
             'modul_aktif' : 'Counter'
         }
@@ -473,6 +477,7 @@ def cdatamesin(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "divisi":divisi,
             'modul_aktif' : 'Mesin'     
         }
@@ -927,6 +932,7 @@ def listdata(r):
         "dsid":sid,
         "sid":sid,
         "akses":akses.akses,
+        "nama":r.session["user"]["nama"],
         "mesin":mesin
     }
     return render(r,"hrd_app/mesin/listdata.html",data)
