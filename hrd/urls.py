@@ -24,7 +24,7 @@ def callback(r):
     result = access.json()
 
     groups = "".join(result["groups"])
-    getCabang = re.findall('cabang_(cirebon|tasik|sumedang|garut|cihideung)',groups,re.IGNORECASE)
+    getCabang = re.findall('ahris_(cirebon|tasik|sumedang|garut|cihideung)',groups,re.IGNORECASE)
     if len(getCabang) <= 0:
         messages.error(r,"Anda tidak memiliki akses ke cabang manapun")
         return redirect("beranda")
