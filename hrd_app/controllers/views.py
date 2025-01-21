@@ -21,7 +21,7 @@ def user_logout(r):
     r.session["ccabang"] = None
     r.session["cabang"] = None
     r.session["user"] = None
-    result = "http://15.59.254.57:9000/flows/-/default/invalidation/"
+    result = os.environ.get("INVALIDATION_URL")
     messages.info(r,"Berhasil logout")
     return redirect(result)
 

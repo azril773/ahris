@@ -5,26 +5,27 @@ from django.contrib.auth.models import User
 from django.contrib.auth import views as auth_views # type: ignore
 from hrd_app.admin import cirebon, tasik, sumedang, cihideung,garut
 import debug_toolbar
+import os
 from django.contrib import messages 
 import re
 from hrd_app.models import user_db, akses_cabang_db, cabang_db
 import json
 from authlib.integrations.django_client import OAuth
 oauth = OAuth()
-oauth.register("oidc",client_id="oeaBamYe0fkDQjMBV9Rn6Q3AY6DdcJLtAUWOzpkt", client_secret="oLPzw5tZgU1UNgwz3xbmXSmMbdUC9Jbs1S3b7cIusiagsFEBU4aqzKuBjMO6W4Uzx78z0ASNlBTcNTwFSQGvf0x97ZCGWgwSt48L8w9dKj4d9hRFRIWwx8UEVRYd4bHz", authorize_url="http://15.59.254.57:9000/application/o/authorize/",server_metadata_url="http://15.59.254.57:9000/application/o/ahris/.well-known/openid-configuration" ,access_token_url="http://15.59.254.57:9000/application/o/token/")
+oauth.register("oidc",client_id=os.environ.get("CLIENT_ID"), client_secret=os.environ.get("CLIENT_SECRET"), authorize_url=os.environ.get("AUTHORIZE_URL"),server_metadata_url=os.environ.get("CONFIG_URL") ,access_token_url=os.environ.get("TOKEN_URL"))
 def login(r):
-    return oauth.oidc.authorize_redirect(r,"http://15.59.254.151:4041/callback")
+    return oauth.oidc.authorize_redirect(r,os.environ.get("REDIRECT_URI"))
 
 
 def callback(r):
     print(r)
     token = oauth.oidc.authorize_access_token(r)
     r.session["token"] = token
-    access = oauth.oidc.get("http://15.59.254.57:9000/application/o/userinfo/",token=token)
+    access = oauth.oidc.get(os.environ.get("USERINFO_URL"),token=token)
     result = access.json()
 
     groups = "".join(result["groups"])
-    getCabang = re.findall('cabang:(cirebon|tasik|sumedang|garut|cihideung)',groups)
+    getCabang = re.findall('ahris_(cirebon|tasik|sumedang|garut|cihideung)',groups,re.IGNORECASE)
     if len(getCabang) <= 0:
         messages.error(r,"Anda tidak memiliki akses ke cabang manapun")
         return redirect("beranda")
