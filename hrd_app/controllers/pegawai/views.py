@@ -2969,9 +2969,7 @@ def spegawai_payroll(r):
 
 
 def upload_foto(r):
-    print(r)
     file = r.FILES.get("file")
-    print(r.POST.get("coba"))
     fss = FileSystemStorage()
     upload = fss.save(f'static/img/{file.name}',file)
     url = fss.url(upload)
