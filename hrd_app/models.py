@@ -653,7 +653,7 @@ class akses_db(models.Model):
 
 
 class akses_divisi_db(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(user_db, on_delete=models.CASCADE)
     divisi = models.ForeignKey(divisi_db, on_delete=models.CASCADE)
 
     def __int__(self):
