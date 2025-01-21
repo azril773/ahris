@@ -370,8 +370,9 @@
     });
 
     $("#cariForm").on("submit",(e) => {
-        const token = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
         e.preventDefault()
+        const token = document.querySelector('input[name="csrfmiddlewaretoken"]').value;
+        console.log("OOOKOKOK")
         var tgl1 = $("#ctgl1").val();
         var tgl2 = $("#ctgl2").val();
         var sid = "{{sid}}";

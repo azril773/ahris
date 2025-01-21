@@ -37,7 +37,7 @@
 
         <div class="row">
             {% if akses == "root" or akses == "it" %}
-            <div class="col-lg-6">
+            {% comment %} <div class="col-lg-6">
                 <h5 class="text-dark text-uppercase">Registrasi User Login Semua Cabang</h5>
                 <div class="border p-5">
                     <form action="{% url "proses_registrasi" %}" method="post">
@@ -107,15 +107,15 @@
                                     <option value="cihideung">Asia Toserba Cihideung</option>
                                 </select>
                             </div> {% endcomment %}
-                        </div>
+                        {% comment %} </div>
                         <div class="d-flex justify-content-end mt-2">
                             <button type="submit" class="btn btn-primary">Daftarkan</button>
                         </div>
                     </form>
                 </div>
-            </div>
+            </div>  {% endcomment %}
             {% endif %}
-            <div class="col-lg-6">
+            {% comment %} <div class="col-lg-6">
                 <h5 class="text-dark text-uppercase">Reset Password Login </h5>
                 <div class="border p-5">
                     <form action="{% url "reset_password" %}" method="post">
@@ -145,7 +145,7 @@
                         </div>
                     </form>
                 </div>
-            </div>
+            </div> {% endcomment %}
             {% if akses == "it" or akses == "root" %}
             <div class="col-lg-6 mt-5">
                 <h5 class="text-dark text-uppercase">Akses Divisi User <b class="text-primary">Cabang {{cp}}</b></h5>
@@ -158,7 +158,7 @@
                                 <select name="userd[]" id="userd" class='mb-2'>
                                     <option value="">Pilih User</option>
                                     {% for user in users %}
-                                        <option value="{{user.pk}}">{{user.username}}</option>
+                                        <option value="{{user.pk}}">{{user.nama}}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -186,12 +186,21 @@
                     <form action="{% url "akses_level" %}" method="post">
                         {% csrf_token %}
                         <div class="row">
-                            <div class="col-6">
+                            {% comment %} <div class="col-6">
                                 <label for="pegawai" class="text-dark">Pegawai</label> <br>
                                 <select name="pegawai" id="pegawai" class='mb-2'>
                                     <option value="">Pilih User</option>
                                     {% for p in pegawai %}
                                         <option value="{{p.pk}}">{{p.nama}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div> {% endcomment %}
+                            <div class="col-6">
+                                <label for="userl" class="text-dark">Username</label> <br>
+                                <select name="userl" id="userl" class='mb-2'>
+                                    <option value="">Pilih User</option>
+                                    {% for user in users %}
+                                        <option value="{{user.pk}}">{{user.nama}}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -201,15 +210,6 @@
                                     <option value="">Pilih User</option>
                                     {% for s in status %}
                                         <option value="{{s.pk}}">{{s.status}}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-6">
-                                <label for="userl" class="text-dark">Username</label> <br>
-                                <select name="userl" id="userl" class='mb-2'>
-                                    <option value="">Pilih User</option>
-                                    {% for user in users %}
-                                        <option value="{{user.pk}}">{{user.username}}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -234,7 +234,7 @@
             </div>
             {% endif %}
             {% if staff %}
-            <div class="col-lg-6 mt-5">
+            {% comment %} <div class="col-lg-6 mt-5">
                 <h5 class="text-dark text-uppercase">Akses Cabang User</h5>
                 <div class="border p-5">
                     <form action="{% url "akses_cabang" %}" method="post">
@@ -266,8 +266,8 @@
                         </div>
                     </form>
                 </div>
-            </div>
-            <div class="col-lg-6 mt-5">
+            </div> {% endcomment %}
+            {% comment %} <div class="col-lg-6 mt-5">
                 <h5 class="text-dark text-uppercase">Super User Form</h5>
                 <div class="border p-5">
                     <form action="{% url "superuser" %}" method="post">
@@ -292,7 +292,7 @@
                         </div>
                     </form>
                 </div>
-            </div>
+            </div> {% endcomment %}
             {% endif %}
         </div>
     </div>

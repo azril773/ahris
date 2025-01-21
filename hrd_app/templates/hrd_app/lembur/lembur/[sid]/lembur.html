@@ -1059,7 +1059,11 @@
         jkompen.clear();
       },
       error: function (error) {
-        alert(error.responseJSON.msg);
+        if(err.responseJSON?.msg){
+          alert(error.responseJSON.msg);
+        }else{
+          alert("Terjadi Kesalahan")
+        }
       },
     });
   });

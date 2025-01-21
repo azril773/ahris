@@ -1,4 +1,5 @@
-== 'hrd' or akses.akses == 'admin' or akses.akses == "root":{% extends "hrd_app/master/base.html" %}
+{% extends "hrd_app/master/base.html" %}
+{% load static %}
 
 {% block breadcrumb %}
 
@@ -68,74 +69,59 @@
             {% csrf_token %}
         <div class="title tx-inverse tx-bold"><h6>Pihak Pertama</h6></div>
         <div class="row">
-            <div class="col-md-6 mt-3">
-                <label for="nama1" class="form-label tx-inverse">Nama</label>
-                <input type="text" name="nama1" id="nama1" class="form-control">
-            </div>
-            <div class="col-md-6 mt-3">
-                <label for="jabatan1" class="form-label tx-inverse">Jabatan</label>
-                <input type="text" name="jabatan1" id="jabatan1" class="form-control">
+            <div class="col-md-12 mt-3">
+                <label for="pegawai1" class="form-label tx-inverse">Nama </label>
+                <select name="pegawai1" id="pegawai1">
+                    <option value="">Pilih Pegawai</option>
+                    {% for p in pegawai %}
+                        <option value="{{p.pk}}">{{p.nama}}</option>
+                    {% endfor %}
+                </select>
             </div>
             <hr style="width: 100%;">
             <br>
         </div>
         <div class="title tx-inverse tx-bold"><h6>Pihak Kedua</h6></div>
         <div class="row">
-            <div class="col-md-4 mt-3">
-                <label for="nama2" class="form-label tx-inverse">Nama </label>
-                <input type="text" name="nama2" id="nama2" class="form-control">
+            <div class="col-md-6 mt-3">
+                <label for="pegawai2" class="form-label tx-inverse">Nama </label>
+                <select name="pegawai2" id="pegawai2">
+                    <option value="">Pilih Pegawai</option>
+                    {% for p in pegawai %}
+                        <option value="{{p.pk}}">{{p.nama}}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="col-md-4 mt-3">
-                <label for="ttl2" class="form-label tx-inverse">Tempat, Tanggal Lahir </label>
-                <input type="text" name="ttl2" id="ttl2" class="form-control">
-            </div>
-            <div class="col-md-4 mt-3">
+            <div class="col-md-6 mt-3">
                 <label for="noktp2" class="form-label tx-inverse">Nomor KTP </label>
                 <input type="text" name="noktp2" id="noktp2" class="form-control">
-            </div>
-            <div class="col-md-4 mt-3">
-                <label for="alamat2" class="form-label tx-inverse">Alamat </label>
-                <input type="text" name="alamat2" id="alamat2" class="form-control">
-            </div>
-            <div class="col-md-4 mt-3">
-                <label for="nohp2" class="form-label tx-inverse">No HP </label>
-                <input type="text" name="nohp2" id="nohp2" class="form-control">
-            </div>
-            <div class="col-md-4 mt-3">
-                <label for="jabatan2" class="form-label tx-inverse">Jabatan </label>
-                <input type="text" name="jabatan2" id="jabatan2" class="form-control">
-            </div>
-            <div class="col-md-4 mt-3">
-                <label for="tugas" class="form-label tx-inverse">Tugas </label>
-                <input type="text" name="tugas" id="tugas" class="form-control">
             </div>
         </div>
         <hr style="width: 100%;">
         <div class="title tx-inverse tx-bold"><h6>General</h6></div>
         <div class="row">
-            <div class="col-md-4 mt-3">
+            <div class="col-md-6 mt-3">
                 <label for="cabang" class="form-label tx-inverse">Cabang </label>
-                <input type="text" name="cabang" id="cabang" class="form-control">
+                <select name="cabang" id="cabang">
+                    <option value="">Pilih Cabang</option>
+                    <option value="cirebon">Cirebon</option>
+                    <option value="tasik">Tasik</option>
+                    <option value="sumedang">Sumedang</option>
+                    <option value="cihideung">Cihideung</option>
+                    <option value="garut">Garut</option>
+                </select>
             </div>
-            <div class="col-md-4 mt-3">
+            <div class="col-md-6 mt-3">
                 <label for="jangka" class="form-label tx-inverse">Jangka Waktu </label>
                 <input type="text" name="jangka" id="jangka" class="form-control">
             </div>
-            <div class="col-md-4 mt-3">
-                <label for="tipe" class="form-label tx-inverse">Pilih Opsi Waktu </label>
-                <select name="tipe" id="tipe">
-                    <option value="">Pilih Opsi</option>
-                    <option value="bulan">Bulan</option>
-                    <option value="tahun">Tahun</option>
-                </select>
-            </div>
-            <div class="col-md-4 mt-3">
+            <div class="col-md-6 mt-3">
                 <label for="dari" class="form-label tx-inverse">Dari Tanggal </label>
                 <input type="text" name="dari" id="dari" class="form-control tgl1">
             </div>
-            <div class="col-md-4 mt-3">
+            <div class="col-md-6 mt-3">
                 <label for="sampai" class="form-label tx-inverse">Sampai Tanggal </label>
-                <input type="text" name="sampai" id="sampai" class="form-control tgl1">
+                <input type="text" name="sampai" id="sampai" class="form-control">
             </div>
             <div class="col-md-4 mt-3">
                 <label for="tempat" class="form-label tx-inverse">Tempat Bekerja </label>
@@ -162,9 +148,19 @@
 {% endblock breadcrumb %}
 
 {% block hrd_ajax %}
-
+<script src="{% static 'js/moment.js' %}"></script>
 <script>
+    $("#dari").on("change",function(e){
+        const value = $(this).val()
+        const format = moment(value,'DD-MM-YYYY').add($('#jangka').val(),"months")
+        console.log(moment(format).format("DD-MM-YYYY"))
+        $("#sampai").val(moment(format).format("DD-MM-YYYY"))
+    })
+
     $("#tipe").selectize()
+    $("#pegawai2").selectize()
+    $("#pegawai1").selectize()
+    $("#cabang").selectize()
 </script>
 
 

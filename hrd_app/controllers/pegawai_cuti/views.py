@@ -1,30 +1,26 @@
 from hrd_app.controllers.lib import *
 
-@login_required
+@authorization(["root","it"])
 def pegawai_cuti(r):
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
-    if akses is not None:
-        if akses.akses == "root" or akses.akses == "it":
-            
-            aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)]
-            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi)
-            data = {       
-                'dsid': akses.sid_id,
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)]
+    pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi)
+    data = {       
+        'dsid': akses.sid_id,
+        'akses' : akses.akses,
+        "cabang":r.session["cabang"],
+        "ccabang":r.session["ccabang"],
+        "pegawai":pegawai,
+        'modul_aktif' : 'Pegawai Cuti'     
+    }
+    return render(r,"hrd_app/pegawai_cuti/pegawai_cuti.html",data)
 
-                'akses' : akses,
-                "cabang":r.session["cabang"],
-                "ccabang":r.session["ccabang"],
-                "pegawai":pegawai,
-                'modul_aktif' : 'Pegawai Cuti'     
-            }
-            return render(r,"hrd_app/pegawai_cuti/pegawai_cuti.html",data)
-
-@login_required
+@authorization(["root","it"])
 def pegawai_cuti_json(r):
     pass
 
-@login_required
+@authorization(["root","it"])
 def tpegawai_cuti_json(r):
     if r.session["ccabang"] == "cirebon":
         idps = r.POST.getlist("pegawai[]")
@@ -45,7 +41,8 @@ def tpegawai_cuti_json(r):
             return JsonResponse({"status":"success","msg":"tambah data berhasil","failed":failed},status=201)
     else:
         return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses. Silahkan hubungi IT"},status=400)
-@login_required
+
+@authorization(["root","it"])
 def epegawai_cuti_json(r):
     if r.session["ccabang"] == "cirebon":
         if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -68,7 +65,7 @@ def epegawai_cuti_json(r):
         return JsonResponse({"status":'error',"msg":"Anda tidak memiliki akses. Silahkan hubungi IT"},status=400)
 
 
-@login_required
+@authorization(["root","it"])
 def dpegawai_cuti_json(r):
     if r.session['ccabang'] == "cirebon":
         if r.headers["X-Requested-With"]:
@@ -83,24 +80,20 @@ def dpegawai_cuti_json(r):
     else:
         return JsonResponse({"status":'error',"msg":"Anda tidak memiliki akses. Silahkan hubungi IT"},status=400)
 
-@login_required
+@authorization(["root","it"])
 def pegawai_cuti_json(r):
     if r.session["ccabang"] == "cirebon":
         if r.headers["X-Requested-With"] == "XMLHttpRequest":
-            id_user = r.user.id
+            id_user = r.session["user"]["id"]
             akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
-            if akses is not None:
-                if akses.akses == "root" or akses.akses == "it":                        
-                    data = []
-
-                    for p in pegawai_cuti_lama.objects.using(r.session["ccabang"]).all():
-                        obj = {
-                            "id":p.pk,
-                            "nama":p.pegawai.nama,
-                            "idp":p.pegawai_id
-                        }
-                        data.append(obj)
-
-                    return JsonResponse({"status":"success","msg":"Berhasil ambil data","data":data},status=200)
+            data = []
+            for p in pegawai_cuti_lama.objects.using(r.session["ccabang"]).all():
+                obj = {
+                    "id":p.pk,
+                    "nama":p.pegawai.nama,
+                    "idp":p.pegawai_id
+                }
+                data.append(obj)
+            return JsonResponse({"status":"success","msg":"Berhasil ambil data","data":data},status=200)
     else:
         return JsonResponse({"status":'error',"msg":"Anda tidak memiliki akses. Silahkan hubungi IT"},status=400)

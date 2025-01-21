@@ -1,38 +1,12 @@
-# DJANGO
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-from django.contrib.auth.models import User
-from django.db import IntegrityError 
-from django.db.models import Q, Avg, Max, Min, Sum, Count, F 
-from django.http import HttpResponse, JsonResponse
-from datetime import date, datetime, timedelta
-from django.template.loader import get_template
-from django.contrib import messages 
-from json import dumps
-import requests
-# SUPPORT
-from hrd_app.function import prosesabsensi
-from openpyxl.styles import Alignment, Font
-from collections import namedtuple
-from openpyxl import Workbook
-import math
-import json
-import time
-import pandas as pd
-from decimal import *
+from .lib import *
 import re
 # PYZK / FINGER MACHINE
-from zk import ZK, const
-from struct import pack
-from zk import user as us
-import codecs  
 # MODEL / DATABASE
 import hrd_app as app
 from ..models import *
-from django.core.serializers import serialize # Create your views here.
 
-
+from hrd.urls import oauth
+from authlib.integrations.django_client import OAuth
 # Functions
 
 
@@ -43,36 +17,13 @@ def logindispatch(request):
     request.POST.get('next')
 
 
-# Logout
-def user_logout(request):
-    request.session["ccabang"] = None
-    request.session["cabang"] = None
-    logout(request)
-    return redirect("login")
-         
-@login_required
-def beranda(r):  
-    
-    iduser = r.user.id
-    print("KLKL")
-    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-        akses = dakses.akses        
-        dsid = dakses.sid_id
-        
-        today = date.today()
-        print("OKK")
-        data = {
-            'akses' : akses,
-            'today' : today,
-            'dsid' : dsid,
-        }
-        
-        return redirect("absensi",sid=dsid)
-        
-    else:    
-        messages.info(r, 'Data akses Anda belum di tentukan.')        
-        return redirect('login')
+def user_logout(r):
+    r.session["ccabang"] = None
+    r.session["cabang"] = None
+    r.session["user"] = None
+    messages.info(r,"Berhasil logout")
+    return redirect("beranda")
+
 
 
 @login_required
@@ -214,18 +165,18 @@ from hrd_app.controllers.pegawai_cuti.views import *
 #                     ).save(using=request.session["ccabang"])
 #                 # print(dt['userid'])
 
-from django.core.serializers import serialize # Create your views here.
-from apscheduler.schedulers.background import BackgroundScheduler
-from apscheduler.triggers.cron import CronTrigger
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# from django.core.serializers import serialize # Create your views here.
+# from apscheduler.schedulers.background import BackgroundScheduler
+# from apscheduler.triggers.cron import CronTrigger
+# # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Pegawai
+# # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# # Pegawai
 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-scheduler = BackgroundScheduler()
+# # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# scheduler = BackgroundScheduler()
 
 # def tasiksetabsensi():
 #     try:

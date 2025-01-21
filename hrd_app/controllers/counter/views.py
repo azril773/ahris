@@ -3,9 +3,9 @@ from hrd_app.controllers.lib import *
 
 # Counter
 # ++++++++++++++
-@login_required
+@authorization(["root","it"])
 def counter(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -29,7 +29,7 @@ def counter(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["root","it"])
 def counter_json(r):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -47,7 +47,7 @@ def counter_json(r):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["root","it"])
 def tambah_counter(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -67,7 +67,7 @@ def tambah_counter(r):
         return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["root","it"])
 def edit_counter(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -87,12 +87,12 @@ def edit_counter(r):
         return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["root","it"])
 def hapus_counter(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        nama_user = r.user.username
+        nama_user = r.session["user"]["nama"]
         
         hid = r.POST.get('hid')
         
@@ -115,20 +115,17 @@ def hapus_counter(r):
 
 
 
-@login_required
+@authorization(["root","it"])
 def scounter_payroll(r):
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):
         akses = akses_db.objects.using(r.session["ccabang"]).get(user_id=id_user)
         akses = akses.akses
-        if akses == "root" or akses == "hrd":
-            counter = counter_db.objects.using(r.session["ccabang"]).all()
-            for c in counter:
-                counter_payroll_db(
-                    id=c.pk,
-                    counter=c.counter,
-                ).save(using=f'p{r.session["ccabang"]}')
-        else:
-            pass
+        counter = counter_db.objects.using(r.session["ccabang"]).all()
+        for c in counter:
+            counter_payroll_db(
+                id=c.pk,
+                counter=c.counter,
+            ).save(using=f'p{r.session["ccabang"]}')
     else:
         pass

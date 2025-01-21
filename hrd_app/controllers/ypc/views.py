@@ -1,8 +1,8 @@
 from hrd_app.controllers.lib import *
 
-@login_required
+@authorization(["*"])
 def tlengkap(r,sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -36,9 +36,9 @@ def tlengkap(r,sid):
         else:
             return render(r,"hrd_app/ypc/tlengkap.html",data)
 
-@login_required
+@authorization(["*"])
 def tketerangan(r,sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -68,9 +68,9 @@ def tketerangan(r,sid):
         }
         return render(r,"hrd_app/ypc/tketerangan.html",data)
 
-@login_required
+@authorization(["*"])
 def terlambat(r,sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -99,7 +99,7 @@ def terlambat(r,sid):
         return render(r,"hrd_app/ypc/terlambat.html",data)
     
     
-@login_required
+@authorization(["*"])
 def tlengkap_json(r,sid):
     if r.headers["X-Requested_With"] == "XMLHttpRequest":
         today = datetime.now()
@@ -114,7 +114,7 @@ def tlengkap_json(r,sid):
         hari = datetime.now().strftime("%A")
         hari = nama_hari(hari)
         data = []
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         div = [d.divisi for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)]
         if sid == 0:
             result = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__hari_off","pegawai__hari_off2","pegawai","pegawai__divisi").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__divisi__in=div)
@@ -148,7 +148,7 @@ def tlengkap_json(r,sid):
             
     
     
-@login_required
+@authorization(["*"])
 def tketerangan_json(r,sid):
     if r.headers["X-Requested_With"] == "XMLHttpRequest":
         tgl1 = r.POST.get("tgl1")
@@ -163,7 +163,7 @@ def tketerangan_json(r,sid):
         hari = datetime.now().strftime("%A")
         hari = nama_hari(hari)
         data = []
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         div = [d.divisi for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)]
         if sid == 0:
             result = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__hari_off","pegawai__hari_off2","pegawai","pegawai__divisi").filter(~Q(pegawai__hari_off__hari=hari) | ~Q(pegawai__hari_off2__hari=hari) ,tgl_absen__range=[tgl1,tgl2],pegawai__divisi__in=div)
@@ -200,7 +200,7 @@ def tketerangan_json(r,sid):
             
     
     
-@login_required
+@authorization(["*"])
 def terlambat_json(r,sid):
     if r.headers["X-Requested_With"] == "XMLHttpRequest":
         tgl1 = r.POST.get("tgl1")
@@ -215,7 +215,7 @@ def terlambat_json(r,sid):
         hari = datetime.now().strftime("%A")
         hari = nama_hari(hari)
         data = []
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         div = [d.divisi for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)]
         
         if sid == 0:

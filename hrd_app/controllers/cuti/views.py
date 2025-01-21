@@ -2,9 +2,9 @@ from hrd_app.controllers.lib import *
 from django.db import transaction
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Cuti
-@login_required
+@authorization(["*"])
 def cuti(r, sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -140,9 +140,9 @@ def cuti(r, sid):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def detail_cuti(r, sid, idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -150,7 +150,7 @@ def detail_cuti(r, sid, idp):
         dsid = dakses.sid_id     
         
         today = date.today()
-        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
         try:
             pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=int(idp),divisi_id__in=aksesdivisi)
         except:
@@ -196,9 +196,9 @@ def detail_cuti(r, sid, idp):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def cari_cuti(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -242,7 +242,7 @@ def cari_cuti(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def cuti_json(r, dr, sp, sid):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -251,7 +251,7 @@ def cuti_json(r, dr, sp, sid):
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
         if int(sid) == 0:
             for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__range=(dari,sampai),pegawai__divisi_id__in=aksesdivisi):
                 
@@ -284,7 +284,7 @@ def cuti_json(r, dr, sp, sid):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["*"])
 def dcuti_json(r, idp):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -297,7 +297,7 @@ def dcuti_json(r, idp):
             if not ac:
                 return JsonResponse({'status':'error',"msg":"Awal cuti tidak ada "})
             tac = ac.tgl
-            aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+            aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
             pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(idp)).last()
             if not pegawai:
                 return JsonResponse({"status":'error',"msg":"Pegawai tidak ada"},status=400)
@@ -334,7 +334,7 @@ def dcuti_json(r, idp):
             if not ac:
                 return JsonResponse({'status':'error',"msg":"Awal cuti tidak ada "})
             tac = ac.tgl
-            aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+            aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
             for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__gte=tac, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi):                
                 ct = {
                     'id':i.id,
@@ -348,14 +348,14 @@ def dcuti_json(r, idp):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["*"])
 def tambah_cuti(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     dtgl = r.POST.get('tgl')
     idp = r.POST.get('idp')
     dket = r.POST.get('ket')
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
     ltgl = dtgl.split(', ')   
     ac = awal_cuti_db.objects.using(r.session["ccabang"]).last()
     if ac is None:
@@ -615,15 +615,15 @@ def tambah_cuti(r):
     return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["*"])
 def edit_sisa_cuti(r):
     
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
 
     idp = r.POST.get('idp')
     scuti = r.POST.get('scuti')
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
-    id_user = r.user.id
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
+    id_user = r.session["user"]["id"]
     akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
     modul = r.POST.get('modul')
     try:
@@ -632,17 +632,11 @@ def edit_sisa_cuti(r):
         return JsonResponse({"status":'error',"msg":"Pegawai tidak ada"},status=400)
     
     if modul == 'ecuti':
-        if akses.akses == 'root' or akses.akses == 'it':
-            pg.sisa_cuti = int(scuti)
-            pg.save(using=r.session["ccabang"])
-        else:
-            return JsonResponse({'status':"error","msg":"Anda tidak memiliki akses untuk edit sisa cuti"},status=400)
+        pg.sisa_cuti = int(scuti)
+        pg.save(using=r.session["ccabang"])
     elif modul == 'reset_cuti':
-        if akses.akses == 'root' or akses.akses == "it":
-            pg.sisa_cuti = 12
-            pg.save(using=r.session["ccabang"])   
-        else:
-            return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses untuk reset cuti"},status=400)
+        pg.sisa_cuti = 12
+        pg.save(using=r.session["ccabang"])   
     else:
         for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if p.tgl_masuk is None:
@@ -666,12 +660,12 @@ def edit_sisa_cuti(r):
     return JsonResponse({"status": "success","msg":"Berhasil edit cuti"})
 
 
-@login_required
+@authorization(["*"])
 def batal_cuti(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     idc = r.POST.get('idc')
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
     try:
         ct = cuti_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").get(id=int(idc),pegawai__divisi_id__in=aksesdivisi)
     except:

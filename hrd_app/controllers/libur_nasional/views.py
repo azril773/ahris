@@ -2,9 +2,9 @@ from hrd_app.controllers.lib import *
 
 # Libur Nasional
 # ++++++++++++++
-@login_required
+@authorization(["*"])
 def libur_nasional(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -28,7 +28,7 @@ def libur_nasional(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def libur_nasional_json(r):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -51,7 +51,7 @@ def libur_nasional_json(r):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["*"])
 def tambah_libur_nasional(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -78,7 +78,7 @@ def tambah_libur_nasional(r):
         return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["*"])
 def edit_libur_nasional(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -105,12 +105,12 @@ def edit_libur_nasional(r):
         return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["*"])
 def hapus_libur_nasional(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        nama_user = r.user.username
+        nama_user = r.session["user"]["nama"]
         
         hid = r.POST.get('hid')
               
@@ -127,4 +127,3 @@ def hapus_libur_nasional(r):
         status = 'ok'
         
         return JsonResponse({"status": status})
-

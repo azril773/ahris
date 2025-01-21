@@ -11,4 +11,5 @@ urlpatterns = [
     path('tlibur_nasional', views.tambah_libur_nasional, name='tlibur_nasional'),
     path('elibur_nasional', views.edit_libur_nasional, name='elibur_nasional'),
     path('hlibur_nasional', views.hapus_libur_nasional, name='hlibur_nasional'),
+    path('ganti_password_json', views.ganti_password_json, name='ganti_password_json'),
 ]
