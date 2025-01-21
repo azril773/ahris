@@ -1059,6 +1059,8 @@ class pegawai_db_arsip(models.Model):
     tgl_masuk = models.DateField(null=True, blank=True)
     tgl_aktif = models.DateTimeField(null=True, blank=True)
     tgl_nonaktif = models.DateTimeField(null=True, blank=True)
+    tgl_cuti = models.DateField(null=True)
+    expired = models.DateField(null=True)
 
     hari_off = models.ForeignKey(hari_db,related_name="hari_off_arsip", on_delete=models.CASCADE)
     hari_off2 = models.ForeignKey(hari_db, on_delete=models.CASCADE, related_name='hari_off2_arsip',null=True, blank=True)
@@ -1067,6 +1069,8 @@ class pegawai_db_arsip(models.Model):
     cuti_awal = models.IntegerField(null=True)
     shift = models.CharField(max_length=100, null=True, blank=True)
     counter = models.ForeignKey(counter_db,related_name="counter_arsip", on_delete=models.CASCADE, null=True, blank=True)
+    profile_picture = models.CharField(max_length=100,null=True)
+
     
     rekening = models.CharField(max_length=50, null=True, blank=True)
 
