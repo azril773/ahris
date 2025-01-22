@@ -1837,10 +1837,9 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
     if not att:
         pass
     else:
-        for a in att:
-            if a['userid'] in luserid:
-                
-
+        for ab in absensi_db.objects.using(cabang).filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]],pegawai__userid__in=luserid):
+            dta = [a for a in att if str(a["userid"]) == str(ab.pegawai.userid) and ab.tgl_absen == datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S").date()]
+            for a in dta:                
                 # simpan data raw jika belum ada di list ddr
                 if not a in ddr:
                     data_raw_db(
@@ -1853,7 +1852,6 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                 jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
                 japlus = jam_absen + timedelta(minutes=2,seconds=30)
                 jamin = jam_absen - timedelta(minutes=2,seconds=30)
-
                 pg = next((pgw for pgw in pegawai if pgw["userid"] == a["userid"]),None)
                 cekuser = [du for du in dt if int(du["userid"]) == int(a["userid"]) and du["jam_absen"].date() == jam_absen.date() and du["jam_absen"] > jamin and du["jam_absen"] < japlus and du["punch"] != a["punch"]]
                 if len(cekuser) > 0:
@@ -1934,7 +1932,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                     ab.shift = jam.shift.shift if jam.shift is not None else None
                                 
                                 
-# ++++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         if a["punch"] == 0 and jam_absen.hour >= 4 and jam_absen.hour < 18 :
                             try:
                                 ab2 = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai__userid=a["userid"])
@@ -1978,7 +1976,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                         "ket": "Masuk"
                                 }
                                 dt.append(data)
-# ++++++++++++++++++++++++++++++++++++++++  MASUK MALAM TASIK +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  MASUK MALAM TASIK +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 0 and jam_absen.hour > 18:
                             # pastikan untuk userid hotel
                             try:
@@ -2008,8 +2006,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                 }
                                 dt.append(data)
                             
-
-# ++++++++++++++++++++++++++++++++++++++++  ISTIRAHAT  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  ISTIRAHAT  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 2 and int(jam_absen.hour) > 8 and int(jam_absen.hour) < 21:
                             try:
                                 ab2 = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai__userid=a["userid"])
@@ -2077,7 +2074,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                         "ket": "Istirahat"
                                     }
                                     dt.append(data)
-# ++++++++++++++++++++++++++++++++++++++++  ISTIRAHAT MALAM TASIK +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  ISTIRAHAT MALAM TASIK +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 2 and (int(jam_absen.hour) > 21 or int(jam_absen.hour) < 8):
                             if ab.istirahat is None:
                                 ab.istirahat = jam_absen.time()
@@ -2092,7 +2089,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                 dt.append(data)
                             else:
                                 pass
-# ++++++++++++++++++++++++++++++++++++++++  ISTIRAHAT 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  ISTIRAHAT 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 4 and int(jam_absen.hour) > 8 and int(jam_absen.hour) < 21:
                             try:
                                 ab2 = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai__userid=a["userid"])
@@ -2151,7 +2148,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                         "ket": "Istirahat 2"
                                     }
                                     dt.append(data)
-# ++++++++++++++++++++++++++++++++++++++++  ISTIRAHAT MALAM 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  ISTIRAHAT MALAM 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 4 and (int(jam_absen.hour) > 21 or int(jam_absen.hour) < 8):
                             if ab.istirahat is None:
                                 ab.istirahat = jam_absen.time()
@@ -2166,7 +2163,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                 dt.append(data)
                             else:
                                 pass
-# ++++++++++++++++++++++++++++++++++++++++  KEMBALI +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  KEMBALI +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 3 and int(jam_absen.hour) > 9:
                             try:
                                 ab2 = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai__userid=a["userid"])
@@ -2225,7 +2222,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                         "ket": "Kembali Istirahat"
                                     }
                                     dt.append(data)
-# ++++++++++++++++++++++++++++++++++++++++  KEMBALI 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  KEMBALI 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 5 and int(jam_absen.hour) > 9:
                             try:
                                 ab2 = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai__userid=a["userid"])
@@ -2284,7 +2281,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                         "ket": "Kembali Istirahat 2"
                                     }
                                     dt.append(data)
-# ++++++++++++++++++++++++++++++++++++++++  KEMBALI MALAM 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  KEMBALI MALAM 2 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 5 and int(jam_absen.hour) < 9:
                             if ab.kembali2 is None:
                                 ab.kembali2 = jam_absen.time()
@@ -2299,7 +2296,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                 dt.append(data)
                             else:
                                 pass
-# ++++++++++++++++++++++++++++++++++++++++  KEMBALI MALAM +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  KEMBALI MALAM +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 3 and (int(jam_absen.hour) > 21 or int(jam_absen.hour) < 9):
                             if ab.kembali is None:
                                 ab.kembali = jam_absen.time()
@@ -2314,7 +2311,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                 dt.append(data)
                             else:
                                 pass
-# ++++++++++++++++++++++++++++++++++++++++  PULANG  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  PULANG  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 1 and int(jam_absen.hour) > 9:
                             try:
                                 ab2 = absensi_db.objects.using(cabang).get(tgl_absen=tplus.date(),pegawai__userid=a["userid"])
@@ -2373,7 +2370,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                         "ket": "Pulang"
                                     }
                                     dt.append(data)
-# ++++++++++++++++++++++++++++++++++++++++  PULANG MALAM  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+    # +++++++++++++++++++++++++++++++++++++++  PULANG MALAM  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
                         elif a["punch"] == 1 and int(jam_absen.hour) < 9:
                                 try:
                                     ab2 = absensi_db.objects.using(cabang).get(tgl_absen=tmin.date(),pegawai_id=ab.pegawai.pk)
@@ -2415,7 +2412,6 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                                         "ket": "Pulang Malam"
                                     }
                                     dt.append(data)
-
                             # if ab.masuk is not None:
                             #     if int(ab.masuk.hour) < 18:
                             #         ab.kembali = jam_absen.time()
@@ -2428,12 +2424,10 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                             #     else:
                             #         ab.kembali = jam_absen.time()
                             #         ab.save(using=cabang)
-
-
                             
                     else:
                         pass
-                    
+                        
     for dt2 in dt:
         if not dt2 in ddtor:
             data_trans_db(
