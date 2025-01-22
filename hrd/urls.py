@@ -4,7 +4,6 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User
 from django.contrib.auth import views as auth_views # type: ignore
 from hrd_app.admin import cirebon, tasik, sumedang, cihideung,garut
-import debug_toolbar
 import os
 from django.contrib import messages 
 import re
@@ -116,7 +115,6 @@ urlpatterns = [
     path('cihideungadmin/', cihideung.urls),
     path('garutadmin/', garut.urls),
     path('', beranda),
-    path("__debug__/",include(debug_toolbar.urls)),
     path("login/",login,name='login'),
     path("beranda/",beranda,name='beranda'),
     # path("login/",include("hrd_app.router.login.urls")),
