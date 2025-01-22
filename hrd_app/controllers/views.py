@@ -35,9 +35,9 @@ def beranda_no_akses(request):
 
 
 
-@login_required
 def ganti_cabang(r):
     cabang = r.POST.get("cabang")
+    print(r.POST.get("cabang"))
     if not cabang_db.objects.filter(cabang=cabang).exists():
         return JsonResponse({"status":"error","msg":"Gagal mengganti cabang"},status=401)
     cabang = cabang_db.objects.filter(cabang=cabang)
