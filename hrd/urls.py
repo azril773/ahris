@@ -79,7 +79,6 @@ def callback(r):
     return redirect("/hrd/absensi/0")
 
 def beranda(r): 
-    print(r.session["user"])
     auth = False
     nama = None
     cabang = ''
