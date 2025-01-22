@@ -772,11 +772,13 @@ def pabsen(req):
         sp = datetime.strftime(sampai, "%d-%m-%Y")
     else:
         tminus1 = date.today() + timedelta(days=-1)
+        tplus1 = date.today()
         dari = datetime.strptime(f'{tminus1} 00:00:00', "%Y-%m-%d %H:%M:%S")
-        sampai = datetime.strptime(f'{date.today()} 23:59:59', "%Y-%m-%d %H:%M:%S")    
+        sampai = datetime.strptime(f'{tplus1} 23:59:59', "%Y-%m-%d %H:%M:%S")    
         dr = datetime.strftime(dari, "%d-%m-%Y")
         sp = datetime.strftime(sampai, "%d-%m-%Y")
     rangetgl = pd.date_range(dari.date(), sampai.date()).tolist()
+    print(rangetgl)
     pegawai = [] 
     luserid = []  
     
