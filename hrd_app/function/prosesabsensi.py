@@ -12,7 +12,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
     if not att:
         pass
     else:
-        for ab in absensi_db.objects.using(cabang).filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]],pegawai__userid__in=luserid):
+        for ab in absensi_db.objects.using(cabang).select_related("pegawai","pegawai__divisi").filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]],pegawai__userid__in=luserid):
             dta = [a for a in att if str(a["userid"]) == str(ab.pegawai.userid) and ab.tgl_absen == datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S").date()]
             for a in dta:
                 if a['userid'] in luserid:
@@ -1840,9 +1840,9 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
     if not att:
         pass
     else:
-        for ab in absensi_db.objects.using(cabang).filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]],pegawai__userid__in=luserid):
+        for ab in absensi_db.objects.using(cabang).select_related("pegawai","pegawai__divisi").filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]],pegawai__userid__in=luserid):
             dta = [a for a in att if str(a["userid"]) == str(ab.pegawai.userid) and ab.tgl_absen == datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S").date()]
-            for a in dta:                
+        for a in dta:                
                 # simpan data raw jika belum ada di list ddr
                 if not a in ddr:
                     data_raw_db(
