@@ -778,7 +778,6 @@ def pabsen(req):
         dr = datetime.strftime(dari, "%d-%m-%Y")
         sp = datetime.strftime(sampai, "%d-%m-%Y")
     rangetgl = pd.date_range(dari.date(), sampai.date()).tolist()
-    print(rangetgl)
     pegawai = [] 
     luserid = []  
     
@@ -896,6 +895,7 @@ def pabsen(req):
                         pegawai_id = p.pk
                     ).save(using=req.session["ccabang"])
     dmesin = []
+    print(datetime.now())
     try:
         for m in mesin_db.objects.using(req.session["ccabang"]).filter(status="Active"):
             ip = m.ipaddress
@@ -926,6 +926,7 @@ def pabsen(req):
         messages.error(req,"Terjadi kesalahan sdskd")
         return redirect("absensi",sid=sid)
     att = sorted(dmesin, key=lambda i: i['jam_absen'])
+    print(datetime.now())
     # with open("static/data.json","r") as f:
     #     file = f.read()
     #     att = json.loads(file)["data"]
