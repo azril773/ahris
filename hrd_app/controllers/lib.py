@@ -288,7 +288,7 @@ def periode_tgl(tanggal):
 def authorization(roles):
     def view(func):
         def process(r,*args, **kwargs):
-            try:
+            # try:
                 user = r.session["user"]
                 akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=user["id"]).last()
                 if not akses:
@@ -302,10 +302,10 @@ def authorization(roles):
                     
                 res = func(r,*args, **kwargs)
                 return res
-            except Exception as e:
-                print(e)
-                messages.error(r,e)
-                return redirect("beranda")
+            # except Exception as e:
+            #     print(e)
+            #     messages.error(r,e)
+            #     return redirect("beranda")
         return process
     return view
 
