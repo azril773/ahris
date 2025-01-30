@@ -304,6 +304,7 @@ def authorization(roles):
                 return res
             except Exception as e:
                 print(e)
+                messages.error(r,e)
                 return redirect("beranda")
         return process
     return view
