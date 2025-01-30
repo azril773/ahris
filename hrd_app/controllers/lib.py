@@ -302,7 +302,8 @@ def authorization(roles):
                     
                 res = func(r,*args, **kwargs)
                 return res
-            except:
+            except Exception as e:
+                print(e)
                 return redirect("beranda")
         return process
     return view
