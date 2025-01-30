@@ -288,19 +288,22 @@ def periode_tgl(tanggal):
 def authorization(roles):
     def view(func):
         def process(r,*args, **kwargs):
-            user = r.session["user"]
-            akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=user["id"]).last()
-            if not akses:
-                messages.error(r,"Akses anda belum ditentukan")
-                return redirect("beranda")
-            
-            if not "*" in roles:
-                if not akses.akses in roles:
-                    messages.error(r,"Anda tidak memiliki akses")
+            try:
+                user = r.session["user"]
+                akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=user["id"]).last()
+                if not akses:
+                    messages.error(r,"Akses anda belum ditentukan")
                     return redirect("beranda")
                 
-            res = func(r,*args, **kwargs)
-            return res
+                if not "*" in roles:
+                    if not akses.akses in roles:
+                        messages.error(r,"Anda tidak memiliki akses")
+                        return redirect("beranda")
+                    
+                res = func(r,*args, **kwargs)
+                return res
+            except:
+                return redirect("beranda")
         return process
     return view
 
