@@ -151,7 +151,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                                     }
                                     dt.append(data)
                                 else:
-                                    update.append({"masuk_b":jam_absen.time(),"id":ab.pk})
+                                    update.append({"masuk":jam_absen.time(),"id":ab.pk})
                                     data = {
                                             "userid": a["userid"],
                                             "jam_absen": jam_absen,
