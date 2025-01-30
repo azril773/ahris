@@ -9,7 +9,6 @@ from django.contrib import messages
 import re
 from hrd_app.models import user_db, akses_cabang_db, cabang_db
 import json
-from debug_toolbar.toolbar import debug_toolbar_urls
 from authlib.integrations.django_client import OAuth
 oauth = OAuth()
 oauth.register("oidc",client_id=os.environ.get("CLIENT_ID"), client_secret=os.environ.get("CLIENT_SECRET"), authorize_url=os.environ.get("AUTHORIZE_URL"),server_metadata_url=os.environ.get("CONFIG_URL") ,access_token_url=os.environ.get("TOKEN_URL"))
@@ -120,4 +119,4 @@ urlpatterns = [
     path("beranda/",beranda,name='beranda'),    
     # path("login/",include("hrd_app.router.login.urls")),
     path('hrd/', include('hrd_app.router.urls')),
-] + debug_toolbar_urls()
+]
