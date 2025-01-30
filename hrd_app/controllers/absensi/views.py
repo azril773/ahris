@@ -834,6 +834,11 @@ def pabsen(req):
             }
             pegawai.append(data)        
             luserid.append(p.userid)
+            for tgl in rangetgl:
+                if absensi_db.objects.using(req.session["ccabang"]).filter(pegawai_id=p.pk,tgl_absen=tgl).exists():
+                    pass
+                else:
+                    absensi_db(tgl_absen=tgl,pegawai_id=p.pk).save(using=req.session["ccabang"])
     else:
         for p in [pgw for pgw in pegawaiLoop if pgw.status_id == sid]:
             if p.jabatan is None:
@@ -878,20 +883,21 @@ def pabsen(req):
             }
             pegawai.append(data)        
             luserid.append(p.userid)
-    abs =  absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]])
-    absensi = [a for a in abs]
-    noexist = []
-    for abs1 in absensi:
-        if abs1.pegawai.userid in luserid:
             for tgl in rangetgl:
-                if abs1.tgl_absen == tgl:
+                if absensi_db.objects.using(req.session["ccabang"]).filter(pegawai_id=p.pk,tgl_absen=tgl).exists():
                     pass
                 else:
-                    noexist.append(absensi_db(pegawai_id=abs1.pegawai_id,tgl_absen=tgl))
-    absensi_db.objects.using(req.session["ccabang"]).bulk_create(noexist)
-
-
-    
+                    absensi_db(tgl_absen=tgl,pegawai_id=p.pk).save(using=req.session["ccabang"])    
+    listabsen = absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]])
+    notexist = []
+    for pgw in pegawai:
+        for tgl in rangetgl:
+            if len([ab for ab in listabsen if ab.pegawai.pk == pgw["idp"] and ab.tgl_absen == tgl]) > 1:
+                pass
+            else:
+                notexist.append({"pegawai_id":pgw["idp"],"tgl_absen":tgl})
+    print(notexist)
+    absensi_db.objects.using(req.session["ccabang"]).bulk_create(notexist)
 
     dmesin = []
     try:
@@ -958,7 +964,9 @@ def pabsen(req):
     hari = now.strftime("%A")
     hari = nama_hari(hari)
     print("OKOKOK")
+    print(luserid)
     absensi =  absensi_db.objects.using(req.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(tgl_absen__range=rangetgl,pegawai__userid__in=luserid)
+    print(absensi)
     absensi = [a for a in absensi]
     if req.session["ccabang"] != "tasik":
         prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor,absensi)
