@@ -896,46 +896,36 @@ def pabsen(req):
                         pegawai_id = p.pk
                     ).save(using=req.session["ccabang"])
     dmesin = []
-    # try:
-    #     for m in mesin_db.objects.using(req.session["ccabang"]).filter(status="Active"):
-    #         ip = m.ipaddress
-    #         # conn = None
-    #         zk = ZK(str(ip), port=4370, timeout=65)
-    #         conn = zk.connect()
-    #         conn.disable_device()
-    #         # dt absensi
-    #         absensi = conn.get_attendance()
-    #         for a in absensi:
-    #             # 
-    #             if dari <= a.timestamp <= sampai:   
-    #                 # users = conn.get_users()
-    #                 if str(a.user_id) in luserid:     
-    #                     data = {
-    #                         "userid": a.user_id, 
-    #                         "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
-    #                         "punch": a.punch,
-    #                         "mesin":m.nama
-    #                     }
-    #                     dmesin.append(data)
-    #                 else:
-    #                     pass                
-    #         conn.enable_device()
-    #         conn.disconnect()
-    # except Exception as e:
-    #     print(e)
-    #     messages.error(req,"Terjadi kesalahan sdskd")
-    #     return redirect("absensi",sid=sid)
-    # att = sorted(dmesin, key=lambda i: i['jam_absen'])
-    # print(datetime.now())
-    # with open("data.json","w") as f:
-    #     f.write(json.dumps(att))
-    # return JsonResponse({"status":"ok"})
-    with open("data.json","r") as f:
-        file = f.read()
-        att = json.loads(file)
-
-    # print(att)
-    # return JsonResponse({"status":"succsss"})
+    try:
+        for m in mesin_db.objects.using(req.session["ccabang"]).filter(status="Active"):
+            ip = m.ipaddress
+            # conn = None
+            zk = ZK(str(ip), port=4370, timeout=65)
+            conn = zk.connect()
+            conn.disable_device()
+            # dt absensi
+            absensi = conn.get_attendance()
+            for a in absensi:
+                # 
+                if dari <= a.timestamp <= sampai:   
+                    # users = conn.get_users()
+                    if str(a.user_id) in luserid:     
+                        data = {
+                            "userid": a.user_id, 
+                            "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
+                            "punch": a.punch,
+                            "mesin":m.nama
+                        }
+                        dmesin.append(data)
+                    else:
+                        pass                
+            conn.enable_device()
+            conn.disconnect()
+    except Exception as e:
+        print(e)
+        messages.error(req,"Terjadi kesalahan sdskd")
+        return redirect("absensi",sid=sid)
+    att = sorted(dmesin, key=lambda i: i['jam_absen'])
     ddr = []
     for d in data_raw_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
         data = {
