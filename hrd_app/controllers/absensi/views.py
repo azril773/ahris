@@ -6,6 +6,7 @@ from django.db import connection
 from multiprocessing import Pool
 import ast
 from hrd_app.function import prosesabsensi
+import cProfile
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Absensi
 @authorization(["*"])
@@ -895,41 +896,43 @@ def pabsen(req):
                         pegawai_id = p.pk
                     ).save(using=req.session["ccabang"])
     dmesin = []
-    print(datetime.now())
-    try:
-        for m in mesin_db.objects.using(req.session["ccabang"]).filter(status="Active"):
-            ip = m.ipaddress
-            # conn = None
-            zk = ZK(str(ip), port=4370, timeout=65)
-            conn = zk.connect()
-            conn.disable_device()
-            # dt absensi
-            absensi = conn.get_attendance()
-            for a in absensi:
-                # 
-                if dari <= a.timestamp <= sampai:   
-                    # users = conn.get_users()
-                    if str(a.user_id) in luserid:     
-                        data = {
-                            "userid": a.user_id, 
-                            "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
-                            "punch": a.punch,
-                            "mesin":m.nama
-                        }
-                        dmesin.append(data)
-                    else:
-                        pass                
-            conn.enable_device()
-            conn.disconnect()
-    except Exception as e:
-        print(e)
-        messages.error(req,"Terjadi kesalahan sdskd")
-        return redirect("absensi",sid=sid)
-    att = sorted(dmesin, key=lambda i: i['jam_absen'])
-    print(datetime.now())
-    # with open("static/data.json","r") as f:
-    #     file = f.read()
-    #     att = json.loads(file)["data"]
+    # try:
+    #     for m in mesin_db.objects.using(req.session["ccabang"]).filter(status="Active"):
+    #         ip = m.ipaddress
+    #         # conn = None
+    #         zk = ZK(str(ip), port=4370, timeout=65)
+    #         conn = zk.connect()
+    #         conn.disable_device()
+    #         # dt absensi
+    #         absensi = conn.get_attendance()
+    #         for a in absensi:
+    #             # 
+    #             if dari <= a.timestamp <= sampai:   
+    #                 # users = conn.get_users()
+    #                 if str(a.user_id) in luserid:     
+    #                     data = {
+    #                         "userid": a.user_id, 
+    #                         "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
+    #                         "punch": a.punch,
+    #                         "mesin":m.nama
+    #                     }
+    #                     dmesin.append(data)
+    #                 else:
+    #                     pass                
+    #         conn.enable_device()
+    #         conn.disconnect()
+    # except Exception as e:
+    #     print(e)
+    #     messages.error(req,"Terjadi kesalahan sdskd")
+    #     return redirect("absensi",sid=sid)
+    # att = sorted(dmesin, key=lambda i: i['jam_absen'])
+    # print(datetime.now())
+    # with open("data.json","w") as f:
+    #     f.write(json.dumps(att))
+    # return JsonResponse({"status":"ok"})
+    with open("data.json","r") as f:
+        file = f.read()
+        att = json.loads(file)
 
     # print(att)
     # return JsonResponse({"status":"succsss"})
@@ -965,11 +968,43 @@ def pabsen(req):
     now = datetime.now()
     hari = now.strftime("%A")
     hari = nama_hari(hari)
+    update = []
     if req.session["ccabang"] != "tasik":
         prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)
     else:
-        prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)    
-    #     
+        prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor,update)    
+    for abs in absensi_db.objects.using(req.session["ccabang"]).filter(pegawai__userid__in=luserid,tgl_absen__range=rangetgl):
+        for up in update:
+            if str(abs.pk) != str(up["id"]):
+                continue
+            key = up.keys()
+            if "masuk" in key:
+                abs.masuk = up["masuk"]
+            elif "masuk_b" in key:
+                abs.masuk_b = up["masuk_b"]
+            elif "pulang" in key:
+                abs.pulang = up["pulang"]
+            elif "pulang_b" in key:
+                abs.pulang_b = up["pulang_b"]
+            elif "istirahat" in key:
+                abs.istirahat = up["istirahat"]
+            elif "istirahat2" in key:
+                abs.istirahat2 = up["istirahat2"]
+            elif "istirahat_b" in key:
+                abs.istirahat_b = up["istirahat_b"]
+            elif "istirahat2_b" in key:
+                abs.istirahat2_b = up["istirahat2_b"]
+            elif "kembali" in key:
+                abs.kembali = up["kembali"]
+            elif "kembali2" in key:
+                abs.kembali2 = up["kembali2"]
+            elif "kembali_b" in key:
+                abs.kembali_b = up["kembali_b"]
+            elif "kembali2_b" in key:
+                abs.kembali2_b = up["kembali2_b"]
+            abs.save(using=req.session["ccabang"])
+            del update[update.index(up)]
+
         
     ijin = []  
     libur = []
@@ -1859,7 +1894,7 @@ def pabsen(req):
     #     messages.error(req,"Terjadi kesalahan")
     #     return redirect("absensi",sid=int(sid))
     
-
+    # return render("test")
     return redirect ('absensi',sid=int(sid))   
 
 @authorization(["*"])
