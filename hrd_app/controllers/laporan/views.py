@@ -309,7 +309,6 @@ def laporan_json(r):
             }
             data.append(obj)
     datai = []
-    print(data)
     for dt in data:
         if not rekap_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(dt["id"]),periode=int(bulan),tahun=int(tahun)).exists():
             rekap_db(
@@ -1180,7 +1179,6 @@ def print_laporan_divisi(r):
                                 obj["b"] = 0
                             else:
                                 obj["b"] = 1
-                print(obj["b"])
                 obj["kehadiran"] = kehadiran
                 obj["terlambat"] = trlmbt
                 tselisih = str(tselisih).split(".")
@@ -1465,7 +1463,6 @@ def print_laporan_shift(r):
             data.append(obj[s2.shift])
         result.append({"tanggal":d,"data":data})
 
-    print(result)
     return render(r,"hrd_app/laporan/[shift]/print_laporan_shift.html",{"data":result})
 
 

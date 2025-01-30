@@ -963,6 +963,7 @@ def pabsen(req):
         prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)
     else:
         prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor,update)    
+
     for abs in absensi_db.objects.using(req.session["ccabang"]).filter(pegawai__userid__in=luserid,tgl_absen__range=rangetgl):
         for up in update:
             if str(abs.pk) != str(up["id"]):
@@ -1120,6 +1121,7 @@ def pabsen(req):
         data = absensi_db.objects.using(req.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()))
     elif int(sid) > 0:
         data = absensi_db.objects.using(req.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()),pegawai__status_id=sid)
+    print(data)
     username = req.session["user"]["nama"]
     cabang = req.session["ccabang"]
     for a in data:
