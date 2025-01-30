@@ -925,6 +925,7 @@ def pabsen(req):
         print(e)
         messages.error(req,"Terjadi kesalahan sdskd")
         return redirect("absensi",sid=sid)
+    print("MESIN SELESAI")
     att = sorted(dmesin, key=lambda i: i['jam_absen'])
     ddr = []
     for d in data_raw_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
@@ -959,11 +960,14 @@ def pabsen(req):
     hari = now.strftime("%A")
     hari = nama_hari(hari)
     update = []
+    print("PROSES ABSENSI MULAI")
     if req.session["ccabang"] != "tasik":
         prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor)
     else:
         prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor,update)    
+    print("PROSES ABSENSI SELESAI")
 
+    print("SET JENIS")
     for abs in absensi_db.objects.using(req.session["ccabang"]).filter(pegawai__userid__in=luserid,tgl_absen__range=rangetgl):
         for up in update:
             if str(abs.pk) != str(up["id"]):
@@ -995,6 +999,7 @@ def pabsen(req):
                 abs.kembali2_b = up["kembali2_b"]
             abs.save(using=req.session["ccabang"])
             del update[update.index(up)]
+    print("SELESAI")
 
         
     ijin = []  
@@ -1117,6 +1122,7 @@ def pabsen(req):
         kompen.append(data)
         
     # data absensi
+    print("SET OPG, DLL")
     if int(sid) == 0:
         data = absensi_db.objects.using(req.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen__range=(dari.date(),sampai.date()))
     elif int(sid) > 0:
@@ -1881,6 +1887,7 @@ def pabsen(req):
             ho = ab.pegawai.hari_off.hari
         else:
             ho = None
+    print("SELESAI OPG, DLL")
     # except Exception as e:
     #     print(e)
     #     messages.error(req,"Terjadi kesalahan")
