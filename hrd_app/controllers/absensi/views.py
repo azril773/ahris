@@ -878,7 +878,7 @@ def pabsen(req):
             }
             pegawai.append(data)        
             luserid.append(p.userid)
-    abs =  absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen__range=rangetgl)
+    abs =  absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]])
     absensi = [a for a in abs]
     noexist = []
     for abs1 in absensi:
