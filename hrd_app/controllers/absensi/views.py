@@ -878,16 +878,16 @@ def pabsen(req):
             }
             pegawai.append(data)        
             luserid.append(p.userid)
-    absensi =  absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen__range=rangetgl)
-    absensi = [a for a in absensi]
+    abs =  absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen__range=rangetgl)
+    absensi = [a for a in abs]
     noexist = []
-    for abs in absensi:
-        if abs.pegawai.userid in luserid:
+    for abs1 in absensi:
+        if abs1.pegawai.userid in luserid:
             for tgl in rangetgl:
-                if abs.tgl_absen == tgl:
+                if abs1.tgl_absen == tgl:
                     pass
                 else:
-                    noexist.append(absensi_db(pegawai_id=abs.pegawai_id,tgl_absen=tgl))
+                    noexist.append(absensi_db(pegawai_id=abs1.pegawai_id,tgl_absen=tgl))
     absensi_db.objects.using(req.session["ccabang"]).bulk_create(noexist)
 
 
