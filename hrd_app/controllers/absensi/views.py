@@ -955,7 +955,7 @@ def pabsen(req):
     hari = nama_hari(hari)
     print("OKOKOK")
     print(luserid)
-    absensi =  absensi_db.objects.using(req.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(tgl_absen__range=rangetgl,pegawai__userid__in=luserid)
+    absensi =  absensi_db.objects.using(req.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]],pegawai__userid__in=luserid)
     print(absensi)
     absensi = [a for a in absensi]
     if req.session["ccabang"] != "tasik":
