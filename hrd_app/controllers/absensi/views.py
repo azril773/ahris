@@ -888,16 +888,6 @@ def pabsen(req):
                     pass
                 else:
                     absensi_db(tgl_absen=tgl,pegawai_id=p.pk).save(using=req.session["ccabang"])    
-    listabsen = absensi_db.objects.using(req.session["ccabang"]).filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]])
-    notexist = []
-    for pgw in pegawai:
-        for tgl in rangetgl:
-            if len([ab for ab in listabsen if ab.pegawai.pk == pgw["idp"] and ab.tgl_absen == tgl]) > 1:
-                pass
-            else:
-                notexist.append({"pegawai_id":pgw["idp"],"tgl_absen":tgl})
-    print(notexist)
-    absensi_db.objects.using(req.session["ccabang"]).bulk_create(notexist)
 
     dmesin = []
     try:
