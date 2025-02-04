@@ -20,9 +20,9 @@ def user_logout(r):
     r.session["ccabang"] = None
     r.session["cabang"] = None
     r.session["user"] = None
-    # result = os.environ.get("INVALIDATION_URL")
+    result = os.environ.get("INVALIDATION_URL")
     messages.info(r,"Berhasil logout")
-    return redirect("beranda")
+    return redirect(result)
 
 
 
