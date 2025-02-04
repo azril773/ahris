@@ -1,5 +1,6 @@
 from hrd_app.controllers.lib import *
 import pika
+# from numba import jit
 import threading
 from concurrent.futures import ThreadPoolExecutor
 from django.db import connection
@@ -757,7 +758,9 @@ def prosesmesin(dt):
         print(e)
         raise Exception("Terjadi kesalahan")
     return dmesin
-    
+
+
+# @jit(nopython=True)
 @authorization(["*"])
 def pabsen(req):    
     print("OKOK")
