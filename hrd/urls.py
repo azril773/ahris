@@ -101,7 +101,7 @@ def beranda(r):
         'dsid':0,
         "nama":nama,
         "auth":auth,
-        "dashboard":"http://15.59.254.57:9000"
+        "dashboard":os.environ.get("AUTHENTIK")
     }
     return render(r,"hrd_app/beranda.html",data)
     
