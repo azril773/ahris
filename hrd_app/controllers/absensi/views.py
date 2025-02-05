@@ -920,7 +920,7 @@ def pabsen(req):
             conn.disconnect()
     except Exception as e:
         print(e)
-        messages.error(req,"Terjadi kesalahan sdskd")
+        messages.error(req,"Terjadi kesalahan pada mesin")
         return redirect("absensi",sid=sid)
     print("MESIN SELESAI")
     att = sorted(dmesin, key=lambda i: i['jam_absen'])
