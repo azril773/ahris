@@ -901,21 +901,29 @@ def pabsen(req):
             conn = zk.connect()
             conn.disable_device()
             # dt absensi
-            absensi = conn.get_attendance()
-            for a in absensi:
-                # 
-                if dari <= a.timestamp <= sampai:   
-                    # users = conn.get_users()
-                    if str(a.user_id) in luserid:     
-                        data = {
-                            "userid": a.user_id, 
-                            "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
-                            "punch": a.punch,
-                            "mesin":m.nama
-                        }
-                        dmesin.append(data)
-                    else:
-                        pass                
+            try:
+                absensi = conn.get_attendance()
+                for a in absensi:
+                    # 
+                    if dari <= a.timestamp <= sampai:   
+                        # users = conn.get_users()
+                        if str(a.user_id) in luserid:     
+                            data = {
+                                "userid": a.user_id, 
+                                "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
+                                "punch": a.punch,
+                                "mesin":m.nama
+                            }
+                            dmesin.append(data)
+                        else:
+                            pass  
+            except Exception as e:
+                conn.enable_device()
+                conn.disconnect()
+                messages.error(req,"Terjadi kesalahan pada mesin")
+                return redirect("absensi",sid=sid)
+            
+            
             conn.enable_device()
             conn.disconnect()
     except Exception as e:
