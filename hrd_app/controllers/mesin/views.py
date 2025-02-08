@@ -419,35 +419,39 @@ def add_data(r,id):
         userids = [user.user_id for user in users if user.user_id not in datamesin]
         user = [user for user in users if user.user_id not in datamesin]
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids)
-        pegawai_arsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
+        templates = conn.get_templates()
+
+        # pegawai_arsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
         # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
         # 
         for u in user:
-            for pgw in pegawai:
-                if pgw.userid == u.user_id:
-                    if u.privilege == const.USER_ADMIN:
-                        level = 1
-                    else:
-                        level = 0
-                    datamesin_db(
-                        uid=u.uid,
-                        nama=pgw.nama,
-                        userid=u.user_id,
-                        level=level
-                    ).save(using=r.session["ccabang"])
-            for pgwa in pegawai_arsip:
-                if pgwa.userid == u.user_id:
-                    if u.privilege == const.USER_ADMIN:
-                        level = 1
-                    else:
-                        level = 0
-                    datamesin_db(
-                        uid=u.uid,
-                        nama=pgwa.nama,
-                        userid=u.user_id,
-                        level=level
-                    ).save(using=r.session["ccabang"])
+            pgw = next([p for p in pegawai if p.userid == u.user_id],None)
+            if not pgw:
+                continue
+            if u.privilege == const.USER_ADMIN:
+                level = 1
+            else:
+                level = 0
+            datamesin_db(
+                uid=u.uid,
+                nama=pgw.nama,
+                userid=u.user_id,
+                level=level
+            ).save(using=r.session["ccabang"])
+            template = [tm for tm in templates if tm.uid == u.uid]
+            for t in template:
+                sidikjari_db(
+                    uid=t.uid,
+                    nama=pgw.nama,
+                    userid=u.user_id,
+                    size=t.size,
+                    fid=t.fid,
+                    valid=t.valid,
+                    template=t.template
+                ).save(using=r.session["ccabang"])
 
+
+                    
         conn.enable_device()
         conn.disconnect()
 

@@ -781,7 +781,7 @@ def pabsen(req):
         sampai = datetime.strptime(f'{tplus1} 23:59:59', "%Y-%m-%d %H:%M:%S")    
         dr = datetime.strftime(dari, "%d-%m-%Y")
         sp = datetime.strftime(sampai, "%d-%m-%Y")
-    rangetgl = pd.date_range(dari.date(), sampai.date()).tolist()
+    rangetgl = pd.date_range(dari, sampai).tolist()
     pegawai = [] 
     luserid = []  
     
@@ -794,30 +794,14 @@ def pabsen(req):
     divisi = [div.divisi for div in aksesdivisi]
     pegawaiLoop = pegawai_db.objects.using(req.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi)
     # try:
+    insertab = []
     if int(sid) == 0:
-        for p in [pgw for pgw in pegawaiLoop]:
-            if p.jabatan is None:
-                jabatan = None
-            else:
-                jabatan = p.jabatan.jabatan
-            
-            if p.counter is None:
-                counter = None
-            else:
-                counter = p.counter.counter
-            if p.divisi is None:
-                divisi = None
-            else:
-                divisi = p.divisi.divisi
-            if p.kelompok_kerja is None:
-                kelompok_kerja = None
-            else:
-                kelompok_kerja = p.kelompok_kerja.kelompok
-                
-            if p.hari_off2 is None:
-                ho = None
-            else:
-                ho = p.hari_off2.hari        
+        for p in pegawaiLoop:
+            jabatan = p.jabatan.jabatan if p.jabatan is not None else None
+            counter = p.counter.counter if p.counter is not None else None
+            divisi = p.divisi.divisi if p.divisi is not None else None
+            kelompok_kerja = p.kelompok_kerja.kelompok if p.kelompok_kerja is not None else None
+            ho = p.hari_off2.hari if p.hari_off2 is not None else None
             data = {
                 'idp' : p.id,
                 'nama' : p.nama,
@@ -838,34 +822,17 @@ def pabsen(req):
             pegawai.append(data)        
             luserid.append(p.userid)
             for tgl in rangetgl:
-                if absensi_db.objects.using(req.session["ccabang"]).filter(pegawai_id=p.pk,tgl_absen=tgl).exists():
+                if absensi_db.objects.using(req.session["ccabang"]).filter(pegawai_id=p.pk,tgl_absen=tgl.date()).exists():
                     pass
                 else:
-                    absensi_db(tgl_absen=tgl,pegawai_id=p.pk).save(using=req.session["ccabang"])
+                    insertab.append(absensi_db(tgl_absen=tgl.date(),pegawai_id=p.pk))
     else:
-        for p in [pgw for pgw in pegawaiLoop if pgw.status_id == sid]:
-            if p.jabatan is None:
-                jabatan = None
-            else:
-                jabatan = p.jabatan.jabatan
-            
-            if p.counter is None:
-                counter = None
-            else:
-                counter = p.counter.counter
-            if p.divisi is None:
-                divisi = None
-            else:
-                divisi = p.divisi.divisi
-            if p.kelompok_kerja is None:
-                kelompok_kerja = None
-            else:
-                kelompok_kerja = p.kelompok_kerja.kelompok
-                
-            if p.hari_off2 is None:
-                ho = None
-            else:
-                ho = p.hari_off2.hari        
+        for p in [pgw for pgw in pegawaiLoop if pgw.status_id == int(sid)]:
+            jabatan = p.jabatan.jabatan if p.jabatan is not None else None
+            counter = p.counter.counter if p.counter is not None else None
+            divisi = p.divisi.divisi if p.divisi is not None else None
+            kelompok_kerja = p.kelompok_kerja.kelompok if p.kelompok_kerja is not None else None
+            ho = p.hari_off2.hari if p.hari_off2 is not None else None  
             data = {
                 'idp' : p.id,
                 'nama' : p.nama,
@@ -887,11 +854,11 @@ def pabsen(req):
             pegawai.append(data)        
             luserid.append(p.userid)
             for tgl in rangetgl:
-                if absensi_db.objects.using(req.session["ccabang"]).filter(pegawai_id=p.pk,tgl_absen=tgl).exists():
+                if absensi_db.objects.using(req.session["ccabang"]).filter(pegawai_id=p.pk,tgl_absen=tgl.date()).exists():
                     pass
                 else:
-                    absensi_db(tgl_absen=tgl,pegawai_id=p.pk).save(using=req.session["ccabang"])    
-
+                    insertab.append(absensi_db(tgl_absen=tgl.date(),pegawai_id=p.pk))   
+    absensi_db.objects.using(req.session["ccabang"]).bulk_create(insertab)
     dmesin = []
     try:
         for m in mesin_db.objects.using(req.session["ccabang"]).filter(status="Active"):
@@ -901,37 +868,42 @@ def pabsen(req):
             conn = zk.connect()
             conn.disable_device()
             # dt absensi
-            try:
-                absensi = conn.get_attendance()
-                for a in absensi:
-                    # 
-                    if dari <= a.timestamp <= sampai:   
-                        # users = conn.get_users()
-                        if str(a.user_id) in luserid:     
-                            data = {
-                                "userid": a.user_id, 
-                                "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
-                                "punch": a.punch,
-                                "mesin":m.nama
-                            }
-                            dmesin.append(data)
-                        else:
-                            pass  
-            except Exception as e:
-                conn.enable_device()
-                conn.disconnect()
-                messages.error(req,"Terjadi kesalahan {e}")
-                return redirect("absensi",sid=sid)
-            
-
+            absensi = conn.get_attendance()
+            for a in absensi:
+                # 
+                if dari <= a.timestamp <= sampai:   
+                    # users = conn.get_users()
+                    if str(a.user_id) in luserid:     
+                        data = {
+                            "userid": a.user_id, 
+                            "jam_absen": datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),
+                            "punch": a.punch,
+                            "mesin":m.nama
+                        }
+                        dmesin.append(data)
+                    else:
+                        pass                
             conn.enable_device()
             conn.disconnect()
     except Exception as e:
         print(e)
-        messages.error(req,"Terjadi kesalahan pada mesin \n {e}")
+        messages.error(req,e)
         return redirect("absensi",sid=sid)
-    print("MESIN SELESAI")
+    # with open("data.json","rb") as f:
+    #     dmesin = json.loads(f.read())
+    # dmesin = [
+    #     {"userid": "101095", "jam_absen": "2025-02-06 08:57:59", "punch": 1, "mesin": "Supermarket - 2"},
+    #     {"userid": "101095", "jam_absen": "2025-02-06 08:58:04", "punch": 0, "mesin": "Supermarket - 2"},
+    #     {"userid": "101095", "jam_absen": "2025-02-06 12:57:59", "punch": 2, "mesin": "Supermarket - 2"},
+    #     {"userid": "101095", "jam_absen": "2025-02-06 13:57:59", "punch": 3, "mesin": "Supermarket - 2"},
+    #     {"userid": "101095", "jam_absen": "2025-02-06 16:57:59", "punch": 1, "mesin": "Supermarket - 2"},
+    #     {"userid": "101095", "jam_absen": "2025-02-07 08:57:59", "punch": 0, "mesin": "Supermarket - 2"},
+    #     {"userid": "101095", "jam_absen": "2025-02-07 12:57:59", "punch": 2, "mesin": "Supermarket - 2"},
+    #     {"userid": "101095", "jam_absen": "2025-02-07 13:57:59", "punch": 3, "mesin": "Supermarket - 2"},
+    #     {"userid": "101095", "jam_absen": "2025-02-07 17:08:10", "punch": 1, "mesin": "Supermarket - 2"},
+    # ]
     att = sorted(dmesin, key=lambda i: i['jam_absen'])
+    # print(att)
     ddr = []
     for d in data_raw_db.objects.using(req.session["ccabang"]).filter(userid__in=luserid,jam_absen__range=(dari - timedelta(days=1),sampai + timedelta(days=1))):
         data = {
@@ -964,17 +936,14 @@ def pabsen(req):
     now = datetime.now()
     hari = now.strftime("%A")
     hari = nama_hari(hari)
-    print("OKOKOK")
-    print(luserid)
     absensi =  absensi_db.objects.using(req.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(tgl_absen__range=[rangetgl[0],rangetgl[-1]],pegawai__userid__in=luserid)
-    print(absensi)
-    absensi = [a for a in absensi]
+    absensi = sorted(absensi,key=lambda i:i.tgl_absen)
     if req.session["ccabang"] != "tasik":
         prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor,absensi)
     else:
         prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor,absensi)    
     print("SELESAI")
-        
+    # return redirect("absensi",sid=sid)
     ijin = []  
     libur = []
     cuti = []
@@ -1134,57 +1103,48 @@ def pabsen(req):
         # jika ada absen masuk dan pulang
         # rencana cronjob jalan
         if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-            for hari in [str(a.pegawai.hari_off),str(a.pegawai.hari_off2)]:
-                if hari == str(nh):
-                    # jika dia bisa mendapatkan opg 
-                    # if 
-                    #     continue
-                    if a.pegawai.status_id in lsopg:
-                        if re.search("security",a.pegawai.status.status,re.IGNORECASE) is None:
-                            # jika ada geder off dari hari ini ke hari lain
-                            if not next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
-                                
-                                if not next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                                    opg_db(
-                                        pegawai_id = ab.pegawai_id,
-                                        opg_tgl = ab.tgl_absen,   
-                                        keterangan = 'OFF Pengganti Reguler',                         
-                                        add_by = 'Program',
-                                    ).save(using=cabang)
-                else: 
-                    if str(a.pegawai.hari_off) == "On Off":
-                        ab.keterangan_absensi = None
-                        ab.save(using=cabang)
+            if nh in [str(a.pegawai.hari_off),str(a.pegawai.hari_off2)]:
+                if a.pegawai.status_id in lsopg:
+                    if re.search("security",a.pegawai.status.status,re.IGNORECASE) is None:
+                        # jika ada geder off dari hari ini ke hari lain
+                        if not next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
+                            
+                            if not next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                                opg_db(
+                                    pegawai_id = ab.pegawai_id,
+                                    opg_tgl = ab.tgl_absen,   
+                                    keterangan = 'OFF Pengganti Reguler',                         
+                                    add_by = 'Program',
+                                ).save(using=cabang)
+                            else:
+                                pass
+                        else:
+                            pass
+                    else:
+                        pass
+                else:
+                    pass
+            else: 
+                if str(a.pegawai.hari_off) == "On Off":
+                    ab.keterangan_absensi = None
+                    ab.save(using=cabang)
                         
         # jika tidak ada masuk dan pulang   
         else:
             # jika dinas luar
-            if len(ijindl) > 0:
-                for il in ijindl:
-                    if il["tgl"] == ab.tgl_absen and int(il["idp"]) == int(ab.pegawai.pk):
-                        for hari in [str(a.pegawai.hari_off),str(a.pegawai.hari_off2)]:
-                            if hari == str(nh):
-                                if a.pegawai.status_id in lsopg:
-                                    if not next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
-                                        if not next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                                            opg_db(
-                                                pegawai_id = ab.pegawai_id,
-                                                opg_tgl = ab.tgl_absen,   
-                                                keterangan = 'OFF Pengganti Reguler',                         
-                                                add_by = 'Program',
-                                            ).save(using=cabang)
-                                else:
-                                    pass
-                            else:
-                                # jika on off
-                                if str(a.pegawai.hari_off) == 'On Off':
-                                    ab.keterangan_absensi = 'OFF'
-                                    ab.save(using=cabang)
-                                else:
-                                    pass
-                            
-                    else:
-                        pass
+            if str(a.pegawai.hari_off) == 'On Off':
+                ab.keterangan_absensi = 'OFF'
+                ab.save(using=cabang)
+            for il in ijindl:
+                if il["tgl"] == ab.tgl_absen and int(il["idp"]) == int(ab.pegawai.pk) and nh in [str(a.pegawai.hari_off),str(a.pegawai.hari_off2)] and  a.pegawai.status_id in lsopg and not next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False) and not next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                    opg_db(
+                        pegawai_id = ab.pegawai_id,
+                        opg_tgl = ab.tgl_absen,   
+                        keterangan = 'OFF Pengganti Reguler',                         
+                        add_by = 'Program',
+                    ).save(using=cabang)                        
+                else:
+                    pass
             # jika dia hari ini off
             if (a.masuk is not None or a.pulang is not None) or (a.masuk_b is not None or a.pulang_b is not None):
                 if str(a.pegawai.hari_off) == "On Off":
@@ -1209,32 +1169,25 @@ def pabsen(req):
         for l in libur:
         # jika ada absen di hari libur nasional
             ab.libur_nasional = None
-            if l['tgl_libur'] == ab.tgl_absen:                            
-                ab.libur_nasional = l['libur']
-                ab.save(using=cabang)
-                
-                # Hari Minggu
-                if str(nh) == 'Minggu':
-                    if a.pegawai.status_id in lsopg:
-                        
-                        # Staff
+            if a.pegawai.status_id in lsopg:
+                if l['tgl_libur'] == ab.tgl_absen:                            
+                    ab.libur_nasional = l['libur']
+                    ab.save(using=cabang)
+                    
+                    # Hari Minggu
+                    if str(nh) == 'Minggu':                        
+                            # Staff
                         if a.pegawai.status_id in status_ln: # regex
                             # jika hari off nya adalah hari minggu dan masuk maka hanya akan mendapatkan 1 opg
-                            if str(a.pegawai.hari_off) == str(nh):
-                                if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
-                                    if not next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
-                                        if not next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                                            opg_db(
-                                                pegawai_id = ab.pegawai_id,
-                                                opg_tgl = ab.tgl_absen,   
-                                                keterangan = 'OFF Pengganti Reguler',                         
-                                                add_by = 'Program',
-                                            ).save(using=cabang)
-                                else:
-                                    pass    
+                            if str(nh) in [str(a.pegawai.hari_off), str(a.pegawai.hari_off2)] and (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None) and not next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False) and not next((True for o in opg_all if o["idp"] == ab.pegawai_id and o["opg_tgl"] == ab.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
+                                opg_db(
+                                    pegawai_id = ab.pegawai_id,
+                                    opg_tgl = ab.tgl_absen,   
+                                    keterangan = 'OFF Pengganti Reguler',                         
+                                    add_by = 'Program',
+                                ).save(using=cabang)
                             else:
-                                pass
-                        
+                                pass                        
                         # Karyawan
                         else:
                             pass
@@ -1260,16 +1213,12 @@ def pabsen(req):
                             #         pass    
                             # else:
                             #     pass                                
-                    else:
-                        pass 
-                
-                # Bukan Hari Minggu
-                else:
-                    if a.pegawai.status_id in lsopg:
-                                                        
+                    
+                    # Bukan Hari Minggu
+                    else:                                                        
                         # Staff
                         if a.pegawai.status_id in status_ln:
-                            if str(a.pegawai.hari_off) == str(nh):
+                            if str(nh) in [str(a.pegawai.hari_off), str(a.pegawai.hari_off2)]:
                                 # JIKA DIA MASUK DIHARI MERAH DILIBUR REGULERNYA MAKA AKAN DAPAT 2 OPG
                                 if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
                                     if not next((True for gs in geser_all if gs["idp"] == ab.pegawai_id and gs["dari_tgl"] == ab.tgl_absen),False):
@@ -1322,98 +1271,38 @@ def pabsen(req):
                                         ab.save(using=cabang)
                             else:
                                 pass    
-                    else:
-                        pass                                                                    
-            else:
-                pass
+                else:
+                    pass
                     
         # ijin
         for i in ijin:
-            if a.pegawai_id == i['idp']:
-                if i['tgl_ijin'] == ab.tgl_absen:
-                    ij = i['ijin']
-                    ket = i['keterangan']
-                    ab.keterangan_ijin = f'{ij}-({ket})'
-                    ab.save(using=cabang)
-                else:
-                    pass
+            if a.pegawai_id == i['idp'] and i['tgl_ijin'] == ab.tgl_absen:
+                ij = i['ijin']
+                ket = i['keterangan']
+                ab.keterangan_ijin = f'{ij}-({ket})'
+                ab.save(using=cabang)
             else:
                 pass                                 
         
         for kmpn in kompen:
-            if a.pegawai_id == kmpn["idp"]:
-                if kmpn["tgl_kompen"] == a.tgl_absen:
-                    if ab.jam_masuk is not None and ab.jam_pulang is None:
-                        if ab.masuk is not None and ab.pulang is not None:
-                            if ab.pulang > ab.masuk:
-                                jm = datetime.combine(ab.tgl_absen,ab.jam_masuk)
-                                jp = datetime.combine(ab.tgl_absen,ab.jam_pulang)
-                                
-                                jkompen = float(kmpn["kompen"])
-                                
-                                if kmpn["jenis_kompen"] == 'awal':
-                                    njm = jm - timedelta(hours=jkompen)
-                                    njp = ab.jam_pulang
-                                elif kmpn["jenis_kompen"] == 'akhir':    
-                                    njm = ab.jam_masuk
-                                    njp = jp + timedelta(hours=jkompen)
-                                else:    
-                                    njm = jm - timedelta(hours=jkompen)
-                                    njp = jp + timedelta(hours=jkompen)
-                                
-                                dmsk = f'{ab.tgl_absen} {ab.masuk}'
-                                dplg = f'{ab.tgl_absen} {ab.pulang}'
-                                
-                                msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
-                                plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
-                                
-                                dselisih = plg - msk
-                                djam_selisih = f'{ab.tgl_absen} {dselisih}'
-                                selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
-                                
-                                if int(selisih.hour) <= 4:
-                                    tjk = 0
-                                else:
-                                    detik = selisih.second / 3600
-                                    menit = selisih.minute / 60
-                                    hour = selisih.hour
-                                    
-                                    jam = int(hour) + float(menit) + float(detik)
-                                    
-                                    tjk = jam       
-                                
-                                status = 'ok'                
-                                ab.jam_masuk = njm
-                                ab.jam_pulang = njp
-                            else: 
-                                tjk = 0   
-                        else:
-                            tjk = 0
-                    else:
-                        tjk = 0
-                    if kmpn["jenis_kompen"] == 'awal':
-                        ab.keterangan_lain = f"Kompen/PJK-Awal {kmpn['kompen']} Jam"
-                    elif kmpn["jenis_kompen"] == "akhir":
-                        ab.keterangan_lain = f"Kompen/PJK-Akhir {kmpn['kompen']} Jam"
-                    else:
-                        ab.keterangan_lain = f"Kompen/PJK 1 hari"
-                    nama_user = username
-                    ab.total_jam_kerja = round(tjk,1)
-                    ab.edit_by = nama_user
-                    ab.save(using=cabang)
-                else:
-                    pass
-            else:
-                pass
-        
-        # cuti
-        for c in cuti:
-            # jika didalam data cuti ada pegawai id
-            if a.pegawai_id == c['idp']:
-                # jika tgl cuti sama dengan tgl absen
-                if c['tgl_cuti'] == ab.tgl_absen:
-                    # jika tidak masuk dan pulang
-                    if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
+            if a.pegawai_id == kmpn["idp"] and kmpn["tgl_kompen"] == a.tgl_absen:
+                if ab.jam_masuk is not None and ab.jam_pulang is None and ab.masuk is not None and ab.pulang is not None:
+                    if ab.pulang > ab.masuk:
+                        jm = datetime.combine(ab.tgl_absen,ab.jam_masuk)
+                        jp = datetime.combine(ab.tgl_absen,ab.jam_pulang)
+                        
+                        jkompen = float(kmpn["kompen"])
+                        
+                        if kmpn["jenis_kompen"] == 'awal':
+                            njm = jm - timedelta(hours=jkompen)
+                            njp = ab.jam_pulang
+                        elif kmpn["jenis_kompen"] == 'akhir':    
+                            njm = ab.jam_masuk
+                            njp = jp + timedelta(hours=jkompen)
+                        else:    
+                            njm = jm - timedelta(hours=jkompen)
+                            njp = jp + timedelta(hours=jkompen)
+                        
                         dmsk = f'{ab.tgl_absen} {ab.masuk}'
                         dplg = f'{ab.tgl_absen} {ab.pulang}'
                         
@@ -1422,25 +1311,70 @@ def pabsen(req):
                         
                         dselisih = plg - msk
                         djam_selisih = f'{ab.tgl_absen} {dselisih}'
-                        selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S') 
-                        # jika jam kerja kurang dari 4 jam
+                        selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S')
+                        
                         if int(selisih.hour) <= 4:
-                            ab.keterangan_absensi = c['keterangan']
-                            ab.save(using=cabang)
-                        # jika jam kerja lebih dari 4 jam
+                            tjk = 0
                         else:
-                            cuti_db.objects.using(cabang).get(id=int(c['id'])).delete()
-                            pg = pegawai_db.objects.using(cabang).get(pk=ab.pegawai_id)
-                            sc = pg.sisa_cuti
-                            ab.keterangan_absensi = ""
-                            ab.save(using=cabang)
-                            pg.sisa_cuti = sc + 1
-                            pg.save(using=cabang)          
-                    else:
+                            detik = selisih.second / 3600
+                            menit = selisih.minute / 60
+                            hour = selisih.hour
+                            
+                            jam = int(hour) + float(menit) + float(detik)
+                            
+                            tjk = jam       
+                        
+                        status = 'ok'                
+                        ab.jam_masuk = njm
+                        ab.jam_pulang = njp
+                    else: 
+                        tjk = 0   
+                else:
+                    tjk = 0
+                if kmpn["jenis_kompen"] == 'awal':
+                    ab.keterangan_lain = f"Kompen/PJK-Awal {kmpn['kompen']} Jam"
+                elif kmpn["jenis_kompen"] == "akhir":
+                    ab.keterangan_lain = f"Kompen/PJK-Akhir {kmpn['kompen']} Jam"
+                else:
+                    ab.keterangan_lain = f"Kompen/PJK 1 hari"
+                nama_user = username
+                ab.total_jam_kerja = round(tjk,1)
+                ab.edit_by = nama_user
+                ab.save(using=cabang)
+            else:
+                pass
+        
+        # cuti
+        for c in cuti:
+            # jika didalam data cuti ada pegawai id
+            if a.pegawai_id == c['idp'] and c['tgl_cuti'] == ab.tgl_absen:
+                # jika tidak masuk dan pulang
+                if (ab.masuk is not None and ab.pulang is not None) or (ab.masuk_b is not None and ab.pulang_b is not None):
+                    dmsk = f'{ab.tgl_absen} {ab.masuk}'
+                    dplg = f'{ab.tgl_absen} {ab.pulang}'
+                    
+                    msk = datetime.strptime(dmsk, '%Y-%m-%d %H:%M:%S')
+                    plg = datetime.strptime(dplg, '%Y-%m-%d %H:%M:%S')
+                    
+                    dselisih = plg - msk
+                    djam_selisih = f'{ab.tgl_absen} {dselisih}'
+                    selisih = datetime.strptime(djam_selisih, '%Y-%m-%d %H:%M:%S') 
+                    # jika jam kerja kurang dari 4 jam
+                    if int(selisih.hour) <= 4:
                         ab.keterangan_absensi = c['keterangan']
                         ab.save(using=cabang)
+                    # jika jam kerja lebih dari 4 jam
+                    else:
+                        cuti_db.objects.using(cabang).get(id=int(c['id'])).delete()
+                        pg = pegawai_db.objects.using(cabang).get(pk=ab.pegawai_id)
+                        sc = pg.sisa_cuti
+                        ab.keterangan_absensi = ""
+                        ab.save(using=cabang)
+                        pg.sisa_cuti = sc + 1
+                        pg.save(using=cabang)          
                 else:
-                    pass
+                    ab.keterangan_absensi = c['keterangan']
+                    ab.save(using=cabang)
             else:
                 pass        
             
@@ -1468,40 +1402,32 @@ def pabsen(req):
                 pass
         # opg
         for o in opg_all:
-            if a.pegawai_id == o['idp']:
-                # cek jika di dalam data opg diambil pada tanggal saat ini
-                if o['diambil_tgl'] == ab.tgl_absen:
+            if a.pegawai_id == o['idp'] and o['diambil_tgl'] == ab.tgl_absen:
+                opg_get= opg_db.objects.using(cabang).get(id=o['id'])
+                # jika tidak masuk dan tidak ada pulang
+                if ab.masuk is None and ab.pulang is None and ab.masuk_b is None and ab.pulang_b is None:
+                    topg = datetime.strftime(o['opg_tgl'], '%d-%m-%Y')
+                    ab.keterangan_absensi = f'OPG-({topg})'
+                    ab.save(using=cabang)                                
                     
-                    opg_get= opg_db.objects.using(cabang).get(id=o['id'])
-                    # jika tidak masuk dan tidak ada pulang
-                    if ab.masuk is None and ab.pulang is None and ab.masuk_b is None and ab.pulang_b is None:
-                        topg = datetime.strftime(o['opg_tgl'], '%d-%m-%Y')
-                        ab.keterangan_absensi = f'OPG-({topg})'
-                        ab.save(using=cabang)                                
-                        
-                        opg_get.status = 1
-                        opg_get.edit_by ='Program'
-                        opg_get.save(using=cabang)
-                    # jika masuk dan pulang
-                    else:
-                        opg_get.diambil_tgl = None
-                        opg_get.edit_by = 'Program'
-                        opg_get.save(using=cabang)
-                            
+                    opg_get.status = 1
+                    opg_get.edit_by ='Program'
+                    opg_get.save(using=cabang)
+                # jika masuk dan pulang
                 else:
-                    pass
+                    opg_get.diambil_tgl = None
+                    opg_get.edit_by = 'Program'
+                    opg_get.save(using=cabang)
+                        
             else:
                 pass        
         
         # dinas luar   
         for n in dl:
-            if a.pegawai_id == n['idp']:
-                if n['tgl_dinas'] == ab.tgl_absen:
-                    ket = n['keterangan']
-                    ab.keterangan_absensi = f'Dinas Luar-({ket})'
-                    ab.save(using=cabang)
-                else:
-                    pass    
+            if a.pegawai_id == n['idp'] and n['tgl_dinas'] == ab.tgl_absen:
+                ket = n['keterangan']
+                ab.keterangan_absensi = f'Dinas Luar-({ket})'
+                ab.save(using=cabang)
             else:
                 pass    
                                 
@@ -2230,10 +2156,7 @@ def pu(r,tgl,userid,sid):
     # jika ada absen masuk dan pulang
     # rencana cronjob jalan
     if (abs.masuk is not None and abs.pulang is not None) or (abs.masuk_b is not None and abs.pulang_b is not None):
-        if str(abs.pegawai.hari_off) == str(nh):
-            # jika dia bisa mendapatkan opg 
-            # if 
-            #     continue
+        if nh in [str(abs.pegawai.hari_off),str(abs.pegawai.hari_off2)]:
             if abs.pegawai.status_id in lsopg:
                 if re.search("security",abs.pegawai.status.status,re.IGNORECASE) is not None:
                     pass
@@ -2259,25 +2182,6 @@ def pu(r,tgl,userid,sid):
         else:
             pass
         
-        # sama aja kaya sebelumnya
-        if str(abs.pegawai.hari_off2) == str(nh):
-            if abs.pegawai.status_id in lsopg:
-                if next((True for gs in geser_all if gs["idp"] == abs.pegawai_id and gs["dari_tgl"] == abs.tgl_absen),False):
-                    pass
-                else:
-                    if next((True for o in opg_all if o["idp"] == abs.pegawai_id and o["opg_tgl"] == abs.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                        pass
-                    else:
-                        opg_db(
-                            pegawai_id = abs.pegawai_id,
-                            opg_tgl = abs.tgl_absen,   
-                            keterangan = 'OFF Pengganti Reguler',                         
-                            add_by = 'Program',
-                        ).save(using=r.session['ccabang'])
-            else:
-                pass
-        else:
-            pass
             
         if str(abs.pegawai.hari_off) == "On Off":
             abs.keterangan_absensi = None
@@ -2290,7 +2194,7 @@ def pu(r,tgl,userid,sid):
             for il in ijindl:
                 if il["tgl"] == abs.tgl_absen and int(il["idp"]) == int(abs.pegawai.pk):
                     # jika off dia hari ini
-                    if str(abs.pegawai.hari_off) == str(nh):
+                    if nh in [str(abs.pegawai.hari_off),str(abs.pegawai.hari_off2)]:
                         # jika dia bisa mendapatkan opg
                         if abs.pegawai.status_id in lsopg:
                             # jika dia geser dari hari off ke hari lain
@@ -2318,25 +2222,9 @@ def pu(r,tgl,userid,sid):
                             abs.save(using=r.session["ccabang"])
                         else:
                             pass
+                else:
+                    continue
                         
-                    if str(abs.pegawai.hari_off2) == str(nh):
-                        if abs.pegawai.status_id in lsopg:
-                            if next((True for gs in geser_all if gs["idp"] == abs.pegawai_id and gs["dari_tgl"] == abs.tgl_absen),False):
-                                pass
-                            else:
-                                if next((True for o in opg_all if o["idp"] == abs.pegawai_id and o["opg_tgl"] == abs.tgl_absen and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                                    pass
-                                else:
-                                    opg_db(
-                                        pegawai_id = abs.pegawai_id,
-                                        opg_tgl = abs.tgl_absen,   
-                                        keterangan = 'OFF Pengganti Reguler',                         
-                                        add_by = 'Program',
-                                    ).save(using=r.session['ccabang'])
-                        else:
-                            pass
-                    else:
-                        pass    
         else:
             # jika dia hari ini off
             if (abs.masuk is not None or abs.pulang is not None) or (abs.masuk_b is not None or abs.pulang_b is not None):
@@ -2360,16 +2248,15 @@ def pu(r,tgl,userid,sid):
     
     # libur nasional
     for l in libur:
-    # jika ada absen di hari libur nasional
-        abs.libur_nasional = None
-        if l['tgl_libur'] == abs.tgl_absen:                            
-            abs.libur_nasional = l['libur']
-            abs.save(using=r.session["ccabang"])
-            
-            # Hari Minggu
-            if str(nh) == 'Minggu':
-                if abs.pegawai.status_id in lsopg:
-                    
+        if abs.pegawai.status_id in lsopg:
+            # jika ada absen di hari libur nasional
+            abs.libur_nasional = None
+            if l['tgl_libur'] == abs.tgl_absen:                            
+                abs.libur_nasional = l['libur']
+                abs.save(using=r.session["ccabang"])
+                
+                # Hari Minggu
+                if str(nh) == 'Minggu':
                     # Staff
                     if abs.pegawai.status_id in status_ln: # regex
                         # jika hari off nya adalah hari minggu dan masuk maka hanya akan mendapatkan 1 opg
@@ -2417,14 +2304,9 @@ def pu(r,tgl,userid,sid):
                         #         pass    
                         # else:
                         #     pass                                
-                else:
-                    pass 
-            
-            # Bukan Hari Minggu
-            else:
-                if abs.pegawai.status_id in lsopg:
-                                                    
-                    # Staff
+                
+                # Bukan Hari Minggu
+                else:                                                    
                     if abs.pegawai.status_id in status_ln:
                         if str(abs.pegawai.hari_off) == str(nh):
                             # JIKA DIA MASUK DIHARI MERAH DILIBUR REGULERNYA MAKA AKAN DAPAT 2 OPG
@@ -2506,10 +2388,10 @@ def pu(r,tgl,userid,sid):
                                 pass    
                         else:
                             pass                                
-                else:
-                    pass                                                                    
+            else:
+                pass  
         else:
-            pass
+            pass  
                 
     # ijin
     for i in ijin:

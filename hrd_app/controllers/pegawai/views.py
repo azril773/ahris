@@ -7,6 +7,7 @@ import base64
 @authorization(["*"])
 def pegawai(r,sid):
     iduser = r.session["user"]["id"]
+    print(iduser)
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses

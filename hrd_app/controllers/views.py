@@ -166,8 +166,8 @@ from hrd_app.controllers.pegawai_cuti.views import *
 #                 # print(dt['userid'])
 
 # from django.core.serializers import serialize # Create your views here.
-# from apscheduler.schedulers.background import BackgroundScheduler
-# from apscheduler.triggers.cron import CronTrigger
+from apscheduler.schedulers.background import BackgroundScheduler
+from apscheduler.triggers.cron import CronTrigger
 # # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 # # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -176,7 +176,7 @@ from hrd_app.controllers.pegawai_cuti.views import *
 # # Pegawai
 
 # # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# scheduler = BackgroundScheduler()
+scheduler = BackgroundScheduler()
 
 # def tasiksetabsensi():
 #     try:
@@ -1348,9 +1348,12 @@ from hrd_app.controllers.pegawai_cuti.views import *
 #         # print(e)
 #         return e
 #     # pegawai_db.objects.using("cirebon").filter(id=3636).update(nik="silvia21")
-# trigger = CronTrigger(
-#     year="*",month="*",day='*',hour="08",minute="00",second="00"
-# )
+
+def coba():
+    print("OKOKO")
+trigger = CronTrigger(
+    year="*",month="*",day='*',hour="*",minute="*",second="*"
+)
 # # trigger = CronTrigger(
 # #     year="*",month="*",day='*',hour="09",minute="27",second="45"
 # # )
@@ -1364,7 +1367,7 @@ from hrd_app.controllers.pegawai_cuti.views import *
 # #     year="*",month="*",day='*',hour="07",minute="30",second="00"
 # # )
 # # scheduler.remove_all_jobs()
-# scheduler.add_job(tasiksetabsensi,trigger=trigger)
+# scheduler.add_job(coba,trigger=trigger)
 # scheduler.start()
 # # scheduler.add_job(cirebonsetabsensi,trigger=trigger1)
 # scheduler.add_job(cirebonsetabsensi,trigger=trigger2)
