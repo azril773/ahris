@@ -1152,7 +1152,6 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
             else:
                 continue
         # # Versi
-        print(type(jam_absen),jam_absen)
         r = next((tgl for tgl in rangetgl if tgl.date() == jam_absen.date()),None)
         if not r:
             continue
