@@ -862,6 +862,7 @@ def pabsen(req):
     dmesin = []
     try:
         for m in mesin_db.objects.using(req.session["ccabang"]).filter(status="Active"):
+            print("MESIN")
             ip = m.ipaddress
             # conn = None
             zk = ZK(str(ip), port=4370, timeout=65)
