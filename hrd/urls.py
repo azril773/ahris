@@ -93,7 +93,6 @@ def beranda(r):
             pass
     except:
         pass
-    print(r.session["user"])
 
     data = {
         "cabang":cabang,
