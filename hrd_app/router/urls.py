@@ -1,11 +1,12 @@
 from django.urls import path,include
 from hrd_app.controllers import views
 from django.contrib.auth import views as auth_views
+from hrd.urls import beranda
 urlpatterns = [
     path('logindispatch', views.logindispatch, name='dispatch'),
+    path('', beranda),
     path('logout', views.user_logout, name='logout'),
     
-    path('', views.beranda, name='beranda'),
     path('ganti_cabang/', views.ganti_cabang, name='ganti_cabang'),
 
     # +++++++++++++++++++ URLS ABSENSI +++++++++++++++++++

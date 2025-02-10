@@ -3,9 +3,9 @@ from hrd_app.controllers.lib import *
 
 # Status Pegawai
 # ++++++++++++++
-@login_required
+@authorization(["root","it"])
 def status_pegawai(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -18,6 +18,7 @@ def status_pegawai(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'modul_aktif' : 'Status Pegawai'     
         }
         
@@ -28,7 +29,7 @@ def status_pegawai(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["root","it"])
 def status_pegawai_json(r):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -46,7 +47,7 @@ def status_pegawai_json(r):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["root","it"])
 def tambah_status_pegawai(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -66,7 +67,7 @@ def tambah_status_pegawai(r):
         return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["root","it"])
 def edit_status_pegawai(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -86,12 +87,12 @@ def edit_status_pegawai(r):
         return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["root","it"])
 def hapus_status_pegawai(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        nama_user = r.user.username
+        nama_user = r.session["user"]["nama"]
         
         hid = r.POST.get('hid')
         
@@ -114,9 +115,9 @@ def hapus_status_pegawai(r):
     
 
 # ++++++++++++++
-@login_required
+@authorization(["root","it"])
 def status_pegawai_lh(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -129,6 +130,7 @@ def status_pegawai_lh(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai Lintas Hari'     
         }
@@ -140,7 +142,7 @@ def status_pegawai_lh(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["root","it"])
 def status_pegawai_json_lh(r):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -155,7 +157,7 @@ def status_pegawai_json_lh(r):
             data.append(sp)
         return JsonResponse({"data": data})
 
-@login_required
+@authorization(["root","it"])
 def tstatus_pegawai_lh(r):
     status = r.POST.get("status")
     
@@ -166,7 +168,7 @@ def tstatus_pegawai_lh(r):
         return JsonResponse({'status':'berhasil'},safe=False,status=201)
 
 
-@login_required
+@authorization(["root","it"])
 def estatus_pegawai_lh(r):
     status = r.POST.get("status")
     id = r.POST.get('id')
@@ -179,10 +181,10 @@ def estatus_pegawai_lh(r):
         
         return JsonResponse({"status":"gagal update"},safe=False,status=400)
 
-@login_required
+@authorization(["root","it"])
 def hstatus_pegawai_lh(r):
     id = r.POST.get('id')
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
 
     try:
         get = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).get(pk=int(id))
@@ -196,9 +198,9 @@ def hstatus_pegawai_lh(r):
         return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
 
 # ++++++++++++++
-@login_required
+@authorization(["root","it"])
 def status_pegawai_payroll(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -211,6 +213,7 @@ def status_pegawai_payroll(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "status":status_pegawai,
             'modul_aktif' : 'Status Pegawai Payroll'     
         }
@@ -222,7 +225,7 @@ def status_pegawai_payroll(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["root","it"])
 def status_pegawai_json_payroll(r):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -237,7 +240,7 @@ def status_pegawai_json_payroll(r):
             data.append(sp)
         return JsonResponse({"data": data})
 
-@login_required
+@authorization(["root","it"])
 def tstatus_pegawai_payroll(r):
     status = r.POST.get("status")
     
@@ -248,7 +251,7 @@ def tstatus_pegawai_payroll(r):
         return JsonResponse({'status':'berhasil'},safe=False,status=201)
 
 
-@login_required
+@authorization(["root","it"])
 def estatus_pegawai_payroll(r):
     status = r.POST.get("status")
     id = r.POST.get('id')
@@ -261,10 +264,10 @@ def estatus_pegawai_payroll(r):
         
         return JsonResponse({"status":"gagal update"},safe=False,status=400)
 
-@login_required
+@authorization(["root","it"])
 def hstatus_pegawai_payroll(r):
     id = r.POST.get('id')
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
 
     try:
         get = status_pegawai_payroll_db.objects.using(r.session["ccabang"]).get(pk=int(id))
@@ -279,20 +282,17 @@ def hstatus_pegawai_payroll(r):
 
 
 
-@login_required
+@authorization(["root","it"])
 def sstatus_payroll(r):
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):
         akses = akses_db.objects.using(r.session["ccabang"]).get(user_id=id_user)
         akses = akses.akses
-        if akses == "root" or akses == "hrd":
-            status = status_pegawai_db.objects.using(r.session["ccabang"]).all()
-            for s in status:
-                status_pegawai_payroll_app_db(
-                    id=s.pk,
-                    status=s.status,
-                ).save(using=f'p{r.session["ccabang"]}')
-        else:
-            pass
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all()
+        for s in status:
+            status_pegawai_payroll_app_db(
+                id=s.pk,
+                status=s.status,
+            ).save(using=f'p{r.session["ccabang"]}')
     else:
         pass 

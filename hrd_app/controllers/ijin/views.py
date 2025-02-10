@@ -2,9 +2,9 @@
 from hrd_app.controllers.lib import *
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # ijin
-@login_required
+@authorization(["*"])
 def ijin(r, sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -80,6 +80,7 @@ def ijin(r, sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -102,9 +103,9 @@ def ijin(r, sid):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def cari_ijin(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -153,6 +154,7 @@ def cari_ijin(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -173,9 +175,9 @@ def cari_ijin(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def cari_ijin_sid(r, dr, sp, sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -220,6 +222,7 @@ def cari_ijin_sid(r, dr, sp, sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -240,7 +243,7 @@ def cari_ijin_sid(r, dr, sp, sid):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def ijin_json(r, dr, sp, sid):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -249,7 +252,7 @@ def ijin_json(r, dr, sp, sid):
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
         for i in ijin_db.objects.using(r.session["ccabang"]).select_related('pegawai','ijin').filter(tgl_ijin__range=(dari,sampai),pegawai__divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 
@@ -295,15 +298,15 @@ def ijin_json(r, dr, sp, sid):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["*"])
 def tambah_ijin(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     dtgl = r.POST.get('tgl')
     dpegawai = r.POST.get('pegawai')
     dijin = r.POST.get('ijin')
     dket = r.POST.get('ket')
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
     try:
        ij = jenis_ijin_db.objects.using(r.session["ccabang"]).get(id=int(dijin))
     except: 
@@ -336,9 +339,9 @@ def tambah_ijin(r):
     return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["*"])
 def batal_ijin(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
 
     id_ijin = r.POST.get('id')
     
@@ -373,9 +376,9 @@ def batal_ijin(r):
 
 # Jenis Ijin
 # ++++++++++++++
-@login_required
+@authorization(["*"])
 def jenis_ijin(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -389,6 +392,7 @@ def jenis_ijin(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'modul_aktif' : 'Jenis Ijin'     
         }
         
@@ -398,7 +402,7 @@ def jenis_ijin(r):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-@login_required
+@authorization(["*"])
 def jenis_ijin_json(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()
@@ -413,7 +417,7 @@ def jenis_ijin_json(r):
             data.append(obj)
         return JsonResponse({"data":data},safe=False,status=200)
 
-@login_required
+@authorization(["*"])
 def tjenis_ijin(r):
     jenis_ijin = r.POST.get("jenis_ijin")
 
@@ -426,7 +430,7 @@ def tjenis_ijin(r):
         status = "ok"
     return JsonResponse({"status":status},safe=False,status=200)
 
-@login_required
+@authorization(["*"])
 def ejenis_ijin(r):
     jenis_ijin = r.POST.get("jenis_ijin")
     id = r.POST.get("id") 
@@ -437,11 +441,11 @@ def ejenis_ijin(r):
         status = "ok"
     return JsonResponse({"status":status},safe=False,status=200)
 
-@login_required
+@authorization(["*"])
 def hjenis_ijin(r):
     id = r.POST.get("id")
     jenis_ijin = r.POST.get("jenis_ijin")
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     try:
         jenis_ijin_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
         thapus = histori_hapus_db(
@@ -455,7 +459,7 @@ def hjenis_ijin(r):
     return JsonResponse({"status":status},safe=False,status=200)
 
 
-@login_required
+@authorization(["*"])
 def tcuti_melahirkan(r):
     dr = r.POST.get("dari")
     sp = r.POST.get("sampai")

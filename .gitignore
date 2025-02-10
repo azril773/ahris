@@ -141,3 +141,4 @@ hrd_app/migrations
 static/excel/*
 static/pdf/*
 static/data.json
+static/img/*

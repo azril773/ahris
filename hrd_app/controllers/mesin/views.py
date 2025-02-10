@@ -1,8 +1,8 @@
 from hrd_app.controllers.lib import *
 
-@login_required
+
 def amesin(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -18,6 +18,7 @@ def amesin(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'modul_aktif' : 'Counter'     
         }
         
@@ -27,7 +28,7 @@ def amesin(r):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
     
-@login_required
+
 def mesin_json(r):
     if r.headers["X-Requested-With"] == 'XMLHttpRequest':
         mesin = mesin_db.objects.using(r.session["ccabang"]).all()
@@ -43,9 +44,9 @@ def mesin_json(r):
         return JsonResponse({"data":data})
     
 
-@login_required
+
 def admesin(r,id): 
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -74,10 +75,9 @@ def admesin(r,id):
                 userid = [{"userid":u.user_id,"uid":u.uid} for u in users if u.user_id not in dm]
 
                 conn.enable_device() 
+                conn.disconnect()
             except Exception as e:
                 messages.error(r,"Proccess terminate: {}".format(e))
-            finally:
-                conn.disconnect()
 
 
         data = {       
@@ -87,6 +87,7 @@ def admesin(r,id):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'id':id,
             'userid':userid,
             'modul_aktif' : 'Counter'
@@ -101,9 +102,9 @@ def admesin(r,id):
         return redirect('beranda')
 
 
-@login_required
+
 def rmesin(r,userid,id,uid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
 
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -125,6 +126,7 @@ def rmesin(r,userid,id,uid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             "counter":counter,
             "divisi":divisi,
@@ -141,11 +143,11 @@ def rmesin(r,userid,id,uid):
 
 
 
-@login_required
+
 def tambah_data_pegawai(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
-        user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)
+        user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])
         if not user.exists():
             return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
         user = user[0]
@@ -260,12 +262,10 @@ def tambah_data_pegawai(r):
                         level=level
                     ).save(using=r.session["ccabang"])
                 conn.enable_device()
+                conn.disconnect()
 
         except Exception as e:
             return JsonResponse({"status":"error","msg":e},status=500)
-        finally:
-            if conn:
-                conn.disconnect()
         if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
             return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
         if email != "":
@@ -296,8 +296,8 @@ def tambah_data_pegawai(r):
                 kelompok_kerja_id=kk,
                 sisa_cuti=12,
                 counter_id=counter,
-                add_by=r.user.username,
-                edit_by=r.user.username
+                add_by=r.session["user"]["nama"],
+                edit_by=r.session["user"]["nama"]
 
                 # status
             ).save(using=r.session["ccabang"])
@@ -361,7 +361,7 @@ def tambah_data_pegawai(r):
                     gelar=pdk['gelar']
                 ).save(using=r.session["ccabang"])
             status = "ok"
-            user = r.user.username
+            user = r.session["user"]["nama"]
 
             
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
@@ -369,9 +369,9 @@ def tambah_data_pegawai(r):
 
 
 
-@login_required
+
 def datamesin(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -385,6 +385,7 @@ def datamesin(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'id':id,
             'modul_aktif' : 'Counter'
         }
@@ -396,11 +397,11 @@ def datamesin(r):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-@login_required
-def add_data(r,id):
-    user = r.user.username
 
-    iduser = r.user.id
+def add_data(r,id):
+    user = r.session["user"]["nama"]
+
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses   
     try:
@@ -418,48 +419,50 @@ def add_data(r,id):
         userids = [user.user_id for user in users if user.user_id not in datamesin]
         user = [user for user in users if user.user_id not in datamesin]
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids)
-        pegawai_arsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
+        templates = conn.get_templates()
+
+        # pegawai_arsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
         # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
         # 
         for u in user:
-            for pgw in pegawai:
-                if pgw.userid == u.user_id:
-                    if u.privilege == const.USER_ADMIN:
-                        level = 1
-                    else:
-                        level = 0
-                    datamesin_db(
-                        uid=u.uid,
-                        nama=pgw.nama,
-                        userid=u.user_id,
-                        level=level
-                    ).save(using=r.session["ccabang"])
-            for pgwa in pegawai_arsip:
-                if pgwa.userid == u.user_id:
-                    if u.privilege == const.USER_ADMIN:
-                        level = 1
-                    else:
-                        level = 0
-                    datamesin_db(
-                        uid=u.uid,
-                        nama=pgwa.nama,
-                        userid=u.user_id,
-                        level=level
-                    ).save(using=r.session["ccabang"])
+            pgw = next([p for p in pegawai if p.userid == u.user_id],None)
+            if not pgw:
+                continue
+            if u.privilege == const.USER_ADMIN:
+                level = 1
+            else:
+                level = 0
+            datamesin_db(
+                uid=u.uid,
+                nama=pgw.nama,
+                userid=u.user_id,
+                level=level
+            ).save(using=r.session["ccabang"])
+            template = [tm for tm in templates if tm.uid == u.uid]
+            for t in template:
+                sidikjari_db(
+                    uid=t.uid,
+                    nama=pgw.nama,
+                    userid=u.user_id,
+                    size=t.size,
+                    fid=t.fid,
+                    valid=t.valid,
+                    template=t.template
+                ).save(using=r.session["ccabang"])
 
+
+                    
         conn.enable_device()
+        conn.disconnect()
 
     except Exception as e:
         messages.error(r, "Process terminate : {}".format(e))
-    finally:
-        if conn:
-            conn.disconnect()
     return redirect("amesin")
 
 
-@login_required
+
 def cdatamesin(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -478,6 +481,7 @@ def cdatamesin(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             "divisi":divisi,
             'modul_aktif' : 'Mesin'     
         }
@@ -489,598 +493,503 @@ def cdatamesin(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["root","it"])
 def cpalldata(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
-    if akses == "admin" or akses == "root":
-        master = r.POST.get("mesin")
-        # divisi = r.POST.getlist("divisi[]")
-        mesin_tujuan = r.POST.getlist("mesint[]")
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
+    master = r.POST.get("mesin")
+    # divisi = r.POST.getlist("divisi[]")
+    mesin_tujuan = r.POST.getlist("mesint[]")
+    pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
+    
+    datauser = []
+    try:
+        mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=master)
+        zk = ZK(mesin.ipaddress,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        datamesin = conn.get_users()
+        fingers = []
+        for dm in datamesin:
+            for pgw in pegawai:
+                if dm.user_id == pgw.userid:
+                    datauser.append(dm)
         
-        datauser = []
-
+        for du in datauser:
+            for i in range(1,11):
+                ft = conn.get_user_template(uid=du.uid,temp_id=i)
+                if ft is not None:
+                    fingers.append(ft)
+        conn.enable_device()
+        conn.disconnect()
+    except Exception as e:
+        messages.error(r,"Process terminate : {}".format(e))
+    
+    for m in mesin_tujuan:
         try:
-            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=master)
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
             zk = ZK(mesin.ipaddress,4370)
             conn = zk.connect()
             conn.disable_device()
-
-
-            datamesin = conn.get_users()
-            fingers = []
-            for dm in datamesin:
-                for pgw in pegawai:
-                    if dm.user_id == pgw.userid:
-                        datauser.append(dm)
-            
             for du in datauser:
-                for i in range(1,11):
-                    ft = conn.get_user_template(uid=du.uid,temp_id=i)
-                    if ft is not None:
-                        fingers.append(ft)
+                conn.delete_user(user_id=du.user_id)
+                fts = []
+                for f in fingers:
+                    if f.uid == du.uid:
+                        fts.append(f)
+                conn.save_user_template(du,fts)        
             conn.enable_device()
-        except Exception as e:
-            messages.error(r,"Process terminate : {}".format(e))
-        finally:
-            if conn:
-                conn.disconnect()
-
-
-        
-        for m in mesin_tujuan:
-            try:
-                mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
-                zk = ZK(mesin.ipaddress,4370)
-                conn = zk.connect()
-                conn.disable_device()
-                for du in datauser:
-                    conn.delete_user(user_id=du.user_id)
-                    fts = []
-                    for f in fingers:
-                        if f.uid == du.uid:
-                            fts.append(f)
-                    conn.save_user_template(du,fts)        
-                conn.enable_device()
-            except Exception as e:
-                messages.error(r,"Proccess terminate : {}".format(e))
-            finally:
-                if conn:
-                    conn.disconnect()
-
-    return redirect("cdatamesin")
-
-@login_required
-def cppegawai(r):
-    iduser = r.user.id
-    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
-    akses = data_akses.akses 
-    if akses == "admin" or akses == "root":
-        master = r.POST.get("mesin")
-        pegawai = r.POST.getlist("pegawai[]")
-        mesin_tujuan = r.POST.getlist("mesint[]")
-        if len(pegawai) <= 0:
-            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
-        else:
-            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pegawai,aktif=1)
-        
-        datauser = []
-
-        try:
-            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=master)
-            zk = ZK(mesin.ipaddress,4370)
-            conn = zk.connect()
-            conn.disable_device()
-
-
-            datamesin = conn.get_users()
-            fingers = []
-            for dm in datamesin:
-                for pgw in pegawai:
-                    if dm.user_id == pgw.userid:
-                        datauser.append(dm)
-            
-            for du in datauser:
-                for i in range(1,11):
-                    ft = conn.get_user_template(uid=du.uid,temp_id=i)
-                    if ft is not None:
-                        fingers.append(ft)
-            conn.enable_device()
-        except Exception as e:
-            messages.error(r,"Process terminate : {}".format(e))
-        finally:
-            if conn:
-                conn.disconnect()
-
-
-        
-        for m in mesin_tujuan:
-            try:
-                mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
-                zk = ZK(mesin.ipaddress,4370)
-                conn = zk.connect()
-
-                conn.disable_device()
-
-
-                for du in datauser:
-                    conn.delete_user(user_id=du.user_id)
-
-                    fts = []
-                    for f in fingers:
-                        if f.uid == du.uid:
-                            fts.append(f)
-
-                    conn.save_user_template(du,fts)        
-
-
-                conn.enable_device()
-            except Exception as e:
-                messages.error(r,"Proccess terminate : {}".format(e))
-            finally:
-                if conn:
-                    conn.disconnect()
-
-
-
-    return redirect("cdatamesin")
-
-@login_required
-def cpdivisi(r):
-    iduser = r.user.id
-    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
-    akses = data_akses.akses 
-    if akses == "admin" or akses == "root":
-        master = r.POST.get("mesin")
-        divisi = r.POST.getlist("divisi[]")
-        mesin_tujuan = r.POST.getlist("mesint[]")
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=divisi,aktif=1)
-        
-        datauser = []
-
-        try:
-            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=master)
-            zk = ZK(mesin.ipaddress,4370)
-            conn = zk.connect()
-            conn.disable_device()
-
-
-            datamesin = conn.get_users()
-            fingers = []
-            for dm in datamesin:
-                for pgw in pegawai:
-                    if dm.user_id == pgw.userid:
-                        datauser.append(dm)
-            
-            for du in datauser:
-                for i in range(1,11):
-                    ft = conn.get_user_template(uid=du.uid,temp_id=i)
-                    if ft is not None:
-                        fingers.append(ft)
-            conn.enable_device()
-        except Exception as e:
-            messages.error(r,"Process terminate : {}".format(e))
-        finally:
-            if conn:
-                conn.disconnect()
-
-
-        for m in mesin_tujuan:
-            try:
-                mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
-                zk = ZK(mesin_tujuan,4370)
-                conn = zk.connect()
-                conn.disable_device()
-            
-
-
-                for du in datauser:
-                    conn.delete_user(user_id=du.user_id)
-
-                    fts = []
-                    for f in fingers:
-                        if f.uid == du.uid:
-                            fts.append(f)
-
-                    conn.save_user_template(du,fts)        
-
-
-                conn.enable_device()
-            except Exception as e:
-                messages.error(r,"Proccess terminate : {}".format(e))
-            finally:
-                if conn:
-                    conn.disconnect()
-
-
-
-    return redirect("cdatamesin")
-
-@login_required
-def adduser_machine(r): 
-    iduser = r.user.id
-    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
-    akses = data_akses.akses 
-    if akses == "admin" or akses == "root":
-        mesin = r.POST.get("mesin")
-        nama = r.POST.get("nama")
-        level = r.POST.get("level")
-        userid = r.POST.get("userid")
-        password = r.POST.get("password")
-
-        try:
-            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=mesin)
-            zk = ZK(mesin.ipaddress,4370)
-            conn = zk.connect()
-            conn.disable_device()
-
-            users = conn.get_users()
-            uids = [user.uid for user in users]
-
-            n_data = 1
-            last_uid = sorted(uids)[-1]
-            uid_ready = [uid for uid in range(uids[0], uids[-1] +1 ) if uid not in uids]
-            if len(uid_ready) <= 0:
-                uid = last_uid + 1
-                if level == 1:
-                    conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
-                else:
-                    conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
-            else:
-                uid = uid_ready[0]
-                if level == 1:
-                    conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
-                else:
-                    conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
-
-
-            conn.enable_device()
-        except Exception as e:
-            messages.error(r,"Proccess terminate : {}".format(e))
-        finally:
             conn.disconnect()
+        except Exception as e:
+            messages.error(r,"Proccess terminate : {}".format(e))
+
     return redirect("cdatamesin")
 
-
-@login_required
-def edituser_machine(r):
-    iduser = r.user.id
+@authorization(["root","it"])
+def cppegawai(r):
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
-    if akses == "admin" or akses == "root":
-        mesin = r.POST.get("mesin")
-        pegawai = r.POST.get("pegawai")
-        nama = r.POST.get("nama")
-        password =r.POST.get("password")
-        userid =r.POST.get("userid")
-        level =r.POST.get("level")
+    master = r.POST.get("mesin")
+    pegawai = r.POST.getlist("pegawai[]")
+    mesin_tujuan = r.POST.getlist("mesint[]")
+    if len(pegawai) <= 0:
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
+    else:
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pegawai,aktif=1)
+    
+    datauser = []
+    try:
+        mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=master)
+        zk = ZK(mesin.ipaddress,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        datamesin = conn.get_users()
+        fingers = []
+        for dm in datamesin:
+            for pgw in pegawai:
+                if dm.user_id == pgw.userid:
+                    datauser.append(dm)
         
-
+        for du in datauser:
+            for i in range(1,11):
+                ft = conn.get_user_template(uid=du.uid,temp_id=i)
+                if ft is not None:
+                    fingers.append(ft)
+        conn.enable_device()
+        conn.disconnect()
+    except Exception as e:
+        messages.error(r,"Process terminate : {}".format(e))
+    
+    for m in mesin_tujuan:
         try:
-            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=mesin)
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
             zk = ZK(mesin.ipaddress,4370)
             conn = zk.connect()
             conn.disable_device()
-
-            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id=pegawai,aktif=1)
-            if not pegawai.exists():
-                messages.error(r,'Pegawai tidak ada')
-                return redirect("")
-
-            users = conn.get_users()
-            user = [user for user in users if user.user_id == pegawai[0].userid]
-            
-            if level == 0:
-                conn.set_user(uid=user[0].uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
-            else:
-                conn.set_user(uid=user[0].uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
-
+            for du in datauser:
+                conn.delete_user(user_id=du.user_id)
+                fts = []
+                for f in fingers:
+                    if f.uid == du.uid:
+                        fts.append(f)
+                conn.save_user_template(du,fts)        
             conn.enable_device()
-
+            conn.disconnect()
         except Exception as e:
             messages.error(r,"Proccess terminate : {}".format(e))
-        finally:
-            if conn:
-                conn.disconnect()
+
+
+
+    return redirect("cdatamesin")
+
+@authorization(["root","it"])
+def cpdivisi(r):
+    iduser = r.session["user"]["id"]
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
+    akses = data_akses.akses 
+    master = r.POST.get("mesin")
+    divisi = r.POST.getlist("divisi[]")
+    mesin_tujuan = r.POST.getlist("mesint[]")
+    pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=divisi,aktif=1)
+    
+    datauser = []
+    try:
+        mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=master)
+        zk = ZK(mesin.ipaddress,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        datamesin = conn.get_users()
+        fingers = []
+        for dm in datamesin:
+            for pgw in pegawai:
+                if dm.user_id == pgw.userid:
+                    datauser.append(dm)
+        
+        for du in datauser:
+            for i in range(1,11):
+                ft = conn.get_user_template(uid=du.uid,temp_id=i)
+                if ft is not None:
+                    fingers.append(ft)
+        conn.enable_device()
+        conn.disconnect()
+    except Exception as e:
+        messages.error(r,"Process terminate : {}".format(e))
+    for m in mesin_tujuan:
+        try:
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
+            zk = ZK(mesin_tujuan,4370)
+            conn = zk.connect()
+            conn.disable_device()
+        
+            for du in datauser:
+                conn.delete_user(user_id=du.user_id)
+                fts = []
+                for f in fingers:
+                    if f.uid == du.uid:
+                        fts.append(f)
+                conn.save_user_template(du,fts)        
+            conn.enable_device()
+            conn.disconnect()
+        except Exception as e:
+            messages.error(r,"Proccess terminate : {}".format(e))
+
+
+
+    return redirect("cdatamesin")
+
+@authorization(["root","it"])
+def adduser_machine(r): 
+    iduser = r.session["user"]["id"]
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
+    akses = data_akses.akses 
+    mesin = r.POST.get("mesin")
+    nama = r.POST.get("nama")
+    level = r.POST.get("level")
+    userid = r.POST.get("userid")
+    password = r.POST.get("password")
+    try:
+        mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=mesin)
+        zk = ZK(mesin.ipaddress,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        users = conn.get_users()
+        uids = [user.uid for user in users]
+        n_data = 1
+        last_uid = sorted(uids)[-1]
+        uid_ready = [uid for uid in range(uids[0], uids[-1] +1 ) if uid not in uids]
+        if len(uid_ready) <= 0:
+            uid = last_uid + 1
+            if level == 1:
+                conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
+            else:
+                conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
+        else:
+            uid = uid_ready[0]
+            if level == 1:
+                conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
+            else:
+                conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
+        conn.enable_device()
+        conn.disconnect()
+    except Exception as e:
+        messages.error(r,"Proccess terminate : {}".format(e))
+    return redirect("cdatamesin")
+
+
+@authorization(["root","it"])
+def edituser_machine(r):
+    iduser = r.session["user"]["id"]
+    data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
+    akses = data_akses.akses 
+    mesin = r.POST.get("mesin")
+    pegawai = r.POST.get("pegawai")
+    nama = r.POST.get("nama")
+    password =r.POST.get("password")
+    userid =r.POST.get("userid")
+    level =r.POST.get("level")
+    
+    try:
+        mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=mesin)
+        zk = ZK(mesin.ipaddress,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id=pegawai,aktif=1)
+        if not pegawai.exists():
+            messages.error(r,'Pegawai tidak ada')
+            return redirect("")
+        users = conn.get_users()
+        user = [user for user in users if user.user_id == pegawai[0].userid]
+        
+        if level == 0:
+            conn.set_user(uid=user[0].uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
+        else:
+            conn.set_user(uid=user[0].uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
+        conn.enable_device()
+        conn.disconnect()
+    except Exception as e:
+        messages.error(r,"Proccess terminate : {}".format(e))
     return redirect("cdatamesin")   
 
 
-@login_required
+@authorization(["root","it"])
 def deleteuser_machine(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
-    if akses == "admin" or akses == "root":
-        pegawai = r.POST.getlist("pegawai[]")
-        mesin = r.POST.getlist("mesint[]")
-
-        pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1,id__in=pegawai)
-        userids = [ user.userid for user in pgw ]
-
-        for m in mesin:
-            try:
-                mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
-                zk = ZK(mesin.ipaddress,4370)
-                conn = zk.connect()
-                conn.disable_device()
-                for userid in userids:
-                    conn.delete_user(user_id=int(userid))
-                conn.enable_device()
-            except Exception as e:
-                messages.error(r,"Proccess terminate : {}".format(e))
-            finally:
-                if conn:
-                    conn.disconnect()
+    pegawai = r.POST.getlist("pegawai[]")
+    mesin = r.POST.getlist("mesint[]")
+    pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1,id__in=pegawai)
+    userids = [ user.userid for user in pgw ]
+    for m in mesin:
+        try:
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
+            zk = ZK(mesin.ipaddress,4370)
+            conn = zk.connect()
+            conn.disable_device()
+            for userid in userids:
+                conn.delete_user(user_id=int(userid))
+            conn.enable_device()
+            conn.disconnect()
+        except Exception as e:
+            messages.error(r,"Proccess terminate : {}".format(e))
     return redirect("cdatamesin")
 
-@login_required
+@authorization(["root","it"])
 def deleteuser_machineu(r):
-    user = r.user.username
+    user = r.session["user"]["nama"]
 
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
-    if akses == "admin" or akses == "root":
-        pegawai = r.POST.get("userid")
-        mesin = r.POST.getlist("mesint[]")
-
-        userids = pegawai.split(",")
-        for m in mesin:
-            try:
-                mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
-                zk = ZK(mesin.ipaddress,4370)
-                conn = zk.connect()
-                conn.disable_device()
-                for userid in userids:
-                    conn.delete_user(user_id=int(userid))
-                conn.enable_device()
-            except Exception as e:
-                messages.error(r,"Proccess terminate : {}".format(e))
-            finally:
-                if conn:
-                    conn.disconnect()
+    pegawai = r.POST.get("userid")
+    mesin = r.POST.getlist("mesint[]")
+    userids = pegawai.split(",")
+    for m in mesin:
+        try:
+            mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
+            zk = ZK(mesin.ipaddress,4370)
+            conn = zk.connect()
+            conn.disable_device()
+            for userid in userids:
+                conn.delete_user(user_id=int(userid))
+            conn.enable_device()
+            conn.disconnect()
+        except Exception as e:
+            messages.error(r,"Proccess terminate : {}".format(e))
     return redirect("cdatamesin")
 
 
-@login_required
+@authorization(["root","it"])
 def hapusabsen(r,id):
 
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
-    if akses == "admin" or akses == "root":
-        try:
-            mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(id))
-            zk = ZK(mesin.ipaddress,4370)
-            conn = zk.connect()
-            conn.disable_device()
-            conn.clear_attendance()
-            messages.success(r,"Berhasil membersihkan data absensi mesin" + mesin.nama)
-
-
-            conn.enable_device()
-        except Exception as e:
-            messages.error(r,e)
-        finally:
-            if conn:
-                conn.disconnect()
+    try:
+        mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(id))
+        zk = ZK(mesin.ipaddress,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        conn.clear_attendance()
+        messages.success(r,"Berhasil membersihkan data absensi mesin" + mesin.nama)
+        conn.enable_device()
+        conn.disconnect()
+    except Exception as e:
+        messages.error(r,e)
 
     return redirect("amesin")
 
-@login_required
+@authorization(["root","it"])
 def sesuaikanjam(r,id):
 
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
-    if akses == "admin" or akses == "root":
-        try:
-            mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(id))
-            zk = ZK(mesin.ipaddress,4370)
-            conn = zk.connect()
-            conn.disable_device()
-
-            today  = datetime.today()
-            conn.set_time(today)
-            messages.success(r,"Berhasil sesuaikan jam mesin" + mesin.nama)
-
-            conn.enable_device()
-        except Exception as e:
-            messages.error(r,e)
-        finally:
-            if conn:
-                conn.disconnect()
+    try:
+        mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(id))
+        zk = ZK(mesin.ipaddress,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        today  = datetime.today()
+        conn.set_time(today)
+        messages.success(r,"Berhasil sesuaikan jam mesin" + mesin.nama)
+        conn.enable_device()
+        conn.disconnect()
+    except Exception as e:
+        messages.error(r,e)
 
     return redirect("amesin")
 
 
-@login_required
+@authorization(["root","it"])
 def clearbuffer(r,id):
 
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
-    if akses == "admin" or akses == "root":
-        try:
-            mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(id))
-            zk = ZK(mesin.ipaddress,4370)
-            conn = zk.connect()
-            conn.disable_device()
-
-            conn.free_data()
-            messages.success(r,"Berhasil membersihkan buffer mesin" + mesin.nama)
-
-            conn.enable_device()
-        except Exception as e:
-            messages.error(r,e)
-        finally:
-            if conn:
-                conn.disconnect()
+    try:
+        mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(id))
+        zk = ZK(mesin.ipaddress,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        conn.free_data()
+        messages.success(r,"Berhasil membersihkan buffer mesin" + mesin.nama)
+        conn.enable_device()
+        conn.disconnect()
+    except Exception as e:
+        messages.error(r,e)
 
     return redirect("amesin")
 
-@login_required
+@authorization(["root","it"])
 def tmesin(r):
 
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     nama = r.POST.get("namamesin")
     ip = r.POST.get("ipaddress")
     status = r.POST.get("status")
-    if akses == "admin" or akses == "root":
-        if nama == "" or ip == '' or status == '':
-            # messages.error(r,"Form tidak boleh kosong")
-            return JsonResponse({"status":"error","msg":"Form tidak boleh kosong"},status=400)
-        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(Q(nama=nama) | Q(ipaddress=ip))
-        
-        if mesin.exists():
-            # messages.error(r,"Mesin sudah ada" + mesin.nama)
-            return JsonResponse({"status":"error","msg":"Mesin sudah ada"},status=400)
-        mesin_db(
-            nama=nama,
-            ipaddress=ip,
-            status=status
-        ).save(using=r.session["ccabang"])
-        return JsonResponse({"status":"success","msg":"Berhasil menambahkan mesin"},status=200)
+    if nama == "" or ip == '' or status == '':
+        # messages.error(r,"Form tidak boleh kosong")
+        return JsonResponse({"status":"error","msg":"Form tidak boleh kosong"},status=400)
+    mesin = mesin_db.objects.using(r.session["ccabang"]).filter(Q(nama=nama) | Q(ipaddress=ip))
+    
+    if mesin.exists():
+        # messages.error(r,"Mesin sudah ada" + mesin.nama)
+        return JsonResponse({"status":"error","msg":"Mesin sudah ada"},status=400)
+    mesin_db(
+        nama=nama,
+        ipaddress=ip,
+        status=status
+    ).save(using=r.session["ccabang"])
+    return JsonResponse({"status":"success","msg":"Berhasil menambahkan mesin"},status=200)
             
 
 
-@login_required
+@authorization(["root","it"])
 def hmesin(r):
 
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     idmesin = r.POST.get("idmesin")
-    if akses == "admin" or akses == "root":
-        mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin)).delete()
-        # messages.success(r,"Berhasil menghapus mesin")
-        return JsonResponse({"status":"success","msg":"Berhasil menghapus mesin"},status=200)
+    mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin)).delete()
+    # messages.success(r,"Berhasil menghapus mesin")
+    return JsonResponse({"status":"success","msg":"Berhasil menghapus mesin"},status=200)
             
 
 
-@login_required
+@authorization(["root","it"])
 def emesin(r):
 
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     nama = r.POST.get("editnamamesin")
     ip = r.POST.get("editipaddress")
     status = r.POST.get("editstatus")
     idmesin = r.POST.get("idmesin")
-    if akses == "admin" or akses == "root":
-        if nama == '' or ip == '' or status == '' or idmesin == '':
-            return JsonResponse({"status":"error","msg":"Form tidak boleh kosong"},status=400)
-        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin))
-        if not mesin.exists():
-            return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
-        checkmesin = mesin_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idmesin)),Q(nama=nama) | Q(ipaddress=ip))
-        if checkmesin.exists():
-            return JsonResponse({"status":"error","msg":"Mesin sudah ada"},status=400)
-        mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin)).update(
-            nama=nama,
-            ipaddress=ip,
-            status=status
-        )
-        return JsonResponse({"status":"success","msg":"Berhasil edit mesin"},status=200)
+    if nama == '' or ip == '' or status == '' or idmesin == '':
+        return JsonResponse({"status":"error","msg":"Form tidak boleh kosong"},status=400)
+    mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin))
+    if not mesin.exists():
+        return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
+    checkmesin = mesin_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idmesin)),Q(nama=nama) | Q(ipaddress=ip))
+    if checkmesin.exists():
+        return JsonResponse({"status":"error","msg":"Mesin sudah ada"},status=400)
+    mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin)).update(
+        nama=nama,
+        ipaddress=ip,
+        status=status
+    )
+    return JsonResponse({"status":"success","msg":"Berhasil edit mesin"},status=200)
 
 
-@login_required
+@authorization(["root","it"])
 def getmesin(r):
 
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
     akses = data_akses.akses 
     idmesin = r.POST.get("idmesin")
-    if akses == "admin" or akses == "root":
-        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin))
-        if not mesin.exists():
-            return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
-        data = {
-            "nama":mesin[0].nama,
-            "ipaddress":mesin[0].ipaddress,
-            "status":mesin[0].status
-        }
-
+    mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(idmesin))
+    if not mesin.exists():
+        return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
+    data = {
+        "nama":mesin[0].nama,
+        "ipaddress":mesin[0].ipaddress,
+        "status":mesin[0].status
+    }
     return JsonResponse({"status":"success","msg":"Berhasil mengambil mesin","data":data},status=200)
 
 
-@login_required
+@authorization(["root","it"])
 def listdata(r):
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
-    if akses is not None:
-        if akses.akses == "root" or akses.akses == "admin":
-            mesin = mesin_db.objects.using(r.session["ccabang"]).all()
-            sid = akses.sid_id
-            data = {
-                "dsid":sid,
-                "sid":sid,
-                "akses":akses.akses,
-                "mesin":mesin
-            }
-            return render(r,"hrd_app/mesin/listdata.html",data)
-
-        else:
-            messages.error(r,"Anda tidak memiliki akses")
-            return redirect("beranda")
-    else:
-        messages.error(r,"Akses anda belum ditentukan")
-        return redirect("beranda")
+    mesin = mesin_db.objects.using(r.session["ccabang"]).all()
+    sid = akses.sid_id
+    data = {
+        "dsid":sid,
+        "sid":sid,
+        "akses":akses.akses,
+        "nama":r.session["user"]["nama"],
+        "mesin":mesin
+    }
+    return render(r,"hrd_app/mesin/listdata.html",data)
 
 
-@login_required
+
+@authorization(["root","it"])
 def listdata_json(r):
     try:
-        iduser = r.user.id
+        iduser = r.session["user"]["id"]
         data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
         akses = data_akses.akses 
         mesin = r.POST.get("mesin")
         userid = r.POST.get("userid")
         if mesin is None:
             return JsonResponse({"status":"error","msg":"Silahkan pilih mesin terlebih dahulu"},status=400)
-        if akses == "admin" or akses == "root":
+        if userid is not None:
+            luserid = userid.split(",")
+            luserid = [iduser.strip() for iduser in luserid]
+        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(mesin)).last()
+        if mesin is None:
+            return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
+        zk = ZK(mesin.ipaddress,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        users = conn.get_users()
+        data = []
+        for user in users:
             if userid is not None:
-                luserid = userid.split(",")
-                luserid = [iduser.strip() for iduser in luserid]
-            mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(mesin)).last()
-            if mesin is None:
-                return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)
-            zk = ZK(mesin.ipaddress,4370)
-            conn = zk.connect()
-            conn.disable_device()
-            users = conn.get_users()
-            data = []
-            for user in users:
-                if userid is not None:
-                    if user.user_id in luserid:
-                        obj = {
-                            "userid":user.user_id,
-                            "nama":user.name,
-                            "mesin":f"{mesin.ipaddress} - {mesin.nama}"
-                        }
-                        data.append(obj)
-                else:
+                if user.user_id in luserid:
                     obj = {
                         "userid":user.user_id,
                         "nama":user.name,
                         "mesin":f"{mesin.ipaddress} - {mesin.nama}"
                     }
                     data.append(obj)
-            conn.disconnect()
-            data = sorted(data,key=lambda i: i["userid"])
+            else:
+                obj = {
+                    "userid":user.user_id,
+                    "nama":user.name,
+                    "mesin":f"{mesin.ipaddress} - {mesin.nama}"
+                }
+                data.append(obj)
+        conn.disconnect()
+        data = sorted(data,key=lambda i: i["userid"])
         return JsonResponse({"status":"success","msg":"Berhasil mengambil mesin","data":data},status=200)
     except Exception as e:
         print(e)
         return JsonResponse({"status":'error',"msg":"Terjadi kesalahan"},status=400)
-# @login_required
+# 
 # def get_mesin(r,mesin):
 
-#     iduser = r.user.id
+#     iduser = r.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses 
 #     if akses == "admin" or akses == "root":
@@ -1101,12 +1010,12 @@ def listdata_json(r):
 # -------------------------------------------------------------------------------------------------------------------------------
 # Registrasi
 
-# @login_required # Menampilkan data user_id terakhir berdasarkan status pegawai (staff, karyawan, dll)
+#  # Menampilkan data user_id terakhir berdasarkan status pegawai (staff, karyawan, dll)
 # def last_userid(request):
     
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1143,12 +1052,12 @@ def listdata_json(r):
 #     else:
 #         return redirect('beranda')
 
-# @login_required # Menampilkan daftar mesin finger print untuk dikeluarkan datanya di fungsi data_mesin
+#  # Menampilkan daftar mesin finger print untuk dikeluarkan datanya di fungsi data_mesin
 # def tarik_data_user(request):
     
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1169,12 +1078,12 @@ def listdata_json(r):
 
 # # Menampilkan data user di mesin finger yang belum terdapat dalam table datamesin_db
 # # Form input pegawai untuk disimpan dalam database
-# @login_required       
+#        
 # def data_mesin(request, ip):
     
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1250,12 +1159,12 @@ def listdata_json(r):
 #     else:
 #         return redirect('beranda')
 
-# @login_required
+# 
 # def form_tambah_pegawai(request, uid, ip):
     
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1297,12 +1206,12 @@ def listdata_json(r):
 #     else:
 #         return redirect ('beranda')        
 
-# @login_required # untuk mengarahkan kembali ke fungsi data_mesin setelah proses submit dari fungsi data_mesin
+#  # untuk mengarahkan kembali ke fungsi data_mesin setelah proses submit dari fungsi data_mesin
 # def redirect_ip(request):
     
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1318,12 +1227,12 @@ def listdata_json(r):
 #     else:
 #         return redirect('beranda')
         
-# @login_required # Menampilkan daftar mesin yang sudah di simpan dalam database
+#  # Menampilkan daftar mesin yang sudah di simpan dalam database
 # def mesin(request):
 
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1343,12 +1252,12 @@ def listdata_json(r):
 #     else:
 #         return redirect('beranda') 
 
-# @login_required # Menambah mesin ke dalam table Mesin
+#  # Menambah mesin ke dalam table Mesin
 # def olah_mesin(request):
 
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1388,12 +1297,12 @@ def listdata_json(r):
 #     else:
 #         return redirect('beranda')
 
-# @login_required # Hapus mesin di table Mesin
+#  # Hapus mesin di table Mesin
 # def hapus_mesin(request):
 
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1411,12 +1320,12 @@ def listdata_json(r):
 #     else:
 #         return redirect('beranda')
 
-# @login_required # Menghapus data absensi atau enrollment di mesin fingerprint
+#  # Menghapus data absensi atau enrollment di mesin fingerprint
 # def hapus_absensi(request, ip):
     
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1446,12 +1355,12 @@ def listdata_json(r):
 #     else:
 #         return redirect('beranda')
 
-# @login_required # Menyesuaikan jam di mesin dengan jam di pc
+#  # Menyesuaikan jam di mesin dengan jam di pc
 # def sesuaikan_jam(request, ip):
 
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1482,12 +1391,12 @@ def listdata_json(r):
 #     else:
 #         return redirect('beranda')
 
-# @login_required # Clear Buffer mesin finger
+#  # Clear Buffer mesin finger
 # def clear_buffer(request, ip):
     
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1517,12 +1426,12 @@ def listdata_json(r):
 #     else:
 #         return redirect('beranda')
 
-# @login_required # cek koneksi ke mesin finger
+#  # cek koneksi ke mesin finger
 # def cek_koneksi(request):
     
-#     user = request.user.username
+#     user = request.session["user"]["nama"]
 
-#     iduser = request.user.id
+#     iduser = request.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses        
 
@@ -1565,7 +1474,7 @@ def listdata_json(r):
 #         return redirect('beranda')
 # # -------------------------------------------------------------------------------------------
 # # Kelola data user di mesin
-# @login_required
+# 
 # def all_copymaster_machine(request):
     
 #     master = request.POST.get('master')
@@ -1666,7 +1575,7 @@ def listdata_json(r):
     
 #     return redirect('kirim_data')
 
-# @login_required
+# 
 # def severaluser_copymaster_machine(request):
 
 #     # ambil data user yang dipilih dari mesin master
@@ -1782,7 +1691,7 @@ def listdata_json(r):
 
 #     return redirect('kirim_data')
 
-# @login_required
+# 
 # def severaldiv_copymaster_machine(request):
 
 #     # ambil data user yang dipilih dari mesin master
@@ -1898,7 +1807,7 @@ def listdata_json(r):
     
 #     return redirect('kirim_data')
 
-# @login_required
+# 
 # def adduser_machine(request):
 
 #     mesin = request.POST.get('mesin')
@@ -1954,7 +1863,7 @@ def listdata_json(r):
 
 #     return redirect('kirim_data')
 
-# @login_required
+# 
 # def edituser_machine(request):
 
 #     mesin = request.POST.get('mesin')
@@ -1998,7 +1907,7 @@ def listdata_json(r):
 
 #     return redirect('kirim_data')
 
-# @login_required
+# 
 # def deleteusername_machine(request):
 
 #     pegawai = request.POST.getlist('nama')
@@ -2034,7 +1943,7 @@ def listdata_json(r):
 
 #     return redirect('kirim_data')
 
-# @login_required
+# 
 # def deleteuserid_machine(request):
 
 #     duserid = request.POST.get('userid')

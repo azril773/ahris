@@ -11,7 +11,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 import pickle
-@login_required
+@authorization(["*"])
 def broadcast(r,sid):
     iduser = r.user.id
         
@@ -35,6 +35,7 @@ def broadcast(r,sid):
             'akses':akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'sid':sid,
             'status':status,
             "sil":sid_lembur,
@@ -49,7 +50,7 @@ def broadcast(r,sid):
         return redirect('beranda')
     
 
-@login_required
+@authorization(["*"])
 def single_perjanjian_kontrak(r):
     idp = r.POST.get("idp")
     prd = r.POST.get('prd')
@@ -59,7 +60,7 @@ def single_perjanjian_kontrak(r):
     return JsonResponse({"status":"success","msg":"Success"},status=200)
 
 
-@login_required
+@authorization(["*"])
 def single_absensi(r):
     idp = r.POST.get("idp")
     prd = r.POST.get('prd')
@@ -81,7 +82,7 @@ def single_absensi(r):
 
     return JsonResponse({"status":"ok"})
 
-@login_required
+@authorization(["*"])
 def ra(r):
     with open(r"static/pdf/absensi.pdf","rb") as f:
         resp = HttpResponse(f.read(),"application/pdf")
@@ -89,7 +90,7 @@ def ra(r):
         return resp
 
 
-@login_required
+@authorization(["*"])
 def bpa(r,sid):
     pegawai = r.POST.getlist("pegawai[]")
     if len(pegawai) <= 0:

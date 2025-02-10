@@ -12,6 +12,7 @@ from django.contrib import messages
 from json import dumps
 import requests
 import weasyprint
+import os
 from dateutil.relativedelta import relativedelta
 from calendar import monthrange
 # SUPPORT
@@ -281,10 +282,37 @@ def periode_tgl(tanggal):
     
     return data       
 
+
+
+
+def authorization(roles):
+    def view(func):
+        def process(r,*args, **kwargs):
+            try:
+                user = r.session["user"]
+                akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=user["id"]).last()
+                if not akses:
+                    messages.error(r,"Akses anda belum ditentukan")
+                    return redirect("beranda")
+                
+                if not "*" in roles:
+                    if not akses.akses in roles:
+                        messages.error(r,"Anda tidak memiliki akses")
+                        return redirect("beranda")
+                    
+                res = func(r,*args, **kwargs)
+                return res
+            except Exception as e:
+                print(e)
+                messages.error(r,e)
+                return redirect("beranda")
+        return process
+    return view
+
 # Pengaturan
-@login_required
+@authorization(["*"])
 def pengaturan(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -354,3 +382,5 @@ def terbilang(bil):
         Hasil = ":("
 
     return Hasil
+
+

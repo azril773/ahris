@@ -1,9 +1,13 @@
 from hrd_app.controllers.lib import *
 from django.db import transaction
+from django.core.files.storage import FileSystemStorage
+import pathlib
 import pandas as pd
-@login_required
+import base64
+@authorization(["*"])
 def pegawai(r,sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
+    print(iduser)
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
@@ -37,7 +41,7 @@ def pegawai(r,sid):
         #             shift=p.shift,
         #             counter=p.counter,
         #             rekening=p.rekening,
-        #             add_by=r.user.username,
+        #             add_by=r.session["user"]["nama"],
         #         ).save(using=r.session["ccabang"])
         #         p.delete(using=r.session["ccabang"])
         # excel = pd.read_excel("static/ahris.xlsx")
@@ -58,7 +62,7 @@ def pegawai(r,sid):
         #         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(idp))
         #     else:
         #         pegawai = []
-        #     # nama_user = r.user.username
+        #     # nama_user = r.session["user"]["nama"]
         #     if not pegawai:
         #         # return JsonResponse({"status":"error","msg":"Pegawai tidak ada"})
         #         continue
@@ -273,6 +277,7 @@ def pegawai(r,sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'status' : status,
@@ -286,9 +291,9 @@ def pegawai(r,sid):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def pegawai_non_aktif(r,sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -307,6 +312,7 @@ def pegawai_non_aktif(r,sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'status' : status,
@@ -320,9 +326,9 @@ def pegawai_non_aktif(r,sid):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["root","it"])
 def edit_pegawai(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -341,13 +347,16 @@ def edit_pegawai(r,idp):
         kontak_lain = kontak_lain_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp))
         pengalaman = pengalaman_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp))
         pendidikan = pendidikan_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp))
+        print(pg.pk)
         try:
             pribadi = pribadi_db.objects.using(r.session["ccabang"]).get(pegawai_id=pg.pk)
+            print(pribadi)
             pribadi.tgl_lahir = pribadi.tgl_lahir.strftime("%d-%m-%Y")
             pribadi.tinggi_badan = ".".join(str(pribadi.tinggi_badan).split(","))
             pribadi.berat_badan = ".".join(str(pribadi.berat_badan).split(","))
         except:
             pribadi = None
+        print(pribadi)
         today = date.today()
         krg = []
         kln = []
@@ -360,7 +369,9 @@ def edit_pegawai(r,idp):
                 "nama":k.nama,
                 "tgl_lahir":k.tgl_lahir.strftime("%d-%m-%Y"),
                 "gender":k.gender,
-                "gol_darah":k.gol_darah
+                "gol_darah":k.gol_darah,
+                "status_bpjs":k.status_bpjs if k.status_bpjs is not None else 0,
+                "no_bpjs_ks":k.no_bpjs_ks if k.no_bpjs_ks is not None else 0
             }
             krg.append(obj)
 
@@ -415,6 +426,7 @@ def edit_pegawai(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'id':idp,
             'dsid': dsid,
             'sid': pg.status_id,
@@ -426,6 +438,7 @@ def edit_pegawai(r,idp):
             "pg_hr":pg.hari_off_id,
             'hr':hr,
             'pg':pg,
+            'ca':pg.cuti_awal if pg.cuti_awal is not None else 0,
             "status":status,
             'today':datetime.strftime(today,'%d-%m-%Y'),
             'keluarga':krg,
@@ -449,202 +462,282 @@ def edit_pegawai(r,idp):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-@login_required
+@authorization(["root","it"])
 def epegawai(r,idp):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        try:
-            user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)
-            if not user.exists():
-                return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
-            user = user[0]
-            sid = user.sid_id
-            nama = r.POST.get("nama")
-            id = r.POST.get("id")
-            gender = r.POST.get("gender")
-            tgl_masuk = r.POST.get("tgl_masuk")
-            nik = r.POST.get("nik")
-            userid = r.POST.get("userid")
-            status = r.POST.get("status")
-            div = r.POST.get("div")
-            counter = r.POST.get("counter")
-            jabatan = r.POST.get("jabatan")
-            kk = r.POST.get("kk")
-            shift = r.POST.get("shift")
-            hr = r.POST.get("hr")
-            ca = r.POST.get("ca")
-            rek = r.POST.get("rek")
-            payroll = r.POST.get("payroll")
-            nks = r.POST.get("nks")
-            ntk = r.POST.get("ntk")
-            pks = r.POST.get("pks")
-            ptk = r.POST.get("ptk")
-
-            # Data Pribadi
-            alamat = r.POST.get("alamat")
-            phone = r.POST.get("phone")
-            email = r.POST.get("email")
-            kota_lahir = r.POST.get("kota_lahir")
-            tgl_lahir = r.POST.get("tgl_lahir")
-            tinggi = r.POST.get("tinggi")
-            berat = r.POST.get("berat")
-            goldarah = r.POST.get("goldarah")
-            agama = r.POST.get("agama")
-            if alamat == '' or phone == '' or email == '' or kota_lahir == '' or tgl_lahir == '' or agama == '':
-                return JsonResponse({"status":"error","msg":"data pribadi tidak boleh kosong"},status=400)
-            keluarga = r.POST.get("keluarga")
-            pihak = r.POST.get("pihak")
-            pengalaman = r.POST.get("pengalaman")
-            pendidikan = r.POST.get("pendidikan")
-            keluarga = json.loads(keluarga)
-            pihak = json.loads(pihak)
-            pengalaman = json.loads(pengalaman)
-            pendidikan = json.loads(pendidikan)
-            id_user = r.user.id
-            aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
-            divisi = [div.divisi for div in aksesdivisi]
+        id = r.POST.get("id")
+        with transaction.atomic(using=r.session["ccabang"]):
             try:
-                pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(id),divisi__in=divisi)
-            except:
-                return JsonResponse({"status":"error"},status=500)
-            if not pgw.exists():
-                return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses ke pegawai ini"},status=400)
-            else:
-                pgw = pgw[0]
-            status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(pk=status)
-            if pribadi_db.objects.using(r.session["ccabang"]).filter(~Q(pegawai__userid=userid),email=email).exists():
-                return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
-            if pegawai_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idp)),userid=userid).exists():
-                return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
-            elif pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idp)),userid=userid).exists():
-                return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
-            else:
-                
-                pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(pgw.pk)).update(
-                    nama=nama,
-                    email=email,
-                    gender=gender,
-                    no_telp=phone,
-                    userid=userid,
-                    status=status_pegawai,
-                    nik=nik,
-                    divisi_id=div,
-                    jabatan_id=jabatan,
-                    no_rekening=rek,
-                    no_bpjs_ks=nks,
-                    no_bpjs_tk=ntk,
-                    payroll_by=payroll,
-                    ks_premi=pks,
-                    tk_premi=ptk,
-                    aktif=1,
-                    tgl_masuk=tgl_masuk,
-                    tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
-                    hari_off_id=hr,
-                    kelompok_kerja_id=kk,
-                    shift=shift,
-                    sisa_cuti=12,
-                    counter_id=counter,
-                    add_by=r.user.username,
-                    edit_by=r.user.username
-
-                    # status
-                )   
-
-                
-
-                # Pengalaman
-                pengalaman_db.objects.using(r.session["ccabang"]).filter(pegawai__userid=int(userid)).delete()
-                for pgl in pengalaman:
-                    pengalaman_db(
-                        pegawai_id=int(idp),
-                        perusahaan=pgl['perusahaan'],
-                        kota_id=pgl['kota'],
-                        dari_tahun=pgl["dari_tahun"],
-                        sampai_tahun=pgl["sampai_tahun"],
-                        jabatan=pgl['jabatan']
-                    ).save(using=r.session["ccabang"])
-
-
-                # Pendidikan
-                pendidikan_db.objects.using(r.session["ccabang"]).filter(pegawai__userid=int(userid)).delete()
-                for pdk in pendidikan:
-                    pendidikan_db(
-                        pegawai_id=int(idp),
-                        pendidikan=pdk['pendidikan'],
-                        nama=pdk['nama'],
-                        kota_id=pdk['kota'],
-                        dari_tahun=pdk['dari_tahun'],
-                        sampai_tahun=pdk['sampai_tahun'],
-                        jurusan=pdk['jurusan'],
-                        gelar=pdk['gelar']
-                    ).save(using=r.session["ccabang"])
-
-
-                # Tambah Pihak Lain
-                pgw = pegawai_db.objects.using(r.session["ccabang"]).get(userid=userid)
-                kontak_lain_db.objects.using(r.session["ccabang"]).filter(pegawai__userid=int(userid)).delete()
-                for p in pihak:
-                    kontak_lain_db(
-                    pegawai_id=int(pgw.pk),
-                    hubungan = p['hubungan'],
-                    nama = p['nama'],
-                    gender = p['gender'],
-                    phone = p['phone']
-                    ).save(using=r.session["ccabang"])
-                
-
-                # Tambah Keluarga
-                keluarga_db.objects.using(r.session["ccabang"]).filter(pegawai__userid=int(userid)).delete()
-                for k in keluarga:
-                    if k["hubungan"] != "" and k["nama"] != "" and k["tgl_lahir"] != "Invalid date" and k["tgl_lahir"] != "" and "gender" != "" and k["gol_darah"] != "":
-                        keluarga_db(
-                            pegawai_id=int(pgw.pk),
-                            hubungan = k['hubungan'],
-                            nama = k["nama"],
-                            tgl_lahir = datetime.strptime(k['tgl_lahir'],'%d-%m-%Y').strftime("%Y-%m-%d"),
-                            gender = k['gender'],
-                            gol_darah = k['gol_darah']
-                        ).save(using=r.session["ccabang"])
-                    else:
+                fss = FileSystemStorage()
+                file = r.FILES.get("file")
+                user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])
+                if not user.exists():
+                    return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
+                user = user[0]
+                print(r.POST)
+                sid = user.sid_id
+                nama = r.POST.get("nama")
+                gender = r.POST.get("gender")
+                tgl_masuk = r.POST.get("tgl_masuk")
+                nik = r.POST.get("nik")
+                userid = r.POST.get("userid")
+                status = r.POST.get("status")
+                div = r.POST.get("div")
+                counter = r.POST.get("counter")
+                jabatan = r.POST.get("jabatan")
+                kk = r.POST.get("kk")
+                shift = r.POST.get("shift")
+                print(shift)
+                hr = r.POST.get("hr")
+                ca = r.POST.get("ca")
+                rek = r.POST.get("rek")
+                payroll = r.POST.get("payroll")
+                nks = r.POST.get("nks")
+                ntk = r.POST.get("ntk")
+                pks = r.POST.get("pks")
+                ptk = r.POST.get("ptk")
+                if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '' or tgl_masuk is None or shift == "":
+                    return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
+                # Data Pribadi
+                alamat = r.POST.get("alamat")
+                phone = r.POST.get("phone")
+                email = r.POST.get("email")
+                kota_lahir = r.POST.get("kota_lahir")
+                tgl_lahir = r.POST.get("tgl_lahir")
+                tinggi = r.POST.get("tinggi")
+                berat = r.POST.get("berat")
+                goldarah = r.POST.get("goldarah")
+                agama = r.POST.get("agama")
+                if alamat == '' or phone == '' or email == '' or kota_lahir == '' or tgl_lahir == '' or agama == '':
+                    return JsonResponse({"status":"error","msg":"data pribadi tidak boleh kosong"},status=400)
+                keluarga = r.POST.get("keluarga")
+                pihak = r.POST.get("pihak")
+                pengalaman = r.POST.get("pengalaman")
+                pendidikan = r.POST.get("pendidikan")
+                keluarga = json.loads(keluarga)
+                pihak = json.loads(pihak)
+                pengalaman = json.loads(pengalaman)
+                pendidikan = json.loads(pendidikan)
+                id_user = r.session["user"]["id"]
+                aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+                divisi = [div.divisi for div in aksesdivisi]
+                print("COBA COBA")
+                try:
+                    pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(id),divisi__in=divisi).last()
+                except Exception as e:
+                    print(e)
+                    return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
+                if not pgw:
+                    return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses ke pegawai ini"},status=400)
+                status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(pk=status)
+                if pribadi_db.objects.using(r.session["ccabang"]).filter(~Q(pegawai__userid=userid),email=email).exists():
+                    return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
+                if pegawai_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idp)),userid=userid).exists():
+                    return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
+                elif pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idp)),userid=userid).exists():
+                    return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
+                else:
+                    url = pgw.profile_picture
+                    if file == "undefined" or file == "null" or file is None: 
                         pass
+                    else:
+                        # Check for type image
+                        if file.content_type == "image/jpeg" or file.content_type == "image/png" or file.content_type == "image/jpg":
+                            # Check size of image
+                            if file.size > 2000000:
+                                transaction.set_rollback(True,using=r.session["ccabang"])
+                                return JsonResponse({"status":'error',"msg":"File tidak boleh lebih dari 2 MB"},status=400)
+                            
 
-                # Tambah Data Pribadi
-                pribadi = pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=id)
-                if len(pribadi) > 0:
-                    pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=id).update(
-                        pegawai_id=int(pgw.pk),
-                        alamat=alamat,
-                        phone=phone,
+                            if pgw.profile_picture is not None:
+                                if pgw.profile_picture[0] == "/":
+                                    pp = pgw.profile_picture[1:]
+                                else:
+                                    pp = pgw.profile_picture
+                                if pathlib.Path(pp).exists():
+                                    os.remove(pp)
+                            uploaded = fss.save(f'static/img/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")}_{"_".join(file.name.split(" "))}',file)
+                            url = fss.url(uploaded)
+                        else:
+                            transaction.set_rollback(True,using=r.session["ccabang"])
+                            return JsonResponse({"status":'error',"msg":"Pilih file dengan format jpeg, jpg, atau png"},status=400)
+                    seri = serialize("json",[pgw])
+                    seri = json.loads(seri)
+                    seri[0]["fields"]["pegawai"] = pgw
+                    seri[0]["fields"]["edit_by"] = r.session["user"]["nama"]
+                    print(seri)
+                    history_pegawai_db(**seri[0]["fields"]).save(using=r.session["ccabang"])
+                    history = history_pegawai_db.objects.using(r.session["ccabang"]).filter().last()
+                    pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(pgw.pk)).update(
+                        nama=nama,
                         email=email,
-                        kota_lahir=kota_lahir,
-                        tgl_lahir=tgl_lahir,
-                        tinggi_badan=tinggi if tinggi != "" else 0,
-                        berat_badan=berat if berat != "" else 0,
-                        gol_darah=goldarah,
-                        agama=agama
-                    )
-                else: 
-                    pribadi_db(
-                        pegawai_id=int(pgw.pk),
-                        alamat=alamat,
-                        phone=phone,
-                        email=email,
-                        kota_lahir=kota_lahir,
-                        tgl_lahir=tgl_lahir,
-                        tinggi_badan=tinggi,
-                        berat_badan=berat,
-                        gol_darah=goldarah,
-                        agama=agama
-                    ).save(using=r.session["ccabang"])
+                        gender=gender,
+                        no_telp=phone,
+                        userid=userid,
+                        status=status_pegawai,
+                        nik=nik,
+                        divisi_id=div,
+                        jabatan_id=jabatan,
+                        no_rekening=rek,
+                        no_bpjs_ks=nks,
+                        no_bpjs_tk=ntk,
+                        payroll_by=payroll,
+                        profile_picture=url,
+                        ks_premi=pks,
+                        tk_premi=ptk,
+                        aktif=1,
+                        tgl_masuk=datetime.strptime(tgl_masuk,"%d-%m-%Y").strftime("%Y-%m-%d"),
+                        tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
+                        hari_off_id=hr,
+                        kelompok_kerja_id=kk,
+                        shift=shift,
+                        sisa_cuti=0,
+                        cuti_awal=ca,
+                        counter_id=counter,
+                        add_by=r.session["user"]["nama"],
+                        edit_by=r.session["user"]["nama"]
 
-                status= 'OK'
-        except Exception as e:
-            print(e)
-            return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
+                        # status
+                    )   
+
+                    
+
+                    # Pengalaman
+                    pgldb = pengalaman_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","perusahaan","kota","dari_tahun","sampai_tahun","jabatan")
+                    dpgl = []
+                    for hpgl in pgldb:
+                        hpgl["history"] = history
+                        dpgl.append(hpgl)
+                    if len(dpgl) > 0:
+                        [history_pengalaman_db(**dpg).save(using=r.session["ccabang"]) for dpg in dpgl]                            
+                    pengalaman_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).delete()
+                    for pgl in pengalaman:
+                        print(pgl)
+                        pengalaman_db(
+                            pegawai_id=int(idp),
+                            perusahaan=pgl['perusahaan'],
+                            kota_id=pgl['kota'],
+                            dari_tahun=pgl["dari_tahun"],
+                            sampai_tahun=pgl["sampai_tahun"],
+                            jabatan=pgl['jabatan']
+                        ).save(using=r.session["ccabang"])
+
+
+                    # Pendidikan
+                    pdkdb = pendidikan_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","pendidikan","nama","kota","dari_tahun","sampai_tahun","jurusan","gelar")
+                    dpdk = []
+                    for hpdk in pdkdb:
+                        hpdk["fields"]["history"] = history
+                        dpdk.append(hpdk["fields"])
+                    if len(dpdk) > 0:
+                        [history_pendidikan_db(**dpd).save(using=r.session["ccabang"]) for dpd in dpdk]
+                    pendidikan_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).delete()
+                    for pdk in pendidikan:
+                        pendidikan_db(
+                            pegawai_id=int(idp),
+                            pendidikan=pdk['pendidikan'],
+                            nama=pdk['nama'],
+                            kota_id=pdk['kota'],
+                            dari_tahun=pdk['dari_tahun'],
+                            sampai_tahun=pdk['sampai_tahun'],
+                            jurusan=pdk['jurusan'],
+                            gelar=pdk['gelar']
+                        ).save(using=r.session["ccabang"])
+
+
+                    # Tambah Pihak Lain
+                    kontak_lain = kontak_lain_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","hubungan","nama","gender","phone")
+                    dkontak_lain = []
+                    for hkontak in kontak_lain:
+                        hkontak["history"] = history
+                        dkontak_lain.append(hkontak)
+                    if len(dkontak_lain) > 0:
+                        [history_kontak_lain_db(**d).save(using=r.session["ccabang"]) for d in dkontak_lain]
+
+
+                    kontak_lain_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).delete()
+                    for p in pihak:
+                        kontak_lain_db(
+                        pegawai_id=int(pgw.pk),
+                        hubungan = p['hubungan'],
+                        nama = p['nama'],
+                        gender = p['gender'],
+                        phone = p['phone']
+                        ).save(using=r.session["ccabang"])
+
+
+                    # Tambah Keluarga
+                    klgdb = keluarga_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","hubungan","nama","tgl_lahir","gender","gol_darah")
+                    dkeluarga = []
+                    print(klgdb)
+                    for hklg in klgdb:
+                        hklg["history"] = history
+                        dkeluarga.append(hklg)
+                    if len(dkeluarga) > 0:
+                        [history_keluarga_db(**dkl).save(using=r.session["ccabang"]) for dkl in dkeluarga]
+
+                    keluarga_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).delete()
+                    for k in keluarga:
+                        if k["hubungan"] != "" and k["nama"] != "" and k["tgl_lahir"] != "Invalid date" and k["tgl_lahir"] != "" and "gender" != "" and k["gol_darah"] != "":
+                            keluarga_db(
+                                pegawai_id=int(pgw.pk),
+                                hubungan = k['hubungan'],
+                                nama = k["nama"],
+                                tgl_lahir = datetime.strptime(k['tgl_lahir'],'%d-%m-%Y'),
+                                gender = k['gender'],
+                                gol_darah = k['gol_darah'],
+                                status_bpjs = k['status_bpjs'],
+                                no_bpjs_ks = k['no_bpjs_ks'],
+                            ).save(using=r.session["ccabang"])
+                        else:
+                            pass
+
+                    # Tambah Data Pribadi
+                    pribadi = pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","alamat","phone","email","kota_lahir","tgl_lahir","tinggi_badan","berat_badan","gol_darah","agama").last()
+                    if pribadi is not None:
+                        pribadi["history"] = history
+                        history_pribadi_db(**pribadi).save(using=r.session["ccabang"])
+                        pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).update(
+                            pegawai_id=int(pgw.pk),
+                            alamat=alamat,
+                            phone=phone,
+                            email=email,
+                            kota_lahir=kota_lahir,
+                            tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
+                            tinggi_badan=tinggi if tinggi != "" else 0,
+                            berat_badan=berat if berat != "" else 0,
+                            gol_darah=goldarah,
+                            agama=agama
+                        )
+                    else: 
+                        print("MASUKKKK")
+                        pribadi_db(
+                            pegawai_id=int(pgw.pk),
+                            alamat=alamat,
+                            phone=phone,
+                            email=email,
+                            kota_lahir=kota_lahir,
+                            tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
+                            tinggi_badan=tinggi,
+                            berat_badan=berat,
+                            gol_darah=goldarah,
+                            agama=agama
+                        ).save(using=r.session["ccabang"])
+                        pribadi = pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","alamat","phone","email","kota_lahir","tgl_lahir","tinggi_badan","berat_badan","gol_darah","agama").last()
+                        pribadi["history"] = history
+                        print(pribadi)
+                        history_pribadi_db(**pribadi).save(using=r.session["ccabang"])
+
+                    status= 'OK'
+            except Exception as e:
+                print(e,"OSKOKDS")
+                transaction.set_rollback(True,using=r.session['ccabang'])
+                return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
 
-@login_required
+@authorization(["root","it"])
 def tpegawai(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
 
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -666,6 +759,7 @@ def tpegawai(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             "counter":counter,
             "divisi":divisi,
@@ -679,195 +773,217 @@ def tpegawai(r):
         }
     return render(r,"hrd_app/pegawai/tpegawai/tambah.html",data)
 
-@login_required
+@authorization(["root","it"])
 def tambah_pegawai(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        try:
+        with transaction.atomic(using=r.session["ccabang"]):
             
-            user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)
-            if not user.exists():
-                return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
-            user = user[0]
-            sid = user.sid_id
-            nama = r.POST.get("nama")
-            gender = r.POST.get("gender")
-            tgl_masuk = r.POST.get("tgl_masuk")
-            nik = r.POST.get("nik")
-            userid = r.POST.get("userid")
-            status = r.POST.get("status")
-            div = r.POST.get("div")
-            counter = r.POST.get("counter")
-            jabatan = r.POST.get("jabatan")
-            kk = r.POST.get("kk")
-            shift = r.POST.get("shift")
-            hr = r.POST.get("hr")
-            ca = r.POST.get("ca")
-            rek = r.POST.get("rek")
-            payroll = r.POST.get("payroll")
-            nks = r.POST.get("nks")
-            ntk = r.POST.get("ntk")
-            pks = r.POST.get("pks")
-            ptk = r.POST.get("ptk")
-
-            if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '' or tgl_masuk is None:
-                return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
-
-            # Data Pribadi
-            alamat = r.POST.get("alamat")
-            phone = r.POST.get("phone")
-            email = r.POST.get("email")
-            kota_lahir = r.POST.get("kota_lahir")
-            tgl_lahir = r.POST.get("tgl_lahir")
-            tinggi = r.POST.get("tinggi")
-            berat = r.POST.get("berat")
-            goldarah = r.POST.get("goldarah")
-            agama = r.POST.get("agama")
-
-
-            keluarga = r.POST.get("keluarga")
-            pihak = r.POST.get("pihak")
-            pengalaman = r.POST.get("pengalaman")
-            pendidikan = r.POST.get("pendidikan")
-            id_user = r.user.id
-            aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
-            divisi = [d.pk for d in aksesdivisi]
-            # 
-            # return JsonResponse({"msg":"error"},status=400)
-            if keluarga:
-                keluarga = json.loads(keluarga)
-            else:
-                keluarga = []
-            
-
-            if pihak:
-                pihak = json.loads(pihak)
-            else:
-                pihak = []
-
-
-            if pengalaman:
-                pengalaman = json.loads(pengalaman)
-            else:
-                pengalaman = []
-            
-
-            if pendidikan:
-                pendidikan = json.loads(pendidikan)
-            else:
-                pendidikan = []
             try:
-                status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(pk=status)
-            except:
-                status_pegawai = None
-            if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
-                return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
-            if email != "":
-                if pribadi_db.objects.using(r.session["ccabang"]).filter(email=email).exists():
-                    return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
+                fss = FileSystemStorage()
+                file = r.FILES.get("file")
+                user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])
+                if not user.exists():
+                    return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
+                user = user[0]
+                sid = user.sid_id
+                nama = r.POST.get("nama")
+                gender = r.POST.get("gender")
+                tgl_masuk = r.POST.get("tgl_masuk")
+                nik = r.POST.get("nik")
+                userid = r.POST.get("userid")
+                status = r.POST.get("status")
+                div = r.POST.get("div")
+                counter = r.POST.get("counter")
+                jabatan = r.POST.get("jabatan")
+                kk = r.POST.get("kk")
+                shift = r.POST.get("shift")
+                hr = r.POST.get("hr")
+                ca = r.POST.get("ca")
+                rek = r.POST.get("rek")
+                payroll = r.POST.get("payroll")
+                nks = r.POST.get("nks")
+                ntk = r.POST.get("ntk")
+                pks = r.POST.get("pks")
+                ptk = r.POST.get("ptk")
 
-            if pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
-                return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
-            elif pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
-                return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
-            else:
-                pegawai = pegawai_db(
-                    nama=nama,
-                    gender=gender,
-                    email=email,
-                    no_telp=phone,
-                    userid=userid,
-                    status=status_pegawai,
-                    nik=nik,
-                    divisi_id=div,
-                    jabatan_id=jabatan,
-                    no_rekening=rek,
-                    no_bpjs_ks=nks,
-                    no_bpjs_tk=ntk,
-                    payroll_by=payroll,
-                    ks_premi=pks,
-                    tk_premi=ptk,
-                    aktif=1,
-                    tgl_masuk=datetime.strptime(str(tgl_masuk),'%d-%m-%Y').strftime("%Y-%m-%d"),
-                    tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
-                    hari_off_id=hr,
-                    kelompok_kerja_id=kk,
-                    shift=shift,
-                    sisa_cuti=12,
-                    counter_id=counter,
-                    add_by=r.user.username,
-                    edit_by=r.user.username
+                if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '' or tgl_masuk is None or shift == "":
+                    return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
 
-                    # status
-                ).save(using=r.session["ccabang"])
+                # Data Pribadi
+                alamat = r.POST.get("alamat")
+                phone = r.POST.get("phone")
+                email = r.POST.get("email")
+                kota_lahir = r.POST.get("kota_lahir")
+                tgl_lahir = r.POST.get("tgl_lahir")
+                tinggi = r.POST.get("tinggi")
+                berat = r.POST.get("berat")
+                goldarah = r.POST.get("goldarah")
+                agama = r.POST.get("agama")
 
 
-                # Tambah Pihak Lain
-                pgw = pegawai_db.objects.using(r.session["ccabang"]).get(userid=userid)
-                for p in pihak:
-                    tkl = kontak_lain_db(
-                    pegawai_id=int(pgw.pk),
-                    hubungan = p['hubungan'],
-                    nama = p['nama'],
-                    gender = p['gender'],
-                    phone = p['phone']
-                    ).save(using=r.session["ccabang"])
+                keluarga = r.POST.get("keluarga")
+                pihak = r.POST.get("pihak")
+                pengalaman = r.POST.get("pengalaman")
+                pendidikan = r.POST.get("pendidikan")
+                id_user = r.session["user"]["id"]
+                aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+                divisi = [d.pk for d in aksesdivisi]
+                # 
+                # return JsonResponse({"msg":"error"},status=400)
+                if keluarga != "null":
+                    keluarga = json.loads([])
+                else:
+                    keluarga = []
                 
 
-                # Tambah Keluarga
-                for k in keluarga:
-                    tkeluarga = keluarga_db(
-                        pegawai_id=int(pgw.pk),
-                        hubungan = k['hubungan'],
-                        nama = k["nama_keluarga"],
-                        tgl_lahir = datetime.strptime(k['tgl_lahir_keluarga'],'%d-%m-%Y'),
-                        gender = k['gender'],
-                        gol_darah = k['goldarah']
+                if pihak != "null":
+                    pihak = json.loads([])
+                else:
+                    pihak = []
+
+
+                if pengalaman != "null":
+                    pengalaman = json.loads([])
+                else:
+                    pengalaman = []
+                
+
+                if pendidikan != "null":
+                    pendidikan = json.loads([])
+                else:
+                    pendidikan = []
+                try:
+                    status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(pk=status)
+                except:
+                    status_pegawai = None
+                if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
+                    return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
+                if email != "":
+                    if pribadi_db.objects.using(r.session["ccabang"]).filter(email=email).exists():
+                        return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
+                if pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
+                    return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
+                elif pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
+                    return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
+                else:
+                    url = None
+                    if file == "undefined" or file == "null" or file is None or file == "None": 
+                        pass
+                    else:
+                        if file.content_type == "image/jpeg" or file.content_type == "image/png" or file.content_type == "image/jpg":
+                            if file.size > 2000000:
+                                transaction.set_rollback(True,using=r.session["ccabang"])
+                                return JsonResponse({"status":'error',"msg":"File tidak boleh lebih dari 2 MB"},status=400)
+                            uploaded = fss.save(f'static/img/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")}_{"_".join(file.name.split(" "))}',file)
+                            url = fss.url(uploaded)
+                        else:
+                            transaction.set_rollback(True,using=r.session["ccabang"])
+                            return JsonResponse({"status":'error',"msg":"Pilih file dengan format jpeg, jpg, atau png"},status=400)
+                    
+                    pegawai_db(
+                        nama=nama,
+                        gender=gender,
+                        email=email,
+                        no_telp=phone,
+                        userid=userid,
+                        status=status_pegawai,
+                        nik=nik,
+                        divisi_id=div,
+                        jabatan_id= jabatan ,
+                        no_rekening=rek,
+                        no_bpjs_ks=nks,
+                        no_bpjs_tk=ntk,
+                        payroll_by=payroll,
+                        ks_premi=pks,
+                        tk_premi=ptk,
+                        aktif=1,
+                        profile_picture=url,
+                        tgl_masuk=datetime.strptime(str(tgl_masuk),'%d-%m-%Y').strftime("%Y-%m-%d"),
+                        tgl_aktif=datetime.now().strftime('%Y-%m-%d'),
+                        hari_off_id=hr,
+                        kelompok_kerja_id=kk,
+                        shift=shift,
+                        sisa_cuti=0,
+                        cuti_awal=ca,
+                        counter_id=counter,
+                        add_by=r.session["user"]["nama"],
+                        edit_by=r.session["user"]["nama"]
+
+                        # status
                     ).save(using=r.session["ccabang"])
 
-                # Tambah Data Pribadi
-                pribadi_db(
-                    pegawai_id=int(pgw.pk),
-                    alamat=alamat,
-                    phone=phone,
-                    email=email,
-                    kota_lahir=kota_lahir,
-                    tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
-                    tinggi_badan=tinggi if tinggi != "" else 0,
-                    berat_badan=berat if berat != "" else 0,
-                    gol_darah=goldarah,
-                    agama=agama
-                ).save(using=r.session["ccabang"])
-                for pgl in pengalaman:
-                    pengalaman_db(
+
+                    # Tambah Pihak Lain
+                    pgw = pegawai_db.objects.using(r.session["ccabang"]).get(userid=userid)
+                    for p in pihak:
+                        tkl = kontak_lain_db(
                         pegawai_id=int(pgw.pk),
-                        perusahaan=pgl['perusahaan'],
-                        kota_id=pgl['kota'],
-                        dari_tahun=pgl['dari_tahun'],
-                        sampai_tahun=pgl['sampai_tahun'],
-                        jabatan=pgl['jabatan']
-                    ).save(using=r.session["ccabang"])
-                
-                for pdk in pendidikan:
-                    pendidikan_db(
+                        hubungan = p['hubungan'],
+                        nama = p['nama'],
+                        gender = p['gender'],
+                        phone = p['phone']
+                        ).save(using=r.session["ccabang"])
+                    
+                    # Tambah Keluarga
+                    for k in keluarga:
+                        tkeluarga = keluarga_db(
+                            pegawai_id=int(pgw.pk),
+                            hubungan = k['hubungan'],
+                            nama = k["nama_keluarga"],
+                            tgl_lahir = datetime.strptime(k['tgl_lahir_keluarga'],'%d-%m-%Y').strftime("%Y-%m-%d"),
+                            gender = k['gender'],
+                            gol_darah = k['goldarah'],
+                            status_bpjs = k["status_bpjs"],
+                            no_bpjs_ks = k["no_bpjs_ks"]
+                        ).save(using=r.session["ccabang"])
+
+                    # Tambah Data Pribadi
+                    pribadi_db(
                         pegawai_id=int(pgw.pk),
-                        pendidikan=pdk['pendidikan'],
-                        nama=pdk['nama'],
-                        kota_id=pdk['kota'],
-                        dari_tahun=pdk['dari_tahun'],
-                        sampai_tahun=pdk['sampai_tahun'],
-                        jurusan=pdk['jurusan'],
-                        gelar=pdk['gelar']
+                        alamat=alamat,
+                        phone=phone,
+                        email=email,
+                        kota_lahir=kota_lahir,
+                        tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
+                        tinggi_badan=tinggi if tinggi != "" else 0,
+                        berat_badan=berat if berat != "" else 0,
+                        gol_darah=goldarah,
+                        agama=agama
                     ).save(using=r.session["ccabang"])
-                status = "ok"
-        except Exception as e:
-            print(e)
-            return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
+                    for pgl in pengalaman:
+                        pengalaman_db(
+                            pegawai_id=int(pgw.pk),
+                            perusahaan=pgl['perusahaan'],
+                            kota_id=pgl['kota'],
+                            dari_tahun=pgl['dari_tahun'],
+                            sampai_tahun=pgl['sampai_tahun'],
+                            jabatan=pgl['jabatan']
+                        ).save(using=r.session["ccabang"])
+                    
+                    for pdk in pendidikan:
+                        pendidikan_db(
+                            pegawai_id=int(pgw.pk),
+                            pendidikan=pdk['pendidikan'],
+                            nama=pdk['nama'],
+                            kota_id=pdk['kota'],
+                            dari_tahun=pdk['dari_tahun'],
+                            sampai_tahun=pdk['sampai_tahun'],
+                            jurusan=pdk['jurusan'],
+                            gelar=pdk['gelar']
+                        ).save(using=r.session["ccabang"])
+                    status = "ok"
+                    
+            except Exception as e:
+                transaction.set_rollback(True,using=r.session["ccabang"])
+                print(e,"OSKODKOSKD")
+                return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
+            
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
 
 
-@login_required
+@authorization(["*"])
 def getPegawai(r,idp):
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     result = serialize("json",[pegawai_db.objects.using(r.session["ccabang"]).get(pk=int(idp),divisi__in=divisi)])
@@ -875,10 +991,10 @@ def getPegawai(r,idp):
     return JsonResponse({"data":result[0]},status=200,safe=False)
 
 
-@login_required
+@authorization(["*"])
 def tambah_keluarga(r, idp):
 
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     hubungan = r.POST.get('dhubungan_keluarga')
     dnama = r.POST.get('dnama_keluarga')
     tgl_lahir = r.POST.get('dtgl_lahir_keluarga')
@@ -905,10 +1021,9 @@ def tambah_keluarga(r, idp):
         
     return JsonResponse({"status": status, "idl":idl, "hub":hubungan, "dnama":dnama, "tlahir":tgl_lahir, "gender":gender, "goldarah":gol_darah})
 
-
-@login_required
+@authorization(["*"])
 def tambah_kl(r, idp):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     hubungan = r.POST.get('dhubungan_kl')
     dnama = r.POST.get('dnama_kl')
@@ -935,14 +1050,14 @@ def tambah_kl(r, idp):
     return JsonResponse({"status": status, "idl_kl":idl_kl, "hub_kl":hubungan, "dnama_kl":dnama, "gender_kl":gender, "dphone_kl":phone})
 
 
-@login_required
+@authorization(["*"])
 def general_data(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         dsid = dakses.sid_id
@@ -958,6 +1073,7 @@ def general_data(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -978,6 +1094,7 @@ def general_data(r,idp):
             'ntk':pg.no_bpjs_tk,
             'pks':pg.ks_premi,
             'ptk':pg.tk_premi,
+            "pp":pg.profile_picture,
             'modul_aktif' : 'Pegawai',
             "aktif":1,
         }
@@ -989,9 +1106,9 @@ def general_data(r,idp):
         return redirect('beranda')
     
 
-@login_required
+@authorization(["*"])
 def general_data_nonaktif(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -999,7 +1116,7 @@ def general_data_nonaktif(r,idp):
            
         dsid = dakses.sid_id   
         
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -1015,6 +1132,7 @@ def general_data_nonaktif(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1046,16 +1164,16 @@ def general_data_nonaktif(r,idp):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def data_pribadi(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -1092,6 +1210,7 @@ def data_pribadi(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1110,16 +1229,16 @@ def data_pribadi(r,idp):
 
 
 
-@login_required
+@authorization(["*"])
 def data_pribadi_nonaktif(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         dsid = dakses.sid_id   
@@ -1154,6 +1273,7 @@ def data_pribadi_nonaktif(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1173,16 +1293,16 @@ def data_pribadi_nonaktif(r,idp):
 
 
 
-@login_required
+
 def pendidikan_kerja(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -1205,6 +1325,7 @@ def pendidikan_kerja(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1222,16 +1343,16 @@ def pendidikan_kerja(r,idp):
 
 
 
-@login_required
+
 def pendidikan_kerja_nonaktif(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -1255,6 +1376,7 @@ def pendidikan_kerja_nonaktif(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1271,16 +1393,16 @@ def pendidikan_kerja_nonaktif(r,idp):
         return redirect('beranda')
 
 
-@login_required
+
 def promosi_demosi(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -1297,6 +1419,7 @@ def promosi_demosi(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1315,9 +1438,9 @@ def promosi_demosi(r,idp):
     
 
 
-# @login_required
+# 
 # def promosi_demosi(r,idp):
-#     iduser = r.user.id
+#     iduser = r.session["user"]["id"]
         
 #     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
 #         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -1347,16 +1470,16 @@ def promosi_demosi(r,idp):
 #         return redirect('beranda')
 
 
-@login_required
+
 def promosi_demosi_nonaktif(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -1373,6 +1496,7 @@ def promosi_demosi_nonaktif(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1391,9 +1515,9 @@ def promosi_demosi_nonaktif(r,idp):
     
 
 
-# @login_required
+# 
 # def promosi_demosi_nonaktif(r,idp):
-#     iduser = r.user.id
+#     iduser = r.session["user"]["id"]
         
 #     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
 #         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -1424,7 +1548,7 @@ def promosi_demosi_nonaktif(r,idp):
 
 
 
-@login_required
+
 def tambah_prodemo(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         res = {"status":""}
@@ -1432,7 +1556,7 @@ def tambah_prodemo(r):
         status = r.POST.get("status")
         jabatan_seb = r.POST.get("jabatan_seb")
         jabatan_sek = r.POST.get("jabatan_sek")
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -1498,16 +1622,16 @@ def promodemo_json(r,idp,aktif):
         return JsonResponse({'data':rslt},status=200,safe=False)
 
 
-@login_required
+
 def sangsi(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -1523,6 +1647,7 @@ def sangsi(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1536,16 +1661,16 @@ def sangsi(r,idp):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-@login_required
+
 def sangsi_nonaktif(r,idp):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
            
         dsid = dakses.sid_id   
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -1564,6 +1689,7 @@ def sangsi_nonaktif(r,idp):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'sid': int(sid),
             'idp': idp,
@@ -1577,7 +1703,7 @@ def sangsi_nonaktif(r,idp):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-@login_required
+
 def get_sangsi_pegawai(r,idp):
     sangsi = sangsi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now()).last()
     if not sangsi:
@@ -1587,7 +1713,7 @@ def get_sangsi_pegawai(r,idp):
         sangsi = json.loads(sangsi)[0]
     return JsonResponse({"data":sangsi},status=200,safe=False)
 
-@login_required
+
 def sangsi_json(r,idp,aktif):
     if aktif == 0:
         sangsi = sangsi_db_arsip.objects.filter(pegawai_id=int(idp),tgl_berakhir__gte=datetime.now())
@@ -1604,7 +1730,7 @@ def sangsi_json(r,idp,aktif):
         result.append(obj)
     return JsonResponse({"data":result})
 
-@login_required
+
 def tambah_sangsi(r,idp):
 
     # cek dari xmlhttprequest
@@ -1633,12 +1759,12 @@ def tambah_sangsi(r,idp):
         return JsonResponse({'status':"success create sangsi"},status=201,safe=False)
 
 
-@login_required
+
 def aktif_nonaktif(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     idp = r.POST.get('idp')
     nama_modul = r.POST.get('nama_modul')
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     
@@ -1661,10 +1787,10 @@ def aktif_nonaktif(r):
     return JsonResponse({"status": status})
 
 
-@login_required
+
 def nonaktif(r):
     idp = r.POST.get('idp')
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     
@@ -1673,7 +1799,7 @@ def nonaktif(r):
         return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses ke pegawai ini"},status=400)
     else:
         pg = pg[0]
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     p = pg
     with transaction.atomic(using=r.session["ccabang"]):
         try:
@@ -1705,7 +1831,9 @@ def nonaktif(r):
                 cuti_awal=p.cuti_awal,
                 shift=p.shift,
                 counter=p.counter,
-
+                tgl_cuti=p.tgl_cuti,
+                expired=p.expired,
+                profile_picture=p.profile_picture,
                 rekening=p.rekening,
 
                 add_by=nama_user,
@@ -1874,11 +2002,11 @@ def nonaktif(r):
     return JsonResponse({"status": status})
 
 
-@login_required
+
 def aktif(r):
     idp = r.POST.get('idp')
-    nama_user = r.user.username
-    id_user = r.user.id
+    nama_user = r.session["user"]["nama"]
+    id_user = r.session["user"]["id"]
     aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
     
@@ -1906,6 +2034,9 @@ def aktif(r):
                 payroll_by=p.payroll_by,
                 ks_premi=p.ks_premi,
                 tk_premi=p.tk_premi,
+                tgl_cuti=p.tgl_cuti,
+                expired=p.expired,
+                profile_picture=p.profile_picture,
 
                 aktif=p.aktif,
                 tgl_masuk=p.tgl_masuk,
@@ -2047,13 +2178,13 @@ def aktif(r):
 
 
 
-@login_required
+
 def pegawai_json(r, sid):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         if int(sid) == 0:
@@ -2163,11 +2294,11 @@ def pegawai_json(r, sid):
         return JsonResponse({"data": data},status=200)
 
 
-@login_required
+
 def non_aktif_json(r, sid):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -2264,13 +2395,13 @@ def non_aktif_json(r, sid):
         return JsonResponse({"data": data})
 
 
-@login_required
+
 def detail_pegawai_json(r, idp):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
         data = []
-        id_user = r.user.id
+        id_user = r.session["user"]["id"]
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         
@@ -2307,9 +2438,9 @@ def detail_pegawai_json(r, idp):
 
 
 
-@login_required
+
 def registrasi_pegawai(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
@@ -2322,6 +2453,7 @@ def registrasi_pegawai(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             'status' : status,
             'modul_aktif' : 'Pegawai'
@@ -2333,16 +2465,16 @@ def registrasi_pegawai(r):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-@login_required
+
 def rpm(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
         
-        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(status="Active")
+        mesin = mesin_db.objects.using(r.session["ccabang"]).all()
         data = {       
             'dsid': dsid,
             "mesin":mesin,
@@ -2359,9 +2491,9 @@ def rpm(r):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-@login_required
+
 def rp_mesin(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -2369,7 +2501,7 @@ def rp_mesin(r):
         akses = dakses.akses
         dsid = dakses.sid_id
         
-        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(status="Active")
+        mesin = mesin_db.objects.using(r.session["ccabang"]).all()
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
         divisi = divisi_db.objects.using(r.session["ccabang"]).all()
         data = {       
@@ -2387,9 +2519,9 @@ def rp_mesin(r):
         return redirect('beranda')
     
 
-@login_required
+
 def rp_cmesin(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
@@ -2414,15 +2546,15 @@ def rp_cmesin(r):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-@login_required
+
 def rp_form(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
-        user = r.user.username
+        user = r.session["user"]["nama"]
 
-        iduser = r.user.id
+        iduser = r.session["user"]["id"]
         data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
         akses = data_akses.akses 
         dsid = data_akses.sid_id
@@ -2430,47 +2562,51 @@ def rp_form(r):
         userid = r.POST.get("userid")
         tipe = r.POST.get("tipe")
         mesin = r.POST.get("mesin")
-        print(tipe)
-        if tipe != "rp_mesin":
-            if akses == "admin" or akses == "root":
-                level = r.POST.get("level")
-                password = r.POST.get("password")
-
-                try:
-                    dmesin = mesin_db.objects.using(r.session["ccabang"]).get(pk=mesin)
+        # if tipe != "rp_mesin":
+        #     if akses == "admin" or akses == "root":
+        #         level = r.POST.get("level")
+        #         password = r.POST.get("password")
+        #         if pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
+        #             messages.error(r,"Pegawai dengan userid tersebut sudah ada")
+        #             return redirect("rp_mesin")
+        #         if pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
+        #             messages.error(r,"Pegawai dengan userid tersebut sudah ada")
+        #             return redirect("rp_mesin")
+        #         try:
+        #             dmesin = mesin_db.objects.using(r.session["ccabang"]).get(pk=mesin)
                     
-                    id = dmesin.pk
-                    zk = ZK(dmesin.ipaddress,4370)
-                    conn = zk.connect()
-                    conn.disable_device()
+        #             id = dmesin.pk
+        #             zk = ZK(dmesin.ipaddress,4370)
+        #             conn = zk.connect()
+        #             conn.disable_device()
 
-                    users = conn.get_users()
-                    uids = [user.uid for user in users]
+        #             users = conn.get_users()
+        #             uids = [user.uid for user in users]
 
-                    n_data = 1
-                    last_uid = sorted(uids)[-1]
-                    uid_ready = [uid for uid in range(uids[0], uids[-1] +1 ) if uid not in uids]
-                    if len(uid_ready) <= 0:
-                        uid = last_uid + 1
-                        if level == 1:
-                            conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
-                        else:
-                            conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
-                    else:
-                        uid = uid_ready[0]
-                        if level == 1:
-                            conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
-                        else:
-                            conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
+        #             n_data = 1
+        #             last_uid = sorted(uids)[-1]
+        #             uid_ready = [uid for uid in range(uids[0], uids[-1] +1 ) if uid not in uids]
+        #             if len(uid_ready) <= 0:
+        #                 uid = last_uid + 1
+        #                 if level == 1:
+        #                     conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
+        #                 else:
+        #                     conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
+        #             else:
+        #                 uid = uid_ready[0]
+        #                 if level == 1:
+        #                     conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
+        #                 else:
+        #                     conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
 
-                    conn.enable_device()
-                    conn.disconnect()
-                except Exception as e:
-                    messages.error(r,"Proccess terminate : {}".format(e))
-                    return redirect("rpm")
-                # finally:
-                #     if conn:
-                #         pass
+        #             conn.enable_device()
+        #             conn.disconnect()
+        #         except Exception as e:
+        #             messages.error(r,"Proccess terminate : {}".format(e))
+        #             return redirect("rp_mesin")
+        #         # finally:
+        #         #     if conn:
+        #         #         pass
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
@@ -2482,16 +2618,20 @@ def rp_form(r):
         status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('status')
         hr = hari_db.objects.using(r.session["ccabang"]).all()
         kota_kabupaten = kota_kabupaten_db.objects.using(r.session["ccabang"]).all()
+
+        shift = shift_db.objects.using(r.session["ccabang"]).all()
         
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'dsid': dsid,
             "counter":counter,
             "divisi":divisi,
             "jabatan":jabatan,
             'status':status,
+            "shift":shift,
             "kota_kabupaten":kota_kabupaten,
             "kk":kk,
             "hr":hr,
@@ -2506,13 +2646,14 @@ def rp_form(r):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
-@login_required
+
 def tambah_pegawai_non_validasi(r):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         with transaction.atomic(using=r.session["ccabang"]) as wt:
-            
+            fss = FileSystemStorage()
+            file = r.FILES.get("file")
             try:
-                user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)
+                user = akses_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])
                 if not user.exists():
                     return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses"},status=400)
                 user = user[0]
@@ -2536,7 +2677,7 @@ def tambah_pegawai_non_validasi(r):
                 ntk = r.POST.get("ntk")
                 pks = r.POST.get("pks")
                 ptk = r.POST.get("ptk")
-                if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '' or tgl_masuk is None:
+                if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '' or tgl_masuk is None or shift == "":
                     transaction.set_rollback(True,using=r.session["ccabang"])
                     return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
 
@@ -2556,25 +2697,25 @@ def tambah_pegawai_non_validasi(r):
                 pihak = r.POST.get("pihak")
                 pengalaman = r.POST.get("pengalaman")
                 pendidikan = r.POST.get("pendidikan")
-                if keluarga:
+                if keluarga != "null":
                     keluarga = json.loads(keluarga)
                 else:
                     keluarga = []
                 
-
-                if pihak:
+ 
+                if pihak != "null":
                     pihak = json.loads(pihak)
                 else:
                     pihak = []
 
 
-                if pengalaman:
+                if pengalaman != "null":
                     pengalaman = json.loads(pengalaman)
                 else:
                     pengalaman = []
                 
 
-                if pendidikan:
+                if pendidikan != "null":
                     pendidikan = json.loads(pendidikan)
                 else:
                     pendidikan = []
@@ -2636,14 +2777,12 @@ def tambah_pegawai_non_validasi(r):
                             level=level
                         ).save(using=r.session["ccabang"])
                     conn.enable_device()
+                    conn.disconnect()
 
                 except Exception as e:
                     print(e)
                     transaction.set_rollback(True,using=r.session["ccabang"])
                     return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=500)
-                finally:
-                    if conn:
-                        conn.disconnect()
                 if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
                     transaction.set_rollback(True,using=r.session["ccabang"])
                     return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
@@ -2659,6 +2798,19 @@ def tambah_pegawai_non_validasi(r):
                     transaction.set_rollback(True,using=r.session["ccabang"])
                     return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
                 else:
+                    url = None
+                    if file == "undefined" or file == "null" or file is None or file == "None": 
+                        pass
+                    else:
+                        if file.content_type == "image/jpeg" or file.content_type == "image/png" or file.content_type == "image/jpg":
+                            if file.size > 2000000:
+                                transaction.set_rollback(True,using=r.session["ccabang"])
+                                return JsonResponse({"status":'error',"msg":"File tidak boleh lebih dari 2 MB"},status=400)
+                            uploaded = fss.save(f'static/img/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S-%f")}_{"_".join(file.name.split(" "))}',file)
+                            url = fss.url(uploaded)
+                        else:
+                            transaction.set_rollback(True,using=r.session["ccabang"])
+                            return JsonResponse({"status":'error',"msg":"Pilih file dengan format jpeg, jpg, atau png"},status=400)
                     pegawai_db(
                         nama=nama,
                         gender=gender,
@@ -2674,6 +2826,7 @@ def tambah_pegawai_non_validasi(r):
                         no_bpjs_tk=ntk,
                         payroll_by=payroll,
                         ks_premi=pks,
+                        profile_picture=url,
                         tk_premi=ptk,
                         aktif=1,
                         tgl_masuk=datetime.strptime(str(tgl_masuk),'%d-%m-%Y').strftime("%Y-%m-%d"),
@@ -2681,10 +2834,11 @@ def tambah_pegawai_non_validasi(r):
                         hari_off_id=hr,
                         kelompok_kerja_id=kk,
                         shift=shift,
-                        sisa_cuti=12,
+                        sisa_cuti=0,
+                        cuti_awal=ca,
                         counter_id=counter,
-                        add_by=r.user.username,
-                        edit_by=r.user.username
+                        add_by=r.session["user"]["nama"],
+                        edit_by=r.session["user"]["nama"]
                     ).save(using=r.session["ccabang"])
 
 
@@ -2703,17 +2857,19 @@ def tambah_pegawai_non_validasi(r):
 
                     # Tambah Keluarga
                     for k in keluarga:
-                        tkeluarga = keluarga_db(
+                        keluarga_db(
                             pegawai_id=int(pgw.pk),
                             hubungan = k['hubungan'],
                             nama = k["nama_keluarga"],
                             tgl_lahir = datetime.strptime(k['tgl_lahir_keluarga'],'%d-%m-%Y'),
                             gender = k['gender'],
-                            gol_darah = k['goldarah']
+                            gol_darah = k['goldarah'],
+                            status_bpjs = k["status_bpjs"],
+                            no_bpjs_ks = k["no_bpjs_ks"]
                         ).save(using=r.session["ccabang"])
 
                     # Tambah Data Pribadi
-                    pribadi = pribadi_db(
+                    pribadi_db(
                         pegawai_id=int(pgw.pk),
                         alamat=alamat,
                         phone=phone,
@@ -2755,7 +2911,7 @@ def tambah_pegawai_non_validasi(r):
 
 
 
-@login_required
+
 def ambil_mesin(r):
     idmesin = r.POST.get("mesin")
     
@@ -2782,39 +2938,309 @@ def ambil_mesin(r):
         messages.error(r,"Proccess terminate : {}".format(e))
         return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
 
-@login_required
+@authorization(["root","it"])
 def spegawai_payroll(r):
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):
         akses = akses_db.objects.using(r.session["ccabang"]).get(user_id=id_user)
         akses = akses.akses
         pegawaip = pegawai_payroll_db.objects.using(f'p{r.session["ccabang"]}').all()
-        if akses == "root" or akses == "hrd":
-            pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
-            for p in pegawai:
-                if len([pe for pe in pegawaip if p.userid == pe.userid]) > 0:
-                    continue
-                pegawai_payroll_db(
-                    id=p.pk,
-                    nama=p.nama,
-                    userid=p.userid,
-                    gender=p.gender,
-                    status=p.status,
-                    nik=p.nik,
-                    divisi=p.divisi,
-                    no_rekening=p.no_rekening,
-                    no_bpjs_ks=p.no_bpjs_ks,
-                    no_bpjs_tk=p.no_bpjs_tk,
-                    payroll_by=p.payroll_by,
-                    ks_premi=p.ks_premi,
-                    tk_premi=p.tk_premi,
-                    aktif=1,
-                    tgl_masuk=p.tgl_masuk,
-                    status_payroll=0,
-                    add_by="prog",
-                    edit_by="prog",
-                ).save(using=f'p{r.session["ccabang"]}')
-        else:
-            pass
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
+        for p in pegawai:
+            if len([pe for pe in pegawaip if p.userid == pe.userid]) > 0:
+                continue
+            pegawai_payroll_db(
+                id=p.pk,
+                nama=p.nama,
+                userid=p.userid,
+                gender=p.gender,
+                status=p.status,
+                nik=p.nik,
+                divisi=p.divisi,
+                no_rekening=p.no_rekening,
+                no_bpjs_ks=p.no_bpjs_ks,
+                no_bpjs_tk=p.no_bpjs_tk,
+                payroll_by=p.payroll_by,
+                ks_premi=p.ks_premi,
+                tk_premi=p.tk_premi,
+                aktif=1,
+                tgl_masuk=p.tgl_masuk,
+                status_payroll=0,
+                add_by="prog",
+                edit_by="prog",
+            ).save(using=f'p{r.session["ccabang"]}')
     else:
         pass
+
+
+
+def upload_foto(r):
+    file = r.FILES.get("file")
+    fss = FileSystemStorage()
+    upload = fss.save(f'static/img/{file.name}',file)
+    url = fss.url(upload)
+    print(url)
+    print(upload)
+    # file = open("static/img/coba.jpeg","wb")
+    # file.write(foto)
+    # print(foto)/
+
+
+@authorization(["root","it"])
+def history(r,sid):
+    id_user = r.session["user"]["id"]
+    akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+    dsid = akses.sid_id
+    aksesdiv = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+    div = [div.divisi.pk for div in aksesdiv]
+    pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=div).distinct("status_id")
+    status = [p.status_id for p in pegawai]
+    s_pegawai = status_pegawai_db.objects.using(r.session['ccabang']).filter(pk__in=status)
+    data = {
+        'akses' : akses.akses,
+        "cabang":r.session["cabang"],
+        "ccabang":r.session["ccabang"],
+        "nama":r.session["user"]["nama"],
+        'dsid': dsid,
+        'sid': int(sid),
+        "status":s_pegawai,
+        'modul_aktif' : 'Pegawai'
+    }
+    return render(r,"hrd_app/pegawai/history/history.html",data)
+
+
+@authorization(["root","it"])
+def history_pegawai_json(r,sid):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        id_user = r.session["user"]["id"]
+        akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+        data = []
+        aksesdiv = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+        div = [div.divisi.pk for div in aksesdiv]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=div,status_id=sid):
+            # divisi = f'{p.divisi} / {p.counter}' if p.counter is not None else '' 
+            if p.divisi is not None and p.counter is not None:
+                divisi = f"{p.divisi.divisi} - {p.counter.counter}"
+            elif p.divisi is not None:
+                divisi = f"{p.divisi.divisi}"
+            else:
+                divisi = "-"
+            obj = {
+                "id":p.pk,
+                "nama":p.nama,
+                "nik":p.nik,
+                "sid":p.status_id,
+                "userid":p.userid,
+                "divisi":divisi,
+                "jabatan":p.jabatan.jabatan if p.jabatan is not None else "-",
+                "hari_off":p.hari_off.hari
+            }
+            data.append(obj)
+        print(data)
+        return JsonResponse({"status":'success',"msg":"Berhasil ambil data pegawai","data":data},status=200)
+    else:
+        return JsonResponse({"status":"error","msg":"Terjadi Kesalahan"},status=400)
+    
+@authorization(["root","it"])
+def detail_history(r,sid,idp):
+    id_user = r.session["user"]["id"]
+    akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+    dsid = akses.sid_id
+    aksesdiv = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+    div = [div.divisi.pk for div in aksesdiv]
+    pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=div).distinct("status_id")
+    status = [p.status_id for p in pegawai]
+    s_pegawai = status_pegawai_db.objects.using(r.session['ccabang']).filter(pk__in=status)
+    pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(idp),divisi_id__in=div).last()
+    if not pegawai:
+        messages.error(r,"Pegawai tidak ada")
+        return redirect("history",sid=sid)
+    data = {
+        'akses' : akses,
+        "cabang":r.session["cabang"],
+        "ccabang":r.session["ccabang"],
+        "nama":r.session["user"]["nama"],
+        'dsid': dsid,
+        'idp': idp,
+        'sid': int(sid),
+        "status":s_pegawai,
+        'modul_aktif' : 'Pegawai'
+    }
+    return render(r,"hrd_app/pegawai/history/[sid]/[idp]/detail_history.html",data)
+            
+@authorization(["root","it"])
+def detail_history_json(r,sid,idp):
+    id_user = r.session["user"]["id"]
+    akses = akses_db.objects.using(r.session['ccabang']).filter(user_id=id_user).last()
+    data = []
+    for h in history_pegawai_db.objects.select_related("pegawai__divisi","pegawai__kelompok_kerja","pegawai").using(r.session["ccabang"]).filter(pegawai_id=int(idp)):
+        obj = {
+            "id":h.pk,
+            "nama":h.pegawai.nama,
+            "userid":h.pegawai.userid,
+            "nik":h.pegawai.nik,
+            "tgl_masuk":h.pegawai.tgl_masuk,
+            "kk":h.pegawai.kelompok_kerja.kelompok if h.pegawai.kelompok_kerja is not None else "-",
+            "divisi":h.pegawai.divisi.divisi if h.pegawai.divisi is not None else "",
+            "edit_by":h.edit_by,
+            "edit_date":h.edit_date
+        }
+        data.append(obj)
+    return JsonResponse({"status":"success","msg":"Berhasil ambil data history","data":data},status=200)
+
+
+@authorization(["root","it"])
+def detail_data_json(r):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        id_user = r.session["user"]["id"]
+        akses = akses_db.objects.using(r.session['ccabang']).filter(user_id=id_user).last()
+        hid = r.POST.get("id")
+        aksesdiv = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+        div = [div.divisi_id for div in aksesdiv]
+        history = history_pegawai_db.objects.select_related("pegawai__divisi").using(r.session["ccabang"]).filter(pk=int(hid),pegawai__divisi_id__in=div)
+        data = []
+        for h in history:
+            obj = {
+                "pegawai":h.pegawai_id,
+                "nama":h.nama,
+                "email":h.email,
+                "no_telp":h.no_telp,
+                "userid":h.userid,
+                "gender":h.gender,
+                "status":h.pegawai.status.status if h.pegawai.status is not None else "-",
+                "nik":h.nik,
+                "divisi":h.pegawai.divisi.divisi if h.pegawai.divisi is not None else "-",
+                "jabatan":h.pegawai.jabatan.jabatan if h.pegawai.jabatan is not None else "-",
+                "no_rekening":h.no_rekening,
+                "no_bpjs_ks":h.no_bpjs_ks,
+                "no_bpjs_tk":h.no_bpjs_tk,
+                "payroll_by":h.payroll_by,
+                "ks_premi":h.ks_premi,
+                "tk_premi":h.tk_premi,
+                "aktif":h.aktif,
+                "tgl_masuk":h.tgl_masuk,
+                "tgl_aktif":h.tgl_aktif,
+                "tgl_nonaktif":h.tgl_nonaktif,
+                "tgl_cuti":h.tgl_cuti,
+                "expired":h.expired,
+                "hari_off":h.pegawai.hari_off.hari if h.pegawai.hari_off is not None else "-",
+                "hari_off2":h.pegawai.hari_off2.hari if h.pegawai.hari_off2 is not None else "-",
+                "kelompok_kerja":h.pegawai.kelompok_kerja.kelompok if h.pegawai.kelompok_kerja is not None else "-",
+                "sisa_cuti":h.sisa_cuti,
+                "cuti_awal":h.cuti_awal,
+                "shift":h.shift,
+                "counter":h.pegawai.counter.counter if h.pegawai.counter is not None else "-",
+                "profile_picture":h.profile_picture,
+                "rekening":h.rekening,
+                "add_by":h.add_by,
+                "edit_by":h.edit_by,
+                "add_date":h.add_date,
+                "edit_date":h.edit_date,
+                "item_edit":h.item_edit
+            }
+            data.append(obj)
+        return JsonResponse({"status":'success',"msg":"Berhasil ambil data","data":data},status=200)
+    else:
+        return JsonResponse({"status":"error","msg":"Terjadi Kesalahan"},status=400)
+    
+
+        
+@authorization(["root","it"])
+def history_pribadi_json(r):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        id_user = r.session["user"]["id"]
+        akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+        hid = r.POST.get("id")
+        data = []
+        for h in history_pribadi_db.objects.using(r.session["ccabang"]).filter(history_id=hid):
+            obj = {
+                "pegawai":h.pegawai,
+                "alamat":h.alamat,
+                "phone":h.phone,
+                "email":h.email,
+                "kota_lahir":h.kota_lahir,
+                "tgl_lahir":h.tgl_lahir,
+                "tinggi_badan":h.tinggi_badan,
+                "berat_badan":h.berat_badan,
+                "gol_darah":h.gol_darah,
+                "agama":h.agama, 
+            }
+            data.append(obj)
+        return JsonResponse({"status":'success','msg':"Berhasil ambil data","data":data},status=200)
+        
+
+@authorization(["root","it"])
+def keluarga_data_json(r):
+    id_user = r.session["user"]["id"]
+    akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+    hid = r.POST.get("id")
+    keluarga = []
+    for kp in history_keluarga_db.objects.using(r.session["ccabang"]).filter(history_id=hid):
+        obj = {
+            "pegawai":kp.pegawai if kp.pegawai is not None else '-',
+            "hubungan":kp.hubungan if kp.hubungan is not None else "-",
+            "nama":kp.nama if kp.nama is not None else "-", 
+            "tgl_lahir":kp.tgl_lahir if kp.tgl_lahir is not None else "-",
+            "gender":kp.gender if kp.gender is not None else '-',
+            "gol_darah":kp.gol_darah if kp.gol_darah is not None else "-",
+        }
+        keluarga.append(obj)
+    return JsonResponse({"status":'success',"msg":"Berhasil ambil data","data":keluarga},status=200)
+    
+@authorization(["root","it"])
+def pihak_data_json(r):
+    id_user = r.session["user"]["id"]
+    akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+    hid = r.POST.get("id")
+    pihak = []
+    for k in history_kontak_lain_db.objects.using(r.session["ccabang"]).filter(history_id=hid):
+        obj  = {
+            "pegawai":k.pegawai if k.pegawai is not None else "-",
+            "hubungan":k.hubungan if k.hubungan is not None else "-",
+            "nama":k.nama if k.nama is not None else "-",
+            "gender":k.gender if k.gender is not None else "-",
+            "phone":k.phone if k.phone is not None else "-",
+        }
+        pihak.append(obj)
+    return JsonResponse({"status":'success',"msg":"Berhasil ambil data","data":pihak,"pihak":pihak},status=200)
+    
+
+@authorization(["root","it"])
+def pengalaman_data_json(r):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        id_user = r.session["user"]["id"]
+        akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+        hid = r.POST.get("id")
+        pengalaman = []
+        for pgl in history_pengalaman_db.objects.using(r.session['ccabang']).filter(history_id=hid):
+            obj = {
+                "pegawai":pgl.pegawai,
+                "perusahaan":pgl.perusahaan,
+                "kota":pgl.kota,
+                "dari_tahun":pgl.dari_tahun,
+                "sampai_tahun":pgl.sampai_tahun,
+                "jabatan":pgl.jabatan,
+            }
+            pengalaman.append(obj)
+        return JsonResponse({"status":"success","msg":"Berhasil ambil data","data":pengalaman},status=200)
+
+@authorization(["root","it"])
+def pendidikan_data_json(r):
+    if r.headers["X-Requested-With"] == "XMLHttpRequest":
+        id_user = r.session["user"]["id"]
+        akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
+        hid = r.POST.get("id")
+        pendidikan = []
+        for pdk in history_pendidikan_db.objects.using(r.session["ccabang"]).filter(history_id=hid):
+            obj = {
+                "pegawai":pdk.pegawai,
+                "pendidikan":pdk.pendidikan,
+                "nama":pdk.nama,
+                "kota":pdk.kota,
+                "dari_tahun":pdk.dari_tahun,
+                "sampai_tahun":pdk.sampai_tahun,
+                "jurusan":pdk.jurusan,
+                "gelar":pdk.gelar,
+            }
+            pendidikan.append(obj)
+        return JsonResponse({"status":"success","msg":"Berhasil ambil data","data":pendidikan},status=200)

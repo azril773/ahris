@@ -1,38 +1,11 @@
-# DJANGO
-from django.shortcuts import render, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth import logout
-from django.contrib.auth.models import User
-from django.db import IntegrityError 
-from django.db.models import Q, Avg, Max, Min, Sum, Count, F 
-from django.http import HttpResponse, JsonResponse
-from datetime import date, datetime, timedelta
-from django.template.loader import get_template
-from django.contrib import messages 
-from json import dumps
-import requests
-# SUPPORT
-from hrd_app.function import prosesabsensi
-from openpyxl.styles import Alignment, Font
-from collections import namedtuple
-from openpyxl import Workbook
-import math
-import json
-import time
-import pandas as pd
-from decimal import *
+from .lib import *
 import re
 # PYZK / FINGER MACHINE
-from zk import ZK, const
-from struct import pack
-from zk import user as us
-import codecs  
 # MODEL / DATABASE
 import hrd_app as app
 from ..models import *
-from django.core.serializers import serialize # Create your views here.
 
-
+from hrd.urls import oauth
 # Functions
 
 
@@ -43,36 +16,14 @@ def logindispatch(request):
     request.POST.get('next')
 
 
-# Logout
-def user_logout(request):
-    request.session["ccabang"] = None
-    request.session["cabang"] = None
-    logout(request)
-    return redirect("login")
-         
-@login_required
-def beranda(r):  
-    
-    iduser = r.user.id
-    print("KLKL")
-    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-        akses = dakses.akses        
-        dsid = dakses.sid_id
-        
-        today = date.today()
-        print("OKK")
-        data = {
-            'akses' : akses,
-            'today' : today,
-            'dsid' : dsid,
-        }
-        
-        return redirect("absensi",sid=dsid)
-        
-    else:    
-        messages.info(r, 'Data akses Anda belum di tentukan.')        
-        return redirect('login')
+def user_logout(r):
+    r.session["ccabang"] = None
+    r.session["cabang"] = None
+    r.session["user"] = None
+    # result = os.environ.get("INVALIDATION_URL")
+    messages.info(r,"Berhasil logout")
+    return redirect("beranda")
+
 
 
 @login_required
@@ -84,9 +35,9 @@ def beranda_no_akses(request):
 
 
 
-@login_required
 def ganti_cabang(r):
     cabang = r.POST.get("cabang")
+    print(r.POST.get("cabang"))
     if not cabang_db.objects.filter(cabang=cabang).exists():
         return JsonResponse({"status":"error","msg":"Gagal mengganti cabang"},status=401)
     cabang = cabang_db.objects.filter(cabang=cabang)
@@ -214,17 +165,17 @@ from hrd_app.controllers.pegawai_cuti.views import *
 #                     ).save(using=request.session["ccabang"])
 #                 # print(dt['userid'])
 
-from django.core.serializers import serialize # Create your views here.
+# from django.core.serializers import serialize # Create your views here.
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.cron import CronTrigger
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Pegawai
+# # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# # Pegawai
 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+# # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 scheduler = BackgroundScheduler()
 
 # def tasiksetabsensi():
@@ -1397,9 +1348,12 @@ scheduler = BackgroundScheduler()
 #         # print(e)
 #         return e
 #     # pegawai_db.objects.using("cirebon").filter(id=3636).update(nik="silvia21")
-# trigger = CronTrigger(
-#     year="*",month="*",day='*',hour="08",minute="00",second="00"
-# )
+
+def coba():
+    print("OKOKO")
+trigger = CronTrigger(
+    year="*",month="*",day='*',hour="*",minute="*",second="*"
+)
 # # trigger = CronTrigger(
 # #     year="*",month="*",day='*',hour="09",minute="27",second="45"
 # # )
@@ -1413,7 +1367,7 @@ scheduler = BackgroundScheduler()
 # #     year="*",month="*",day='*',hour="07",minute="30",second="00"
 # # )
 # # scheduler.remove_all_jobs()
-# scheduler.add_job(tasiksetabsensi,trigger=trigger)
+# scheduler.add_job(coba,trigger=trigger)
 # scheduler.start()
 # # scheduler.add_job(cirebonsetabsensi,trigger=trigger1)
 # scheduler.add_job(cirebonsetabsensi,trigger=trigger2)

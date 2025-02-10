@@ -1,8 +1,8 @@
 from hrd_app.controllers.lib import *
 import os
-@login_required
+@authorization(["*"])
 def laporan(r,sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -35,6 +35,7 @@ def laporan(r,sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'status' : status,
             'dsid': dsid,
             'sid': sid,
@@ -57,7 +58,7 @@ def laporan(r,sid):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
     
-
+@authorization(["*"])
 def laporan_json(r):
     sid = r.POST.get('sid')
     bulan = r.POST.get('bulan')
@@ -65,7 +66,7 @@ def laporan_json(r):
     date = tahun+"-"+bulan+"-25"
     sp = datetime.strptime(date,"%Y-%m-%d")
     dr = sp - timedelta(days=30)
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
     data = []
 
     if int(sid) == 0:
@@ -308,7 +309,6 @@ def laporan_json(r):
             }
             data.append(obj)
     datai = []
-    print(data)
     for dt in data:
         if not rekap_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(dt["id"]),periode=int(bulan),tahun=int(tahun)).exists():
             rekap_db(
@@ -352,9 +352,9 @@ def laporan_json(r):
 
 
 
-@login_required
+@authorization(["*"])
 def print_laporan(r,sid,id,bulan,tahun):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -378,6 +378,7 @@ def print_laporan(r,sid,id,bulan,tahun):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'status' : status,
             'dsid': dsid,
             "dari":dr.date(),
@@ -397,7 +398,7 @@ def print_laporan(r,sid,id,bulan,tahun):
         return render(r,'hrd_app/laporan/[sid]/[id]/[bulan]/[tahun]/print_laporan.html', data)
     # return render(r,"hrd_app/laporan/print_laporan.html")
 
-
+@authorization(["*"])
 def laporan_json_periode(r,sid,id,dr,sp):
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
         
@@ -569,7 +570,7 @@ def laporan_json_periode(r,sid,id,dr,sp):
         slc = slice(0,2)
         return JsonResponse({"data": data,"kehadiran":kehadiran,"hari":hari_count,"tselisih":f"{tselisih[0]},{tselisih[1][slc]}","trlmbt":trlmbt,"lh":lhstatus })
     
-
+@authorization(["*"])
 def laporan_json_periode_excel(r,sid,id,bulan,tahun):        
         data = []
         sampai = datetime.strptime(f'{tahun}-{bulan}-26',"%Y-%m-%d").date()
@@ -785,18 +786,18 @@ def laporan_json_periode_excel(r,sid,id,bulan,tahun):
         # return JsonResponse({"data": data,"kehadiran":kehadiran,"hari":hari_count,"tselisih":f"{tselisih[0]},{tselisih[1][slc]}","trlmbt":trlmbt })
         # return redirect("laporan",sid=sid)
 
-@login_required
+@authorization(["*"])
 def print_laporan_pegawai(r):
     pgw = r.POST.getlist("pegawai[]")
     dr = r.POST.get("dari")
     sp = r.POST.get("sampai")
     # 
     try:
-        iduser = r.user.id
+        iduser = r.session["user"]["id"]
         
         if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
             dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-            sid = dakses.pegawai.status.pk
+            sid = dakses.sid_id
             data = [] 
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pgw)
         lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
@@ -983,22 +984,23 @@ def print_laporan_pegawai(r):
             obj["now"] = datetime.now().date()
             data.append(obj)
     except Exception as e:
+        print(e)
         messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))
-        return redirect("laporan",sid=sid)
+        return redirect("laporan",sid=0)
     return render(r,"hrd_app/laporan/print_laporan_pegawai.html",{"data":data})
 
-@login_required
+@authorization(["*"])
 def print_laporan_divisi(r):
     dvs = r.POST.getlist("divisi[]")
     dr = r.POST.get("dari")
     sp = r.POST.get("sampai")
     # 
     try:
-        iduser = r.user.id
+        iduser = r.session["user"]["id"]
         
         if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
             dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-            sid = dakses.pegawai.status.pk
+            sid = dakses.sid_id
             data = [] 
         divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=dvs)
         lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
@@ -1177,7 +1179,6 @@ def print_laporan_divisi(r):
                                 obj["b"] = 0
                             else:
                                 obj["b"] = 1
-                print(obj["b"])
                 obj["kehadiran"] = kehadiran
                 obj["terlambat"] = trlmbt
                 tselisih = str(tselisih).split(".")
@@ -1189,7 +1190,7 @@ def print_laporan_divisi(r):
         return redirect("laporan",sid=sid)
     return render(r,"hrd_app/laporan/print_laporan_pegawai.html",{"data":data})
 
-@login_required
+@authorization(["*"])
 def print_laporan_divisi_excel(r):
     dvs = r.POST.getlist("divisi[]")
     dr = r.POST.get("dari")
@@ -1220,11 +1221,11 @@ def print_laporan_divisi_excel(r):
                     'ln': []
                 }
     try:
-        iduser = r.user.id
+        iduser = r.session["user"]["id"]
         
         if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
             dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-            sid = dakses.pegawai.status.pk
+            sid = dakses.sid_id
             data = [] 
         divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=dvs)
         for p in divisi:
@@ -1391,9 +1392,9 @@ def print_laporan_divisi_excel(r):
     return render(r,"hrd_app/laporan/print_laporan_pegawai.html",{"data":data})
 
 
-@login_required
+@authorization(["*"])
 def print_laporan_shift(r):
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     akses_divisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     adiv = [div.divisi.pk for div in akses_divisi]
     shift = r.POST.getlist("shift[]")
@@ -1462,14 +1463,13 @@ def print_laporan_shift(r):
             data.append(obj[s2.shift])
         result.append({"tanggal":d,"data":data})
 
-    print(result)
     return render(r,"hrd_app/laporan/[shift]/print_laporan_shift.html",{"data":result})
 
 
 
-@login_required
+@authorization(["*"])
 def print_laporan_divisi_excel_cirebon(r):
-    id_user = r.user.id
+    id_user = r.session["user"]["id"]
     if r.session["ccabang"] == "cirebon":
         divisi = r.POST.get("divisi")
         dari = r.POST.get("dari")
@@ -1604,7 +1604,6 @@ def print_laporan_divisi_excel_cirebon(r):
             obj["t_hari_kerja"].append(t_hari_kerja)
             obj["ket"].append("")
 
-        print(obj)
         df = pd.DataFrame(obj)
         for f in os.listdir("static/excel/"):
             if re.search(".*",f):

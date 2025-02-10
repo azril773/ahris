@@ -2,9 +2,9 @@
 from hrd_app.controllers.lib import *
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Geser Off
-@login_required
+@authorization(["*"])
 def geser_off(r, sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -59,6 +59,7 @@ def geser_off(r, sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'today' : today,
             'status' : status,
             'pegawai' : pegawai,
@@ -79,9 +80,9 @@ def geser_off(r, sid):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def cari_geser_off(r):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -133,6 +134,7 @@ def cari_geser_off(r):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -152,9 +154,9 @@ def cari_geser_off(r):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def cari_geser_off_sid(r, dr, sp, sid):
-    iduser = r.user.id
+    iduser = r.session["user"]["id"]
     
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
@@ -204,6 +206,7 @@ def cari_geser_off_sid(r, dr, sp, sid):
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
             'status' : status,
             'pegawai' : pegawai,
             'dsid' : dsid,
@@ -223,7 +226,7 @@ def cari_geser_off_sid(r, dr, sp, sid):
         return redirect('beranda')
 
 
-@login_required
+@authorization(["*"])
 def geseroff_json(r, dr, sp, sid):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -232,7 +235,7 @@ def geseroff_json(r, dr, sp, sid):
         
         dari = datetime.strptime(dr,'%d-%m-%Y').date()
         sampai = datetime.strptime(sp,'%d-%m-%Y').date()
-        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)]  
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]  
         if int(sid) == 0:
             for i in geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(dari_tgl__range=(dari,sampai),pegawai__divisi_id__in=aksesdivisi):
                             
@@ -267,9 +270,9 @@ def geseroff_json(r, dr, sp, sid):
         return JsonResponse({"data": data})
 
 
-@login_required
+@authorization(["*"])
 def tambah_geseroff(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
     
     dtgl = r.POST.get('tgl')
     dtgl2 = r.POST.get('tgl2')
@@ -280,7 +283,7 @@ def tambah_geseroff(r):
     ke = datetime.strptime(dtgl2,'%d-%m-%Y').date()   
     
     fdari = datetime.strftime(dari,'%d-%m-%Y')  
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)] 
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])] 
     try:
         pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=int(dpegawai),divisi_id__in=aksesdivisi)  
     except:
@@ -426,12 +429,12 @@ def tambah_geseroff(r):
     return JsonResponse({"status": status})
 
 
-@login_required
+@authorization(["*"])
 def batal_geseroff(r):
-    nama_user = r.user.username
+    nama_user = r.session["user"]["nama"]
 
     id_batal = r.POST.get('id_batal')
-    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.user.id)] 
+    aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])] 
     try:
         gf = geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").get(id=int(id_batal),pegawai__divisi_id__in=aksesdivisi)
     except:
