@@ -20,9 +20,9 @@ def user_logout(r):
     r.session["ccabang"] = None
     r.session["cabang"] = None
     r.session["user"] = None
-    # result = os.environ.get("INVALIDATION_URL")
+    result = os.environ.get("INVALIDATION_URL")
     messages.info(r,"Berhasil logout")
-    return redirect("beranda")
+    return redirect(result)
 
 
 
@@ -37,7 +37,6 @@ def beranda_no_akses(request):
 
 def ganti_cabang(r):
     cabang = r.POST.get("cabang")
-    print(r.POST.get("cabang"))
     if not cabang_db.objects.filter(cabang=cabang).exists():
         return JsonResponse({"status":"error","msg":"Gagal mengganti cabang"},status=401)
     cabang = cabang_db.objects.filter(cabang=cabang)
