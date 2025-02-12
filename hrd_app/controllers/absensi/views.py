@@ -935,8 +935,8 @@ def pabsen(req):
             }
             dl.append(data)
             dl_idp.append(n.pegawai_id)
-        for ij in ijin_db.objects.using(req.session["ccabang"]).filter(tgl_ijin__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("tgl_ijin","pegawai_id","ijin_id"):
-            if re.search('(dinas luar|dl)',ij.ijin.jenis_ijin,re.IGNORECASE) is not None:
+        for ij in ijin_db.objects.using(req.session["ccabang"]).filter(tgl_ijin__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("tgl_ijin","pegawai_id","ijin_id","ijin__jenis_ijin"):
+            if re.search('(dinas luar|dl)',ij["ijin__jenis_ijin"],re.IGNORECASE) is not None:
                 data = {
                     "tgl":ij["tgl_ijin"],
                     "idp":ij["pegawai_id"],
