@@ -135,7 +135,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
         # +++++++++++++++++++++++++++++++++++  MASUK MALAM TASIK +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             elif a["punch"] == 0 and jam_absen.hour > 18:
                 if pg["status_id"] in status_lh:
-                    ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]))
+                    ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]),None)
                     ab2["masuk"] = jam_absen.time()
                     data = {
                         "userid": a["userid"],
@@ -293,7 +293,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                     else:
                         try:
                             # tanda
-                            ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tmin.date() and abs["pegawai_id"] == pg["idp"]))
+                            ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tmin.date() and abs["pegawai_id"] == pg["idp"]),None)
                             if ab2["istirahat"] is not None:
                                 if ab2["istirahat"].hour < 9:
                                     ab2["istirahat"] = jam_absen.time()
@@ -473,7 +473,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                     }
                     dt.append(data)
                 else:
-                    ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tmin.date() and abs["pegawai_id"] == pg["idp"]))
+                    ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tmin.date() and abs["pegawai_id"] == pg["idp"]),None)
                     if ab2["istirahat2"] is not None:
                         if not ab2["istirahat2"].hour < 9:
                             ab2["istirahat2_b"] = jam_absen.time()
@@ -624,7 +624,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                     }
                     dt.append(data)
                 else:
-                    ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tmin.date() and abs["pegawai_id"] == pg["idp"]))
+                    ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tmin.date() and abs["pegawai_id"] == pg["idp"]),None)
                     if ab2["kembali2"] is not None:
                         if not ab2["kembali2"].hour < 9:
                             ab2["kembali2_b"] = jam_absen.time()
@@ -738,7 +738,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                         }
                         dt.append(data)
                     else:
-                        ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tmin.date() and abs["pegawai_id"] == pg["idp"]))
+                        ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tmin.date() and abs["pegawai_id"] == pg["idp"]),None)
                         if ab2["kembali"] is not None:
                             if not ab2["kembali"].hour < 9:
                                 ab2["kembali_b"] = jam_absen.time()
@@ -855,7 +855,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                         }
                         dt.append(data)
                     else:
-                        ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tmin.date() and abs["pegawai_id"] == pg["idp"]))
+                        ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tmin.date() and abs["pegawai_id"] == pg["idp"]),None)
                         if ab2["pulang"] is not None:
                             if not ab2["pulang"].hour < 9:
                                 ab2["pulang_b"] = jam_absen.time()
@@ -1056,7 +1056,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                     
             # ++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             if a["punch"] == 0 and jam_absen.hour >= 4 and jam_absen.hour < 18 :
-                ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]))
+                ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]),None)
                 if ab["masuk"] is not None:
                     if ab["masuk"].hour > 18:
                         ab2["masuk"] = jam_absen.time()
@@ -1111,7 +1111,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                     dt.append(data)
             # ++++++++++++++++++++++++++++++++++  MASUK MALAM TASIK +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             elif a["punch"] == 0 and jam_absen.hour > 18:
-                ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]))
+                ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]),None)
                 ab2["masuk"] = jam_absen.time()
                 data = {
                     "userid": a["userid"],
@@ -1124,7 +1124,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                 
             # ++++++++++++++++++++++++++++++++++  ISTIRAHAT  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
             elif a["punch"] == 2 and int(jam_absen.hour) > 8 and int(jam_absen.hour) < 21:
-                ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]))
+                ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]),None)
                 if ab["istirahat"] is not None:
                     if ab["istirahat"].hour > 9 and ab["istirahat"].hour < 21:
                         ab["istirahat"]  = jam_absen.time()
