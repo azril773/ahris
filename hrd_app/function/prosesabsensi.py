@@ -944,17 +944,19 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                             dt.append(data)
 
         absensi_db.objects.using(cabang).bulk_update([absensi_db(id=abs["id"],pegawai_id=abs["pegawai_id"],tgl_absen=abs["tgl_absen"],masuk=abs["masuk"],istirahat=abs['istirahat'],kembali=abs["kembali"],istirahat2=abs["istirahat2"],kembali2=abs["kembali2"],pulang=abs["pulang"],masuk_b=abs["masuk_b"],istirahat_b=abs["istirahat_b"],kembali_b=abs["kembali_b"],istirahat2_b=abs["istirahat2_b"],kembali2_b=abs["kembali2_b"],pulang_b=abs["pulang_b"],jam_masuk=abs["jam_masuk"],jam_pulang=abs["jam_pulang"],lama_istirahat=abs["lama_istirahat"],shift=abs["shift"]) for abs in absensi],["pegawai_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","jam_masuk","jam_pulang","lama_istirahat","shift"])   
-        bulk = [data_raw_db(userid=dr["userid"],jam_absen=dr["jam_absen"],punch=dr["punch"],mesin=dr["mesin"]) for dr in insertdr]
-        data_raw_db.objects.using(cabang).bulk_create(bulk)
-        for dt2 in dt:
-            if not dt2 in ddtor:
-                data_trans_db(
-                    userid=dt2["userid"],
-                    jam_absen=dt2["jam_absen"],
-                    punch=dt2["punch"],
-                    mesin=dt2["mesin"], 
-                    keterangan=dt2["ket"],
-                ).save(using=cabang)
+        print("INSERT ABSEN SELESAI")
+        print(datetime.now())
+
+        print(len(insertdr))
+        bulkraw = [data_raw_db(userid=dr["userid"],jam_absen=dr["jam_absen"],punch=dr["punch"],mesin=dr["mesin"]) for dr in insertdr]
+        data_raw_db.objects.using(cabang).bulk_create(bulkraw,batch_size=3000)    
+        print("INSERT RAW SELESAI")
+        print(datetime.now())
+            
+        bulktrans = [data_trans_db(userid=t["userid"],jam_absen=t["jam_absen"],punch=t["punch"],mesin=t["mesin"],keterangan=t["ket"]) for t in dt if not t in ddtor]
+        print(len(bulktrans))
+        data_trans_db.objects.using(cabang).bulk_create(bulktrans,batch_size=3000)
+        print("INSERT TRANS SELESAI")
         print(datetime.now())
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
