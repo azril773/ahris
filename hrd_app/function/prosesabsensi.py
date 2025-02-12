@@ -1439,16 +1439,24 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                         "ket": "Pulang Malam"
                     }
                     dt.append(data)
-
-
-
+        print("SELESAI")
+        print(datetime.now())
+        print(len(absensi))
         absensi_db.objects.using(cabang).bulk_update([absensi_db(id=abs["id"],pegawai_id=abs["pegawai_id"],tgl_absen=abs["tgl_absen"],masuk=abs["masuk"],istirahat=abs['istirahat'],kembali=abs["kembali"],istirahat2=abs["istirahat2"],kembali2=abs["kembali2"],pulang=abs["pulang"],jam_masuk=abs["jam_masuk"],jam_pulang=abs["jam_pulang"],lama_istirahat=abs["lama_istirahat"],shift=abs["shift"]) for abs in absensi],["pegawai_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","jam_masuk","jam_pulang","lama_istirahat","shift"],batch_size=3000)
+        print("INSERT ABSEN SELESAI")
+        print(datetime.now())
 
+        print(len(insertdr))
         bulkraw = [data_raw_db(userid=dr["userid"],jam_absen=dr["jam_absen"],punch=dr["punch"],mesin=dr["mesin"]) for dr in insertdr]
         data_raw_db.objects.using(cabang).bulk_create(bulkraw,batch_size=3000)    
+        print("INSERT RAW SELESAI")
+        print(datetime.now())
             
         bulktrans = [data_trans_db(userid=t["userid"],jam_absen=t["jam_absen"],punch=t["punch"],mesin=t["mesin"],keterangan=t["ket"]) for t in dt if not t in ddtor]
+        print(len(bulktrans))
         data_trans_db.objects.using(cabang).bulk_create(bulktrans,batch_size=3000)
+        print("INSERT TRANS SELESAI")
+        print(datetime.now())
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
