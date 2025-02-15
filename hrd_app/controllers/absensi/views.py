@@ -861,8 +861,10 @@ def pabsen(req):
         libur = []
         cuti = []
         geser = []
+        geserdr = []
         kompen = []
         opg = []
+        opgdr = []
         dl = []
         dl_idp = []
         ijindl = []
@@ -873,7 +875,7 @@ def pabsen(req):
             lsopg.append(s.status_id)
 
         # data ijin
-        for i in ijin_db.objects.using(req.session["ccabang"]).select_related('ijin','pegawai').filter(tgl_ijin__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("ijin__jenis_ijin","tgl_ijin","pegawai_id","keterangan"):
+        for i in ijin_db.objects.using(req.session["ccabang"]).select_related('ijin','pegawai').filter(tgl_ijin__range=(dari.date(),sampai.date())).values("ijin__jenis_ijin","tgl_ijin","pegawai_id","keterangan"):
             data = {
                 "ijin" : i["ijin__jenis_ijin"],
                 "tgl_ijin" : i["tgl_ijin"],
@@ -883,7 +885,7 @@ def pabsen(req):
             ijin.append(data)
         
         # data libur nasional
-        for l in libur_nasional_db.objects.using(req.session["ccabang"]).filter(tgl_libur__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("libur","tgl_libur","insentif_karyawan","insentif_staff"):
+        for l in libur_nasional_db.objects.using(req.session["ccabang"]).filter(tgl_libur__range=(dari.date(),sampai.date())).values("libur","tgl_libur","insentif_karyawan","insentif_staff"):
             data = {
                 'libur' : l["libur"],
                 'tgl_libur' : l["tgl_libur"],
@@ -893,7 +895,7 @@ def pabsen(req):
             libur.append(data)  
             
         # data cuti
-        for c in cuti_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(tgl_cuti__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("id","pegawai_id","tgl_cuti","keterangan"):
+        for c in cuti_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(tgl_cuti__range=(dari.date(),sampai.date())).values("id","pegawai_id","tgl_cuti","keterangan"):
             data = {
                 'id': c["id"],
                 'idp' : c["pegawai_id"],
@@ -903,7 +905,7 @@ def pabsen(req):
             cuti.append(data)
             
         # data geser off
-        for g in geseroff_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(ke_tgl__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("id","pegawai_id","dari_tgl","ke_tgl","keterangan"):
+        for g in geseroff_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(ke_tgl__range=(dari.date(),sampai.date())).values("id","pegawai_id","dari_tgl","ke_tgl","keterangan"):
             data = {
                 'id' : g["id"],
                 'idp' : g["pegawai_id"], 
@@ -912,9 +914,18 @@ def pabsen(req):
                 'keterangan' : g["keterangan"]
             } 
             geser.append(data)
+        for g in geseroff_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(dari_tgl__range=(dari.date(),sampai.date())).values("id","pegawai_id","dari_tgl","ke_tgl","keterangan"):
+            data = {
+                'id' : g["id"],
+                'idp' : g["pegawai_id"], 
+                'dari_tgl' : g["dari_tgl"],
+                'ke_tgl' : g["ke_tgl"],
+                'keterangan' : g["keterangan"]
+            } 
+            geserdr.append(data)
         status_ln = [st.status.pk for st in list_status_opg_libur_nasional_db.objects.using(req.session["ccabang"]).all()]
         # data opg
-        for o in opg_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(diambil_tgl__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date()), status=0).values("id","pegawai_id","opg_tgl","diambil_tgl","keterangan","status","edit_by"):
+        for o in opg_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(diambil_tgl__range=(dari.date(),sampai.date())).values("id","pegawai_id","opg_tgl","diambil_tgl","keterangan","status","edit_by"):
             data = {
                 'id':o["id"],
                 'idp': o["pegawai_id"],
@@ -925,9 +936,20 @@ def pabsen(req):
                 "edit_by":o["edit_by"]
             }
             opg.append(data)
+        for odr in opg_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(opg_tgl__range=(dari.date(),sampai.date())).values("id","pegawai_id","opg_tgl","diambil_tgl","keterangan","status","edit_by"):
+            data = {
+                'id':odr["id"],
+                'idp': odr["pegawai_id"],
+                'opg_tgl':odr["opg_tgl"],
+                'diambil_tgl':odr["diambil_tgl"],
+                'keterangan':odr["keterangan"],
+                "status":odr["status"],
+                "edit_by":odr["edit_by"]
+            }
+            opgdr.append(data)
         
         # data dinas luar
-        for n in dinas_luar_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(tgl_dinas__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("pegawai_id","tgl_dinas","keterangan"):
+        for n in dinas_luar_db.objects.using(req.session["ccabang"]).select_related('pegawai').filter(tgl_dinas__range=(dari.date(),sampai.date())).values("pegawai_id","tgl_dinas","keterangan"):
             data = {
                 'idp': n["pegawai_id"],
                 'tgl_dinas':n["tgl_dinas"],
@@ -935,7 +957,7 @@ def pabsen(req):
             }
             dl.append(data)
             dl_idp.append(n.pegawai_id)
-        for ij in ijin_db.objects.using(req.session["ccabang"]).filter(tgl_ijin__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("tgl_ijin","pegawai_id","ijin_id","ijin__jenis_ijin"):
+        for ij in ijin_db.objects.using(req.session["ccabang"]).filter(tgl_ijin__range=(dari.date(),sampai.date())).values("tgl_ijin","pegawai_id","ijin_id","ijin__jenis_ijin"):
             if re.search('(dinas luar|dl)',ij["ijin__jenis_ijin"],re.IGNORECASE) is not None:
                 data = {
                     "tgl":ij["tgl_ijin"],
@@ -976,7 +998,7 @@ def pabsen(req):
             nasional tersebut jika masuk mendapat opg = 1 (off pengganti reguler)
             
             --> jika tidak ada libur nasional, maka staff yang masuk di hari off regulernya maka mendapat opg = 1 (off pengganti 
-            reguler)
+            reguler)2
             
             Karyawan + SPG dibayar oleh Asia:
             --> jika ada libur nasional (senin - minggu), maka Karyawan yang memiliki off reguler bertepatan
@@ -985,15 +1007,14 @@ def pabsen(req):
             --> jika tidak ada libur nasional, maka Karyawan yang masuk di hari off regulernya maka mendapat opg = 1 (off pengganti 
             reguler)
             
-            """     
-            
+            """  
             # OFF & OFF Pengganti Reguler
             # jika ada absen masuk dan pulang
             # rencana cronjob jalan
             if (a["masuk"] is not None and a["pulang"] is not None) or (a["masuk_b"] is not None and a["pulang_b"] is not None):
                 if nh in [str(a["pegawai__hari_off__hari"]),str(a["pegawai__hari_off2__hari"])]:
-                    if a["pegawai__status_id"] in lsopg and re.search("security",a["pegawai__status__status"],re.IGNORECASE) is None and not next((True for gs in geser if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),False) and not next((True for o in opg if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                        opg.append({
+                    if a["pegawai__status_id"] in lsopg and re.search("security",a["pegawai__status__status"],re.IGNORECASE) is None and next((False for gs in geserdr if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
+                        opgdr.append({
                             'id':0,
                             'idp':a["pegawai_id"],
                             'opg_tgl':a["tgl_absen"],
@@ -1013,8 +1034,8 @@ def pabsen(req):
                 if str(a["pegawai__hari_off__hari"]) == 'On Off':
                     a["keterangan_absensi"] = 'OFF'
                 for il in ijindl:
-                    if il["tgl"] == a["tgl_absen"] and int(il["idp"]) == int(a["pegawai_id"]) and nh in [str(a["pegawai__hari_off__hari"]),str(a["pegawai__hari_off2__hari"])] and  a["pegawai__status_id"] in lsopg and not next((True for gs in geser if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),False) and not next((True for o in opg if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                        opg.append({
+                    if il["tgl"] == a["tgl_absen"] and int(il["idp"]) == int(a["pegawai_id"]) and nh in [str(a["pegawai__hari_off__hari"]),str(a["pegawai__hari_off2__hari"])] and  a["pegawai__status_id"] in lsopg and next((False for gs in geserdr if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
+                        opgdr.append({
                             'id':0,
                             'idp':a["pegawai_id"],
                             'opg_tgl':a["tgl_absen"],
@@ -1051,8 +1072,8 @@ def pabsen(req):
                             # Staff
                         if a["pegawai__status_id"] in status_ln: # regex
                             # jika hari off nya adalah hari minggu dan masuk maka hanya akan mendapatkan 1 opg
-                            if str(nh) in [str(a["pegawai__hari_off__hari"]), str(a["pegawai__hari_off2__hari"])] and (a["masuk"] is not None and a["pulang"] is not None) or (a["masuk_b"] is not None and a["pulang_b"] is not None) and not next((True for gs in geser if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),False) and not next((True for o in opg if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                                opg.append({
+                            if str(nh) in [str(a["pegawai__hari_off__hari"]), str(a["pegawai__hari_off2__hari"])] and (a["masuk"] is not None and a["pulang"] is not None) or (a["masuk_b"] is not None and a["pulang_b"] is not None) and next((False for gs in geserdr if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
+                                opgdr.append({
                                     'id':0,
                                     'idp':a["pegawai_id"],
                                     'opg_tgl':a["tgl_absen"],
@@ -1073,9 +1094,9 @@ def pabsen(req):
                             if str(nh) in [str(a["pegawai__hari_off__hari"]), str(a["pegawai__hari_off2__hari"])]:
                                 # JIKA DIA MASUK DIHARI MERAH DILIBUR REGULERNYA MAKA AKAN DAPAT 2 OPG
                                 if (a["masuk"] is not None and a["pulang"] is not None) or (a["masuk_b"] is not None and a["pulang_b"] is not None):
-                                    if not next((True for gs in geser if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),False):
-                                        if not next((True for o in opg if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                                            opg.append({
+                                    if next((False for gs in geserdr if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),True):
+                                        if next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
+                                            opgdr.append({
                                                 'id':0,
                                                 'idp':a["pegawai_id"],
                                                 'opg_tgl':a["tgl_absen"],
@@ -1084,8 +1105,8 @@ def pabsen(req):
                                             })
                                             insertopg.append(opg_db(pegawai_id=a["pegawai_id"],opg_tgl=a["tgl_absen"],keterangan="OFF Pengganti Reguler",add_by="Program"))
                                             
-                                        if not next((True for o in opg if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
-                                            opg.append({
+                                        if next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),True):
+                                            opgdr.append({
                                                 'id':0,
                                                 'idp':a["pegawai_id"],
                                                 'opg_tgl':a["tgl_absen"],
@@ -1095,8 +1116,8 @@ def pabsen(req):
                                             insertopg.append(opg_db(pegawai_id=a["pegawai_id"],opg_tgl=a["tgl_absen"],keterangan="OFF Pengganti Tgl Merah",add_by="Program"))
                                 # TAPI JIKA TIDAK MASUK HANYA MENDAPATKAN 1 OPG
                                 else:
-                                    if not next((True for o in opg if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
-                                        opg.append({
+                                    if next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),True):
+                                        opgdr.append({
                                             'id':0,
                                             'idp':a["pegawai_id"],
                                             'opg_tgl':a["tgl_absen"],
@@ -1107,9 +1128,9 @@ def pabsen(req):
                             # JIKA HARI OFF TIDAK BERTEPATAN HARI LIBUR NASIONAL
                             else:
                                 if (a["masuk"] is not None and a["pulang"] is not None) or (a["masuk_b"] is not None and a["pulang_b"] is not None):
-                                    if not next((True for gs in geser if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),False):
-                                        if not next((True for o in opg if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
-                                            opg.append({
+                                    if next((False for gs in geserdr if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),True):
+                                        if next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),True):
+                                            opgdr.append({
                                                 'id':0,
                                                 'idp':a["pegawai_id"],
                                                 'opg_tgl':a["tgl_absen"],
@@ -1124,8 +1145,7 @@ def pabsen(req):
                         # Karyawan
                         # JIKA MASUK HANYA MENDAPATKAN 1 OPG DAN INSENTIF
                         else:
-                            if (a["masuk"] is not None and a["pulang"] is not None) or (a["masuk_b"] is not None and a["pulang_b"] is not None) and not geseroff_db.objects.using(cabang).using(cabang).filter(dari_tgl=a["tgl_absen"], pegawai_id=a["pegawai_id"]).exists():
-                                if not next((True for o in opg if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),False):                                        
+                            if (a["masuk"] is not None and a["pulang"] is not None) or (a["masuk_b"] is not None and a["pulang_b"] is not None) and next((False for gs in geserdr if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):                                        
                                     a["insentif"] = l['insentif_karyawan']
                             else:
                                 pass    
@@ -1604,7 +1624,7 @@ def pabsen(req):
                         elif date_part[1] == '+1':
                             adjusted_datetime = base_datetime + timedelta(days=1)
                     else:
-                        opg.append({
+                        opgdr.append({
                             'id':0,
                             'idp':a["pegawai_id"],
                             'opg_tgl':a["tgl_absen"],

@@ -522,15 +522,11 @@ def epegawai(r,idp):
                 aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
                 divisi = [div.divisi for div in aksesdivisi]
                 print("COBA COBA")
-                try:
-                    pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(id),divisi__in=divisi).last()
-                except Exception as e:
-                    print(e)
-                    return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
+                pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(id),divisi__in=divisi).last()
                 if not pgw:
                     return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses ke pegawai ini"},status=400)
                 status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(pk=status)
-                if pribadi_db.objects.using(r.session["ccabang"]).filter(~Q(pegawai__userid=userid),email=email).exists():
+                if pribadi_db.objects.using(r.session["ccabang"]).filter(~Q(pegawai__userid=userid), ~Q(pegawai__userid=pgw.userid),email=email).exists():
                     return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
                 if pegawai_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idp)),userid=userid).exists():
                     return JsonResponse({"status":"error","msg":"duplikat data"},status=400)

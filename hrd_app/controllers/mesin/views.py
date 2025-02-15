@@ -411,7 +411,6 @@ def add_data(r,id):
         conn.disable_device()
 
 
-        fingers = conn.get_templates()
         users = conn.get_users()
 
 
@@ -419,14 +418,24 @@ def add_data(r,id):
         userids = [user.user_id for user in users if user.user_id not in datamesin]
         user = [user for user in users if user.user_id not in datamesin]
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids)
+        pegawaiarsip = pegawai_db_arsip.objects.using(r.sesssion["ccabang"]).filter(userid__in=userids)
         templates = conn.get_templates()
 
         # pegawai_arsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
         # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
         # 
         for u in user:
-            pgw = next([p for p in pegawai if p.userid == u.user_id],None)
-            if not pgw:
+            pgw = next((p for p in pegawai if p.userid == u.user_id),None)
+            pgwa = next((pg for pg in pegawaiarsip if pg.userid == u.user_id))
+            if pgw is not None and pgwa is not None:
+                print(f"Data dengan userid {u.user_id} ada di data pegawai dan pegawai arsip")
+                continue
+            if pgw is not None:
+                pgw = pgw
+            elif pgwa is not None:
+                pgw = pgwa
+            else:
+                print(f"Data pegawai dengan userid {u.user_id} tidak ada")
                 continue
             if u.privilege == const.USER_ADMIN:
                 level = 1
