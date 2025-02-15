@@ -451,17 +451,7 @@ def ganti_password(r):
     id_user = r.session["user"]["id"]
     akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
     if akses is not None:
-        dsid = akses.sid_id
-        sid = akses.sid_id
-        data = {
-            'akses' : akses,
-            "cabang":r.session["cabang"],
-            "ccabang":r.session["ccabang"],
-            "nama":r.session["user"]["nama"],
-            'dsid': dsid,
-            'sid': sid,
-        }
-        return render(r,"hrd_app/login/ganti_password.html",data)
+        return redirect(os.environ.get("CHANGE_PASS"))
     else:
         messages.error(r,"Akses anda belum ditentukan")
         return redirect("beranda")

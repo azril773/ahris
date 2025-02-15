@@ -706,6 +706,7 @@ def absensi_json(r, dr, sp, sid):
 def pabsen(req):    
     try:
         print(datetime.now())
+        startglobal = time.perf_counter()
         t1 = req.POST.get('tgl1')
         t2 = req.POST.get('tgl2')
         sid = req.POST.get('sid')
@@ -857,6 +858,8 @@ def pabsen(req):
         else:
             prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor,absensi)    
         print("SELESAI")
+
+        startsec = time.perf_counter()
         ijin = []  
         libur = []
         cuti = []
@@ -1062,7 +1065,7 @@ def pabsen(req):
             
             # libur nasional
             for l in libur:
-            # jika ada absen di hari libur nasional
+            # jika ada absen di hari libutart = time.perf_counter()r nasional
                 a["libur_nasional"] = None
                 if a["pegawai__status_id"] in lsopg and l['tgl_libur'] == a["tgl_absen"]:                            
                     a["libur_nasional"] = l['libur']
@@ -1650,17 +1653,27 @@ def pabsen(req):
             a["total_jam_istirahat"] = tji + tji_b
             a["total_jam_istirahat2"] = tji2 + tji2_b
         
-        print(len(data))
+        end = time.perf_counter()
+        print(f"PROSES ABSENSI LOOP OPG DLL {end-startsec} detik")
+
+        start = time.perf_counter()
         absensi_db.objects.using(cabang).bulk_update([absensi_db(id=abs["id"],pegawai_id=abs["pegawai_id"],tgl_absen=abs["tgl_absen"],masuk=abs["masuk"],istirahat=abs['istirahat'],kembali=abs["kembali"],istirahat2=abs["istirahat2"],kembali2=abs["kembali2"],pulang=abs["pulang"],masuk_b=abs["masuk_b"],istirahat_b=abs["istirahat_b"],kembali_b=abs["kembali_b"],istirahat2_b=abs["istirahat2_b"],kembali2_b=abs["kembali2_b"],pulang_b=abs["pulang_b"],keterangan_absensi=abs["keterangan_absensi"],keterangan_ijin=abs["keterangan_ijin"],keterangan_lain=abs["keterangan_lain"],libur_nasional=abs["libur_nasional"],insentif=abs["insentif"],jam_masuk=abs["jam_masuk"],jam_pulang=abs["jam_pulang"],lama_istirahat=abs["lama_istirahat"],shift=abs["shift"],total_jam_kerja=abs["total_jam_kerja"],total_jam_istirahat=abs["total_jam_istirahat"],total_jam_istirahat2=abs["total_jam_istirahat2"],edit_by=abs["edit_by"]) for abs in data],["pegawai_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","keterangan_absensi","keterangan_ijin","keterangan_lain","libur_nasional","insentif","jam_masuk","jam_pulang","lama_istirahat","total_jam_kerja","total_jam_istirahat","total_jam_istirahat2","edit_by","shift"],batch_size=2300)  
+        end = time.perf_counter()
+        print(f"PROSES ABSENSI OPG DLL UPDATE {end-start} detik. {len(data)}")
+
+
         opg_db.objects.using(cabang).bulk_create(insertopg,batch_size=2300)
+
+        print(datetime.now())
+        endglobal = time.perf_counter()
+        print(f"SEMUA DIPROSES DALAM WAKTU {endglobal - startglobal} detik")
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
         return redirect("absensi",sid=int(sid))
     
-    # return render("test")
-    print(datetime.now())
+    # return render("test"
     return redirect ('absensi',sid=int(sid))   
 
 @authorization(["*"])
@@ -1842,12 +1855,13 @@ def pu(r,tgl,userid,sid):
     id_user = r.session['user']['id']
     aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
     divisi = [div.divisi for div in aksesdivisi]
-    abs = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").filter(tgl_absen=tgl,pegawai__userid=userid,pegawai__divisi__in=divisi).values("id","pegawai_id","pegawai__userid","pegawai__kelompok_kerja_id","pegawai__hari_off__hari","pegawai__hari_off2__hari","pegawai__status_id","pegawai__status__status","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","keterangan_absensi","keterangan_ijin","keterangan_lain","libur_nasional","insentif","jam_masuk","jam_pulang","lama_istirahat","total_jam_kerja","total_jam_istirahat","total_jam_istirahat2","edit_by","shift")
-    if not abs.exists():
+    abs = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").filter(tgl_absen=tgl,pegawai__userid=userid,pegawai__divisi__in=divisi).values("id","pegawai_id","pegawai__userid","pegawai__kelompok_kerja_id","pegawai__hari_off__hari","pegawai__hari_off2__hari","pegawai__status_id","pegawai__status__status","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","keterangan_absensi","keterangan_ijin","keterangan_lain","libur_nasional","insentif","jam_masuk","jam_pulang","lama_istirahat","total_jam_kerja","total_jam_istirahat","total_jam_istirahat2","edit_by","shift").last()
+    if not abs:
         messages.error(r,"Anda tidak memiliki akses")
         return redirect("absensi",sid=sid)
     else:
         pass
+    print(abs)
     abs["masuk"] = None
     abs["pulang"] = None
     abs["istirahat"] = None
@@ -1898,8 +1912,10 @@ def pu(r,tgl,userid,sid):
     libur = []
     cuti = []
     geser = []
+    geserdr = []
     kompen = []
     opg = []
+    opgdr = []
     dl = []
     dl_idp = []
     ijindl = []
@@ -1908,9 +1924,8 @@ def pu(r,tgl,userid,sid):
     # list status pegawai yang dapat opg
     for s in list_status_opg_db.objects.using(r.session["ccabang"]).all():
         lsopg.append(s.status_id)
-
     # data ijin
-    for i in ijin_db.objects.using(r.session["ccabang"]).select_related('ijin','pegawai').filter(tgl_ijin__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("ijin__jenis_ijin","tgl_ijin","pegawai_id","keterangan"):
+    for i in ijin_db.objects.using(r.session["ccabang"]).select_related('ijin','pegawai').filter(tgl_ijin=tgl).values("ijin__jenis_ijin","tgl_ijin","pegawai_id","keterangan"):
         data = {
             "ijin" : i["ijin__jenis_ijin"],
             "tgl_ijin" : i["tgl_ijin"],
@@ -1920,7 +1935,7 @@ def pu(r,tgl,userid,sid):
         ijin.append(data)
     
     # data libur nasional
-    for l in libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("libur","tgl_libur","insentif_karyawan","insentif_staff"):
+    for l in libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur=tgl).values("libur","tgl_libur","insentif_karyawan","insentif_staff"):
         data = {
             'libur' : l["libur"],
             'tgl_libur' : l["tgl_libur"],
@@ -1930,7 +1945,7 @@ def pu(r,tgl,userid,sid):
         libur.append(data)  
         
     # data cuti
-    for c in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_cuti__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("id","pegawai_id","tgl_cuti","keterangan"):
+    for c in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_cuti=tgl).values("id","pegawai_id","tgl_cuti","keterangan"):
         data = {
             'id': c["id"],
             'idp' : c["pegawai_id"],
@@ -1940,7 +1955,7 @@ def pu(r,tgl,userid,sid):
         cuti.append(data)
         
     # data geser off
-    for g in geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(ke_tgl__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("id","pegawai_id","dari_tgl","ke_tgl","keterangan"):
+    for g in geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(ke_tgl=tgl).values("id","pegawai_id","dari_tgl","ke_tgl","keterangan"):
         data = {
             'id' : g["id"],
             'idp' : g["pegawai_id"], 
@@ -1949,20 +1964,42 @@ def pu(r,tgl,userid,sid):
             'keterangan' : g["keterangan"]
         } 
         geser.append(data)
+    for g in geseroff_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(dari_tgl=tgl).values("id","pegawai_id","dari_tgl","ke_tgl","keterangan"):
+        data = {
+            'id' : g["id"],
+            'idp' : g["pegawai_id"], 
+            'dari_tgl' : g["dari_tgl"],
+            'ke_tgl' : g["ke_tgl"],
+            'keterangan' : g["keterangan"]
+        } 
+        geserdr.append(data)
     status_ln = [st.status.pk for st in list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).all()]
     # data opg
-    for o in opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(diambil_tgl__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date()), status=0).values("id","pegawai_id","opg_tgl","diambil_tgl","keterangan"):
+    for o in opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(diambil_tgl=tgl).values("id","pegawai_id","opg_tgl","diambil_tgl","keterangan","status","edit_by"):
         data = {
             'id':o["id"],
             'idp': o["pegawai_id"],
             'opg_tgl':o["opg_tgl"],
             'diambil_tgl':o["diambil_tgl"],
-            'keterangan':o["keterangan"]
+            'keterangan':o["keterangan"],
+            "status":o["status"],
+            "edit_by":o["edit_by"]
         }
         opg.append(data)
+    for odr in opg_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(opg_tgl=tgl).values("id","pegawai_id","opg_tgl","diambil_tgl","keterangan","status","edit_by"):
+        data = {
+            'id':odr["id"],
+            'idp': odr["pegawai_id"],
+            'opg_tgl':odr["opg_tgl"],
+            'diambil_tgl':odr["diambil_tgl"],
+            'keterangan':odr["keterangan"],
+            "status":odr["status"],
+            "edit_by":odr["edit_by"]
+        }
+        opgdr.append(data)
     
     # data dinas luar
-    for n in dinas_luar_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_dinas__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("pegawai_id","tgl_dinas","keterangan"):
+    for n in dinas_luar_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_dinas=tgl).values("pegawai_id","tgl_dinas","keterangan"):
         data = {
             'idp': n["pegawai_id"],
             'tgl_dinas':n["tgl_dinas"],
@@ -1970,8 +2007,8 @@ def pu(r,tgl,userid,sid):
         }
         dl.append(data)
         dl_idp.append(n.pegawai_id)
-    for ij in ijin_db.objects.using(r.session["ccabang"]).filter(tgl_ijin__range=((dari - timedelta(days=1)).date(),(sampai - timedelta(days=1)).date())).values("tgl_ijin","pegawai_id","ijin_id"):
-        if re.search('(dinas luar|dl)',ij.ijin.jenis_ijin,re.IGNORECASE) is not None:
+    for ij in ijin_db.objects.using(r.session["ccabang"]).filter(tgl_ijin=tgl).values("tgl_ijin","pegawai_id","ijin_id","ijin__jenis_ijin"):
+        if re.search('(dinas luar|dl)',ij["ijin__jenis_ijin"],re.IGNORECASE) is not None:
             data = {
                 "tgl":ij["tgl_ijin"],
                 "idp":ij["pegawai_id"],
@@ -1980,15 +2017,23 @@ def pu(r,tgl,userid,sid):
             ijindl.append(data)
     for k in kompen_db.objects.using(r.session["ccabang"]).all().values("id","pegawai_id","jenis_kompen","kompen","tgl_kompen"):
         data = {
-            "idl":k["pk"],
+            "idl":k["id"],
             "idp":k["pegawai_id"],
             "jenis_kompen":k["jenis_kompen"],
             "kompen":k["kompen"],
             "tgl_kompen":k["tgl_kompen"],
         }
         kompen.append(data)
-
-
+        
+    # data absensi
+    if int(sid) == 0:
+        data = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen=tgl).values("id","pegawai_id","pegawai__userid","pegawai__kelompok_kerja_id","pegawai__hari_off__hari","pegawai__hari_off2__hari","pegawai__status_id","pegawai__status__status","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","keterangan_absensi","keterangan_ijin","keterangan_lain","libur_nasional","insentif","jam_masuk","jam_pulang","lama_istirahat","total_jam_kerja","total_jam_istirahat","total_jam_istirahat2","edit_by","shift")
+    elif int(sid) > 0:
+        data = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__status',"pegawai__hari_off","pegawai__hari_off2").filter(tgl_absen=tgl,pegawai__status_id=sid).values("id","pegawai_id","pegawai__userid","pegawai__kelompok_kerja_id","pegawai__hari_off__hari","pegawai__hari_off2__hari","pegawai__status_id","pegawai__status__status","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","keterangan_absensi","keterangan_ijin","keterangan_lain","libur_nasional","insentif","jam_masuk","jam_pulang","lama_istirahat","total_jam_kerja","total_jam_istirahat","total_jam_istirahat2","edit_by","shift")
+    insertopg = []
+    insertijin  = []
+    username = r.session["user"]["nama"]
+    cabang = r.session["ccabang"]
     day = abs["tgl_absen"].strftime("%A")
     nh = nama_hari(day)  
     """ Rules OPG (staff & karyawan) & Insentif (hanya untuk karyawan) :
@@ -2002,7 +2047,7 @@ def pu(r,tgl,userid,sid):
     nasional tersebut jika masuk mendapat opg = 1 (off pengganti reguler)
     
     --> jika tidak ada libur nasional, maka staff yang masuk di hari off regulernya maka mendapat opg = 1 (off pengganti 
-    reguler)
+    reguler)2
     
     Karyawan + SPG dibayar oleh Asia:
     --> jika ada libur nasional (senin - minggu), maka Karyawan yang memiliki off reguler bertepatan
@@ -2011,20 +2056,21 @@ def pu(r,tgl,userid,sid):
     --> jika tidak ada libur nasional, maka Karyawan yang masuk di hari off regulernya maka mendapat opg = 1 (off pengganti 
     reguler)
     
-    """     
-    
+    """  
     # OFF & OFF Pengganti Reguler
     # jika ada absen masuk dan pulang
     # rencana cronjob jalan
     if (abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None):
         if nh in [str(abs["pegawai__hari_off__hari"]),str(abs["pegawai__hari_off2__hari"])]:
-            if abs["pegawai__status_id"] in lsopg and re.search("security",abs["pegawai__status__status"],re.IGNORECASE) is None and not next((True for gs in geser if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),False) and not next((True for o in opg if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                opg_db(
-                    pegawai_id=abs["pegawai_id"],
-                    opg_tgl=abs["tgl_absen"],
-                    keterangan="OFF Pengganti Reguler",
-                    add_by="Program"
-                ).save(using=r.session["ccabang"])
+            if abs["pegawai__status_id"] in lsopg and re.search("security",abs["pegawai__status__status"],re.IGNORECASE) is None and next((False for gs in geserdr if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
+                opgdr.append({
+                    'id':0,
+                    'idp':abs["pegawai_id"],
+                    'opg_tgl':abs["tgl_absen"],
+                    'diambil_tgl':"",
+                    'keterangan':"OFF Pengganti Reguler"
+                })
+                insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Reguler",add_by="Program"))
             else:
                 pass
         else: 
@@ -2037,13 +2083,15 @@ def pu(r,tgl,userid,sid):
         if str(abs["pegawai__hari_off__hari"]) == 'On Off':
             abs["keterangan_absensi"] = 'OFF'
         for il in ijindl:
-            if il["tgl"] == abs["tgl_absen"] and int(il["idp"]) == int(abs["pegawai_id"]) and nh in [str(abs["pegawai__hari_off__hari"]),str(abs["pegawai__hari_off2__hari"])] and  abs["pegawai__status_id"] in lsopg and not next((True for gs in geser if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),False) and not next((True for o in opg if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                opg_db(
-                    pegawai_id=abs["pegawai_id"],
-                    opg_tgl=abs["tgl_absen"],
-                    keterangan="OFF Pengganti Reguler",
-                    add_by="Program"
-                ).save(using=r.session["ccabang"])
+            if il["tgl"] == abs["tgl_absen"] and int(il["idp"]) == int(abs["pegawai_id"]) and nh in [str(abs["pegawai__hari_off__hari"]),str(abs["pegawai__hari_off2__hari"])] and  abs["pegawai__status_id"] in lsopg and next((False for gs in geserdr if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
+                opgdr.append({
+                    'id':0,
+                    'idp':abs["pegawai_id"],
+                    'opg_tgl':abs["tgl_absen"],
+                    'diambil_tgl':"",
+                    'keterangan':"OFF Pengganti Reguler"
+                })
+                insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Reguler",add_by="Program"))
             else:
                 pass
         # jika dia hari ini off
@@ -2073,13 +2121,15 @@ def pu(r,tgl,userid,sid):
                     # Staff
                 if abs["pegawai__status_id"] in status_ln: # regex
                     # jika hari off nya adalah hari minggu dan masuk maka hanya akan mendapatkan 1 opg
-                    if str(nh) in [str(abs["pegawai__hari_off__hari"]), str(abs["pegawai__hari_off2__hari"])] and (abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None) and not next((True for gs in geser if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),False) and not next((True for o in opg if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                        opg_db(
-                            pegawai_id=abs["pegawai_id"],
-                            opg_tgl=abs["tgl_absen"],
-                            keterangan="OFF Pengganti Reguler",
-                            add_by="Program"
-                        ).save(using=r.session["ccabang"])
+                    if str(nh) in [str(abs["pegawai__hari_off__hari"]), str(abs["pegawai__hari_off2__hari"])] and (abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None) and next((False for gs in geserdr if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
+                        opgdr.append({
+                            'id':0,
+                            'idp':abs["pegawai_id"],
+                            'opg_tgl':abs["tgl_absen"],
+                            'diambil_tgl':"",
+                            'keterangan':"OFF Pengganti Reguler"
+                        })
+                        insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Reguler",add_by="Program"))
                     else:
                         pass                        
                 # Karyawan
@@ -2093,42 +2143,50 @@ def pu(r,tgl,userid,sid):
                     if str(nh) in [str(abs["pegawai__hari_off__hari"]), str(abs["pegawai__hari_off2__hari"])]:
                         # JIKA DIA MASUK DIHARI MERAH DILIBUR REGULERNYA MAKA AKAN DAPAT 2 OPG
                         if (abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None):
-                            if not next((True for gs in geser if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),False):
-                                if not next((True for o in opg if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),False):
-                                    opg_db(
-                                        pegawai_id=abs["pegawai_id"],
-                                        opg_tgl=abs["tgl_absen"],
-                                        keterangan="OFF Pengganti Reguler",
-                                        add_by="Program"
-                                    ).save(using=r.session["ccabang"])
-                                                        
-                                if not next((True for o in opg if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
-                                    opg_db(
-                                        pegawai_id=abs["pegawai_id"],
-                                        opg_tgl=abs["tgl_absen"],
-                                        keterangan="OFF Pengganti Tgl Merah",
-                                        add_by="Program"
-                                    ).save(using=r.session["ccabang"])
+                            if next((False for gs in geserdr if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),True):
+                                if next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
+                                    opgdr.append({
+                                        'id':0,
+                                        'idp':abs["pegawai_id"],
+                                        'opg_tgl':abs["tgl_absen"],
+                                        'diambil_tgl':"",
+                                        'keterangan':"OFF Pengganti Reguler"
+                                    })
+                                    insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Reguler",add_by="Program"))
+                                    
+                                if next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),True):
+                                    opgdr.append({
+                                        'id':0,
+                                        'idp':abs["pegawai_id"],
+                                        'opg_tgl':abs["tgl_absen"],
+                                        'diambil_tgl':"",
+                                        'keterangan':"OFF Pengganti Tgl Merah"
+                                    })
+                                    insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Tgl Merah",add_by="Program"))
                         # TAPI JIKA TIDAK MASUK HANYA MENDAPATKAN 1 OPG
                         else:
-                            if not next((True for o in opg if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
-                                opg_db(
-                                    pegawai_id=abs["pegawai_id"],
-                                    opg_tgl=abs["tgl_absen"],
-                                    keterangan="OFF Pengganti Tgl Merah",
-                                    add_by="Program"
-                                ).save(using=r.session["ccabang"])
+                            if next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),True):
+                                opgdr.append({
+                                    'id':0,
+                                    'idp':abs["pegawai_id"],
+                                    'opg_tgl':abs["tgl_absen"],
+                                    'diambil_tgl':"",
+                                    'keterangan':"OFF Pengganti Tgl Merah"
+                                })
+                                insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Tgl Merah",add_by="Program"))
                     # JIKA HARI OFF TIDAK BERTEPATAN HARI LIBUR NASIONAL
                     else:
                         if (abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None):
-                            if not next((True for gs in geser if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),False):
-                                if not next((True for o in opg if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),False):
-                                    opg_db(
-                                        pegawai_id=abs["pegawai_id"],
-                                        opg_tgl=abs["tgl_absen"],
-                                        keterangan="OFF Pengganti Tgl Merah",
-                                        add_by="Program"
-                                    ).save(using=r.session["ccabang"])
+                            if next((False for gs in geserdr if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),True):
+                                if next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),True):
+                                    opgdr.append({
+                                        'id':0,
+                                        'idp':abs["pegawai_id"],
+                                        'opg_tgl':abs["tgl_absen"],
+                                        'diambil_tgl':"",
+                                        'keterangan':"OFF Pengganti Tgl Merah"
+                                    })
+                                    insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Tgl Merah",add_by="Program"))
                         # TAPI JIKA TIDAK MASUK HANYA MENDAPATKAN 1 OPG
                         else:
                             pass
@@ -2136,8 +2194,7 @@ def pu(r,tgl,userid,sid):
                 # Karyawan
                 # JIKA MASUK HANYA MENDAPATKAN 1 OPG DAN INSENTIF
                 else:
-                    if (abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None) and not geseroff_db.objects.using(cabang).using(cabang).filter(dari_tgl=abs["tgl_absen"], pegawai_id=abs["pegawai_id"]).exists():
-                        if not next((True for o in opg if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),False):                                        
+                    if (abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None) and next((False for gs in geserdr if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):                                        
                             abs["insentif"] = l['insentif_karyawan']
                     else:
                         pass    
@@ -2204,7 +2261,7 @@ def pu(r,tgl,userid,sid):
                 abs["keterangan_lain"] = f"Kompen/PJK-Akhir {kmpn['kompen']} Jam"
             else:
                 abs["keterangan_lain"] = f"Kompen/PJK 1 hari"
-            nama_user = r.user.username
+            nama_user = username
             abs["total_jam_kerja"] = round(tjk,1)
             abs["edit_by"] = nama_user
         else:
@@ -2264,20 +2321,20 @@ def pu(r,tgl,userid,sid):
     # opg
     for o in opg:
         if abs["pegawai_id"] == o['idp'] and o['diambil_tgl'] == abs["tgl_absen"]:
-            opg_get= opg_db.objects.using(cabang).get(id=o['id'])
+            opg_detail = opg_db.objects.using(cabang).get(pk=int(o["id"]))
             # jika tidak masuk dan tidak ada pulang
             if abs["masuk"] is None and abs["pulang"] is None and abs["masuk_b"] is None and abs["pulang_b"] is None:
                 topg = datetime.strftime(o['opg_tgl'], '%d-%m-%Y')
                 abs["keterangan_absensi"] = f'OPG-({topg})'
                 
-                opg_get.status = 1
-                opg_get.edit_by ='Program'
-                opg_get.save(using=cabang)
+                opg_detail.status = 1
+                opg_detail.edit_by ='Program'
+                opg_detail.save(using=cabang)
             # jika masuk dan pulang
             else:
-                opg_get.diambil_tgl = None
-                opg_get.edit_by = 'Program'
-                opg_get.save(using=cabang)
+                opg_detail["diambil_tgl"] = None
+                opg_detail.edit_by = 'Program'
+                opg_detail.save(using=cabang)
                     
         else:
             pass        
@@ -2616,52 +2673,32 @@ def pu(r,tgl,userid,sid):
                 elif date_part[1] == '+1':
                     adjusted_datetime = base_datetime + timedelta(days=1)
             else:
+                opgdr.append({
+                    'id':0,
+                    'idp':abs["pegawai_id"],
+                    'opg_tgl':abs["tgl_absen"],
+                    'diambil_tgl':"",
+                    'keterangan':"OFF Pengganti Reguler"
+                })
+                insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Reguler",add_by="Program"))
                 base_datetime = datetime.strptime(" ".join(date_part), '%Y-%m-%d %H:%M:%S')
                 adjusted_datetime = base_datetime
-            selisih_i2_b = adjusted_datetime
+                selisih_i2_b = adjusted_datetime
+                    
+                detik_i2_b = selisih_i2_b.second / 3600
+                menit_i2_b = selisih_i2_b.minute / 60
+                hour_i2_b = selisih_i2_b.hour
                 
-            detik_i2_b = selisih_i2_b.second / 3600
-            menit_i2_b = selisih_i2_b.minute / 60
-            hour_i2_b = selisih_i2_b.hour
-            
-            jam_i2_b = int(hour_i2_b) + float(menit_i2_b) + float(detik_i2_b)
-            
-            tji2_b = jam_i2_b
+                jam_i2_b = int(hour_i2_b) + float(menit_i2_b) + float(detik_i2_b)
+                
+                tji2_b = jam_i2_b
     else:
         tji2_b = 0    
     abs["total_jam_kerja"] = tjk + tjk_b
     abs["total_jam_istirahat"] = tji + tji_b
     abs["total_jam_istirahat2"] = tji2 + tji2_b
-    obj = {
-        "id":abs.pk,
-        "total_jam_kerja":str(abs.total_jam_kerja),
-        "total_jam_istirahat":str(abs.total_jam_istirahat),
-        "total_jam_istirahat2":str(abs.total_jam_istirahat2),
-        "masuk":str(abs.masuk),
-        "pulang":str(abs.pulang),
-        "istirahat":str(abs.istirahat),
-        "kembali":str(abs.kembali),
-        "masuk_b":str(abs.masuk_b),
-        "pulang_b":str(abs.pulang_b),
-        "istirahat_b":str(abs.istirahat_b),
-        "kembali_b":str(abs.kembali_b),
-        "istirahat2":str(abs.istirahat2),
-        "istirahat2_b":str(abs.istirahat2_b),
-        "kembali2":str(abs.kembali2),
-        "kembali2_b":str(abs.kembali2_b),
-        "tgl_absen":str(abs.tgl_absen),
-        "keterangan_absensi":str(abs.keterangan_absensi),
-        "keterangan_ijin":str(abs.keterangan_ijin),
-        "pegawai":str(abs.pegawai.userid),
-        "keterangan_lain":str(abs.keterangan_lain),
-        "libur_nasional":str(abs.libur_nasional),
-        "lama_istirahat":str(abs.lama_istirahat),
-        "lama_istirahat2":str(abs.lama_istirahat2),
-        "jam_masuk":str(abs.jam_masuk),
-        "jam_pulang":str(abs.jam_pulang),
-        "lebih_jam_kerja":str(abs.lebih_jam_kerja),
-    }
-    abs.save(using=r.session["ccabang"])
+    absensi_db.objects.using(cabang).bulk_update([absensi_db(id=abs["id"],pegawai_id=abs["pegawai_id"],tgl_absen=abs["tgl_absen"],masuk=abs["masuk"],istirahat=abs['istirahat'],kembali=abs["kembali"],istirahat2=abs["istirahat2"],kembali2=abs["kembali2"],pulang=abs["pulang"],masuk_b=abs["masuk_b"],istirahat_b=abs["istirahat_b"],kembali_b=abs["kembali_b"],istirahat2_b=abs["istirahat2_b"],kembali2_b=abs["kembali2_b"],pulang_b=abs["pulang_b"],keterangan_absensi=abs["keterangan_absensi"],keterangan_ijin=abs["keterangan_ijin"],keterangan_lain=abs["keterangan_lain"],libur_nasional=abs["libur_nasional"],insentif=abs["insentif"],jam_masuk=abs["jam_masuk"],jam_pulang=abs["jam_pulang"],lama_istirahat=abs["lama_istirahat"],shift=abs["shift"],total_jam_kerja=abs["total_jam_kerja"],total_jam_istirahat=abs["total_jam_istirahat"],total_jam_istirahat2=abs["total_jam_istirahat2"],edit_by=abs["edit_by"])],["pegawai_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","keterangan_absensi","keterangan_ijin","keterangan_lain","libur_nasional","insentif","jam_masuk","jam_pulang","lama_istirahat","total_jam_kerja","total_jam_istirahat","total_jam_istirahat2","edit_by","shift"]) 
+    opg_db.objects.using(cabang).bulk_create(insertopg)
     # red = redis.Redis(host="15.63.254.114", port="6370", decode_responses=True, username="azril", password=132)
     # for s in red.scan_iter(f"absensi-*{abs.tgl_absen.strftime('%Y-%m-%d')}*-{sid}"):
     #     

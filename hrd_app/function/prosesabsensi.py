@@ -17,6 +17,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
         [[dta.append(a) for a in att if str(a["userid"]) == str(ab["pegawai__userid"]) and ab["tgl_absen"] == datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S").date() and a["userid"] in luserid] for ab in absensi]
         print("Looping selesai")
         # print(dta)
+        start = time.perf_counter()
         for a in dta:
             if not a:
                 continue
@@ -942,27 +943,25 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                                 "ket": "Pulang Malam"
                             }
                             dt.append(data)
-        print("SELESAI")
-        print(datetime.now())
-        print("PROSES INSERT ABSEN")
-        print(len(absensi))
-        absensi_db.objects.using(cabang).bulk_update([absensi_db(id=abs["id"],pegawai_id=abs["pegawai_id"],tgl_absen=abs["tgl_absen"],masuk=abs["masuk"],istirahat=abs['istirahat'],kembali=abs["kembali"],istirahat2=abs["istirahat2"],kembali2=abs["kembali2"],pulang=abs["pulang"],masuk_b=abs["masuk_b"],istirahat_b=abs["istirahat_b"],kembali_b=abs["kembali_b"],istirahat2_b=abs["istirahat2_b"],kembali2_b=abs["kembali2_b"],pulang_b=abs["pulang_b"],jam_masuk=abs["jam_masuk"],jam_pulang=abs["jam_pulang"],lama_istirahat=abs["lama_istirahat"],shift=abs["shift"]) for abs in absensi],["pegawai_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","jam_masuk","jam_pulang","lama_istirahat","shift"],batch_size=2300)   
-        print("INSERT ABSEN SELESAI")
-        print(datetime.now())
+        end = time.perf_counter()
+        print(f"PROSES ABSENSI LOOP {end-start} detik")
 
-        print("PROSES INSERT RAW")
-        print(len(insertdr))
+        start = time.perf_counter()
+        absensi_db.objects.using(cabang).bulk_update([absensi_db(id=abs["id"],pegawai_id=abs["pegawai_id"],tgl_absen=abs["tgl_absen"],masuk=abs["masuk"],istirahat=abs['istirahat'],kembali=abs["kembali"],istirahat2=abs["istirahat2"],kembali2=abs["kembali2"],pulang=abs["pulang"],masuk_b=abs["masuk_b"],istirahat_b=abs["istirahat_b"],kembali_b=abs["kembali_b"],istirahat2_b=abs["istirahat2_b"],kembali2_b=abs["kembali2_b"],pulang_b=abs["pulang_b"],jam_masuk=abs["jam_masuk"],jam_pulang=abs["jam_pulang"],lama_istirahat=abs["lama_istirahat"],shift=abs["shift"]) for abs in absensi],["pegawai_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","jam_masuk","jam_pulang","lama_istirahat","shift"],batch_size=2300)   
+        end = time.perf_counter()
+        print(f"PROSES ABSENSI UPDATE {end-start} detik. {len(absensi)} data")
+
+        start = time.perf_counter()
         bulkraw = [data_raw_db(userid=dr["userid"],jam_absen=dr["jam_absen"],punch=dr["punch"],mesin=dr["mesin"]) for dr in insertdr]
-        data_raw_db.objects.using(cabang).bulk_create(bulkraw,batch_size=3000)    
-        print("INSERT RAW SELESAI")
-        print(datetime.now())
+        data_raw_db.objects.using(cabang).bulk_create(bulkraw,batch_size=2300)    
+        end = time.perf_counter()
+        print(f"PROSES RAW {end-start} detik. {len(insertdr)} data")
             
-        print("PROSES INSERT TRANS")
+        start = time.perf_counter()
         bulktrans = [data_trans_db(userid=t["userid"],jam_absen=t["jam_absen"],punch=t["punch"],mesin=t["mesin"],keterangan=t["ket"]) for t in dt if not t in ddtor]
-        print(len(bulktrans))
-        data_trans_db.objects.using(cabang).bulk_create(bulktrans,batch_size=3000)
-        print("INSERT TRANS SELESAI")
-        print(datetime.now())
+        data_trans_db.objects.using(cabang).bulk_create(bulktrans,batch_size=2300)
+        end = time.perf_counter()
+        print(f"PROSES ABSENSI TRANS {end-start} detik. {len(bulktrans)} data")
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -977,6 +976,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
         [[dta.append(a) for a in att if str(a["userid"]) == str(ab["pegawai__userid"]) and ab["tgl_absen"] == datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S").date() and a["userid"] in luserid] for ab in absensi]
         print("Looping selesai")
         # print(dta)
+        start = time.perf_counter()
         for a in dta:
             if not a:
                 continue
@@ -1446,24 +1446,26 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
                         "ket": "Pulang Malam"
                     }
                     dt.append(data)
-        print("SELESAI")
-        print(datetime.now())
-        print(len(absensi))
-        absensi_db.objects.using(cabang).bulk_update([absensi_db(id=abs["id"],pegawai_id=abs["pegawai_id"],tgl_absen=abs["tgl_absen"],masuk=abs["masuk"],istirahat=abs['istirahat'],kembali=abs["kembali"],istirahat2=abs["istirahat2"],kembali2=abs["kembali2"],pulang=abs["pulang"],jam_masuk=abs["jam_masuk"],jam_pulang=abs["jam_pulang"],lama_istirahat=abs["lama_istirahat"],shift=abs["shift"]) for abs in absensi],["pegawai_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","jam_masuk","jam_pulang","lama_istirahat","shift"],batch_size=3000)
-        print("INSERT ABSEN SELESAI")
-        print(datetime.now())
+        end = time.perf_counter()
+        print(f"PROSES ABSENSI LOOP {end-start} detik")
 
-        print(len(insertdr))
+
+        start = time.perf_counter()
+        absensi_db.objects.using(cabang).bulk_update([absensi_db(id=abs["id"],pegawai_id=abs["pegawai_id"],tgl_absen=abs["tgl_absen"],masuk=abs["masuk"],istirahat=abs['istirahat'],kembali=abs["kembali"],istirahat2=abs["istirahat2"],kembali2=abs["kembali2"],pulang=abs["pulang"],jam_masuk=abs["jam_masuk"],jam_pulang=abs["jam_pulang"],lama_istirahat=abs["lama_istirahat"],shift=abs["shift"]) for abs in absensi],["pegawai_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","jam_masuk","jam_pulang","lama_istirahat","shift"],batch_size=2300)
+        end = time.perf_counter()
+        print(f"PROSES ABSENSI UPDATE {end-start} detik. {len(absensi)} data")
+
+        start = time.perf_counter()
         bulkraw = [data_raw_db(userid=dr["userid"],jam_absen=dr["jam_absen"],punch=dr["punch"],mesin=dr["mesin"]) for dr in insertdr]
-        data_raw_db.objects.using(cabang).bulk_create(bulkraw,batch_size=3000)    
-        print("INSERT RAW SELESAI")
-        print(datetime.now())
+        data_raw_db.objects.using(cabang).bulk_create(bulkraw,batch_size=2300)    
+        end = time.perf_counter()
+        print(f"PROSES RAW {end-start} detik. {len(insertdr)} data")
             
+        start = time.perf_counter()
         bulktrans = [data_trans_db(userid=t["userid"],jam_absen=t["jam_absen"],punch=t["punch"],mesin=t["mesin"],keterangan=t["ket"]) for t in dt if not t in ddtor]
-        print(len(bulktrans))
-        data_trans_db.objects.using(cabang).bulk_create(bulktrans,batch_size=3000)
-        print("INSERT TRANS SELESAI")
-        print(datetime.now())
+        data_trans_db.objects.using(cabang).bulk_create(bulktrans,batch_size=2300)
+        end = time.perf_counter()
+        print(f"PROSES ABSENSI TRANS {end-start} detik. {len(bulktrans)} data")
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
