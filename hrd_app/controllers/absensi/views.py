@@ -823,8 +823,14 @@ def pabsen(req):
         #     messages.error(req,e)
         #     return redirect("absensi",sid=sid)
 
-        with open("data.json") as f:
-            dmesin = json.loads(f.read())
+        # with open("data.json") as f:
+        #     dmesin = json.loads(f.read())
+        dmesin = [
+            {"userid": "3927", "jam_absen": "2025-01-27 07:46:15", "punch": 0, "mesin": "Security"},
+            {"userid": "3927", "jam_absen": "2025-01-27 16:46:15", "punch": 1, "mesin": "Security"},
+            {"userid": "3927", "jam_absen": "2025-01-27 23:46:15", "punch": 0, "mesin": "Security"},
+            {"userid": "3927", "jam_absen": "2025-01-28 08:46:15", "punch": 1, "mesin": "Security"},
+        ]
         att = sorted(dmesin, key=lambda i: i['jam_absen'])
         # print(att)
         ddr = []
