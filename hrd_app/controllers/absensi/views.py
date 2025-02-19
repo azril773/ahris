@@ -865,8 +865,7 @@ def pabsen(req):
         now = datetime.now()
         hari = now.strftime("%A")
         hari = nama_hari(hari)
-        absensi =  absensi_db.objects.using(req.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(tgl_absen__range=[(dari - timedelta(days=1)),(sampai + timedelta(days=1))],pegawai__userid__in=luserid).values("id","pegawai_id","pegawai__userid","pegawai__kelompok_kerja_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","jam_masuk","jam_pulang","lama_istirahat","shift")
-        absensi = sorted(absensi, key=lambda i: i['tgl_absen'])
+        absensi =  absensi_db.objects.using(req.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(tgl_absen__range=[(dari - timedelta(days=1)),(sampai + timedelta(days=1))],pegawai__userid__in=luserid).values("id","pegawai_id","pegawai__userid","pegawai__kelompok_kerja_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","jam_masuk","jam_pulang","lama_istirahat","shift").order_by("tgl_absen")
         if req.session["ccabang"] != "tasik":
             prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,hari,req.session["ccabang"],ddt,ddtor,absensi)
         else:
