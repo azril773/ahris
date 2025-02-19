@@ -501,6 +501,25 @@ def cdatamesin(r):
         messages.info(r, 'Data akses Anda belum di tentukan.')        
         return redirect('beranda')
 
+@authorization(["root","it"])
+def cekmesin(r):
+    iduser = r.session["user"]["id"]
+        
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        disc = []
+        for m in mesin_db.objects.using(r.session["ccabang"]).filter(status="Active"):
+            try:
+                zk = ZK(m.ipaddress,4370,60)
+                conn = zk.connect()
+                if not conn.is_connect:
+                    disc.append({"ipaddress":m.ipaddress,"nama":m.nama,"id":m.pk})
+            except:
+                disc.append({"ipaddress":m.ipaddress,"nama":m.nama,"id":m.pk})
+                
+        return JsonResponse({"status":"success","msg":"Berhasil cek semua mesin","data":disc},status=200)
+    else:    
+        return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=400)
+
 
 @authorization(["root","it"])
 def cpalldata(r):

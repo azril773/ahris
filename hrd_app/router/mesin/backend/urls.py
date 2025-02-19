@@ -21,6 +21,7 @@ urlpatterns = [
     path('hmesin', views.hmesin, name='hmesin'),
     path('emesin', views.emesin, name='emesin'),
     path('getmesin', views.getmesin, name='getmesin'),
+    path('cekmesin', views.cekmesin, name='cekmesin'),
     path('listdata_json', views.listdata_json, name='listdata_json'),
 
 ]
