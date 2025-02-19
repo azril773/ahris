@@ -2,11 +2,12 @@ from concurrent.futures import ThreadPoolExecutor
 from django.db import connection
 from multiprocessing import Pool
 from ..models import *
+from hrd_app.controllers.lib import nama_hari
 import pandas as pd
 from datetime import date, datetime, timedelta
 import time
 import sys, os
-def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddtor,absensi):
+def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,cabang,ddt,ddtor,absensi):
     print(datetime.now())
     try:
         dt = ddt
@@ -25,6 +26,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                 insertdr.append(a)
                 
             jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
+            hari = nama_hari(jam_absen.strftime("%A"))
             r = next((tgl for tgl in rangetgl if tgl.date() == jam_absen.date()),None)
             if not r:
                 continue
@@ -62,8 +64,9 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
             jam = None
             if ab["pegawai__kelompok_kerja_id"] is not None:
                 if a["punch"] == 0:
-                    
                     jkm = [jk for jk in jamkerja if jk["kk_id"] == ab["pegawai__kelompok_kerja_id"] and jk["jam_masuk"] >= bb_msk.time() and jk["jam_masuk"] <= ba_msk.time() and jk["hari"] == hari]
+                    if pg["userid"] == "222249":
+                        print(jkm)
                     ds = []
                     data = []
                     for j in jkm:
@@ -78,6 +81,8 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
                         jam = data[ds.index(getMin)]
                 elif a['punch'] == 1:
                     jkp = [jk for jk in jamkerja if jk["kk_id"] == ab["pegawai__kelompok_kerja_id"] and jk["jam_pulang"] >= bb_msk.time() and jk["jam_pulang"] <= ba_msk.time() and jk["hari"] == hari]
+                    if pg["userid"] == "222249":
+                        print(jkm)
                     data = []
                     ds = []
                     for j in jkp:
@@ -555,7 +560,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddt
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
         print(exc_type, fname, exc_tb.tb_lineno)
 
-def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddtor,absensi):
+def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,cabang,ddt,ddtor,absensi):
     print(datetime.now())
     try:
         dt = ddt
@@ -573,6 +578,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,hari,cabang,ddt,ddto
 
 
             jam_absen = datetime.strptime(a['jam_absen'],"%Y-%m-%d %H:%M:%S")
+            hari = nama_hari(jam_absen.strftime("%A"))
             r = next((tgl for tgl in rangetgl if tgl.date() == jam_absen.date()),None)
             if not r:
                 continue
