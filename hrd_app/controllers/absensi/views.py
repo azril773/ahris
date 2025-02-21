@@ -791,7 +791,7 @@ def pabsen(req):
                     'divisi' : divisi,
                     'jabatan' : jabatan,                
                     'hari_off' : p["hari_off__hari"],
-                    'hari_off2' : ho,
+                    'hari_off2' : ho,   
                     'kelompok_kerja' : kelompok_kerja,
                     'sisa_cuti' : p["sisa_cuti"],
                     'shift' : p["shift"],
