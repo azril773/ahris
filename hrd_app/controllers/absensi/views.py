@@ -806,22 +806,22 @@ def pabsen(req):
                         insertab.append(absensi_db(tgl_absen=tgl.date(),pegawai_id=p["id"]))   
         absensi_db.objects.using(req.session["ccabang"]).bulk_create(insertab)
         dmesin = []
-        # try:
-        #     for m in mesin_db.objects.using(req.session["ccabang"]).filter(status="Active"):
-        #         ip = m.ipaddress
-        #         # conn = None
-        #         zk = ZK(str(ip), port=4370, timeout=65)
-        #         conn = zk.connect()
-        #         conn.disable_device()
-        #         # dt absensi
-        #         absensi = conn.get_attendance()
-        #         [dmesin.append({"userid":a.user_id,"jam_absen":datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),"punch": a.punch,"mesin":m.nama}) for a in absensi if dari <= a.timestamp <= sampai and str(a.user_id) in luserid]
-        #         conn.enable_device()
-        #         conn.disconnect()
-        # except Exception as e:
-        #     print(e)
-        #     messages.error(req,e)
-        #     return redirect("absensi",sid=sid)
+        try:
+            for m in mesin_db.objects.using(req.session["ccabang"]).filter(status="Active"):
+                ip = m.ipaddress
+                # conn = None
+                zk = ZK(str(ip), port=4370, timeout=65)
+                conn = zk.connect()
+                conn.disable_device()
+                # dt absensi
+                absensi = conn.get_attendance()
+                [dmesin.append({"userid":a.user_id,"jam_absen":datetime.strftime(a.timestamp,"%Y-%m-%d %H:%M:%S"),"punch": a.punch,"mesin":m.nama}) for a in absensi if dari <= a.timestamp <= sampai and str(a.user_id) in luserid]
+                conn.enable_device()
+                conn.disconnect()
+        except Exception as e:
+            print(e)
+            messages.error(req,e)
+            return redirect("absensi",sid=sid)
 
         # with open("data.json") as f:
         #     dmesin = json.loads(f.read())

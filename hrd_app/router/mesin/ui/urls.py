@@ -9,4 +9,8 @@ urlpatterns = [
     path("datamesin/",views.datamesin,name="datamesin"),
     path("cdatamesin/",views.cdatamesin,name="cdatamesin"),
     path("listdata/",views.listdata,name="listdata"),
+    path("testmesin/",views.testmesin,name="testmesin"),
+    path("sinkron/",views.sinkrondatamemsin,name="sinkron"),
+    path("setuserid/<int:sid>",views.setuserid,name="setuserid"),
+    path("senddata/<int:sid>",views.senddata,name="senddata"),
 ]
