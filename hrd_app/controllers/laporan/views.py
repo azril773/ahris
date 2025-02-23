@@ -1415,7 +1415,7 @@ def print_laporan_shift(r):
         obj = {}
         for s in shiftdata:
             obj[s.shift] = {"shift":s.shift,"divisi":{}}
-        absensi = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(shift__in=shifts,tgl_absen=d)
+        absensi = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(shift__in=shifts,tgl_absen=d,pegawai__divisi_id=adiv)
         for ab in absensi:
             shift = ab.shift
             div = obj[shift]["divisi"].keys()
@@ -1437,9 +1437,9 @@ def print_laporan_shift(r):
 
                 if ab.keterangan_absensi is None and ab.keterangan_ijin is None and ab.keterangan_lain is None:
                     obj[shift]["divisi"][ab.pegawai.divisi.pk]["tanpa_keterangan"] += 1
-                if re.match("/^m$/",ab.jam_kerja.shift.shift,re.IGNORECASE):
+                if re.match("/^middle$/",ab.shift,re.IGNORECASE):
                     obj[shift]["divisi"][ab.pegawai.divisi.pk]["m"] += 1
-                elif re.match("/^mf$/",ab.jam_kerja.shift.shift,re.IGNORECASE):
+                elif re.match("/^middlefull$/",ab.shift,re.IGNORECASE):
                     obj[shift]["divisi"][ab.pegawai.divisi.pk]["mf"] += 1
             else:
                 obj[shift]["divisi"][ab.pegawai.divisi.pk] = {
@@ -1450,6 +1450,8 @@ def print_laporan_shift(r):
                     "off":0,
                     "sakit":0,
                     "izin":0,
+                    "m":0,
+                    "mf":0,
                     "tanpa_keterangan":0,
                 }
 
@@ -1462,7 +1464,7 @@ def print_laporan_shift(r):
             obj[s2.shift]["divisi"] = dv
             data.append(obj[s2.shift])
         result.append({"tanggal":d,"data":data})
-
+    print(result)
     return render(r,"hrd_app/laporan/[shift]/print_laporan_shift.html",{"data":result})
 
 

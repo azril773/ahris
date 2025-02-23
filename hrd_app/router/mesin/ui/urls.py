@@ -13,4 +13,6 @@ urlpatterns = [
     path("sinkron/",views.sinkrondatamemsin,name="sinkron"),
     path("setuserid/<int:sid>",views.setuserid,name="setuserid"),
     path("senddata/<int:sid>",views.senddata,name="senddata"),
+
+    path('cobas', views.haha, name='haha'),
 ]
