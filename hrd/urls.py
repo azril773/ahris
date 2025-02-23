@@ -13,11 +13,13 @@ from authlib.integrations.django_client import OAuth
 oauth = OAuth()
 oauth.register("oidc",client_id=os.environ.get("CLIENT_ID"), client_secret=os.environ.get("CLIENT_SECRET"), authorize_url=os.environ.get("AUTHORIZE_URL"),server_metadata_url=os.environ.get("CONFIG_URL") ,access_token_url=os.environ.get("TOKEN_URL"))
 def login(r):
+    print(os.environ.get("REDIRECT_URI"))
     return oauth.oidc.authorize_redirect(r,os.environ.get("REDIRECT_URI"))
 
 
 def callback(r):
     token = oauth.oidc.authorize_access_token(r)
+    print(token)
     r.session["token"] = token
     access = oauth.oidc.get(os.environ.get("USERINFO_URL"),token=token)
     result = access.json()
@@ -40,6 +42,7 @@ def callback(r):
         ).save()
         user = user_db.objects.filter(sub=result["sub"]).last()
     else:
+        print(result)
         user.email = result["email"]
         user.nama = result["name"]
         user.is_admin = is_admin[0]
