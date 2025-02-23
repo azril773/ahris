@@ -265,7 +265,20 @@ def pegawai(r,sid):
             
 
         dsid = dakses.sid_id     
-        
+        lastuserid = 0
+        if sid != 0:
+            lastpgw = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid).order_by("userid").last()
+            lastpgwarsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(status_id=sid).order_by("userid").last()
+            if lastpgw.userid is not None and lastpgwarsip is None:
+                lastuserid = lastpgw.userid
+            elif lastpgwarsip is not None and lastpgw is None:
+                lastuserid = lastpgwarsip.userid
+            else:
+                if eval(lastpgwarsip.userid) > eval(lastpgw.userid):
+                    lastuserid = lastpgwarsip.userid
+                    print("OKO")
+                else:
+                    lastuserid = lastpgw.userid
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
         statusid=[]
         for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
@@ -279,6 +292,7 @@ def pegawai(r,sid):
             "ccabang":r.session["ccabang"],
             "nama":r.session["user"]["nama"],
             'dsid': dsid,
+            "lastuserid":lastuserid,
             'sid': int(sid),
             'status' : status,
             'modul_aktif' : 'Pegawai'
@@ -2184,7 +2198,7 @@ def pegawai_json(r, sid):
         aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
         divisi = [div.divisi for div in aksesdivisi]
         if int(sid) == 0:
-            for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi):
+            for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(divisi__in=divisi).order_by("userid"):
                 if p.tgl_masuk is None:
                     tmasuk = None
                 else:
@@ -2235,7 +2249,7 @@ def pegawai_json(r, sid):
                 }
                 data.append(pg)
         else: 
-            for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(status_id=int(sid),divisi__in=divisi):
+            for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("jabatan","status","counter","hari_off","hari_off2","divisi","kelompok_kerja").filter(status_id=int(sid),divisi__in=divisi).order_by("userid"):
                 
                 if p.tgl_masuk is None:
                     tmasuk = None

@@ -462,19 +462,22 @@ def add_data(r,id):
                         template=t.template
                     ))
             else:
-                dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid=u.user_id).last()
-                if not dm:
-                    continue
-                dm.uid = u.uid
-                dm.nama = pgw.nama
-                dm.userid = u.user_id
-                dm.level = u.level
-                dm.password = u.password
-                dm.save(using=r.session["ccabang"])
+                # dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid=u.user_id).last()
+                # if not dm:
+                #     continue
+                # dm.uid = u.uid
+                # dm.nama = pgw.nama
+                # dm.userid = u.user_id
+                # dm.level = u.level
+                # dm.password = u.password
+                # dm.save(using=r.session["ccabang"])
+                pass
 
 
         conn.enable_device()
         conn.disconnect()
+        print(mesin)
+        print(tmps)
         datamesin_db.objects.using(r.session['ccabang']).bulk_create(mesin)
         sidikjari_db.objects.using(r.session["ccabang"]).bulk_create(tmps)
     except Exception as e:
@@ -493,7 +496,7 @@ def cdatamesin(r):
         dsid = dakses.sid_id
         
         mesin = mesin_db.objects.using(r.session["ccabang"]).all()
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
         divisi = divisi_db.objects.using(r.session["ccabang"]).all()
         data = {       
             'dsid': dsid,
@@ -591,10 +594,10 @@ def cppegawai(r):
     pegawai = r.POST.getlist("pegawai[]")
     mesin_tujuan = r.POST.getlist("mesint[]")
     if len(pegawai) <= 0:
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1)
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
     else:
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pegawai,aktif=1)
-    
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pegawai)
+    print(pegawai)
     datauser = []
     try:
         mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=master)
@@ -1110,14 +1113,67 @@ def setuserid(r,sid):
             #         newsdk.append(s)
             #     dtmesin["userid"] = f["userid"]
             #     newdm.append(dtmesin)
-            # print(newdm)
-
+            # print(newdm)  
+            print(pegawai)
+            print(newdm)
+            print(newsdk)
             pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=f["id"],userid=f["userid"]) for f in pegawai],["userid"])
             datamesin_db.objects.using(r.session["ccabang"]).bulk_update([datamesin_db(id=dt["id"],userid=dt["userid"]) for dt in newdm],["userid"])
             sidikjari_db.objects.using(r.session["ccabang"]).bulk_update([sidikjari_db(id=s["id"],userid=s["userid"]) for s in newsdk],["userid"])
         except Exception as e:
             transaction.set_rollback(True,using=r.session["ccabang"])
             raise e
+        
+
+def auto(r):
+    pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=10)
+    pgws = pegawai_db.objects.using(r.session["ccabang"]).all()
+    id = 1
+    for p in pegawai:
+        print(id)
+        if next((pg for pg in pgws if str(pg.userid) == str(id)), None) is None:
+            p.userid = id
+            p.save(using=r.session["ccabang"])
+            id += 1
+        else:
+            id += 1
+            continue
+
+
+def sin(r):
+    pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=10)
+    zk = ZK("15.59.254.211",4370)
+    conn = zk.connect()
+    conn.disable_device()
+    users = conn.get_users()
+    newpgw = []
+    for p in pegawai:
+        us = next((user for user in users if user.name.strip() == p.nama.strip() and re.search('217\d{3}',user.user_id.strip()) is not None), None)
+        if not us:
+            continue
+
+        # newpgw.append(pegawai_db(id=p.pk,userid=us.user_id))
+        newpgw.append({
+            "id":p.pk,
+            'userid':us.user_id,
+            'nama':p.nama
+        })
+    print(len(newpgw))
+    print(newpgw,"PLPLPL\n\n\n")
+    conn.enable_device()
+    conn.disconnect()
+    pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=pg["id"],userid=pg["userid"]) for pg in newpgw],["userid"])
+
+def bynama(r,nama):
+    zk = ZK("15.59.254.211",4370)
+    conn = zk.connect()
+    conn.disable_device()
+    users = conn.get_users()
+    print([user for user in users if user.name == nama])
+    conn.enable_device()
+    conn.disconnect()
+
+
 def senddata(r,sid):
     if sid == 0:
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
@@ -1151,9 +1207,9 @@ def haha(r):
     zk = ZK("15.59.254.211",4370)
     conn = zk.connect()
     conn.disable_device()
-    dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid='218363').last()
+    dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid='222254').last()
     conn.set_user(uid=dm.uid,user_id=dm.userid,name=dm.nama,password=dm.password,privilege=dm.level,card=0)
-    sidik = sidikjari_db.objects.using(r.session["ccabang"]).filter(userid='218363')
+    sidik = sidikjari_db.objects.using(r.session["ccabang"]).filter(userid='222254')
     user = usr.User(uid=dm.uid,name=dm.nama,privilege=dm.level,password=dm.password,user_id=dm.userid)
     fingers = []
     for s in sidik:
@@ -1211,7 +1267,7 @@ def listdata_json(r):
 #     iduser = r.session["user"]["id"]
 #     data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
 #     akses = data_akses.akses 
-#     if akses == "admin" or akses == "root":
+#     if akses == "admin" or akses == "root":get_users
 #         mesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(mesin))
 #         if not mesin.exists():
 #             return JsonResponse({"status":"error","msg":"Mesin tidak ada"},status=400)

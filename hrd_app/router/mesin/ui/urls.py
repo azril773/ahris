@@ -11,8 +11,11 @@ urlpatterns = [
     path("listdata/",views.listdata,name="listdata"),
     path("testmesin/",views.testmesin,name="testmesin"),
     path("sinkron/",views.sinkrondatamemsin,name="sinkron"),
-    path("setuserid/<int:sid>",views.setuserid,name="setuserid"),
-    path("senddata/<int:sid>",views.senddata,name="senddata"),
+    # path("setuserid/<int:sid>",views.setuserid,name="setuserid"),
+    # path("senddata/<int:sid>",views.senddata,name="senddata"),
+    # path("auto",views.auto,name="auto"),
+    # path("setnew",views.sin,name="setnew"),
+    path("bynama/<str:nama>",views.bynama,name="bynama"),
 
-    path('cobas', views.haha, name='haha'),
+    # path('cobas', views.haha, name='haha'),
 ]

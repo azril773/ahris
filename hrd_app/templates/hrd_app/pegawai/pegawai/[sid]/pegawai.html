@@ -39,57 +39,58 @@
 
         <!-- Absensi -->
         <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Data Pegawai Aktif</h6>
-    
+        
         <!-- Info absensi -->        
         <div class="d-flex align-items-center justify-content-start">     
             <div class="mg-r-auto">   
-                            
-            <!-- Button Registrasi -->
-            <a href="{% url "tpegawai" %}" class="btn btn-primary mg-b-6">Registrasi</a>            
-
-            <!-- Button Perjanjian & Kontrak Kerja -->
-            <a href="{% url 'pkwt' %}" class="btn btn-dark mg-b-6">Perjanjian & Kontrak Kerja</a>
-
-            <!-- Button Pegawai Non Aktif -->
-            <a href="{% url 'non_aktif' sid %}"><button class="btn btn-danger mg-b-6">Pegawai Non Aktif</button></a> 
-
-            <a href="{% url 'spegawai_payroll'  %}"><button class="btn btn-warning mg-b-6">Sinkron Data Pegawai Dengan Payroll</button></a> 
-
+                
+                <!-- Button Registrasi -->
+                <a href="{% url "tpegawai" %}" class="btn btn-primary mg-b-6">Registrasi</a>            
+                
+                <!-- Button Perjanjian & Kontrak Kerja -->
+                <a href="{% url 'pkwt' %}" class="btn btn-dark mg-b-6">Perjanjian & Kontrak Kerja</a>
+                
+                <!-- Button Pegawai Non Aktif -->
+                <a href="{% url 'non_aktif' sid %}"><button class="btn btn-danger mg-b-6">Pegawai Non Aktif</button></a> 
+                
+                <a href="{% url 'spegawai_payroll'  %}"><button class="btn btn-warning mg-b-6">Sinkron Data Pegawai Dengan Payroll</button></a> 
+                
             </div>          
         </div>
-
+        
         <br>        
-
+        
         <div class="d-flex align-items-center justify-content-start">
             <div class="col-md-12 pd-x-0">  
                 {% if sid == 0 %}
-                    <a href="{% url 'pegawai' 0 %}" class="btn btn-info mg-b-8">Semua Data</a> &nbsp; 
-                        
-                    {% for s in status %}   
-                        <a href="{% url 'pegawai' s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp;  
-                    {% endfor %}
-
+                <a href="{% url 'pegawai' 0 %}" class="btn btn-info mg-b-8">Semua Data</a> &nbsp; 
+                
+                {% for s in status %}   
+                <a href="{% url 'pegawai' s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp;  
+                {% endfor %}
+                
                 {% else %}
-                    <a href="{% url 'pegawai' 0 %}" class="btn btn-outline-info mg-b-8">Semua Data</a> &nbsp; 
+                <a href="{% url 'pegawai' 0 %}" class="btn btn-outline-info mg-b-8">Semua Data</a> &nbsp; 
                     
-                    {% for s in status %}   
-                        {% if s.id == sid %}
-                            <a href="{% url 'pegawai' s.id%}" class="btn btn-info mg-b-8">{{s.status}}</a> &nbsp;   
+                {% for s in status %}   
+                {% if s.id == sid %}
+                <a href="{% url 'pegawai' s.id%}" class="btn btn-info mg-b-8">{{s.status}}</a> &nbsp;   
                         {% else %}
                             <a href="{% url 'pegawai' s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp; 
-                        {% endif %}
-                    {% endfor %}
-                {% endif %}
-                
-
-            </div>            
-        </div>
-
-        <br>
-
-        <div id="loader"></div>            
-     
-        <!-- Table -->
+                            {% endif %}
+                            {% endfor %}
+                            {% endif %}
+                            
+                            
+                        </div>            
+                    </div>
+                    
+                    <br>
+                    
+                    <div id="loader"></div>            
+                    
+                    <!-- Table -->
+                    <span class='tx-gray-800'>Userid terakhir <b class="tx-black">{{lastuserid}}</b></span>
         <div class="table-wrapper">
             <table id="tabelku" class="table display responsive" style="width:100%">
             <thead>
