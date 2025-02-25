@@ -1005,8 +1005,11 @@ def sinkrondatamemsin(r):
     zkmaster = ZK("15.59.254.211",4370)
     conn = zkmaster.connect()
     usersmaster = conn.get_users()
+    usermasters  = [ud.user_id for ud in usersmaster]
+    print([uf for uf in userids if uf not in usermasters])
     useridac = [us.user_id for us in usersmaster if us.user_id in userids]
     data = {'userid':[],"nama":[],"mesin":''}
+    print("OKOKOK")
     useridss = []
     userdata = []
     
@@ -1017,26 +1020,27 @@ def sinkrondatamemsin(r):
             conn2 = zk.connect()
             users = conn2.get_users()
             templates = conn2.get_templates()
-            userid = [us for us in users if us.user_id in useridac]
-            # for us in userid:
-            #     # if us.user_id in userids
-            #     if us.user_id not in useridss:
-            #     #         # print(us.user_id)
-            #         conn1.set_user(uid=us.uid,name=us.name,privilege=us.privilege,password=us.password,group_id=us.group_id,user_id=us.user_id,card=0)
-            #     # lastuser = conn1.get_users()[-1]
-            #     # template = [tmp for tmp in templates if tmp.uid == us.uid]
-            #     # for t in template:
-            #     #     user = usr.User(uid=lastuser.uid,name=lastuser.name,privilege=lastuser.privilege,password=lastuser.password,group_id=lastuser.group_id,user_id=lastuser.user_id,card=0)
-            #     #     f = finger.Finger(lastuser.uid,t.fid,t.valid,t.template)
-            #     #     conn1.save_user_template(user,f)
-            #         useridss.append(us.user_id)
-            #         # else:
-            #         #     conn1.set_user(uid=,name=us.name,privilege=us.privilege,password=us.password,group_id=us.group_id,user_id=us.user_id,card=0)
-                    
-            time.sleep(1)
+            userid = [us for us in users if us.user_id not in useridac]
+            for us in userid:
+                if us.user_id in userids:
+                    if us.user_id not in useridss:
+                    #         # print(us.user_id)
+                        # conn1.set_user(name=us.name,privilege=us.privilege,password=us.password,user_id=us.user_id,card=0)
+                        # lastuser = conn1.get_users()[-1]
+                        # template = [tmp for tmp in templates if tmp.uid == us.uid]
+                        # for t in template:
+                        #     user = usr.User(uid=lastuser.uid,name=lastuser.name,privilege=lastuser.privilege,password=lastuser.password,group_id=lastuser.group_id,user_id=lastuser.user_id,card=0)
+                        #     f = finger.Finger(lastuser.uid,t.fid,t.valid,t.template)
+                        #     conn1.save_user_template(user,f)
+                        # print(us.user_id)
+                        useridss.append(us.user_id)
+                        # else:
+                        #     conn1.set_user(uid=,name=us.name,privilege=us.privilege,password=us.password,group_id=us.group_id,user_id=us.user_id,card=0)
+            print(useridss)
+            # time.sleep(1)
             conn2.enable_device()
             conn2.disconnect()
-            time.sleep(1)
+            # time.sleep(1)
         except:
             conn2.enable_device()
             conn2.disconnect()
@@ -1053,6 +1057,9 @@ def sinkrondatamemsin(r):
 
 
 def setuserid(r,sid):
+    # Pegawai dan pegawai arsip ada di dalam datamesin
+    # Pegawai dengan userid yang ada di dalam datamesin bisa di proses dan bisa mempunyai userid yang baru
+    # 
     with transaction.atomic(using=r.session["ccabang"]):
         try:
             if not status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=sid).last():
@@ -1078,12 +1085,6 @@ def setuserid(r,sid):
                         init +=1 
                     else:
                         break
-            #     print(next((d for d in datamesin if d["userid"] == str(init) or d["userid"] == init), None) is not None)
-            #     if next((d for d in datamesin if d["userid"] == str(init) or d["userid"] == init), None) is not None:
-            #         failpgw.append(pgw)
-            #         failuserid.append(init)
-            #         continue
-            #     print(init)
                 dtmesin = next((dm for dm in datamesin if dm["userid"] == pgw["userid"]),None)
                 if not dtmesin:
                     continue
@@ -1096,24 +1097,6 @@ def setuserid(r,sid):
                     newsdk.append(s)
                 dtmesin["userid"] = pgw["userid"]
                 newdm.append(dtmesin)
-            print(newdm)
-            # # print(newdm)
-            # print(failpgw)
-            # print(failuserid)
-            # print(init)
-            # for f in failpgw:
-            #     init += 1
-            #     dtmesin = next((dm for dm in datamesin if dm["userid"] == str(f["userid"])),None)
-            #     sidikjari = [sdk for sdk in sidik if sdk["userid"] == str(f["userid"])]
-                    
-            #     f["userid"] = init
-
-            #     for s in sidikjari:
-            #         s["userid"] = f["userid"]
-            #         newsdk.append(s)
-            #     dtmesin["userid"] = f["userid"]
-            #     newdm.append(dtmesin)
-            # print(newdm)  
             print(pegawai)
             print(newdm)
             print(newsdk)
@@ -1140,7 +1123,7 @@ def auto(r):
             continue
 
 
-def sin(r):
+def sin(r): 
     pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=10)
     zk = ZK("15.59.254.211",4370)
     conn = zk.connect()
@@ -1165,13 +1148,45 @@ def sin(r):
     pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=pg["id"],userid=pg["userid"]) for pg in newpgw],["userid"])
 
 def bynama(r,nama):
-    zk = ZK("15.59.254.211",4370)
+    zk = ZK("15.59.254.209",4370)
     conn = zk.connect()
     conn.disable_device()
     users = conn.get_users()
-    print([user for user in users if user.name == nama])
+    templates = conn.get_templates()
+    user = [user for user in users if user.uid == 3711]
+    # conn.set_user(uid=user[0].uid,name=user[0].name,user_id="217056",privilege=user[0].privilege,password=user[0].password)
+    print(user)
+    # print([tmp for tmp in templates if tmp.uid == 1548])
+    # templates = conn.get_templates()
+    # print([user for user in users if user.user_id == '207032'])
+    # zk1 = ZK('15.59.254.211',4370)
+    # conn1 = zk1.connect()
+    # conn1.disable_device()
+    # template = [tmp for tmp in templates if tmp.uid == 911]
+    # conn1.set_user(uid=911,user_id='217070',name="DEVIA NOVIANI R",privilege=const.USER_DEFAULT,password='',card=0)
+    # user = [user for user in conn1.get_users() if user.uid == 911]
+    # print(user)
+    # conn1.save_user_template(user[0],template)
+
+    # conn1.enable_device()
+    # conn1.disconnect()
+    # # print(template)
+    # print([user for user in users if user.user_id == '217070'])
     conn.enable_device()
     conn.disconnect()
+
+def haha(r):
+    zk = ZK("15.59.254.211",4370)
+    conn = zk.connect()
+    conn.disable_device()
+    dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid='218278').last()
+    conn.set_user(uid=dm.uid,user_id=dm.userid,name=dm.nama,password=dm.password,privilege=dm.level,card=0)
+    sidik = sidikjari_db.objects.using(r.session["ccabang"]).filter(userid='218278')
+    user = usr.User(uid=dm.uid,name=dm.nama,privilege=dm.level,password=dm.password,user_id=dm.userid)
+    fingers = []
+    for s in sidik:
+        fingers.append(finger.Finger(uid=s.uid,fid=s.fid,valid=s.valid,template=s.template))
+    conn.save_user_template(user,fingers)
 
 
 def senddata(r,sid):
@@ -1203,18 +1218,6 @@ def senddata(r,sid):
     conn.disconnect()
 
 
-def haha(r):
-    zk = ZK("15.59.254.211",4370)
-    conn = zk.connect()
-    conn.disable_device()
-    dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid='222254').last()
-    conn.set_user(uid=dm.uid,user_id=dm.userid,name=dm.nama,password=dm.password,privilege=dm.level,card=0)
-    sidik = sidikjari_db.objects.using(r.session["ccabang"]).filter(userid='222254')
-    user = usr.User(uid=dm.uid,name=dm.nama,privilege=dm.level,password=dm.password,user_id=dm.userid)
-    fingers = []
-    for s in sidik:
-        fingers.append(finger.Finger(uid=s.uid,fid=s.fid,valid=s.valid,template=s.template))
-    conn.save_user_template(user,fingers)
 
 
 
