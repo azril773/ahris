@@ -421,57 +421,58 @@ def add_data(r,id):
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids)
         pegawaiarsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
         templates = conn.get_templates()
-
+        print(pegawaiarsip)
         # pegawai_arsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
         # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
         # 
         mesin = []
         tmps = []
         for u in user:
-            pgw = next((p for p in pegawai if p.userid == u.user_id),None)
-            pgwa = next((pg for pg in pegawaiarsip if pg.userid == u.user_id),None)
-            if pgw is not None:
-                pgw = pgw
-            elif pgwa is not None:
-                pgw = pgwa
-            else:
-                # print(f"Data pegawai dengan userid {u.user_id} tidak ada")
-                continue
-            if u.privilege == const.USER_ADMIN:
-                level = 14
-            else:
-                level = 0
-            if u.user_id not in datamesin:
-                mesin.append(datamesin_db(
-                    uid=u.uid,
-                    nama=pgw.nama,
-                    userid=u.user_id,
-                    level=level,
-                    password=u.password
-                ))
+            pass
+            # pgw = next((p for p in pegawai if p.userid == u.user_id),None)
+            # pgwa = next((pg for pg in pegawaiarsip if pg.userid == u.user_id),None)
+            # if pgw is not None:
+            #     pgw = pgw
+            # elif pgwa is not None:
+            #     pgw = pgwa
+            # else:
+            #     # print(f"Data pegawai dengan userid {u.user_id} tidak ada")
+            #     continue
+            # if u.privilege == const.USER_ADMIN:
+            #     level = 14
+            # else:
+            #     level = 0
+            # if u.user_id not in datamesin:
+            #     mesin.append(datamesin_db(
+            #         uid=u.uid,
+            #         nama=pgw.nama,
+            #         userid=u.user_id,
+            #         level=level,
+            #         password=u.password
+            #     ))
                 
-                template = [tm for tm in templates if tm.uid == u.uid]
-                for t in template:
-                    tmps.append(sidikjari_db(
-                        uid=t.uid,
-                        nama=pgw.nama,
-                        userid=u.user_id,
-                        size=t.size,
-                        fid=t.fid,
-                        valid=t.valid,
-                        template=t.template
-                    ))
-            else:
-                # dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid=u.user_id).last()
-                # if not dm:
-                #     continue
-                # dm.uid = u.uid
-                # dm.nama = pgw.nama
-                # dm.userid = u.user_id
-                # dm.level = u.level
-                # dm.password = u.password
-                # dm.save(using=r.session["ccabang"])
-                pass
+            #     template = [tm for tm in templates if tm.uid == u.uid]
+            #     for t in template:
+            #         tmps.append(sidikjari_db(
+            #             uid=t.uid,
+            #             nama=pgw.nama,
+            #             userid=u.user_id,
+            #             size=t.size,
+            #             fid=t.fid,
+            #             valid=t.valid,
+            #             template=t.template
+            #         ))
+            # else:
+            #     # dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid=u.user_id).last()
+            #     # if not dm:
+            #     #     continue
+            #     # dm.uid = u.uid
+            #     # dm.nama = pgw.nama
+            #     # dm.userid = u.user_id
+            #     # dm.level = u.level
+            #     # dm.password = u.password
+            #     # dm.save(using=r.session["ccabang"])
+            #     pass
 
 
         conn.enable_device()
@@ -1105,6 +1106,7 @@ def setuserid(r,sid):
             sidikjari_db.objects.using(r.session["ccabang"]).bulk_update([sidikjari_db(id=s["id"],userid=s["userid"]) for s in newsdk],["userid"])
         except Exception as e:
             transaction.set_rollback(True,using=r.session["ccabang"])
+            print("MASUKKK ERRROR")
             raise e
         
 
@@ -1148,12 +1150,12 @@ def sin(r):
     pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=pg["id"],userid=pg["userid"]) for pg in newpgw],["userid"])
 
 def bynama(r,nama):
-    zk = ZK("15.59.254.209",4370)
+    zk = ZK("15.59.254.212",4370)
     conn = zk.connect()
     conn.disable_device()
     users = conn.get_users()
     templates = conn.get_templates()
-    user = [user for user in users if user.uid == 3711]
+    user = [user for user in users if user.uid == 1570]
     # conn.set_user(uid=user[0].uid,name=user[0].name,user_id="217056",privilege=user[0].privilege,password=user[0].password)
     print(user)
     # print([tmp for tmp in templates if tmp.uid == 1548])
@@ -1179,9 +1181,9 @@ def haha(r):
     zk = ZK("15.59.254.211",4370)
     conn = zk.connect()
     conn.disable_device()
-    dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid='218278').last()
+    dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid='217305').last()
     conn.set_user(uid=dm.uid,user_id=dm.userid,name=dm.nama,password=dm.password,privilege=dm.level,card=0)
-    sidik = sidikjari_db.objects.using(r.session["ccabang"]).filter(userid='218278')
+    sidik = sidikjari_db.objects.using(r.session["ccabang"]).filter(userid='217305')
     user = usr.User(uid=dm.uid,name=dm.nama,privilege=dm.level,password=dm.password,user_id=dm.userid)
     fingers = []
     for s in sidik:

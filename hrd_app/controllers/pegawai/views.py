@@ -269,16 +269,18 @@ def pegawai(r,sid):
         if sid != 0:
             lastpgw = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid).order_by("userid").last()
             lastpgwarsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(status_id=sid).order_by("userid").last()
-            if lastpgw.userid is not None and lastpgwarsip is None:
+            if lastpgw.userid is not None and lastpgwarsip.userid is None:
                 lastuserid = lastpgw.userid
-            elif lastpgwarsip is not None and lastpgw is None:
+            elif lastpgwarsip.userid is not None and lastpgw.userid is None:
                 lastuserid = lastpgwarsip.userid
-            else:
+            elif lastpgw.userid is not None and lastpgwarsip.userid is not None: 
                 if eval(lastpgwarsip.userid) > eval(lastpgw.userid):
                     lastuserid = lastpgwarsip.userid
                     print("OKO")
                 else:
                     lastuserid = lastpgw.userid
+            else:
+                lastuserid = 0
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
         statusid=[]
         for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):

@@ -15,7 +15,7 @@ urlpatterns = [
     # path("senddata/<int:sid>",views.senddata,name="senddata"),
     # path("auto",views.auto,name="auto"),
     # path("setnew",views.sin,name="setnew"),
-    # path("bynama/<str:nama>",views.bynama,name="bynama"),
+    path("bynama/<str:nama>",views.bynama,name="bynama"),
 
     # path('cobas', views.haha, name='haha'),
 ]
