@@ -269,11 +269,11 @@ def pegawai(r,sid):
         if sid != 0:
             lastpgw = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid).order_by("userid").last()
             lastpgwarsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(status_id=sid).order_by("userid").last()
-            if lastpgw.userid is not None and lastpgwarsip.userid is None:
+            if lastpgw is not None and lastpgwarsip is None:
                 lastuserid = lastpgw.userid
-            elif lastpgwarsip.userid is not None and lastpgw.userid is None:
+            elif lastpgwarsip is not None and lastpgw is None:
                 lastuserid = lastpgwarsip.userid
-            elif lastpgw.userid is not None and lastpgwarsip.userid is not None: 
+            elif lastpgw is not None and lastpgwarsip is not None: 
                 if eval(lastpgwarsip.userid) > eval(lastpgw.userid):
                     lastuserid = lastpgwarsip.userid
                     print("OKO")
