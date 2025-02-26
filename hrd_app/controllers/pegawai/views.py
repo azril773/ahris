@@ -269,18 +269,18 @@ def pegawai(r,sid):
         if sid != 0:
             pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid)
             pegawaiarsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(status_id=sid)
-            lastpgw = sorted(pegawai, key=lambda i: int(i.userid))[-1]
-            lastpgwarsip = sorted(pegawaiarsip, key=lambda i: int(i.userid))[-1]
-            if lastpgw is not None and lastpgwarsip is None:
-                lastuserid = lastpgw.userid
-            elif lastpgwarsip is not None and lastpgw is None:
-                lastuserid = lastpgwarsip.userid
-            elif lastpgw is not None and lastpgwarsip is not None: 
-                if eval(lastpgwarsip.userid) > eval(lastpgw.userid):
-                    lastuserid = lastpgwarsip.userid
+            lastpgw = sorted(pegawai, key=lambda i: int(i.userid))
+            lastpgwarsip = sorted(pegawaiarsip, key=lambda i: int(i.userid))
+            if len(lastpgw) > 0 and len(lastpgwarsip) <= 0:
+                lastuserid = lastpgw[-1].userid
+            elif len(lastpgwarsip) > 0 and len(lastpgw) <= 0:
+                lastuserid = lastpgwarsip[-1].userid
+            elif len(lastpgw) > 0 and len(lastpgwarsip) > 0: 
+                if eval(lastpgwarsip[-1].userid) > eval(lastpgw[-1].userid):
+                    lastuserid = lastpgwarsip[-1].userid
                     print("OKO")
                 else:
-                    lastuserid = lastpgw.userid
+                    lastuserid = lastpgw[-1].userid
             else:
                 lastuserid = 0
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]

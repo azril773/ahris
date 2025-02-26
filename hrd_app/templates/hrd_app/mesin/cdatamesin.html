@@ -326,6 +326,74 @@
             </div>
             <hr>
         </form>
+        <hr>
+        <h5 class="hitam"># Khusus Admin</h5>
+        <hr>
+        <div id="msgadmin"></div>
+        <div id="tableadmin"></div>
+        <h5 class='hitam'># Cari dengan nama</h5>
+        <div class="d-flex justify-content-start" style="width: 100%;">
+            <div class="" style="width: 100%;">
+                <label for="namap" class="hitam">Nama Pegawai</label>
+                <input type="text" class="form-control" name="namap" id="namap">
+            </div>
+            &nbsp
+            <div class="" style="width: 100%;">
+                <label for="mesinnama" class="hitam">Mesin Tujuan</label>
+                <select name="mesinnama[]" class="mesint"  id="mesinnama" >
+                    <option value="">Pilih Mesin Tujuan</option>
+                    {% for m in mesin %}
+                    <option value="{{m.ipaddress}}">{{m.nama}} - {{m.ipaddress}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="d-flex align-items-end" style="width: 100%;">
+                <button id="bynama" class="btn btn-primary">Proses</button>
+            </div>
+        </div>
+        <hr>
+        <h5 class='hitam'># Cari dengan userid</h5>
+        <div class="d-flex justify-content-start" style="width: 100%;">
+            <div class="" style="width: 100%;">
+                <label for="userid" class="hitam">Userid Pegawai</label>
+                <input type="text" class="form-control" name="userid" id="userid">
+            </div>
+            &nbsp
+            <div class="" style="width: 100%;">
+                <label for="mesinuserid" class="hitam">Mesin Tujuan</label>
+                <select name="mesinuserid[]" class="mesint"  id="mesinuserid" >
+                    <option value="">Pilih Mesin Tujuan</option>
+                    {% for m in mesin %}
+                    <option value="{{m.ipaddress}}">{{m.nama}} - {{m.ipaddress}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="d-flex align-items-end" style="width: 100%;">
+                <button id="byuserid" class="btn btn-primary">Proses</button>
+            </div>
+        </div>
+        <hr>
+        <h5 class='hitam'># Cari dengan uid</h5>
+        <div class="d-flex justify-content-start" style="width: 100%;">
+            <div class="" style="width: 100%;">
+                <label for="uid" class="hitam">UID Pegawai</label>
+                <input type="text" class="form-control" name="uid" id="uid">
+            </div>
+            &nbsp
+            <div class="" style="width: 100%;">
+                <label for="mesinuid" class="hitam">Mesin Tujuan</label>
+                <select name="mesinuid[]" class="mesint"  id="mesinuid" >
+                    <option value="">Pilih Mesin Tujuan</option>
+                    {% for m in mesin %}
+                    <option value="{{m.ipaddress}}">{{m.nama}} - {{m.ipaddress}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="d-flex align-items-end" style="width: 100%;">
+                <button id="byuid" class="btn btn-primary">Proses</button>
+            </div>
+        </div>
+        <hr>
         <!-- BY DIVISI -->
     <!-- alert berhasil -->
     </div>
@@ -346,5 +414,72 @@
             maxItems:null,
         })
         $(".level").selectize()
+        const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+        $("#bynama").on("click",function(e){
+            $("#msgadmin p").remove()
+            $("#tableadmin table").remove()
+            const mesin = $("#mesinnama").val() ? $("#mesinnama").val() : undefined
+            const nama = $("#namap").val() ? $("#namap").val() : undefined 
+            $("#msgadmin").append("<p class='alert alert-info'>Proses...</p>")
+            $.ajax({
+                url:"{% url 'bynama' %}",
+                method:"post",
+                data:{mesin:mesin[0],nama:nama},
+                headers:{"X-CSRFToken":token},
+                success:(e) => {
+                    $("#msgadmin p").remove()
+                    if(e.user){
+                        $("#tableadmin").append(`
+                            <table class="table">
+                                <tr>
+                                    <td>UID</td>
+                                    <td>Nama</td>
+                                    <td>Userid</td>
+                                    <td>Privilege</td>
+                                    <td>Password</td>
+                                </tr>
+                                <tr>
+                                    <td>${e.user.uid}</td>
+                                    <td>${e.user.nama}</td>
+                                    <td>${e.user.userid}</td>
+                                    <td>${e.user.level}</td>
+                                    <td>${e.user.password}</td>
+                                </tr>
+                            </table>
+                        `)
+                    }
+                    if(e.finger){
+                        let str = ''
+                        e.finger.forEach(dt => {
+                            str += `
+                                <tr>
+                                    <td>${dt.uid}</td>
+                                    <td>${dt.fid}</td>
+                                    <td>${dt.size}</td>
+                                </tr>
+                            `
+                        })
+                        $("#tableadmin").append(`<table class="table">
+                                <tr>
+                                    <td>UID</td>
+                                    <td>Finger ID</td>
+                                    <td>Size</td>
+                                </tr>
+                                ${str}
+                            </table>`)
+                    }
+
+                },
+                error:(err) => {
+                    $("#msgadmin p").remove()
+                    $("#tableadmin table").remove()
+                    if(err.responseJSON?.msg){
+                        $("#msgadmin").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    }else{
+                        $("#msgadmin").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                    }
+                }
+            })
+        })
     </script>
 {% endblock hrd_ajax %}

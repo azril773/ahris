@@ -65,8 +65,6 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,cabang,ddt,ddtor,ab
             if ab["pegawai__kelompok_kerja_id"] is not None:
                 if a["punch"] == 0:
                     jkm = [jk for jk in jamkerja if jk["kk_id"] == ab["pegawai__kelompok_kerja_id"] and jk["jam_masuk"] >= bb_msk.time() and jk["jam_masuk"] <= ba_msk.time() and jk["hari"] == hari]
-                    if pg["userid"] == "222249":
-                        print(jkm)
                     ds = []
                     data = []
                     for j in jkm:
@@ -81,8 +79,6 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,cabang,ddt,ddtor,ab
                         jam = data[ds.index(getMin)]
                 elif a['punch'] == 1:
                     jkp = [jk for jk in jamkerja if jk["kk_id"] == ab["pegawai__kelompok_kerja_id"] and jk["jam_pulang"] >= bb_msk.time() and jk["jam_pulang"] <= ba_msk.time() and jk["hari"] == hari]
-                    if pg["userid"] == "222249":
-                        print(jkm)
                     data = []
                     ds = []
                     for j in jkp:

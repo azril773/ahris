@@ -999,15 +999,15 @@ def sinkrondatamemsin(r):
     mesin = mesin_db.objects.using(r.session["ccabang"]).filter(~Q(ipaddress="15.59.254.211"),status="Active")
     userid = [p["userid"] for p in pegawai_db.objects.using(r.session["ccabang"]).all().values("id","userid","nama")]
     useridarsip = [p["userid"] for p in pegawai_db_arsip.objects.using(r.session['ccabang']).all().values("id","userid","nama")]
-    userids = userid
-    zk1 = ZK("15.59.254.211",4370)
-    conn1 = zk1.connect()
-    conn1.disable_device()
-    zkmaster = ZK("15.59.254.211",4370)
+    userids = userid + useridarsip
+
+
+    zkmaster = ZK("15.59.254.28323876",4370)
     conn = zkmaster.connect()
+    zkmaster.disable_device()
     usersmaster = conn.get_users()
-    usermasters  = [ud.user_id for ud in usersmaster]
-    print([uf for uf in userids if uf not in usermasters])
+    # usermasters  = [ud.user_id for ud in usersmaster]
+
     useridac = [us.user_id for us in usersmaster if us.user_id in userids]
     data = {'userid':[],"nama":[],"mesin":''}
     print("OKOKOK")
@@ -1025,18 +1025,18 @@ def sinkrondatamemsin(r):
             for us in userid:
                 if us.user_id in userids:
                     if us.user_id not in useridss:
-                    #         # print(us.user_id)
-                        # conn1.set_user(name=us.name,privilege=us.privilege,password=us.password,user_id=us.user_id,card=0)
-                        # lastuser = conn1.get_users()[-1]
-                        # template = [tmp for tmp in templates if tmp.uid == us.uid]
-                        # for t in template:
-                        #     user = usr.User(uid=lastuser.uid,name=lastuser.name,privilege=lastuser.privilege,password=lastuser.password,group_id=lastuser.group_id,user_id=lastuser.user_id,card=0)
-                        #     f = finger.Finger(lastuser.uid,t.fid,t.valid,t.template)
-                        #     conn1.save_user_template(user,f)
-                        # print(us.user_id)
+                        conn.set_user(name=us.name,privilege=us.privilege,password=us.password,user_id=us.user_id,card=0)
+                        lastuser = conn.get_users()[-1]
+                        template = [tmp for tmp in templates if tmp.uid == us.uid]
+                        for t in template:
+                            user = usr.User(uid=lastuser.uid,name=lastuser.name,privilege=lastuser.privilege,password=lastuser.password,group_id=lastuser.group_id,user_id=lastuser.user_id,card=0)
+                            f = finger.Finger(lastuser.uid,t.fid,t.valid,t.template)
+                            conn.save_user_template(user,f)
+
+
                         useridss.append(us.user_id)
                         # else:
-                        #     conn1.set_user(uid=,name=us.name,privilege=us.privilege,password=us.password,group_id=us.group_id,user_id=us.user_id,card=0)
+                        #     conn.set_user(uid=,name=us.name,privilege=us.privilege,password=us.password,group_id=us.group_id,user_id=us.user_id,card=0)
             print(useridss)
             # time.sleep(1)
             conn2.enable_device()
@@ -1045,15 +1045,11 @@ def sinkrondatamemsin(r):
         except:
             conn2.enable_device()
             conn2.disconnect()
-    print(useridss)
     conn.enable_device()
     conn.disconnect()
-    conn1.enable_device()
-    conn1.disconnect()
 
-    print(useridss)
-    dt = pd.DataFrame(data)
-    dt.to_excel('excel.xlsx')
+    # dt = pd.DataFrame(data)
+    # dt.to_excel('excel.xlsx')
     return JsonResponse(data,safe=False)
 
 
@@ -1149,33 +1145,57 @@ def sin(r):
     conn.disconnect()
     pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=pg["id"],userid=pg["userid"]) for pg in newpgw],["userid"])
 
-def bynama(r,nama):
-    zk = ZK("15.59.254.212",4370)
-    conn = zk.connect()
-    conn.disable_device()
-    users = conn.get_users()
-    templates = conn.get_templates()
-    user = [user for user in users if user.uid == 1570]
-    # conn.set_user(uid=user[0].uid,name=user[0].name,user_id="217056",privilege=user[0].privilege,password=user[0].password)
-    print(user)
-    # print([tmp for tmp in templates if tmp.uid == 1548])
-    # templates = conn.get_templates()
-    # print([user for user in users if user.user_id == '207032'])
-    # zk1 = ZK('15.59.254.211',4370)
-    # conn1 = zk1.connect()
-    # conn1.disable_device()
-    # template = [tmp for tmp in templates if tmp.uid == 911]
-    # conn1.set_user(uid=911,user_id='217070',name="DEVIA NOVIANI R",privilege=const.USER_DEFAULT,password='',card=0)
-    # user = [user for user in conn1.get_users() if user.uid == 911]
-    # print(user)
-    # conn1.save_user_template(user[0],template)
+def bynama(r):
+    if r.method == "POST":
+        mesin = r.POST.get("mesin")
+        nama = r.POST.get("nama")
+        print(nama,mesin)
+        if nama is None or mesin is None:
+            return JsonResponse({"status":'error',"msg":"Harap isi form dengan benar"},status=400)
+        zk = ZK(mesin,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        users = conn.get_users()
+        templates = conn.get_templates()
+        user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password} for user in users if user.name.strip() == nama.strip()]
+        template = []
+        if len(user) > 0:
+            template = [{'uid':tmp.uid,"fid":tmp.fid,"size":tmp.size} for tmp in templates if tmp.uid == user[0]["uid"]]
+            user = user[0]
+        conn.enable_device()
+        conn.disconnect()
+        if len(user) <= 0 and len(template) <= 0:
+            return JsonResponse({"status":"error",'msg':"Data tidak ada"},status=400)
+        return JsonResponse({"status":"success","msg":"berhasil ambil data","user":user,"finger":template},status=200)
+    
+def byuserid(r):
+    if r.method == "POST":
+        mesin = r.POST.get("mesin")
+        userid = r.POST.get("userid")
+        zk = ZK(mesin,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        users = conn.get_users()
+        templates = conn.get_templates()
+        user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.level,"password":user.password} for user in users if str(user.user_id) == str(userid)]
+        conn.enable_device()
+        conn.disconnect()
+        return JsonResponse({"status":"success","msg":"berhasil ambil data","data":user},status=200)
 
-    # conn1.enable_device()
-    # conn1.disconnect()
-    # # print(template)
-    # print([user for user in users if user.user_id == '217070'])
-    conn.enable_device()
-    conn.disconnect()
+def byuid(r):
+    if r.method == "POST":
+        mesin = r.POST.get("mesin")
+        uid = r.POST.get("uid")
+        zk = ZK(mesin,4370)
+        conn = zk.connect()
+        conn.disable_device()
+        users = conn.get_users()
+        templates = conn.get_templates()
+        user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.level,"password":user.password} for user in users if int(user.uid) == int(uid)]
+        conn.enable_device()
+        conn.disconnect()
+        return JsonResponse({"status":"success","msg":"berhasil ambil data","data":user},status=200)
+
 
 def haha(r):
     zk = ZK("15.59.254.211",4370)
