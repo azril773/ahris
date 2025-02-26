@@ -289,10 +289,9 @@ def pegawai(r,sid):
             statusid.append(p.status_id)
             # print(p)
         status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")    
-        st = status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=sid).last()
-        if not st:
-            messages.error(r,"Status pegawai tidak ada")
-            return redirect("beranda")  
+        st = None
+        if sid != 0:
+            st = status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=sid).last()
         # status = serialize("json",status)
         data = {
             'akses' : akses,
