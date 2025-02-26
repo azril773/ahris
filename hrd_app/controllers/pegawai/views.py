@@ -267,8 +267,10 @@ def pegawai(r,sid):
         dsid = dakses.sid_id     
         lastuserid = 0
         if sid != 0:
-            lastpgw = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid).order_by("userid").last()
-            lastpgwarsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(status_id=sid).order_by("userid").last()
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid)
+            pegawaiarsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(status_id=sid)
+            lastpgw = sorted(pegawai, key=lambda i: int(i.userid))[-1]
+            lastpgwarsip = sorted(pegawaiarsip, key=lambda i: int(i.userid))[-1]
             if lastpgw is not None and lastpgwarsip is None:
                 lastuserid = lastpgw.userid
             elif lastpgwarsip is not None and lastpgw is None:
@@ -286,7 +288,11 @@ def pegawai(r,sid):
         for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
             statusid.append(p.status_id)
             # print(p)
-        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")      
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")    
+        st = status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=sid).last()
+        if not st:
+            messages.error(r,"Status pegawai tidak ada")
+            return redirect("beranda")  
         # status = serialize("json",status)
         data = {
             'akses' : akses,
@@ -296,6 +302,7 @@ def pegawai(r,sid):
             'dsid': dsid,
             "lastuserid":lastuserid,
             'sid': int(sid),
+            'st':st,
             'status' : status,
             'modul_aktif' : 'Pegawai'
         }

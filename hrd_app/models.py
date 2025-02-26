@@ -61,6 +61,7 @@ class sidikjari_db(models.Model):
 # ==================================================================
 class status_pegawai_db(models.Model):
     status = models.CharField(max_length=100, unique=True)
+    kode = models.IntegerField(null=True)
 
     def __str__(self):
         return self.status
