@@ -1307,7 +1307,7 @@ def print_laporan_divisi_excel(r):
                     if ab.kembali is not None:
                         if ab.lama_istirahat is not None and ab.istirahat is not None:
                             if datetime.combine(ab.tgl_absen,ab.kembali) > (datetime.combine(ab.tgl_absen,ab.istirahat) + timedelta(hours=int(ab.lama_istirahat))): 
-                                bataskmb = f'{ab.kembali}'
+                                bataskmb = f'<span class="text-danger">{ab.kembali}</span>'
                             else:
                                 bataskmb = f"{ab.kembali}"
                         else:
@@ -1317,7 +1317,7 @@ def print_laporan_divisi_excel(r):
                     elif ab.kembali is not None and ab.kembali2 is None:    
                         kmb = f'{bataskmb}'
                     elif ab.kembali is None and ab.kembali2 is not None:                  
-                        kmb = f'{bataskmb}'    
+                        kmb = f'{ab.kembali2}'    
                     else:
                         kmb = "-"        
                     if ab.kembali_b is not None and ab.kembali2_b is not None:
