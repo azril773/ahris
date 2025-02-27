@@ -500,6 +500,7 @@ def cdatamesin(r):
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
         divisi = divisi_db.objects.using(r.session["ccabang"]).all()
         datamesin = datamesin_db.objects.using(r.session["ccabang"]).all()
+        print(r.session["user"])
         data = {       
             'dsid': dsid,
             "mesin":mesin,
@@ -510,6 +511,7 @@ def cdatamesin(r):
             "ccabang":r.session["ccabang"],
             "nama":r.session["user"]["nama"],
             "divisi":divisi,
+            "admin":r.session["user"]["admin"],
             'modul_aktif' : 'Mesin'     
         }
         
@@ -1144,6 +1146,8 @@ def sin(r):
     conn.disconnect()
     pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=pg["id"],userid=pg["userid"]) for pg in newpgw],["userid"])
 
+
+authorization(["root"])
 def byfilter(r):
     if r.method == "POST":
         mesin = r.POST.getlist("mesin[]")
@@ -1183,6 +1187,7 @@ def byfilter(r):
 
         return JsonResponse({"status":"success","msg":"berhasil ambil data","users":userdt,"fingers":templatesdt},status=200)
 
+authorization(["root"])
 def adddtmesin(r):
     mesin = r.POST.getlist("mesin[]")
     userid = r.POST.getlist("userid[]")
