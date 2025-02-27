@@ -23,5 +23,6 @@ urlpatterns = [
     path('getmesin', views.getmesin, name='getmesin'),
     path('cekmesin', views.cekmesin, name='cekmesin'),
     path('listdata_json', views.listdata_json, name='listdata_json'),
+    path('adddtmesin', views.adddtmesin, name='adddtmesin'),
 
 ]

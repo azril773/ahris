@@ -499,11 +499,12 @@ def cdatamesin(r):
         mesin = mesin_db.objects.using(r.session["ccabang"]).all()
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
         divisi = divisi_db.objects.using(r.session["ccabang"]).all()
+        datamesin = datamesin_db.objects.using(r.session["ccabang"]).all()
         data = {       
             'dsid': dsid,
             "mesin":mesin,
             "pegawai":pegawai,
-
+            "datamesin":datamesin,
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
@@ -1067,8 +1068,6 @@ def setuserid(r,sid):
             sidik = sidikjari_db.objects.using(r.session["ccabang"]).all().values("id","userid","uid")
             newdm = []
             newsdk = []
-            failpgw = []
-            failuserid = []
             useridmesin  = [dm["userid"] for dm in datamesin if re.search('218\d{3}',dm["userid"])]
             print(useridmesin)
             newpgw = [pg for pg in pegawai if pg["userid"] not in useridmesin]
@@ -1145,70 +1144,64 @@ def sin(r):
     conn.disconnect()
     pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=pg["id"],userid=pg["userid"]) for pg in newpgw],["userid"])
 
-def bynama(r):
+def byfilter(r):
     if r.method == "POST":
-        mesin = r.POST.get("mesin")
-        nama = r.POST.get("nama")
-        print(nama,mesin)
-        if nama is None or mesin is None:
+        mesin = r.POST.getlist("mesin[]")
+        data = r.POST.get("data")
+        filter = r.POST.get("filter")
+        print(mesin,data,filter)
+        if data is None or mesin is None or filter is None:
             return JsonResponse({"status":'error',"msg":"Harap isi form dengan benar"},status=400)
-        zk = ZK(mesin,4370)
+        mesindb = mesin_db.objects.using(r.session["ccabang"]).filter(id__in=mesin)
+        userdt = []
+        templatesdt =[]
+        for m in mesindb:
+            zk = ZK(m.ipaddress,4370)
+            conn = zk.connect()
+            conn.disable_device()
+            users = conn.get_users()
+            templates = conn.get_templates()
+            user = []
+            # Check filter
+            if filter == 'nama':
+                user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if user.name.strip() == data.strip()]
+            elif filter == 'userid':
+                user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if str(user.user_id) == str(data)]
+            elif filter == 'uid':
+                user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if int(user.uid) == int(data)]
+            else:
+                return JsonResponse({"status":'error',"msg":"Filter tidak diketahui"},status=400)
+            
+            # Get template by uid user
+            if len(user) > 0:
+                [templatesdt.append({'uid':tmp.uid,"fid":tmp.fid,"size":tmp.size,"mesin":m.nama}) for tmp in templates if tmp.uid == user[-1]["uid"]]
+                userdt.append(user[-1])
+
+            # Enable device and disconnect
+            conn.enable_device()
+            conn.disconnect()
+
+        return JsonResponse({"status":"success","msg":"berhasil ambil data","users":userdt,"fingers":templatesdt},status=200)
+
+def adddtmesin(r):
+    mesin = r.POST.getlist("mesin[]")
+    userid = r.POST.getlist("userid[]")
+    datamesin = datamesin_db.objects.using(r.session["ccabang"]).filter(userid__in=userid)
+    sidikjari = sidikjari_db.objects.using(r.session["ccabang"]).filter(userid__in=userid)
+    for m in mesin:
+        zk = ZK(m,4370)
         conn = zk.connect()
         conn.disable_device()
-        users = conn.get_users()
-        templates = conn.get_templates()
-        user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password} for user in users if user.name.strip() == nama.strip()]
-        template = []
-        if len(user) > 0:
-            template = [{'uid':tmp.uid,"fid":tmp.fid,"size":tmp.size} for tmp in templates if tmp.uid == user[0]["uid"]]
-            user = user[0]
+        for u in datamesin:
+            fingers = [sd for sd in sidikjari if str(sd.userid) == str(u.userid)]
+            conn.set_user(uid=u.uid,user_id=u.userid,name=u.nama,password=u.password,privilege=u.level,card=0)
+            user = usr.User(uid=u.uid,name=u.nama,privilege=u.level,password=u.password,user_id=u.userid)
+            templates = []
+            for s in fingers:
+                templates.append(finger.Finger(uid=s.uid,fid=s.fid,valid=s.valid,template=s.template))
+            conn.save_user_template(user,templates)
         conn.enable_device()
         conn.disconnect()
-        if len(user) <= 0 and len(template) <= 0:
-            return JsonResponse({"status":"error",'msg':"Data tidak ada"},status=400)
-        return JsonResponse({"status":"success","msg":"berhasil ambil data","user":user,"finger":template},status=200)
-    
-def byuserid(r):
-    if r.method == "POST":
-        mesin = r.POST.get("mesin")
-        userid = r.POST.get("userid")
-        zk = ZK(mesin,4370)
-        conn = zk.connect()
-        conn.disable_device()
-        users = conn.get_users()
-        templates = conn.get_templates()
-        user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.level,"password":user.password} for user in users if str(user.user_id) == str(userid)]
-        conn.enable_device()
-        conn.disconnect()
-        return JsonResponse({"status":"success","msg":"berhasil ambil data","data":user},status=200)
-
-def byuid(r):
-    if r.method == "POST":
-        mesin = r.POST.get("mesin")
-        uid = r.POST.get("uid")
-        zk = ZK(mesin,4370)
-        conn = zk.connect()
-        conn.disable_device()
-        users = conn.get_users()
-        templates = conn.get_templates()
-        user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.level,"password":user.password} for user in users if int(user.uid) == int(uid)]
-        conn.enable_device()
-        conn.disconnect()
-        return JsonResponse({"status":"success","msg":"berhasil ambil data","data":user},status=200)
-
-
-def haha(r):
-    zk = ZK("15.59.254.211",4370)
-    conn = zk.connect()
-    conn.disable_device()
-    dm = datamesin_db.objects.using(r.session["ccabang"]).filter(userid='217305').last()
-    conn.set_user(uid=dm.uid,user_id=dm.userid,name=dm.nama,password=dm.password,privilege=dm.level,card=0)
-    sidik = sidikjari_db.objects.using(r.session["ccabang"]).filter(userid='217305')
-    user = usr.User(uid=dm.uid,name=dm.nama,privilege=dm.level,password=dm.password,user_id=dm.userid)
-    fingers = []
-    for s in sidik:
-        fingers.append(finger.Finger(uid=s.uid,fid=s.fid,valid=s.valid,template=s.template))
-    conn.save_user_template(user,fingers)
 
 
 def senddata(r,sid):

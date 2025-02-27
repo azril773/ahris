@@ -1305,7 +1305,7 @@ def pabsen(req):
                         opg_detail.save(using=cabang)
                     # jika masuk dan pulang
                     else:
-                        opg_detail["diambil_tgl"] = None
+                        opg_detail.diambil_tgl = None
                         opg_detail.edit_by = 'Program'
                         opg_detail.save(using=cabang)
                             
