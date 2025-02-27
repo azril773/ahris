@@ -500,7 +500,7 @@ def laporan_json_periode(r,sid,id,dr,sp):
             elif ab.kembali is not None and ab.kembali2 is None:    
                 kmb = f'{bataskmb}'
             elif ab.kembali is None and ab.kembali2 is not None:                  
-                kmb = f'{bataskmb}'    
+                kmb = f'{ab.kembali2}'    
             else:
                 kmb = "-"               
             
@@ -687,7 +687,7 @@ def laporan_json_periode_excel(r,sid,id,bulan,tahun):
             elif ab.kembali is not None and ab.kembali2 is None:    
                 kmb = f'{bataskmb}'
             elif ab.kembali is None and ab.kembali2 is not None:                  
-                kmb = f'{bataskmb}'    
+                kmb = f'{ab.kembali2}'    
             else:
                 kmb = "-"               
             
@@ -1109,7 +1109,7 @@ def print_laporan_divisi(r):
                     elif ab.kembali is not None and ab.kembali2 is None:    
                         kmb = f'{bataskmb}'
                     elif ab.kembali is None and ab.kembali2 is not None:                  
-                        kmb = f'{bataskmb}'    
+                        kmb = f'{ab.kembali2}'    
                     else:
                         kmb = "-"        
                     if ab.kembali_b is not None and ab.kembali2_b is not None:
