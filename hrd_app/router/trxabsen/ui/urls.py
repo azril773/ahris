@@ -3,5 +3,5 @@ from hrd_app.controllers import views
 
 
 urlpatterns = [
-    path("trxabsen",views.trxabsen,name="trxabsen")
+    # path("trxabsen",views.trxabsen,name="trxabsen")
 ]
