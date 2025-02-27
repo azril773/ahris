@@ -105,6 +105,11 @@ urlpatterns = [
 
     path("",include("hrd_app.router.pegawai_cuti.ui.urls")),
     path("",include("hrd_app.router.pegawai_cuti.backend.urls")),
+
+
+    
+    path("",include("hrd_app.router.trxabsen.ui.urls")),
+    path("",include("hrd_app.router.trxabsen.backend.urls")),
     
 
     path('pengaturan', views.pengaturan, name='pengaturan'),

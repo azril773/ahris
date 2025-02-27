@@ -718,6 +718,7 @@ def laporan_json_periode_excel(r,sid,id,bulan,tahun):
                 sln = 1
             else:
                 sln = 0
+            print(plg,ab.pegawai.nama)
             if msk != "-" or plg != "-" or kmb != "-" or ist != "-" or msk_b != "-" or plg_b != "-" or kmb_b != "-" or ist_b != "-":
                 obj["tgl"].append(datetime.strftime(ab.tgl_absen,'%d-%m-%Y'))
                 obj["hari"].append(hari_ini)
@@ -995,6 +996,7 @@ def print_laporan_divisi(r):
     dr = r.POST.get("dari")
     sp = r.POST.get("sampai")
     # 
+    print("OKOKO")
     try:
         iduser = r.session["user"]["id"]
         
@@ -1142,7 +1144,7 @@ def print_laporan_divisi(r):
                         tgl_absen = True
                     else:
                         tgl_absen = False
-                    
+                    print(plg,ab.pegawai.nama)
                     absen = {
                         'id': ab.id,
                         'tgl': datetime.strftime(ab.tgl_absen,'%d-%m-%Y'),
@@ -1236,7 +1238,8 @@ def print_laporan_divisi_excel(r):
                 tselisih = 0.0
                 trlmbt = 0
                 for a in absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(tgl_absen__range=(dari,sampai),pegawai_id=p.pk).order_by('tgl_absen','pegawai__divisi__divisi'):
-                    ab = absensi_db.objects.using(r.session["ccabang"]).get(id=a.id)     
+                    ab = absensi_db.objects.using(r.session["ccabang"]).get(id=a.id)    
+                    print(ab.pulang,ab.pegawai.nama) 
                     if a.masuk is not None and a.pulang is not None and a.masuk_b is None and a.pulang_b is None:
                         kehadiran += 1
                     elif a.masuk_b is not None and a.pulang_b is not None and a.masuk is not None and a.pulang is not None:
@@ -1265,6 +1268,7 @@ def print_laporan_divisi_excel(r):
                         plg_b = f"{ab.pulang_b}"
                     else:
                         plg_b = "-"
+
                     plg = ""
                     if ab.pulang is not None:
                         if ab.jam_pulang is not None:

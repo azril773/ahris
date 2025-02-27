@@ -307,7 +307,7 @@
             {% csrf_token %}
             <div class="d-flex justify-content-start" style="width: 100%;">
                 <div class="" style="width: 100%;">
-                    <label for="pegawai" class="hitam">Pegawai</label>
+                    <label for="userid" class="hitam">Userid</label>
                     <input type="text" class="form-control" name="userid" id="userid">
                 </div>
                 &nbsp
@@ -365,20 +365,21 @@
         <hr>
         <h5 class='hitam'># Tambah ke mesin dengan datamesin</h5>
         <form action="{% url 'adddtmesin' %}" method="post">
+            {% csrf_token %}
             <div class="d-flex justify-content-start" style="width: 100%;">
                 <div class="" style="width: 100%;">
                     <label for="dtpegawai" class="hitam">Data Pegawai</label>
                     <select name="dtpegawai[]" class="mesint"  id="dtpegawai" >
                         <option value="">Pilih Data Pegawai</option>
                         {% for dt in datamesin %}
-                        <option value="{{dt.id}}">{{dt.nama}} - {{dt.uid}} - {{dt.userid}}</option>
+                        <option value="{{dt.userid}}">{{dt.nama}} - {{dt.uid}} - {{dt.userid}}</option>
                         {% endfor %}
                     </select>
                     <b class="hitam">Nama - UID - Userid</b>
                 </div>
                 <div class="" style="width: 100%;">
                     <label for="mesindtmesin" class="hitam">Mesin Tujuan</label>
-                    <select name="mesindtmesin[]" class="mesin"  id="mesindtmesin" >
+                    <select name="mesindtmesin[]" class="mesint"  id="mesindtmesin" >
                         <option value="">Pilih Mesin Tujuan</option>
                         {% for m in mesin %}
                         <option value="{{m.ipaddress}}">{{m.nama}} - {{m.ipaddress}}</option>
