@@ -905,7 +905,7 @@ def print_laporan_pegawai(r):
                 elif ab.kembali is not None and ab.kembali2 is None:    
                     kmb = f'{bataskmb}'
                 elif ab.kembali is None and ab.kembali2 is not None:                  
-                    kmb = f'{bataskmb}'    
+                    kmb = f'{ab.kembali2}'    
                 else:
                     kmb = "-"        
                 if ab.kembali_b is not None and ab.kembali2_b is not None:
