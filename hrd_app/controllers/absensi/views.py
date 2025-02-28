@@ -8,7 +8,7 @@ from multiprocessing import Pool
 import ast
 from hrd_app.function import prosesabsensi
 import cProfile
-import sys, os
+
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # Absensi
 @authorization(["*"])
@@ -1308,7 +1308,6 @@ def pabsen(req):
                         opg_detail.diambil_tgl = None
                         opg_detail.edit_by = 'Program'
                         opg_detail.save(using=cabang)
-                            
                 else:
                     pass        
             

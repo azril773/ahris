@@ -1,0 +1,208 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        <!-- Pesan Error -->
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <div id="msg"></div>
+
+        <h5 class="hitam"># Transaksi Absensi</h5>
+        <div class="row mb-4">
+            <div class="col-md-3" style="width: 100%;">
+                <label for="mesin" class="hitam">Pilih Mesin</label>
+                <select name="mesin[]" id="mesin" class="mesint">
+                    <option value="">Pilih Mesin</option>
+                    {% for m in mesin %}
+                        <option value="{{m.id}}">{{m.nama}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="dari" class="hitam">Dari</label>
+                <input type="text" name="dari" id="dari" class="form-control tgl1" autocomplete="off">
+            </div>
+            <div class="col-md-3">
+                <label for="sampai" class="hitam">Sampai</label>
+                <input type="text" name="sampai" id="sampai" class="form-control tgl1" autocomplete="off">
+
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button class="btn btn-primary" id="cari">Cari Data</utton>
+            </div>
+        </div>
+        <div class=""  style="width: 100%">
+            <table id="tabletrx"  style="width: 100%">
+                <thead>
+                    <tr>
+                        <td class="hitam">Userid</td>
+                        <td class="hitam">Nama</td>
+                        <td class="hitam">Jam Absen</td>
+                        <td class="hitam">Mesin</td>
+                    </tr>
+                </thead>
+    
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <br>
+        <br>
+        <br>
+        <br>
+        <h5 class="hitam"># Pegawai yang tidak ada transaksi lebih dari 30 hari</h5>
+        <div class="d-flex justify-content-end mb-4">
+            <button class="btn btn-primary" id="cek">Cek Data</button>
+        </div>
+        <div class=""  style="width: 100%">
+            <table id="tablenon"  style="width: 100%">
+                <thead>
+                    <tr>
+                        <td class="hitam">Userid</td>
+                        <td class="hitam">Absen Terakhir</td>
+                        <td class="hitam">Mesin</td>
+                    </tr>
+                </thead>
+    
+                <tbody></tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>
+    $(".mesint").selectize({maxItems:null})
+    const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
+    $("#tabletrx").DataTable({
+        destroy: true,
+        ordering: false,
+        paging: false,
+        scrollX:"100%",
+        scrollY: 300,
+        processing: true,
+    })
+    $("#tablenon").DataTable({
+        destroy: true,
+        ordering: false,
+        paging: false,
+        scrollX:"100%",
+        scrollY: 300,
+        processing: true,
+    })
+    
+    $("#cari").on("click",function(e){
+        const mesin = $('#mesin').val() ? $("#mesin").val() : undefined
+        const dari = $("#dari").val() ? $("#dari").val() : undefined
+        const sampai = $("#sampai").val() ? $("#sampai").val() : undefined
+
+        $("#tabletrx").DataTable().destroy()
+        $("#tabletrx").DataTable({
+            ajax:{
+                url:'{% url "trxabsen_json" %}',
+                method:"post",
+                data:{mesin,dari,sampai},
+                headers:{"X-CSRFToken":token},
+                error:(err) => {
+                    $("#msg p").remove()
+                    if(err.responseJSON?.msg){
+                        $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    }else{
+                        $("#msg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                    }
+                }
+            },
+            columns:[
+                {data:'userid'},
+                {data:'nama'},
+                {data:'jam_absen'},
+                {data:'mesin'},
+            ],
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+            },
+            destroy: true,
+            ordering: false,
+            paging: false,
+            scrollX:"100%",
+            scrollY: 300,
+            processing: true,
+        })
+    })
+
+    $("#cek").on("click",function(e){
+        $("#tablenon").DataTable().destroy()
+        $("#tablenon").DataTable({
+            ajax:{
+                url:'{% url "trxabsen_non" %}',
+                method:"post",
+                headers:{"X-CSRFToken":token},
+                error:(err) => {
+                    $("#msg p").remove()
+                    if(err.responseJSON?.msg){
+                        $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    }else{
+                        $("#msg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                    }
+                }
+            },
+            columns:[
+                {data:'userid'},
+                {data:'lastabsen'},
+                {data:'mesin'},
+            ],
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+            },
+            destroy: true,
+            ordering: false,
+            paging: false,
+            scrollX:"100%",
+            scrollY: 300,
+            processing: true,
+        })
+    })
+</script>
+
+{% endblock hrd_ajax %}

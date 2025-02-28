@@ -1,5 +1,5 @@
 from hrd_app.controllers.lib import *
-from zk import user as usr,finger
+from zk import user as usr,finger, exception
 
 
 def amesin(r):
@@ -998,154 +998,6 @@ def testmesin(r):
     conn.enable_device()
     conn.disconnect()
 
-def sinkrondatamemsin(r):
-    mesin = mesin_db.objects.using(r.session["ccabang"]).filter(~Q(ipaddress="15.59.254.211"),status="Active")
-    userid = [p["userid"] for p in pegawai_db.objects.using(r.session["ccabang"]).all().values("id","userid","nama")]
-    useridarsip = [p["userid"] for p in pegawai_db_arsip.objects.using(r.session['ccabang']).all().values("id","userid","nama")]
-    userids = userid + useridarsip
-
-
-    zkmaster = ZK("15.59.254.28323876",4370)
-    conn = zkmaster.connect()
-    zkmaster.disable_device()
-    usersmaster = conn.get_users()
-    # usermasters  = [ud.user_id for ud in usersmaster]
-
-    useridac = [us.user_id for us in usersmaster if us.user_id in userids]
-    data = {'userid':[],"nama":[],"mesin":''}
-    print("OKOKOK")
-    useridss = []
-    userdata = []
-    
-    for m in mesin:
-        print(m.nama)
-        try:
-            zk = ZK(m.ipaddress,4370)
-            conn2 = zk.connect()
-            users = conn2.get_users()
-            templates = conn2.get_templates()
-            userid = [us for us in users if us.user_id not in useridac]
-            for us in userid:
-                if us.user_id in userids:
-                    if us.user_id not in useridss:
-                        conn.set_user(name=us.name,privilege=us.privilege,password=us.password,user_id=us.user_id,card=0)
-                        lastuser = conn.get_users()[-1]
-                        template = [tmp for tmp in templates if tmp.uid == us.uid]
-                        for t in template:
-                            user = usr.User(uid=lastuser.uid,name=lastuser.name,privilege=lastuser.privilege,password=lastuser.password,group_id=lastuser.group_id,user_id=lastuser.user_id,card=0)
-                            f = finger.Finger(lastuser.uid,t.fid,t.valid,t.template)
-                            conn.save_user_template(user,f)
-
-
-                        useridss.append(us.user_id)
-                        # else:
-                        #     conn.set_user(uid=,name=us.name,privilege=us.privilege,password=us.password,group_id=us.group_id,user_id=us.user_id,card=0)
-            print(useridss)
-            # time.sleep(1)
-            conn2.enable_device()
-            conn2.disconnect()
-            # time.sleep(1)
-        except:
-            conn2.enable_device()
-            conn2.disconnect()
-    conn.enable_device()
-    conn.disconnect()
-
-    # dt = pd.DataFrame(data)
-    # dt.to_excel('excel.xlsx')
-    return JsonResponse(data,safe=False)
-
-
-def setuserid(r,sid):
-    # Pegawai dan pegawai arsip ada di dalam datamesin
-    # Pegawai dengan userid yang ada di dalam datamesin bisa di proses dan bisa mempunyai userid yang baru
-    # 
-    with transaction.atomic(using=r.session["ccabang"]):
-        try:
-            if not status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=sid).last():
-                return JsonResponse({"status":'error',"msg":"status pegawai tidak ada"})
-            init = 217000
-            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid).values("id","userid","nama").order_by("nama")
-            datamesin = datamesin_db.objects.using(r.session["ccabang"]).all().values("id","nama","userid","uid")
-            sidik = sidikjari_db.objects.using(r.session["ccabang"]).all().values("id","userid","uid")
-            newdm = []
-            newsdk = []
-            useridmesin  = [dm["userid"] for dm in datamesin if re.search('217\d{3}',dm["userid"])]
-            print(useridmesin)
-            newpgw = [pg for pg in pegawai if pg["userid"] not in useridmesin]
-            userint = [int(us) for us in useridmesin]
-            for pgw in newpgw:
-                init += 1
-                while True:
-                    # print(init)
-                    if init in userint:
-                        init +=1 
-                    else:
-                        break
-                dtmesin = next((dm for dm in datamesin if dm["userid"] == pgw["userid"]),None)
-                if not dtmesin:
-                    continue
-                sidikjari = [sdk for sdk in sidik if sdk["userid"] == pgw["userid"]]
-                    
-                pgw["userid"] = init
-
-                for s in sidikjari:
-                    s["userid"] = pgw["userid"]
-                    newsdk.append(s)
-                dtmesin["userid"] = pgw["userid"]
-                newdm.append(dtmesin)
-            print(pegawai)
-            print(newdm)
-            print(newsdk)
-            pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=f["id"],userid=f["userid"]) for f in pegawai],["userid"])
-            datamesin_db.objects.using(r.session["ccabang"]).bulk_update([datamesin_db(id=dt["id"],userid=dt["userid"]) for dt in newdm],["userid"])
-            sidikjari_db.objects.using(r.session["ccabang"]).bulk_update([sidikjari_db(id=s["id"],userid=s["userid"]) for s in newsdk],["userid"])
-        except Exception as e:
-            transaction.set_rollback(True,using=r.session["ccabang"])
-            print("MASUKKK ERRROR")
-            raise e
-        
-
-def auto(r):
-    pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=10)
-    pgws = pegawai_db.objects.using(r.session["ccabang"]).all()
-    id = 1
-    for p in pegawai:
-        print(id)
-        if next((pg for pg in pgws if str(pg.userid) == str(id)), None) is None:
-            p.userid = id
-            p.save(using=r.session["ccabang"])
-            id += 1
-        else:
-            id += 1
-            continue
-
-
-def sin(r): 
-    pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=10)
-    zk = ZK("15.59.254.211",4370)
-    conn = zk.connect()
-    conn.disable_device()
-    users = conn.get_users()
-    newpgw = []
-    for p in pegawai:
-        us = next((user for user in users if user.name.strip() == p.nama.strip() and re.search('217\d{3}',user.user_id.strip()) is not None), None)
-        if not us:
-            continue
-
-        # newpgw.append(pegawai_db(id=p.pk,userid=us.user_id))
-        newpgw.append({
-            "id":p.pk,
-            'userid':us.user_id,
-            'nama':p.nama
-        })
-    print(len(newpgw))
-    print(newpgw,"PLPLPL\n\n\n")
-    conn.enable_device()
-    conn.disconnect()
-    pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=pg["id"],userid=pg["userid"]) for pg in newpgw],["userid"])
-
-
 authorization(["root"])
 def byfilter(r):
     if r.method == "POST":
@@ -1161,35 +1013,47 @@ def byfilter(r):
             templatesdt =[]
             for m in mesindb:
                 zk = ZK(m.ipaddress,4370)
-                conn = zk.connect()
-                conn.disable_device()
-                users = conn.get_users()
-                templates = conn.get_templates()
-                print(data.split(','))
-                for dt in data.split(","):
-                    user = []
-                    # Check filter
-                    if filter == 'nama':
-                        user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if user.name.strip() == dt.strip()]
-                    elif filter == 'userid':
-                        user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if str(user.user_id) == str(dt.strip())]
-                    elif filter == 'uid':
-                        user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if int(user.uid) == int(dt.strip())]
-                    else:
-                        return JsonResponse({"status":'error',"msg":"Filter tidak diketahui"},status=400)
-                    
-                    # Get template by uid user
-                    if len(user) > 0:
-                        [templatesdt.append({'uid':tmp.uid,"fid":tmp.fid,"size":tmp.size,"mesin":m.nama}) for tmp in templates if tmp.uid == user[-1]["uid"]]
-                        userdt.append(user[-1])
+                print(f"Try connect to {m.ipaddress} - {m.nama}")
+                try:
+                    conn = zk.connect()
+                    conn.disable_device()
+                    users = conn.get_users()
+                    templates = conn.get_templates()
+                    for dt in data.split(","):
+                        user = []
+                        # Check filter
+                        if filter == 'nama':
+                            user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if user.name.strip() == dt.strip()]
+                        elif filter == 'userid':
+                            user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if str(user.user_id) == str(dt.strip())]
+                        elif filter == 'uid':
+                            user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if int(user.uid) == int(dt.strip())]
+                        else:
+                            return JsonResponse({"status":'error',"msg":"Filter tidak diketahui"},status=400)
+                        
+                        # Get template by uid user
+                        if len(user) > 0:
+                            [templatesdt.append({'uid':tmp.uid,"fid":tmp.fid,"size":tmp.size,"mesin":m.nama}) for tmp in templates if tmp.uid == user[-1]["uid"]]
+                            userdt.append(user[-1])
 
-                # Enable device and disconnect
-                conn.enable_device()
-                conn.disconnect()
+                    # Enable device and disconnect
+                    conn.enable_device()
+                    conn.disconnect()
+                    print(f"Success connect to {m.ipaddress} - {m.nama}")
+                except Exception as e:
+                    conn.enable_device()
+                    conn.disconnect()
+                    if type(e) == exception.ZKErrorResponse:
+                        raise Exception(f"Terjadi kesalahan pada mesin {m.ipaddress} - {m.nama}")
+                    raise e
 
             return JsonResponse({"status":"success","msg":"berhasil ambil data","users":userdt,"fingers":templatesdt},status=200)
         except Exception as e:
-            return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=400)
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            msg = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
+            return JsonResponse({"status":"error","msg":msg},status=400)
 
 authorization(["root"])
 def adddtmesin(r):
@@ -1200,55 +1064,33 @@ def adddtmesin(r):
         sidikjari = sidikjari_db.objects.using(r.session["ccabang"]).filter(userid__in=userid)
         for m in mesin:
             zk = ZK(m,4370)
-            conn = zk.connect()
-            conn.disable_device()
-            for u in datamesin:
-                print(u)
-                fingers = [sd for sd in sidikjari if str(sd.userid) == str(u.userid)]
-                print(fingers)
-                conn.set_user(uid=u.uid,user_id=u.userid,name=u.nama,password=u.password,privilege=u.level,card=0)
-                user = usr.User(uid=u.uid,name=u.nama,privilege=u.level,password=u.password,user_id=u.userid)
-                templates = []
-                for s in fingers:
-                    templates.append(finger.Finger(uid=s.uid,fid=s.fid,valid=s.valid,template=s.template))
-                conn.save_user_template(user,templates)
-            conn.enable_device()
-            conn.disconnect()
+            try:
+                conn = zk.connect()
+                conn.disable_device()
+                for u in datamesin:
+                    print(u)
+                    fingers = [sd for sd in sidikjari if str(sd.userid) == str(u.userid)]
+                    print(fingers)
+                    conn.set_user(uid=u.uid,user_id=u.userid,name=u.nama,password=u.password,privilege=u.level,card=0)
+                    user = usr.User(uid=u.uid,name=u.nama,privilege=u.level,password=u.password,user_id=u.userid)
+                    templates = []
+                    for s in fingers:
+                        templates.append(finger.Finger(uid=s.uid,fid=s.fid,valid=s.valid,template=s.template))
+                    conn.save_user_template(user,templates)
+                conn.enable_device()
+                conn.disconnect()
+            except Exception as e:
+                conn.enable_device()
+                conn.disconnect()
+                raise e
         return redirect("cdatamesin")
     except Exception as e:
-        messages.error(r,"Terjadi kesalahan")
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        msg = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
+        messages.error(r,msg)
         return redirect("cdatamesin")
-
-def senddata(r,sid):
-    if sid == 0:
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
-    else:
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid)
-        
-    zk = ZK('15.59.254.212',4370)
-    print('ok')
-    conn = zk.connect()
-    conn.disable_device()
-    datamesin = datamesin_db.objects.using(r.session["ccabang"]).all()
-    templates = sidikjari_db.objects.using(r.session['ccabang']).all()
-    for pgw in pegawai:
-        print(pgw)
-        dmesin = next((mesin for mesin in datamesin if mesin.userid == pgw.userid), None)
-        temp = [sd for sd in templates if sd.userid == pgw.userid]
-        if not dmesin:
-            continue
-        conn.set_user(uid=dmesin.uid,name=dmesin.nama,password=dmesin.password if dmesin.password is not None else '',user_id=dmesin.userid,privilege=dmesin.level)
-        user = usr.User(dmesin.uid,name=dmesin.nama,privilege=dmesin.level,password=dmesin.password,user_id=dmesin.userid)
-        tmps = []
-        print(temp)
-        for tmp in temp:
-            tmps.append(finger.Finger(uid=tmp.uid,fid=tmp.fid,valid=tmp.valid,template=tmp.template))
-        conn.save_user_template(user,tmps)
-    conn.enable_device()
-    conn.disconnect()
-
-
-
 
 
 @authorization(["root","it"])
