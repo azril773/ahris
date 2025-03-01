@@ -237,7 +237,7 @@
                     <select name="pegawai" id="pegawai" class="pegawais">
                         <option value="">Pilih Pegawai</option>
                         {% for p in pegawai %}
-                            <option value="{{p.pk}}">{{p.nama}}</option>
+                            <option value="{{p.pk}}">{{p.nama}} - {{p.userid}}</option>
                         {% endfor %}
                     </select>
                 </div>
