@@ -805,7 +805,7 @@ def deleteuser_machineu(r):
             conn = zk.connect()
             conn.disable_device()
             for us in userids:
-                conn.delete_user(user_id=us)
+                conn.delete_user(user_id=us.strip())
             conn.enable_device()
             conn.disconnect()
         except Exception as e:
