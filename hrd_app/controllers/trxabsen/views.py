@@ -61,14 +61,13 @@ def trxabsen_json(r):
                 for ab in conn.get_attendance():
                     if dr <= ab.timestamp <= sp:
                         pg = next((pgw for pgw in pegawais if str(pgw["userid"]).strip() == str(ab.user_id).strip()),None)
-                        nama = None
-                        if pg is not None:
-                            nama = pg["nama"]
+                        nama = pg["nama"] if pg is not None else '-'
                         absen.append({
                             "userid":ab.user_id,
                             "jam_absen":datetime.strftime(ab.timestamp,"%Y-%m-%d %H:%M:%S"),
                             "nama":nama,
                             'userid':ab.user_id,
+                            "punch":ab.punch,
                             "mesin":m.nama
                         })
                 conn.enable_device()

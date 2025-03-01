@@ -1033,7 +1033,7 @@ def byfilter(r):
                         
                         # Get template by uid user
                         if len(user) > 0:
-                            [templatesdt.append({'uid':tmp.uid,"fid":tmp.fid,"size":tmp.size,"mesin":m.nama}) for tmp in templates if tmp.uid == user[-1]["uid"]]
+                            [templatesdt.append({'uid':tmp.uid,"fid":tmp.fid,"size":tmp.size,'userid':user[-1]["userid"],"nama":user[-1]["nama"],"mesin":m.nama}) for tmp in templates if tmp.uid == user[-1]["uid"]]
                             userdt.append(user[-1])
 
                     # Enable device and disconnect
