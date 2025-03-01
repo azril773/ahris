@@ -2527,6 +2527,7 @@ def rp_mesin(r):
             'dsid': dsid,
             "mesin":mesin,
             "pegawai":pegawai,
+            "cabang":r.session["cabang"],
             "divisi":divisi,
             'modul_aktif' : 'Mesin'     
         }
