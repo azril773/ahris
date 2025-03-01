@@ -520,6 +520,7 @@ def epegawai(r,idp):
                 ptk = r.POST.get("ptk")
                 if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '' or tgl_masuk is None or shift == "":
                     return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
+                userid = userid.strip()
                 # Data Pribadi
                 alamat = r.POST.get("alamat")
                 phone = r.POST.get("phone")
@@ -826,7 +827,7 @@ def tambah_pegawai(r):
 
                 if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '' or tgl_masuk is None or shift == "":
                     return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
-
+                userid = userid.strip()
                 # Data Pribadi
                 alamat = r.POST.get("alamat")
                 phone = r.POST.get("phone")
@@ -2571,7 +2572,6 @@ def rp_form(r):
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
         
         user = r.session["user"]["nama"]
-
         iduser = r.session["user"]["id"]
         data_akses = akses_db.objects.using(r.session["ccabang"]).get(user=iduser)
         akses = data_akses.akses 
@@ -2580,51 +2580,55 @@ def rp_form(r):
         userid = r.POST.get("userid")
         tipe = r.POST.get("tipe")
         mesin = r.POST.get("mesin")
-        # if tipe != "rp_mesin":
-        #     if akses == "admin" or akses == "root":
-        #         level = r.POST.get("level")
-        #         password = r.POST.get("password")
-        #         if pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
-        #             messages.error(r,"Pegawai dengan userid tersebut sudah ada")
-        #             return redirect("rp_mesin")
-        #         if pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
-        #             messages.error(r,"Pegawai dengan userid tersebut sudah ada")
-        #             return redirect("rp_mesin")
-        #         try:
-        #             dmesin = mesin_db.objects.using(r.session["ccabang"]).get(pk=mesin)
-                    
-        #             id = dmesin.pk
-        #             zk = ZK(dmesin.ipaddress,4370)
-        #             conn = zk.connect()
-        #             conn.disable_device()
-
-        #             users = conn.get_users()
-        #             uids = [user.uid for user in users]
-
-        #             n_data = 1
-        #             last_uid = sorted(uids)[-1]
-        #             uid_ready = [uid for uid in range(uids[0], uids[-1] +1 ) if uid not in uids]
-        #             if len(uid_ready) <= 0:
-        #                 uid = last_uid + 1
-        #                 if level == 1:
-        #                     conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
-        #                 else:
-        #                     conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
-        #             else:
-        #                 uid = uid_ready[0]
-        #                 if level == 1:
-        #                     conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
-        #                 else:
-        #                     conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
-
-        #             conn.enable_device()
-        #             conn.disconnect()
-        #         except Exception as e:
-        #             messages.error(r,"Proccess terminate : {}".format(e))
-        #             return redirect("rp_mesin")
-        #         # finally:
-        #         #     if conn:
-        #         #         pass
+        if nama == "" or userid == "" or mesin == "":
+            messages.error(r,'Harap isi form dengan lengkap')
+            return redirect("rp_mesin")
+        print('OKOKO')
+        if tipe == "rp_form":
+            userid = userid.strip()
+            level = r.POST.get("level")
+            password = r.POST.get("password")
+            if level == "":
+                messages.error(r,'Harap isi form dengan lengkap')
+                return redirect("rp_mesin")
+            # return redirect("rp_mesin")
+            if pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
+                messages.error(r,"Pegawai dengan userid tersebut sudah ada")
+                return redirect("rp_mesin")
+            if pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid=userid).exists():
+                messages.error(r,"Pegawai dengan userid tersebut sudah ada")
+                return redirect("rp_mesin")
+            try:
+                dmesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=mesin).last()
+                if not dmesin:
+                    messages.error(r,"Mesin tidak ditemukan")
+                    return redirect("rp_mesin")
+                
+                zk = ZK(dmesin.ipaddress,4370)
+                conn = zk.connect()
+                conn.disable_device()
+                users = conn.get_users()
+                uids = [user.uid for user in users]
+                uid_ready = [uid for uid in range(uids[0], uids[-1] +1 ) if uid not in uids]
+                if len(uid_ready) <= 0:
+                    if level == 1:
+                        conn.set_user(name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
+                    else:
+                        conn.set_user(name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
+                else:
+                    uid = uid_ready[0]
+                    if level == 1:
+                        conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
+                    else:
+                        conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
+                conn.enable_device()
+                conn.disconnect()
+            except Exception as e:
+                messages.error(r,"Proccess terminate : {}".format(e))
+                return redirect("rp_mesin")
+            # finally:
+            #     if conn:
+            #         pass
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
@@ -2636,7 +2640,6 @@ def rp_form(r):
         status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('status')
         hr = hari_db.objects.using(r.session["ccabang"]).all()
         kota_kabupaten = kota_kabupaten_db.objects.using(r.session["ccabang"]).all()
-
         shift = shift_db.objects.using(r.session["ccabang"]).all()
         
         data = {
@@ -2699,6 +2702,7 @@ def tambah_pegawai_non_validasi(r):
                     transaction.set_rollback(True,using=r.session["ccabang"])
                     return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
 
+                userid = userid.strip()
                 # Data Pribadi
                 alamat = r.POST.get("alamat")
                 phone = r.POST.get("phone")

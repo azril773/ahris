@@ -176,7 +176,7 @@ def tambah_data_pegawai(r):
 
         if nama == '' or gender == '' or tgl_masuk == 'Invalid date' or tgl_masuk == '' or nik == '' or userid == '' or div == '' or status == '' or kk == '' or hr == '' or ca == '' or payroll == '':
             return JsonResponse({"status":"error", "msg":"form yang harus diisi tidak boleh kosong"},status=400)
-
+        userid = userid.strip()
         # Data Pribadi
         alamat = r.POST.get("alamat")
         phone = r.POST.get("phone")
@@ -617,8 +617,10 @@ def cppegawai(r):
         
         conn.enable_device()
         conn.disconnect()
+        print(datauser)
     except Exception as e:
         messages.error(r,"Process terminate : {} asal".format(e))
+    return redirect("cdatamesin")
     for m in mesin_tujuan:
         try:
             mesin = mesin_db.objects.using(r.session["ccabang"]).get(ipaddress=m)
@@ -708,15 +710,13 @@ def adduser_machine(r):
         conn.disable_device()
         users = conn.get_users()
         uids = [user.uid for user in users]
-        n_data = 1
-        last_uid = sorted(uids)[-1]
         uid_ready = [uid for uid in range(uids[0], uids[-1] +1 ) if uid not in uids]
+        userid = userid.strip()
         if len(uid_ready) <= 0:
-            uid = last_uid + 1
             if level == 1:
-                conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
+                conn.set_user(name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
             else:
-                conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
+                conn.set_user(name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
         else:
             uid = uid_ready[0]
             if level == 1:
@@ -805,7 +805,7 @@ def deleteuser_machineu(r):
             conn = zk.connect()
             conn.disable_device()
             for us in userids:
-                conn.delete_user(user_id=int(us))
+                conn.delete_user(user_id=us)
             conn.enable_device()
             conn.disconnect()
         except Exception as e:
@@ -1005,7 +1005,6 @@ def byfilter(r):
             mesin = r.POST.getlist("mesin[]")
             data = r.POST.get("data")
             filter = r.POST.get("filter")
-            print(mesin,data,filter)
             if data is None or mesin is None or filter is None:
                 return JsonResponse({"status":'error',"msg":"Harap isi form dengan benar"},status=400)
             mesindb = mesin_db.objects.using(r.session["ccabang"]).filter(id__in=mesin)
