@@ -415,16 +415,12 @@ def add_data(r,id):
         users = conn.get_users()
 
 
-        datamesin = [i.userid for i in datamesin_db.objects.using(r.session["ccabang"]).all()]
-        userids = [user.user_id for user in users]
-        user = [user for user in users]
-        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids)
-        pegawaiarsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
-        templates = conn.get_templates()
-        print(pegawaiarsip)
-        # pegawai_arsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids)
-        # pegawai = [pgw for pgw in pegawai if pgw.userid in userids]
-        # 
+        datamesin = [i.userid for i in datamesin_db.objects.using(r.session["ccabang"]).all()] # ambil semua datamesin
+        userids = [user.user_id for user in users] # array userid yang ada di mesin
+        user = [user for user in users] # array user
+        pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(userid__in=userids) # ambil pegawai yang sudah ada di memsin
+        pegawaiarsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(userid__in=userids) # ambil pegawai yang sudah ada di mesin
+        templates = conn.get_templates() # ambil template finger
         mesin = []
         tmps = []
         mesinupdate = []
@@ -486,8 +482,6 @@ def add_data(r,id):
 
         conn.enable_device()
         conn.disconnect()
-        print(mesin)
-        print(tmps)
         datamesin_db.objects.using(r.session['ccabang']).bulk_create(mesin)
         sidikjari_db.objects.using(r.session["ccabang"]).bulk_create(tmps)
         datamesin_db.objects.using(r.session["ccabang"]).bulk_update(mesinupdate,["uid","nama",'level','password'])
@@ -510,6 +504,8 @@ def cdatamesin(r):
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
         divisi = divisi_db.objects.using(r.session["ccabang"]).all()
         datamesin = datamesin_db.objects.using(r.session["ccabang"]).all()
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).all()
+        print(status)
         print(r.session["user"])
         data = {       
             'dsid': dsid,
@@ -521,6 +517,7 @@ def cdatamesin(r):
             "ccabang":r.session["ccabang"],
             "nama":r.session["user"]["nama"],
             "divisi":divisi,
+            "status":status,
             "admin":r.session["user"]["admin"],
             'modul_aktif' : 'Mesin'     
         }
@@ -1144,6 +1141,120 @@ def listdata_json(r):
     except Exception as e:
         print(e)
         return JsonResponse({"status":'error',"msg":"Terjadi kesalahan"},status=400)
+    
+
+def setuserid(r):
+    # Pegawai dan pegawai arsip ada di dalam datamesin
+    # Pegawai dengan userid yang ada di dalam datamesin bisa di proses dan bisa mempunyai userid yang baru
+    # 
+    sid = r.POST.get("sid")
+    prefix = r.POST.get("prefix")
+    if not re.search('\d{3}',prefix):
+        messages.error(r,'Prefix harus 3 digit dan berupa angka')
+        return redirect("cdatamesin") 
+    with transaction.atomic(using=r.session["ccabang"]):
+        try:
+            if not status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=sid).last():
+                return JsonResponse({"status":'error',"msg":"status pegawai tidak ada"})
+            init = int(prefix+"000")
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid).values("id","userid","nama").order_by("nama")
+            datamesin = datamesin_db.objects.using(r.session["ccabang"]).all().values("id","nama","userid","uid")
+            sidik = sidikjari_db.objects.using(r.session["ccabang"]).all().values("id","userid","uid")
+            newdm = []
+            newsdk = []
+            useridmesin  = [dm["userid"] for dm in datamesin if re.search(f'{prefix}\d{3}',dm["userid"])]
+            newpgw = [pg for pg in pegawai if pg["userid"] not in useridmesin]
+            userint = [int(us) for us in useridmesin]
+            for pgw in newpgw:
+                init += 1
+                while True:
+                    # print(init)
+                    if init in userint:
+                        init +=1 
+                    else:
+                        break
+                dtmesin = next((dm for dm in datamesin if dm["userid"] == pgw["userid"]),None)
+                if not dtmesin:
+                    continue
+                sidikjari = [sdk for sdk in sidik if sdk["userid"] == pgw["userid"]]
+                    
+                pgw["userid"] = init
+
+                for s in sidikjari:
+                    s["userid"] = pgw["userid"]
+                    newsdk.append(s)
+                dtmesin["userid"] = pgw["userid"]
+                newdm.append(dtmesin)
+            pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=f["id"],userid=f["userid"]) for f in pegawai],["userid"])
+            datamesin_db.objects.using(r.session["ccabang"]).bulk_update([datamesin_db(id=dt["id"],userid=dt["userid"]) for dt in newdm],["userid"])
+            sidikjari_db.objects.using(r.session["ccabang"]).bulk_update([sidikjari_db(id=s["id"],userid=s["userid"]) for s in newsdk],["userid"])
+            return redirect("cdatamesin")
+        except Exception as e:
+            transaction.set_rollback(True,using=r.session["ccabang"])
+            print("MASUKKK ERRROR")
+            raise e
+
+
+
+def sinkrondatamemsin(r):
+    mm = r.POST.get("mm")
+    ml = r.POST.get("ml[]")
+    master = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(mm)).last()
+    if not master:
+        messages.error(r,"Mesin master tidak ada")
+        return redirect("cdatamesin")
+    
+    mesin = mesin_db.objects.using(r.session["ccabang"]).filter(~Q(id=master.pk),pk__in=ml,status="Active")
+    userid = [p["userid"] for p in pegawai_db.objects.using(r.session["ccabang"]).all().values("id","userid","nama")]
+    useridarsip = [p["userid"] for p in pegawai_db_arsip.objects.using(r.session['ccabang']).all().values("id","userid","nama")]
+    userids = userid + useridarsip
+
+
+    zkmaster = ZK(master.ipaddress,4370)
+    try:
+        conn = zkmaster.connect()
+    except Exception as e:
+        messages.error(r,f"Terjadi kesalahan pada mesin {master.nama} - {master.ipaddress}")
+
+
+    zkmaster.disable_device()
+    usersmaster = conn.get_users()
+    useridac = [us.user_id for us in usersmaster if us.user_id in userids]
+    # data = {'userid':[],"nama":[],"mesin":''}
+    useridss = []
+    
+    for m in mesin:
+        try:
+            zk = ZK(m.ipaddress,4370)
+            try:
+                conn2 = zk.connect()
+            except Exception as e:
+                messages.error(r,f"Terjadi kesalahan pada mesin {m.nama} - {m.ipaddress}")
+                continue
+            users = conn2.get_users()
+            templates = conn2.get_templates()
+            userid = [us for us in users if us.user_id not in useridac and us.user_id in userids and us.user_id not in useridss] # Optional jika bisa di test terlbih dahulu
+            for us in userid:
+                conn.set_user(name=us.name,privilege=us.privilege,password=us.password,user_id=us.user_id,card=0)
+                lastuser = conn.get_users()[-1]
+                template = [tmp for tmp in templates if tmp.uid == us.uid]
+                for t in template:
+                    user = usr.User(uid=lastuser.uid,name=lastuser.name,privilege=lastuser.privilege,password=lastuser.password,group_id=lastuser.group_id,user_id=lastuser.user_id,card=0)
+                    f = finger.Finger(lastuser.uid,t.fid,t.valid,t.template)
+                    conn.save_user_template(user,f)
+                useridss.append(us.user_id)
+            conn2.enable_device()
+            conn2.disconnect()
+        except:
+            conn2.enable_device()
+            conn2.disconnect()
+    conn.enable_device()
+    conn.disconnect()
+
+    # dt = pd.DataFrame(data)
+    # dt.to_excel('excel.xlsx')
+    # return JsonResponse(data,safe=False)
+   
 # 
 # def get_mesin(r,mesin):
 

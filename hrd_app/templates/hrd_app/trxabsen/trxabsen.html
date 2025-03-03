@@ -82,9 +82,15 @@
         <br>
         <br>
         <br>
-        <h5 class="hitam"># Pegawai yang tidak ada transaksi lebih dari 30 hari</h5>
-        <div class="d-flex justify-content-end mb-4">
-            <button class="btn btn-primary" id="cek">Cek Data</button>
+        <h5 class="hitam"># Pegawai yang tidak ada transaksi lebih dari hari yang ditentukan</h5>
+        <div class="row">
+            <div class="col-md-6">
+                <label for="hari" class="hitam">Lebih Dari (Hari)</label>
+                <input type="text" name"hari" id="hari" class="form-control"> 
+            </div>
+            <div class="col-md-6 d-flex align-items-end">
+                <button class="btn btn-primary" id="cek">Cek Data</button>
+            </div>
         </div>
         <div class=""  style="width: 100%">
             <table id="tablenon"  style="width: 100%">
@@ -173,10 +179,12 @@
     })
 
     $("#cek").on("click",function(e){
+        const hari = $("#hari").val() ? $("#hari").val() : undefined
         $("#tablenon").DataTable().destroy()
         $("#tablenon").DataTable({
             ajax:{
                 url:'{% url "trxabsen_non" %}',
+                data:{hari},
                 method:"post",
                 headers:{"X-CSRFToken":token},
                 error:(err) => {

@@ -392,6 +392,57 @@
             </div>
         </form>
         <hr>
+        <h5 class='hitam'># Standarisasi Userid</h5>
+        <form action="{% url 'setuserid' %}" method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-start" style="widpth: 100%;">
+                <div class="" style="width: 100%;">
+                    <label for="sid" class="hitam">Status Pegawai</label>
+                    <select name="sid" class="mesin"  id="sid" >
+                        <option value="">Pilih Status Pegawai</option>
+                        {% for s in status %}
+                        <option value="{{s.id}}">{{s.status}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="" style="width: 100%;">
+                    <label for="prefix" class="hitam">Prefix</label>
+                    <input type="text" name="prefix" id="prefix" class="form-control">
+                </div>
+                <div class="d-flex align-items-end" style="width: 100%;">
+                    <button type="submit" class="btn btn-primary">Proses</button>
+                </div>
+            </div>
+        </form>
+        <hr>
+        <h5 class='hitam'># Sinkron Data Mesin, terjadi ketika ada data yang ada di mesin lain selain master</h5>
+        <form action="{% url 'setuserid' %}" method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-start" style="widpth: 100%;">
+                <div class="" style="width: 100%;">
+                    <label for="mm" class="hitam">Mesin Master</label>
+                    <select name="mm" class="mesin"  id="mm" >
+                        <option value="">Pilih Mesin Master</option>
+                        {% for m in mesin %}
+                        <option value="{{m.id}}">{{m.nama}} - {{m.ipaddress}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="" style="width: 100%;">
+                    <label for="ml" class="hitam">Mesin Lain</label>
+                    <select name="ml[]" class="mesint"  id="ml" >
+                        <option value="">Pilih Mesin Lain</option>
+                        {% for m in mesin %}
+                        <option value="{{m.id}}">{{m.nama}} - {{m.ipaddress}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% comment %} <div class="d-flex align-items-end" style="width: 100%;">
+                    <button type="submit" class="btn btn-primary">Proses</button>
+                </div> {% endcomment %}
+            </div>
+        </form>
+        <hr>
         {% endif %}
         <!-- BY DIVISI -->
     <!-- alert berhasil -->

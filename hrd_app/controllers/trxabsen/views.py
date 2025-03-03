@@ -2,6 +2,8 @@ from ..lib import *
 
 def trxabsen_non(r):
     try:
+        hari = r.POST.get("hari")
+        hr = int(hari)
         mesin = mesin_db.objects.using(r.session["ccabang"]).filter(status="Active")
         absen = []
         today = datetime.today()
@@ -15,7 +17,7 @@ def trxabsen_non(r):
                 for ab in conn.get_attendance():
                     kode = str(today - ab.timestamp).split(" ")
                     if len(kode) > 1:
-                        if int(kode[0]) >= 30 and ab.user_id not in userids:
+                        if int(kode[0]) >= hr and ab.user_id not in userids:
                             userids.append(ab.user_id)
                             data.append({"userid":ab.user_id,"lastabsen":ab.timestamp,"mesin":m.nama})
                         else:
