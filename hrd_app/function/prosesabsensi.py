@@ -102,7 +102,7 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,cabang,ddt,ddtor,ab
                 else:
                     pass
         # +++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            if a["punch"] == 0 and jam_absen.hour >= 3 and jam_absen.hour < 18 :
+            if a["punch"] == 0 and jam_absen.hour >= 2 and jam_absen.hour < 18 :
                 ab["masuk"] = jam_absen.time()
                 data = {
                         "userid": a["userid"],

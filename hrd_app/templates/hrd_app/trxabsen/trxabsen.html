@@ -80,6 +80,53 @@
 
         <br>
         <br>
+        <div id="msguserid"></div>
+        <h5 class="hitam"># Transaksi Absensi Userid</h5>
+        <div class="row">
+            <div class="col-md-2" >
+                <label for="mesinuserid" class="hitam">Pilih Mesin</label>
+                <select name="mesinuserid[]" id="mesinuserid" class="mesint">
+                    <option value="">Pilih Mesin</option>
+                    {% for m in mesin %}
+                        <option value="{{m.id}}">{{m.nama}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label for="userids" class="hitam">Userid</label>
+                <input type="text" name="userids" id="userids" class="form-control" autocomplete="off">
+            </div>
+            <div class="col-md-2">
+                <label for="dariuserid" class="hitam">Dari</label>
+                <input type="text" name="dariuserid" id="dariuserid" class="form-control tgl1" autocomplete="off">
+            </div>
+            <div class="col-md-2">
+                <label for="sampaiuserid" class="hitam">Sampai</label>
+                <input type="text" name="sampaiuserid" id="sampaiuserid" class="form-control tgl1" autocomplete="off">
+
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button class="btn btn-primary" id="cariuserid">Cari Data</utton>
+            </div>
+        </div>
+        <div class=""  style="width: 100%">
+            <table id="tabletrxuserid"  style="width: 100%">
+                <thead>
+                    <tr>
+                        <td class="hitam">Userid</td>
+                        <td class="hitam">Nama</td>
+                        <td class="hitam">Jam Absen</td>
+                        <td class="hitam">Punch</td>
+                        <td class="hitam">Mesin</td>
+                    </tr>
+                </thead>
+    
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <br>
+        <br>
         <br>
         <br>
         <h5 class="hitam"># Pegawai yang tidak ada transaksi lebih dari hari yang ditentukan</h5>
@@ -125,6 +172,14 @@
         scrollY: 300,
         processing: true,
     })
+    $("#tabletrxuserid").DataTable({
+        destroy: true,
+        ordering: false,
+        paging: false,
+        scrollX:"100%",
+        scrollY: 300,
+        processing: true,
+    })
     $("#tablenon").DataTable({
         destroy: true,
         ordering: false,
@@ -152,6 +207,50 @@
                         $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
                     }else{
                         $("#msg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                    }
+                }
+            },
+            columns:[
+                {data:'userid'},
+                {data:'nama'},
+                {data:'jam_absen'},
+                {data:'punch'},
+                {data:'mesin'},
+            ],
+            "rowCallback": function (row, data) {
+                $('td', row).eq(0).addClass('hitam');
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+            },
+            destroy: true,
+            ordering: false,
+            paging: false,
+            scrollX:"100%",
+            scrollY: 300,
+            processing: true,
+        })
+    })
+    $("#cariuserid").on("click",function(e){
+        const mesin = $('#mesinuserid').val() ? $("#mesinuserid").val() : undefined
+        const userid = $('#userids').val() ? $("#userids").val() : undefined
+        const dari = $("#dariuserid").val() ? $("#dariuserid").val() : undefined
+        const sampai = $("#sampaiuserid").val() ? $("#sampaiuserid").val() : undefined
+
+        $("#tabletrxuserid").DataTable().destroy()
+        $("#tabletrxuserid").DataTable({
+            ajax:{
+                url:'{% url "trxabsen_json_userid" %}',
+                method:"post",
+                data:{mesin,userid,dari,sampai},
+                headers:{"X-CSRFToken":token},
+                error:(err) => {
+                    $("#msguserid p").remove()
+                    if(err.responseJSON?.msg){
+                        $("#msguserid").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                    }else{
+                        $("#msguserid").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
                     }
                 }
             },

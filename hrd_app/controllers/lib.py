@@ -28,7 +28,7 @@ import re
 from decimal import *
 from concurrent.futures import ThreadPoolExecutor
 # PYZK / FINGER MACHINE
-from zk import ZK, const
+from zk import ZK, const, exception
 from struct import pack
 from zk import user as us
 import codecs  
