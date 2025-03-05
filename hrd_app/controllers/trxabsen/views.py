@@ -109,7 +109,6 @@ def filtertrx(r):
             try:
                 conn = zk.connect()
                 conn.disable_device()
-                print("OKOk")
                 for ab in conn.get_attendance():
                     if dr <= ab.timestamp <= sp:
                         if str(ab.user_id).strip() in userid:
@@ -133,7 +132,7 @@ def filtertrx(r):
                 raise e
         # print(absen)    
         data = sorted(absen, key=lambda i: i['jam_absen'],reverse=True)
-        return JsonResponse({"status":"success","msg":"Berhasil mengambil data absensi","data":data},status=200)
+        return JsonResponse({"status":"success","msg":"Berhasil mengambil data absensi","data":data },status=200)
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
