@@ -178,7 +178,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>          
                 </div>
-                <form action="{% url "print_laporan_pegawai" %}" method="post">
+                <form action="{% url "print_laporan_pegawai" %}" method="post" target="_blank">
                     {% csrf_token %}
                     <div class="form-layout form-layout-1">
                     <div class="row mg-b-25">
@@ -223,7 +223,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>          
                 </div>
-                <form action="{% url "print_laporan_divisi" %}" method="post">
+                <form action="{% url "print_laporan_divisi" %}" method="post" target="_blank">
                     {% csrf_token %}
                     <div class="form-layout form-layout-1">
                     <div class="row mg-b-25">
@@ -352,7 +352,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>          
                 </div>
-                <form action="{% url "print_laporan_shift" %}" method="post">
+                <form action="{% url "print_laporan_shift" %}" method="post" target="_blank">
                     {% csrf_token %}
                     <div class="form-layout form-layout-1">
                     <div class="row mg-b-25">
