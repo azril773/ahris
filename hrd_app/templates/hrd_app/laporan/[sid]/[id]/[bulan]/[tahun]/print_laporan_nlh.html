@@ -17,17 +17,17 @@
         <div class="br-section-wrapper mx-32">
             <section id="header" class="w-full flex justify-center mt-2">
                 <div class="flex-col font-light">
-                    <div class="flex justify-center">
-                        <h1 class="uppercase mx-auto font-bold">rekap absensi</h1>
+                    <div class="d-flex justify-content-center">
+                        <h6 class="uppercase mx-auto" style="text-transform:uppercase;"><b>rekap absensi</b></h6>
                     </div>
-                    <div class="flex justify-center mt-2">
-                        <p class="uppercase ">PLAZA ASIA TASIKMALAYA</p>
+                    <div class="d-flex justify-content-center text-uppercase">
+                        {{d.datacabang.tipe}} {{d.datacabang.nama}}
                     </div>
-                    <div class="flex justify-center">
-                        <p class="capitalize">Jl. KHZ. Mustofa No.326, Tasikmalaya 46121</p>
+                    <div class="d-flex justify-content-center text-capitalize">
+                        {{d.datacabang.alamat}}
                     </div>
-                    <div class="flex justify-center">
-                        <p class="">PHONE : (0265) 2352215 | FAX : (0265) 2352218</p>
+                    <div class="d-flex justify-content-center">
+                        PHONE : {{d.datacabang.phone}} | FAX : {{d.datacabang.fax}}
                     </div>
                 </div>
             </section>

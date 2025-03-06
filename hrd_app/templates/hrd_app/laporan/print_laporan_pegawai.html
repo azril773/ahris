@@ -21,14 +21,14 @@
                         <div class="d-flex justify-content-center">
                             <h6 class="uppercase mx-auto" style="text-transform:uppercase;"><b>rekap absensi</b></h6>
                         </div>
-                        <div class="d-flex justify-content-center">
-                            PLAZA ASIA TASIKMALAYA
+                        <div class="d-flex justify-content-center text-uppercase">
+                            {{d.datacabang.tipe}} {{d.datacabang.nama}}
+                        </div>
+                        <div class="d-flex justify-content-center text-capitalize">
+                            {{d.datacabang.alamat}}
                         </div>
                         <div class="d-flex justify-content-center">
-                            Jl. KHZ. Mustofa No.326, Tasikmalaya 46121
-                        </div>
-                        <div class="d-flex justify-content-center">
-                            PHONE : (0265) 2352215 | FAX : (0265) 2352218
+                            PHONE : {{d.datacabang.phone}} | FAX : {{d.datacabang.fax}}
                         </div>
                     </div>
                 </section>
@@ -168,7 +168,7 @@
                         </div>
                         <div class="col-6 d-flex justify-content-end">
                             <div class="">
-                                Tasikmalaya, {{d.now}}
+                                <span class="text-capitalize">{{d.datacabang.nama}}, {{d.now}}</span>
                                 <br>
                                 <div class="d-flex justify-content-end">
     

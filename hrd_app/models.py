@@ -337,6 +337,7 @@ class history_pribadi_db(models.Model):
         verbose_name = 'Data Pribadi History'
         verbose_name_plural = 'Data Pribadi History'
         
+
         
 class history_keluarga_db(models.Model):
     history = models.ForeignKey(history_pegawai_db,on_delete=models.CASCADE,null=True)
@@ -627,6 +628,23 @@ class cabang_db(models.Model):
     class Meta:
         verbose_name = "Cabang DB"
         verbose_name_plural = "Cabang DB"
+    
+
+
+class data_cabang_db(models.Model):
+    cabang = models.ForeignKey(cabang_db,on_delete=models.CASCADE,null=True)
+    nama = models.CharField(max_length=100)
+    alamat = models.CharField(max_length=100)
+    tipe = models.CharField(max_length=100)
+    phone = models.CharField(max_length=50)
+    fax = models.CharField(max_length=50)
+    def __str__(self) -> str:
+        return self.cabang
+    
+    class Meta:
+        verbose_name = "Data Cabang DB"
+        verbose_name_plural = "Data Cabang DB"
+
     
 class pihak_pertama_db(models.Model):
     pegawai = models.ForeignKey(pegawai_db,on_delete=models.CASCADE,null=True)

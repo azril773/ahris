@@ -357,9 +357,13 @@ def print_laporan(r,sid,id,bulan,tahun):
     iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        datacabang = data_cabang_db.objects.filter(cabang__cabang=r.session["ccabang"]).last()
+        if not datacabang:
+            messages.error(r,"Data cabang tidak ada")
+            return redirect("laporan",sid=0)
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
-        dsid = dakses.sid_id     
+        dsid = dakses.sid_id
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).get(id=id)
         status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         statuslh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
@@ -386,6 +390,7 @@ def print_laporan(r,sid,id,bulan,tahun):
             "dr":dr,
             "now":datetime.now().date(),
             "pegawai":pegawai,
+            "datacabang":datacabang,
             "id":id,
             "sp":sp,
             "lh":lh,
@@ -796,10 +801,17 @@ def print_laporan_pegawai(r):
     try:
         iduser = r.session["user"]["id"]
         
-        if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-            dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-            sid = dakses.sid_id
-            data = [] 
+        dakses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).last()
+        if not dakses:
+            messages.error(r,"Anda tidak memiliki akses")
+            return redirect("laporan",sid=0)
+        datacabang = data_cabang_db.objects.filter(cabang__cabang=r.session["ccabang"]).last()
+        if not datacabang:
+            messages.error(r,"Data cabang tidak ada")
+            return redirect("laporan",sid=0)
+        print(datacabang.tipe)
+        sid = dakses.sid_id
+        data = [] 
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=pgw)
         lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
         for p in pegawai:
@@ -817,6 +829,7 @@ def print_laporan_pegawai(r):
                 "divisi":p.divisi,
                 "dari":dari,
                 "sampai":sampai,
+                "datacabang":datacabang,
                 "kehadiran":0,
                 "b":1,
                 "selisih":0,
@@ -1000,10 +1013,16 @@ def print_laporan_divisi(r):
     try:
         iduser = r.session["user"]["id"]
         
-        if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-            dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
-            sid = dakses.sid_id
-            data = [] 
+        dakses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).last()
+        if not dakses:
+            messages.error(r,"Anda tidak memiliki akses")
+            return redirect("laporan",sid=0)
+        datacabang = data_cabang_db.objects.filter(cabang__cabang=r.session["ccabang"]).last()
+        if not datacabang:
+            messages.error(r,"Data cabang tidak ada")
+            return redirect("laporan",sid=0)
+        sid = dakses.sid_id
+        data = [] 
         divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=dvs)
         lh = status_pegawai_lintas_hari_db.objects.using(r.session["ccabang"]).all()
         for p in divisi:
@@ -1015,6 +1034,7 @@ def print_laporan_divisi(r):
                     "nik":p.nik,
                     "divisi":p.divisi,
                     "dari":dari,
+                    "datacabang":datacabang,
                     "b":1,
                     "sampai":sampai,
                     "kehadiran":0,
@@ -1186,6 +1206,7 @@ def print_laporan_divisi(r):
                 tselisih = str(tselisih).split(".")
                 slc = slice(0,2)
                 obj["selisih"] =f"{tselisih[0]},{tselisih[1][slc]}"
+                obj["now"] = datetime.now().date()
                 data.append(obj)
     except Exception as e:
         messages.error(r,"Terjadi kesalahan hubungi IT {}".format(e))
