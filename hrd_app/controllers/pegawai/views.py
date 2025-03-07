@@ -2764,40 +2764,36 @@ def tambah_pegawai_non_validasi(r):
                     usr = [u for u in users if u.user_id == userid]
 
                     conn.set_user(uid=usr[0].uid,name=nama,password=usr[0].password,user_id=usr[0].user_id,privilege=usr[0].privilege,card=0,group_id='')
-
-                    users = [user for user in users if user.user_id == userid]
-                    if len(users) <= 0:
+                    if len(usr) <= 0:
                         transaction.set_rollback(True,using=r.session["ccabang"])
                         return JsonResponse({"status":"error","msg":"Userid tidak valid"},status=400)
                         
-                    if len(users) > 0:
+                    if len(usr) > 0:
                         # datamesin = datamesin_db.objects.filter(userid=users[0].user_id)
                         # if datamesin.exists():
                         #     transaction.set_rollback(True)
                         #     return JsonResponse({"status":"error","msg":"Userid sudah ada di datamesin"},status=400)
-
-                        level = 0
+                        level = usr[0].privilege
                         fingers = []
-                        for i in range(1,11):
-                            ft = conn.get_user_template(uid=int(users[0].uid),temp_id=i)
+                        for i in range(0,11):
+                            ft = conn.get_user_template(uid=int(usr[0].uid),temp_id=i)
                             if ft is not None:
                                 fingers.append(ft)                        
-
+                        sidikjari_db.objects.using(r.session["ccabang"]).filter(uid=usr[0].uid).delete()
                         for f in fingers:
-                            sidikjari_db.objects.using(r.session["ccabang"]).filter(uid=f.uid,fid=f.fid).delete()
                             sidikjari_db(
                                 uid=f.uid,
                                 nama=nama,
-                                userid=users[0].user_id,
+                                userid=usr[0].user_id,
                                 size=f.size,
                                 fid=f.fid,
                                 valid=f.valid,
                                 template=f.template
                             ).save(using=r.session["ccabang"])
                         datamesin_db(
-                            uid=users[0].uid,
+                            uid=usr[0].uid,
                             nama=nama,
-                            userid=users[0].user_id,
+                            userid=usr[0].user_id,
                             level=level
                         ).save(using=r.session["ccabang"])
                     conn.enable_device()

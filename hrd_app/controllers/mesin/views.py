@@ -240,7 +240,7 @@ def tambah_data_pegawai(r):
 
                     level = 0
                     fingers = []
-                    for i in range(1,11):
+                    for i in range(0,11):
                         ft = conn.get_user_template(uid=int(users[0].uid),temp_id=i)
                         if ft is not None:
                             fingers.append(ft)                        
@@ -467,7 +467,7 @@ def add_data(r,id):
                     continue
                 mesinupdate.append(datamesin_db(id=dm.pk,uid=u.uid,nama=pg.nama,level=u.privilege,password=u.password))
                 template = [tmp for tmp in templates if tmp.uid == u.uid]
-                sidikjari_db.objects.using(r.session["ccabang"]).filter(userid=dm.userid).delete()
+                sidikjari_db.objects.using(r.session["ccabang"]).filter(uid=u.uid).delete()
                 for t in template:
                     tmps.append(sidikjari_db(
                         uid=t.uid,
@@ -1149,20 +1149,21 @@ def setuserid(r):
     # 
     sid = r.POST.get("sid")
     prefix = r.POST.get("prefix")
-    if not re.search('\d{3}',prefix):
+    if not re.search('\d{3}',prefix.strip()):
         messages.error(r,'Prefix harus 3 digit dan berupa angka')
         return redirect("cdatamesin") 
     with transaction.atomic(using=r.session["ccabang"]):
         try:
             if not status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=sid).last():
                 return JsonResponse({"status":'error',"msg":"status pegawai tidak ada"})
-            init = int(prefix+"000")
+            init = int(prefix.strip()+'000')
             pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid).values("id","userid","nama").order_by("nama")
             datamesin = datamesin_db.objects.using(r.session["ccabang"]).all().values("id","nama","userid","uid")
             sidik = sidikjari_db.objects.using(r.session["ccabang"]).all().values("id","userid","uid")
             newdm = []
             newsdk = []
-            useridmesin  = [dm["userid"] for dm in datamesin if re.search(f'{prefix}\d{3}',dm["userid"])]
+            useridmesin  = [dm["userid"] for dm in datamesin if re.search(prefix.strip()+'\d{3}',dm["userid"])]
+            print(useridmesin)
             newpgw = [pg for pg in pegawai if pg["userid"] not in useridmesin]
             userint = [int(us) for us in useridmesin]
             for pgw in newpgw:
