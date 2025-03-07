@@ -1179,7 +1179,7 @@ def setuserid(r):
                 sidikjari = [sdk for sdk in sidik if sdk["userid"] == pgw["userid"]]
                     
                 pgw["userid"] = init
-
+                print(pgw["userid"])
                 for s in sidikjari:
                     s["userid"] = pgw["userid"]
                     newsdk.append(s)
