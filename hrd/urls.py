@@ -7,7 +7,7 @@ from hrd_app.admin import cirebon, tasik, sumedang, cihideung,garut
 import os
 from django.contrib import messages 
 import re
-from hrd_app.models import user_db, akses_cabang_db, cabang_db
+from hrd_app.models import user_db, akses_cabang_db, cabang_db, akses_db, status_pegawai_db
 import json
 from authlib.integrations.django_client import OAuth
 oauth = OAuth()
@@ -45,7 +45,10 @@ def callback(r):
         user.is_admin = is_admin[0]
         user.save()
 
+
+
     cbgs = cabang_db.objects.filter(cabang__in=getCabang)
+    
     for c in cbgs:
         if not user_db.objects.using(c.cabang).filter(sub=result["sub"]).exists():
             user_db(
@@ -65,6 +68,17 @@ def callback(r):
                 user_id=user.pk
             ).save()
 
+        if is_admin[0]:
+            akses = akses_db.objects.using(c.cabang).filter(user_id=user.pk).last()
+            status = status_pegawai_db.objects.using(c.cabang).all().first()
+            if not status:
+                continue
+            print(akses,c.cabang)
+            if not akses:
+                akses_db(user_id=user.pk,akses='root',sid_id=status.pk).save(using=c.cabang)
+            else:
+                akses.akses = "root"
+                akses.save(using=c.cabang)
     
     r.session["cabang"] = getCabang
     r.session["ccabang"] = getCabang[0]

@@ -130,6 +130,7 @@
         <br>
         <br>
         <h5 class="hitam"># Pegawai yang tidak ada transaksi lebih dari hari yang ditentukan</h5>
+        <div id="msghari"></div>
         <div class="row">
             <div class="col-md-6">
                 <label for="hari" class="hitam">Lebih Dari (Hari)</label>
@@ -144,7 +145,6 @@
                 <thead>
                     <tr>
                         <td class="hitam">Userid</td>
-                        <td class="hitam">Absen Terakhir</td>
                         <td class="hitam">Mesin</td>
                     </tr>
                 </thead>
@@ -279,6 +279,7 @@
 
     $("#cek").on("click",function(e){
         const hari = $("#hari").val() ? $("#hari").val() : undefined
+        $("#msghari p").remove()
         $("#tablenon").DataTable().destroy()
         $("#tablenon").DataTable({
             ajax:{
@@ -287,23 +288,21 @@
                 method:"post",
                 headers:{"X-CSRFToken":token},
                 error:(err) => {
-                    $("#msg p").remove()
+                    $("#msghari p").remove()
                     if(err.responseJSON?.msg){
-                        $("#msg").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                        $("#msghari").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
                     }else{
-                        $("#msg").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                        $("#msghari").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
                     }
                 }
             },
             columns:[
                 {data:'userid'},
-                {data:'lastabsen'},
                 {data:'mesin'},
             ],
             "rowCallback": function (row, data) {
                 $('td', row).eq(0).addClass('hitam');
                 $('td', row).eq(1).addClass('hitam');
-                $('td', row).eq(2).addClass('hitam');
             },
             destroy: true,
             ordering: false,
