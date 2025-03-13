@@ -293,6 +293,10 @@ def pegawai(r,sid):
         if sid != 0:
             st = status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=sid).last()
         # status = serialize("json",status)
+        kode = 0
+        if st is not None:
+            if st.kode is not None:
+                kode    = st.kode
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
@@ -302,6 +306,7 @@ def pegawai(r,sid):
             "lastuserid":lastuserid,
             'sid': int(sid),
             'st':st,
+            "kode":kode,
             'status' : status,
             'modul_aktif' : 'Pegawai'
         }

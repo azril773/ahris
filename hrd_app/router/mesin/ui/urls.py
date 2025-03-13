@@ -10,10 +10,10 @@ urlpatterns = [
     path("cdatamesin/",views.cdatamesin,name="cdatamesin"),
     path("listdata/",views.listdata,name="listdata"),
     path("testmesin/",views.testmesin,name="testmesin"),
-    # path("sinkron/",views.sinkrondatamemsin,name="sinkron"),
+    path("sinkron/",views.sinkrondatamemsin,name="sinkron"),
     path("setuserid/",views.setuserid,name="setuserid"),
     # path("senddata/<int:sid>",views.senddata,name="senddata"),
-    # path("auto",views.auto,name="auto"),
+    path("testmesin",views.testmesin,name="testmesin"),
     # path("setnew",views.sin,name="setnew"),
     path("byfilter",views.byfilter,name="byfilter"),
 

@@ -164,7 +164,7 @@
                             </div>
                         </div>
 
-                        <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+                        <input type="hidden" name="sid" class="form-control" id="sidabsens" value="{{sid}}">
         
                         <div class="modal-footer">
                         <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Proses Data</button>
@@ -568,6 +568,23 @@
         })
     })
 
+
+    $("#submit_button").on("click",function(e){
+        $("#submit_button").prop("disable",true)
+        const tgl1 = $("#tgl1").val() ? $("#tgl1").val() : undefined
+        const tgl2 = $("#tgl2").val() ? $("#tgl2").val() : undefined
+        const sid = $("#sidabsen").val() ? $("#sidabsen").val() : undefined
+
+        $.ajax({
+            url:"{% url 'pbs' %}",
+            method:"post",
+            data:{tgl1,tgl2,sid},
+            headers:{"X-CSRFToken":token},
+            success:(e) => {
+                
+            }
+        })
+    })
 
 </script>   
  

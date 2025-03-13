@@ -1042,9 +1042,6 @@ def pabsen(req):
                 if str(a["pegawai__hari_off__hari"]) == 'On Off':
                     a["keterangan_absensi"] = 'OFF'
                 for il in ijindl:
-                    if a["pegawai__userid"] == '208003':
-                        print(il["tgl"] == a["tgl_absen"])
-                        print("MASUK")
                     if il["tgl"] == a["tgl_absen"] and int(il["idp"]) == int(a["pegawai_id"]) and nh in [str(a["pegawai__hari_off__hari"]),str(a["pegawai__hari_off2__hari"])] and  a["pegawai__status_id"] in lsopg and next((False for gs in geserdr if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
                         opgdr.append({
                             'id':0,

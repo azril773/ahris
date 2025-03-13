@@ -8,6 +8,7 @@ urlpatterns = [
     path('belum_proses/<int:sid>', views.lembur_belum_proses, name='lembur_bproses'),
     path('proses_ulembur/<int:idl>', views.proses_ulang_lembur, name='proses_ulembur'),
     path('tlembur', views.tambah_lembur, name='tlembur'),
+    path('rp_lembur', views.rp_lembur, name='rp_lembur'),
 
 
 ]

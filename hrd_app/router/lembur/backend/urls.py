@@ -15,4 +15,9 @@ urlpatterns = [
     path("get_jam_kerja",views.get_jam_kerja,name="get_jam_kerja"),
     path('tkompen', views.tambah_kompen, name='tkompen'),
     path('bkompen', views.batal_kompen, name='bkompen'),
+
+    path('trp_lembur', views.trp_lembur, name='trp_lembur'),
+    path('erp_lembur', views.erp_lembur, name='erp_lembur'),
+    path('drp_lembur', views.drp_lembur, name='drp_lembur'),
+
 ]

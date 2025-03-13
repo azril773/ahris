@@ -1,0 +1,203 @@
+{% extends "hrd_app/master/base.html" %}
+
+{% block breadcrumb %}
+
+<!-- <div class="alert alert-warning alert-dismissible tx-info"><marquee class="py-0" direction="left" onmouseover="this.stop()" onmouseout="this.start()">
+    Untuk saat ini proses absensi tidak dapat dilakukan, sampai informasi ini ditiadakan.  
+</marquee></div> -->
+
+<div class="br-pagebody">  
+
+    <div class="br-section-wrapper">
+        <!-- Pesan Error -->
+        {% for message in messages %}
+        <div class="container-fluid p-0">
+            {% if 'safe' in message.tags %}
+            <div class="alert alert-info alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% elif message.tags == "error" %}
+            <div class="alert alert-danger alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message | safe }}</span>
+            </div>
+            {% else %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible" role="alert" >
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+                </button>
+                <span class="tx-16"></span>{{ message }}</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+
+        <!-- Pengaturan -->
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Pengaturan {{modul_aktif}}</h6>
+    
+        <!-- Modul Pengaturan -->        
+        <div class="d-flex align-items-center justify-content-start">     
+            <div class="mg-r-auto">   
+                
+                <button data-target="#tambah" data-toggle="modal" class="btn btn-primary mg-b-6">Tambah</button> &nbsp;
+                
+                {% include 'hrd_app/master/modul_pengaturan.html' %}
+            </div>          
+        </div>
+
+        <br>
+
+        <div id="loader"></div>    
+
+        <!-- Table -->
+        <div class="table-wrapper">
+            <table id="tabelku" class="table display responsive" style="width:100%">
+            <thead>
+                <tr>
+                <th nowrap>Rupiah</th>
+                <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dt in data %}
+                    <tr>
+                        <td>{{dt.rupiah}}</td>
+                        <td>
+                            <button class="btn btn-warning" data-toggle="modal" data-target="#edit" data-id="{{dt.id}}" data-rupiah='{{dt.rupiah}}'>Edit</button>
+                            <button class="btn btn-danger" data-toggle="modal" data-target="#hapus" data-id="{{dt.id}}">Hapus</button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            </table>
+        </div>
+        
+        <!-- Modal -->
+        <div id="tambah" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Tambah {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form action="{% url 'trp_lembur' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Rupiah:</label>
+                                <input type="number" name="rupiah" id="rupiah" class="form-control">
+                            </div>
+                        </div>
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="edit" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Edit {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form action="{% url 'erp_lembur' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                <label class="form-control-label tx-inverse">Rupiah:</label>
+                                <input type="number" name="rupiah" id="erupiah" class="form-control">
+                                <input type="hidden" name="edit_id" id="edit_id" class="form-control">
+                            </div>
+                        </div>                       
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Edit</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+        <div id="hapus" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Hapus {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form id="hapusForm" action="{% url 'drp_lembur' %}" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+        
+                        <div class="col-lg-12">
+                            <p class="hitam">Apakah Anda Yakin ?</p>
+                            <input type="hidden" name="hapus_id" id="hapus_id" class="form-control">
+                        </div>
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Hapus</button>
+                        <button type="button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div><!-- modal-dialog -->
+        </div>
+
+    </div>
+
+</div><!-- br-pagebody -->
+
+{% endblock breadcrumb %}
+
+{% block hrd_ajax %}
+
+<script>
+
+    $("#tabelku").DataTable()
+    $("#edit").on("show.bs.modal",function(e){
+        $("#edit_id").val($(e.relatedTarget).data("id"))
+        $("#erupiah").val($(e.relatedTarget).data("rupiah"))
+    })
+    $("#hapus").on("show.bs.modal",function(e){
+        $("#hapus_id").val($(e.relatedTarget).data("id"))
+        $("#erupiah").val($(e.relatedTarget).data("rupiah"))
+    })
+</script>
+
+{% endblock hrd_ajax %}

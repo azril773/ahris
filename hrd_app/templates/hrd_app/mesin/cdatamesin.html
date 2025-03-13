@@ -416,7 +416,7 @@
         </form>
         <hr>
         <h5 class='hitam'># Sinkron Data Mesin, terjadi ketika ada data yang ada di mesin lain selain master</h5>
-        <form action="{% url 'setuserid' %}" method="post">
+        <form action="{% url 'sinkron' %}" method="post">
             {% csrf_token %}
             <div class="d-flex justify-content-start" style="widpth: 100%;">
                 <div class="" style="width: 100%;">
@@ -437,9 +437,9 @@
                         {% endfor %}
                     </select>
                 </div>
-                {% comment %} <div class="d-flex align-items-end" style="width: 100%;">
+                <div class="d-flex align-items-end" style="width: 100%;">
                     <button type="submit" class="btn btn-primary">Proses</button>
-                </div> {% endcomment %}
+                </div>
             </div>
         </form>
         <hr>

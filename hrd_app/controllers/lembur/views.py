@@ -2242,3 +2242,58 @@ def get_jam_kerja(r):
             return JsonResponse({"status":"success",'msg':"Berhasil","data":data},status=200)
         except Exception as e:
             return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=400)
+        
+
+@authorization(["*"])
+def rp_lembur(r):
+    user = r.session["user"]
+    akses = akses_db.objects.using(r.session['ccabang']).filter(user_id=user["id"]).last()
+    rp = rp_lembur_db.objects.using(r.session['ccabang']).all()
+    data = {
+        "cabang":r.session["cabang"],
+        "ccabang":r.session["ccabang"],
+        "dsid":akses.sid_id,
+        "data":rp,
+        "modul_aktif":"Rupiah Lembur"
+    }
+    return render(r,"hrd_app/lembur/rp_lembur/rp_lembur.html",data)
+
+
+@authorization(["*"])
+def trp_lembur(r):
+    rp = r.POST.get("rupiah")
+    if rp == "":
+        messages.error(r,"Harap isi form dengan lengkap")
+        return redirect("rp_lembur")
+    try:
+        rp = int(rp)
+    except Exception as e:
+        messages.error(r,"Hanya bisa angka")
+        return redirect("rp_lembur")
+    rp_lembur_db(rupiah=rp).save(using=r.session['ccabang'])
+    messages.success(r,"Berhasil menambahkan rupiah lembur")
+    return redirect("rp_lembur")    
+
+@authorization(["*"])
+def erp_lembur(r):
+    id = r.POST.get("edit_id")
+    rp = r.POST.get("rupiah")
+    if rp == "" or id == "":
+        messages.error(r,"Harap isi form dengan lengkap")
+        return redirect("rp_lembur")
+    try:
+        rp = int(rp)
+    except Exception as e:
+        messages.error(r,"Hanya bisa angka")
+        return redirect("rp_lembur")
+    print(id,rp)
+    rp_lembur_db.objects.using(r.session["ccabang"]).filter(pk=id).update(rupiah=rp)
+    messages.success(r,"Berhasil edit rupiah lembur")
+    return redirect("rp_lembur")    
+
+@authorization(["*"])
+def drp_lembur(r):
+    id = r.POST.get("hapus_id")
+    rp_lembur_db.objects.using(r.session["ccabang"]).filter(pk=id).delete()
+    messages.success(r,"Berhasil hapus rupiah lembur")
+    return redirect("rp_lembur")    
