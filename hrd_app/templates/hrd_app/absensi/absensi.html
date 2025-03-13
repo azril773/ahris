@@ -569,7 +569,7 @@
     })
 
 
-    $("#submit_button").on("click",function(e){
+    {% comment %} $("#submit_button").on("click",function(e){
         $("#submit_button").prop("disable",true)
         const tgl1 = $("#tgl1").val() ? $("#tgl1").val() : undefined
         const tgl2 = $("#tgl2").val() ? $("#tgl2").val() : undefined
@@ -584,7 +584,7 @@
                 
             }
         })
-    })
+    }) {% endcomment %}
 
 </script>   
  
