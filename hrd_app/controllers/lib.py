@@ -304,7 +304,6 @@ def authorization(roles):
                 res = func(r,*args, **kwargs)
                 return res
             except Exception as e:
-                print(e,"OKOKOK")
                 messages.error(r,"Silahkan login terlebih dahulu")
                 return redirect("beranda")
         return process

@@ -505,8 +505,6 @@ def cdatamesin(r):
         divisi = divisi_db.objects.using(r.session["ccabang"]).all()
         datamesin = datamesin_db.objects.using(r.session["ccabang"]).all()
         status = status_pegawai_db.objects.using(r.session["ccabang"]).all()
-        print(status)
-        print(r.session["user"])
         data = {       
             'dsid': dsid,
             "mesin":mesin,
@@ -584,11 +582,13 @@ def cpalldata(r):
             conn.disable_device()
             for du in datauser:
                 conn.set_user(du.uid,du.name,du.privilege,du.password,du.group_id,du.user_id,du.card)
-                fts = []
                 fgr = [f for f in fingers if f.uid == du.uid]
-                print(du)
-                print(fgr)
-                conn.save_user_template(du,fgr)       
+                tmps = []
+                for fg in fgr:
+                    tmps.append(finger.Finger(fg.uid,fg.fid,fg.valid,fg.template))
+                # print(du)
+                # print(fgr)
+                conn.save_user_template(du,tmps)       
             conn.enable_device()
             conn.disconnect()
         except Exception as e:
@@ -719,13 +719,13 @@ def adduser_machine(r):
         uid_ready = [uid for uid in range(uids[0], uids[-1] +1 ) if uid not in uids]
         userid = userid.strip()
         if len(uid_ready) <= 0:
-            if level == 1:
+            if int(level) == 1:
                 conn.set_user(name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
             else:
                 conn.set_user(name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
         else:
             uid = uid_ready[0]
-            if level == 1:
+            if int(level) == 1:
                 conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
             else:
                 conn.set_user(uid=uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
@@ -756,11 +756,13 @@ def edituser_machine(r):
         pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(id=pegawai,aktif=1)
         if not pegawai.exists():
             messages.error(r,'Pegawai tidak ada')
-            return redirect("")
+            return redirect("cdatamesin")
         users = conn.get_users()
         user = [user for user in users if user.user_id == pegawai[0].userid]
-        
-        if level == 0:
+        if len(user) <= 0:
+            messages.error(r,"User tidak ada")
+            return redirect("cdatamesin")
+        if level == 0:  
             conn.set_user(uid=user[0].uid,name=nama,password=password,user_id=userid,privilege=const.USER_DEFAULT,card=0,group_id='')
         else:
             conn.set_user(uid=user[0].uid,name=nama,password=password,user_id=userid,privilege=const.USER_ADMIN,card=0,group_id='')
@@ -981,7 +983,7 @@ def listdata(r):
 
 
 def testmesin(r):
-    zk = ZK("15.60.254.206",4370,60)
+    zk = ZK("15.62.254.204",4370,60)
     conn = zk.connect()
     conn.disable_device()
     for pg in pegawai_db.objects.using(r.session["ccabang"]).all():
@@ -1040,12 +1042,10 @@ def byfilter(r):
                     conn.disconnect()
                     print(f"Success connect to {m.ipaddress} - {m.nama}")
                 except Exception as e:
-                    conn.enable_device()
-                    conn.disconnect()
                     if type(e) == exception.ZKErrorResponse:
                         raise Exception(f"Terjadi kesalahan pada mesin {m.ipaddress} - {m.nama}")
                     raise e
-
+            print(len(userdt))
             return JsonResponse({"status":"success","msg":"berhasil ambil data","users":userdt,"fingers":templatesdt},status=200)
         except Exception as e:
             exc_type, exc_obj, exc_tb = sys.exc_info()
@@ -1074,7 +1074,7 @@ def adddtmesin(r):
                     user = usr.User(uid=u.uid,name=u.nama,privilege=u.level,password=u.password,user_id=u.userid)
                     templates = []
                     for s in fingers:
-                        templates.append(finger.Finger(uid=s.uid,fid=s.fid,valid=s.valid,template=s.template))
+                        templates.append(finger.Finger(uid=u.uid,fid=s.fid,valid=s.valid,template=s.template))
                     conn.save_user_template(user,templates)
                 conn.enable_device()
                 conn.disconnect()
@@ -1133,8 +1133,11 @@ def listdata_json(r):
         data = sorted(data,key=lambda i: i["userid"])
         return JsonResponse({"status":"success","msg":"Berhasil mengambil mesin","data":data},status=200)
     except Exception as e:
-        print(e)
-        return JsonResponse({"status":'error',"msg":"Terjadi kesalahan"},status=400)
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        msg = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
+        return JsonResponse({"status":'error',"msg":msg},status=400)
     
 
 def setuserid(r):
@@ -1186,8 +1189,12 @@ def setuserid(r):
             return redirect("cdatamesin")
         except Exception as e:
             transaction.set_rollback(True,using=r.session["ccabang"])
-            print("MASUKKK ERRROR")
-            raise e
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
+            msg = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
+            messages.error(r,msg)
+            return redirect("cdatamesin")
 
 
 
@@ -1235,10 +1242,13 @@ def sinkrondatamemsin(r):
                     # conn.set_user(name=us.name,privilege=us.privilege,password=us.password,user_id=us.user_id,card=0)
                     # lastuser = conn.get_users()[-1]
                     # template = [tmp for tmp in templates if tmp.uid == us.uid]
+                    # tmps = []
+                    # user = usr.User(uid=lastuser.uid,name=lastuser.name,privilege=lastuser.privilege,password=lastuser.password,group_id=lastuser.group_id,user_id=lastuser.user_id,card=0)
                     # for t in template:
-                    #     user = usr.User(uid=lastuser.uid,name=lastuser.name,privilege=lastuser.privilege,password=lastuser.password,group_id=lastuser.group_id,user_id=lastuser.user_id,card=0)
                     #     f = finger.Finger(lastuser.uid,t.fid,t.valid,t.template)
-                    #     conn.save_user_template(user,f)
+                    #     tmps.append(f)
+                    # print(tmps)
+                    # conn.save_user_template(user,tmps)
                     useridss.append(us.user_id)
             conn2.enable_device()
             conn2.disconnect()
@@ -1249,6 +1259,102 @@ def sinkrondatamemsin(r):
             conn2.disconnect()
     conn.enable_device()
     conn.disconnect()
+    return redirect("cdatamesin")
+
+
+authorization(["root","it"])
+def cpbyuserid(r):
+    master = r.POST.get("mesin_master")
+    userid = r.POST.get("userid")
+    mesin = r.POST.getlist("mesin[]")
+
+    if master == "" or userid == "" or mesin == "":
+        messages.error(r,"Harap isi form dengan lengkap")
+        return redirect("cdatamesin")
+    try:
+        if not mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(master)).last():
+            messages.error(r,"Mesin asal tidak ada")
+            return redirect("cdatamesin")
+        
+        dtmesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk__in=mesin)
+        if len(dtmesin) <= 0:
+            messages.error(r,"Mesin tujuan tidak ada")
+            return redirect("cdatamesin")
+        
+
+        userids = userid.split(",")
+        useridss = [us.strip() for us in userids] 
+
+        datauser = []
+        mmaster = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(master)).last()
+        zk = ZK(mmaster.ipaddress,4370,60)
+        conn = zk.connect()
+        conn.disable_device()
+        users = conn.get_users()
+        fingers = conn.get_templates()
+        [datauser.append(user) for user in users if user.user_id in useridss]
+
+        for m in dtmesin:
+            zk1 = ZK(m.ipaddress,4370,60)
+            conn1 = zk1.connect()
+            conn1.disable_device()
+            for dt in datauser:
+                conn1.set_user(uid=dt.uid,name=dt.name,privilege=dt.privilege,password=dt.password,group_id= dt.group_id,user_id=dt.user_id,card=dt.card)
+                finger = [fgr for fgr in fingers if fgr.uid == dt.uid]
+                conn1.save_user_template(dt,finger)
+            conn1.enable_device()
+            conn1.disconnect()
+
+        conn.enable_device()
+        conn.disconnect()
+
+        return redirect("cdatamesin")
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        msg = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
+        messages.error(r,msg)
+        return redirect("cdatamesin")
+
+
+
+
+@authorization(["root","it"])
+def editbyuserid(r):
+    mesin = r.POST.get("mesin")
+    userid = r.POST.get("userid")
+    nama = r.POST.get("nama")
+    nuserid = r.POST.get("nuserid")
+    level = r.POST.get("level")
+    password = r.POST.get("password")
+
+    if mesin == '' or userid == '' or nama == '' or nuserid == '' or level == '':
+        messages.error(r,"Harap isi form dengan lengkap")
+        return redirect("cdatamesin")
+    try:
+        if not mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(mesin)).last():
+            messages.error(r,"Mesin tidak ada")
+            return redirect("cdatamesin")
+        dtmesin = mesin_db.objects.using(r.session["ccabang"]).filter(pk=int(mesin)).last()
+        zk = ZK(dtmesin.ipaddress,4370,60)
+        conn = zk.connect()
+        conn.disable_device()
+        users = conn.get_users()
+        user = next((us for us in users if us.user_id == userid.strip()),None)
+        if not user:
+            return redirect("cdatamesin")
+        conn.set_user(uid=user.uid,name=nama.strip(),privilege=int(level),password=password,group_id='',user_id=nuserid.strip(),card=0)
+        return redirect("cdatamesin")
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        msg = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
+        messages.error(r,msg)
+        return redirect("cdatamesin")
+
 
     # dt = pd.DataFrame(data)
     # dt.to_excel('excel.xlsx')
@@ -1747,7 +1853,6 @@ def sinkrondatamemsin(r):
     
 #     master = request.POST.get('master')
 #     tujuan = request.POST.getlist('tujuan')
-
 #     mesin = mesin_db.objects.using(r.session["ccabang"]).get(id=int(master))
 #     ip_master = mesin.ip_address
     

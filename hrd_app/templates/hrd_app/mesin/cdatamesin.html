@@ -443,6 +443,88 @@
             </div>
         </form>
         <hr>
+        <h5 class='hitam'># Copy user dengan userid</h5>
+        <form action="{% url 'cpbyuserid' %}" method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-start" style="widpth: 100%;">
+                <div class="" style="width: 100%;">
+                    <label for="mesin_master" class="hitam">Mesin Master</label>
+                    <select name="mesin_master" class="mesin"  id="mesin_master" >
+                        <option value="">Pilih Mesin Master</option>
+                        {% for m in mesin %}
+                        <option value="{{m.id}}">{{m.nama}} - {{m.ipaddress}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="" style="width: 100%;">
+                    <label for="userid" class="hitam">Userid</label>
+                    <input type="text" name="userid" id="userid" class="form-control">
+                </div>
+                <div class="" style="width: 100%;">
+                    <label for="mesin" class="hitam">Mesin Lain</label>
+                    <select name="mesin[]" class="mesint"  id="mesin" >
+                        <option value="">Pilih Mesin Lain</option>
+                        {% for m in mesin %}
+                        <option value="{{m.id}}">{{m.nama}} - {{m.ipaddress}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="d-flex align-items-end" style="width: 100%;">
+                    <button type="submit" id="btncpbyuserid" class="btn btn-primary">Proses</button>
+                </div>
+            </div>
+        </form>
+        <hr>
+        <h5 class="hitam"> # Edit Data Ke Mesin dengan userid</h5>
+        <form action="{% url "editbyuserid" %}" method="post">
+            {% csrf_token %}
+            <div class="d-flex justify-content-start" style="width: 100%;">
+                <div class="" style="width: 100%;">
+                    <label for="mesine" class="hitam">Mesin</label>
+                    <select name="mesin" class="mesin" id="mesine" >
+                        <option value="">Pilih Mesin</option>
+                        {% for m in mesin %}
+                            <option value="{{m.pk}}">{{m.nama}} - {{m.ipaddress}}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                &nbsp
+                <div class="" style="width: 100%;">
+                    <label for="useride" class="hitam">Userid Mesin</label>
+                    <input type="text" name="userid" id="useride" class="form-control">
+                </div>
+                &nbsp
+                <div class="" style="width: 100%;">
+                    <label for="namae" class="hitam">Nama</label>
+                    <input type="text" name="nama" id="namae" class="form-control">
+                </div>
+                &nbsp
+                <div class="" style="width: 100%;">
+                    <label for="nuserid" class="hitam">Userid Baru</label>
+                    <input type="text" name="nuserid" id="nuserid" class="form-control">
+                </div>
+                &nbsp
+                <div class="" style="width: 100%;">
+                    <label for="levele" class="hitam">Pilih User Level</label>
+                    <select name="level" id="levele" class="level">
+                        <option value="">Pilih Level</option>
+                        <option value="14">Admin</option>
+                        <option value="0">User</option>
+                    </select>
+                </div>
+                &nbsp
+                <div class="" style="width: 100%;">
+                    <label for="passworde" class="hitam">Password</label>
+                    <input type="text" name="password" id="passworde" class="form-control">
+                </div>
+                &nbsp
+                &nbsp
+                <div class="d-flex align-items-end" style="width: 100%;">
+                    <button type="submit" class="btn btn-primary">Proses</button>
+                </div>
+            </div>
+            <hr>
+        </form>
         {% endif %}
         <!-- BY DIVISI -->
     <!-- alert berhasil -->

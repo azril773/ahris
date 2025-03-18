@@ -12,38 +12,39 @@ def pegawai(r,sid):
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         # for p in pegawai_db.objects.using(r.session["ccabang"]).all():
-        #     if p.aktif == 0:
-        #         pegawai_db_arsip(
-        #             nama=p.nama,
-        #             email=p.email,
-        #             no_telp=p.no_telp,
-        #             userid=p.userid,
-        #             gender=p.gender,
-        #             status=p.status,
-        #             nik=p.nik,
-        #             divisi=p.divisi,
-        #             jabatan=p.jabatan,
-        #             no_rekening=p.no_rekening,
-        #             no_bpjs_ks=p.no_bpjs_ks,
-        #             no_bpjs_tk=p.no_bpjs_tk,
-        #             payroll_by=p.payroll_by,
-        #             ks_premi=p.ks_premi,
-        #             tk_premi=p.tk_premi,
-        #             aktif=p.aktif,
-        #             tgl_masuk=p.tgl_masuk,
-        #             tgl_aktif=p.tgl_aktif,
-        #             tgl_nonaktif=p.tgl_nonaktif,
-        #             hari_off=p.hari_off,
-        #             hari_off2=p.hari_off2,
-        #             kelompok_kerja=p.kelompok_kerja,
-        #             sisa_cuti=p.sisa_cuti,
-        #             cuti_awal=p.cuti_awal,
-        #             shift=p.shift,
-        #             counter=p.counter,
-        #             rekening=p.rekening,
-        #             add_by=r.session["user"]["nama"],
-        #         ).save(using=r.session["ccabang"])
-        #         p.delete(using=r.session["ccabang"])
+            # if p.aktif == 0:
+            #     pegawai_db_arsip(
+            #         nama=p.nama,
+            #         email=p.email,
+            #         no_telp=p.no_telp,
+            #         userid=p.userid,
+            #         gender=p.gender,
+            #         status=p.status,
+            #         nik=p.nik,
+            #         divisi=p.divisi,
+            #         jabatan=p.jabatan,
+            #         no_rekening=p.no_rekening,
+            #         no_bpjs_ks=p.no_bpjs_ks,
+            #         no_bpjs_tk=p.no_bpjs_tk,
+            #         payroll_by=p.payroll_by,
+            #         ks_premi=p.ks_premi,
+            #         tk_premi=p.tk_premi,
+            #         aktif=p.aktif,
+            #         tgl_masuk=p.tgl_masuk,
+            #         tgl_aktif=p.tgl_aktif,
+            #         tgl_nonaktif=p.tgl_nonaktif,
+            #         hari_off=p.hari_off,
+            #         hari_off2=p.hari_off2,
+            #         kelompok_kerja=p.kelompok_kerja,
+            #         profile_picture = p.profile_picture,
+            #         sisa_cuti=p.sisa_cuti,
+            #         cuti_awal=p.cuti_awal,
+            #         shift=p.shift,
+            #         counter=p.counter,
+            #         rekening=p.rekening,
+            #         add_by=r.session["user"]["nama"],
+            #     ).save(using=r.session["ccabang"])
+            #     p.delete(using=r.session["ccabang"])
         # excel = pd.read_excel("static/ahris.xlsx")
         # data = []
         # for i in excel.iloc[:,0]:
@@ -3269,3 +3270,30 @@ def pendidikan_data_json(r):
             }
             pendidikan.append(obj)
         return JsonResponse({"status":"success","msg":"Berhasil ambil data","data":pendidikan},status=200)
+
+
+@authorization(["root","it"])
+def hapusfinger(r):
+    sid = r.POST.get("sid")
+    try:
+        if sid > 0:
+            if not status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(sid)):   
+                raise Exception("Status pegawai tidak ada")
+            userids = [pgw.userid for pgw in pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(status_id=int(sid))]
+        else:
+            userids = [pgw.userid for pgw in pegawai_db_arsip.objects.using(r.session["ccabang"]).all()]
+
+        for m in mesin_db.objects.using(r.session['ccabang']).filter(status="Active"):
+            zk = ZK(m.ipaddress,4370,60)
+            conn = zk.connect()
+            conn.disable_device()
+            for userid in userids:
+                conn.delete_user(user_id=userid)
+        return redirect("non_aktif",sid=sid)
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        msg = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
+        messages.error(r,msg)
+        return redirect("non_aktif",sid=sid)

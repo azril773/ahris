@@ -25,4 +25,5 @@ urlpatterns = [
     path('tkl/<int:idp>', views.tambah_kl, name='tkl'),
     path('ambil_mesin/', views.ambil_mesin, name='ambil_mesin'),
     path('upload_foto/', views.upload_foto, name='upload_foto'),
+    path('hapusfinger/', views.hapusfinger, name='hapusfinger'),
 ]

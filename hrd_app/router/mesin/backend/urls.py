@@ -24,5 +24,7 @@ urlpatterns = [
     path('cekmesin', views.cekmesin, name='cekmesin'),
     path('listdata_json', views.listdata_json, name='listdata_json'),
     path('adddtmesin', views.adddtmesin, name='adddtmesin'),
+    path('cpbyuserid', views.cpbyuserid, name='cpbyuserid'),
+    path('editbyuserid', views.editbyuserid, name='editbyuserid'),
 
 ]

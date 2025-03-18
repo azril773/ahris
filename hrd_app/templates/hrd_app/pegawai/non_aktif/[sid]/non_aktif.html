@@ -49,9 +49,15 @@
 
             <!-- Button Perjanjian & Kontrak Kerja -->
             <button data-target="#pilih_tgl_proses" data-toggle="modal" class="btn btn-dark mg-b-6">Perjanjian & Kontrak Kerja</button>
-
+            
             <!-- Button Pegawai Non Aktif -->
             <a href="{% url 'pegawai' sid %}"><button class="btn btn-success mg-b-6">Pegawai Aktif</button></a>
+            <form action="{% url 'hapusfinger' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="sid" value="{{sid}}">
+                <button data-toggle="modal" class="btn btn-danger mg-b-6">Hapus finger</button>
+            </form>
+
 
             </div>          
         </div>

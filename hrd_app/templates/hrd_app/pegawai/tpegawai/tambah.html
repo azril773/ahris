@@ -242,10 +242,14 @@
                                 <div class="form-group">
                                   <label for="foto" class="form-control-label tx-inverse">Foto</label>  
                                   <input type="file" accept=".jpeg, .jpg, .png" name="foto" id="foto" class="form-control">
+                                  <input type="file" name="foto2" id="foto2">
                                 </div>
                               </div>
                               <div class="col-lg-3">
+                                <video src="" autoplay="true" id="video"></video>
+                                <canvas id="capture"></canvas>
                                 <div class="preview" id="preview">
+                                  <button id="btncpt">capture</button>
                                 </div>
                               </div>
                             </div>
@@ -1392,7 +1396,6 @@ if($(e.target).is("button")){
     const pendidikan = localStorage.getItem("data_pendidikan")
     
 
-
     formData.append("nama",nama)
     formData.append("gender",gender)
     formData.append("tgl_masuk",tgl_masuk)
@@ -1458,4 +1461,25 @@ if($(e.target).is("button")){
     })
   }
 </script>
+{% comment %} <script>
+  navigator.mediaDevices.getUserMedia({
+    video:{width:120,height:120}
+  }).then(stream => {
+    const video = document.querySelector("#video")
+    video.srcObject = stream
+  })
+
+  const canvass = document.getElementById("capture")
+  $("#btncpt").on("click",function(e){
+    const contexts = canvass.getContext('2d');
+    const video = document.querySelector("#video")
+    canvass.width =video.videoWidth
+    canvass.height = video.videoHeight
+
+    const coba = contexts.drawImage(video,0,0,canvass.width,canvass.height)
+    canvass.toBlob(e => {
+      localStorage.setItem("blob",e)
+    })
+  })
+</script> {% endcomment %}
 {% endblock hrd_ajax %}
