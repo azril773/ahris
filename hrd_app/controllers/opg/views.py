@@ -419,10 +419,11 @@ def batal_opg(r):
     idp = opg.pegawai_id
     tgl = opg.diambil_tgl
     
-    ab = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_absen=tgl)
-    if ab.exists():
-        ab[0].keterangan_absensi = None
-        ab[0].save(using=r.session["ccabang"])
+    ab = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_absen=tgl).last()
+    print(ab)
+    if ab is not None:
+        ab.keterangan_absensi = None
+        ab.save(using=r.session["ccabang"])
     
     opg.diambil_tgl = None
     opg.status = 0
