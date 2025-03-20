@@ -308,15 +308,6 @@
                 { data: 'tj' },
                 {
                     data: 'ket',
-                    render:(data,type,row,meta) => {
-                        if (row.masuk == null && row.ket == " ") {
-                            return `<span class="tx-inverse">Tidak Absen Masuk</span>`
-                        }else if (row.pulang == null && row.ket == " ") {
-                            return `<span class="tx-inverse">Belum Absen Pulang</span>`
-                        } else {
-                            return `<span class="tx-inverse">${data}</span>`
-                        }
-                    }
                 },
                 
             ],   

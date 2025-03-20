@@ -39,29 +39,29 @@
         <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Yang Perlu Dicek</h6>
         <div class="d-flex align-items-center justify-content-start">
             <div class="col-md-12 pd-x-0">  
-                <a href="{% url 'terlambat' sid %}" class="btn btn-outline-info mg-b-8">Data terlambat</a> &nbsp;                 
-                <a href="{% url 'tketerangan' sid %}" class="btn btn-info mg-b-8">Tanpa Keterangan</a> &nbsp;                 
-                <a href="{% url 'tlengkap' sid %}" class="btn btn-outline-info mg-b-8">Tidak absen lengkap</a> &nbsp;                    
+                <a href="{% url 'terlambat' sid  %}" class="btn btn-outline-info mg-b-8">Data terlambat</a> &nbsp;                 
+                <a href="{% url 'tketerangan' sid  %}" class="btn btn-outline-info mg-b-8">Tanpa Keterangan</a> &nbsp;                 
+                <a href="{% url 'tlengkap' sid  %}" class="btn btn-info mg-b-8">Tidak absen lengkap</a> &nbsp;                   
             </div>            
         </div>
-        <button data-target="#pilih_tgl_cari" data-toggle="modal" class="btn btn-warning mg-b-6">Cari Absen Tanpa Keterangan</button>
+        <button data-target="#pilih_tgl_cari" data-toggle="modal" class="btn btn-warning mg-b-6">Cari Absen Tidak Lengkap </button>
         <div class="d-flex align-items-center justify-content-start">
             <div class="col-md-12 pd-x-0">  
                 {% if sid == 0 %}
-                    <a href="{% url 'tketerangan' 0 %}" class="btn btn-info mg-b-8">Semua Divisi</a> &nbsp; 
+                    <a href="{% url 'tlengkap' 0 %}" class="btn btn-info mg-b-8">Semua Divisi</a> &nbsp; 
                         
                     {% for s in status %}   
-                        <a href="{% url 'tketerangan' s.id %}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp;  
+                        <a href="{% url 'tlengkap' s.id %}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp;  
                     {% endfor %}
 
                 {% else %}
-                    <a href="{% url 'tketerangan' 0 %}" class="btn btn-outline-info mg-b-8">Semua Divisi</a> &nbsp; 
+                    <a href="{% url 'tlengkap' 0 %}" class="btn btn-outline-info mg-b-8">Semua Divisi</a> &nbsp; 
                     
                     {% for s in status %}   
                         {% if s.id == sid %}
-                            <a href="{% url 'tketerangan' s.id%}" class="btn btn-info mg-b-8">{{s.status}}</a> &nbsp;   
+                            <a href="{% url 'tlengkap' s.id%}" class="btn btn-info mg-b-8">{{s.status}}</a> &nbsp;   
                         {% else %}
-                            <a href="{% url 'tketerangan' s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp; 
+                            <a href="{% url 'tlengkap' s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp; 
                         {% endif %}
                     {% endfor %}
                 {% endif %}
@@ -78,6 +78,10 @@
                 <th>Userid</th>
                 <th>Shift</th>
                 <th>Divisi</th>
+                <th>Masuk</th>
+                <th>Keluar</th>
+                <th>Kembali</th>
+                <th>Pulang</th>
                 <th>Action</th>
                 </tr>
             </thead>
@@ -86,51 +90,17 @@
         </div>
     </div>
 
-    <div id="editIjin" class="modal fade" style="width:100%">
-        <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content bd-0 tx-14">
-            <div class="modal-header pd-y-20 pd-x-25">
-            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Ubah Keterangan</h6>          
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-            </button>          
-            </div>
-            
-            <form id="ubah_ket" method="post">
-                {% csrf_token %}
-                <div class="form-layout form-layout-1">
-                    <label for="ket">Daftar Ijin</label>
-                    <select name="jenis_ijin" id="jenis_ijin" class="mb-4">
-                        <option value="">Pilih Ijin</option>
-                        {% for j in jenis_ijin %}
-                            <option value="{{j.id}}">{{j.jenis_ijin}}</option>
-                        {% endfor %}
-                    </select>
-                    <label for="ket">Keterangan Tambah</label>
-                    {% comment %} <label for="ket">Keterangan Tambahan</label> {% endcomment %}
-                    <textarea name="ket" class="form-control" id="ket" style="width: 600px;"></textarea>
-                    <input type="hidden" name="sid" class="form-control" value="{{sid}}">
-                    <input type="hidden" name="id" id="idAb" class="form-control">
-                    <div class="mt-3 d-flex justify-content-end gap-3">
-                        <button type="submit" class="btn btn-primary mr-2">Ubah</button>
-                        <button class="btn btn-secondary">Batalkan</button>
-                    </div>
-                </div>            
-            </form>              
-        </div>
-        </div><!-- modal-dialog -->
-    </div>
     <div id="pilih_tgl_cari" class="modal fade">
         <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content bd-0 tx-14">
             <div class="modal-header pd-y-20 pd-x-25">
-            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Cari Data Tanpa Keterangan</h6>          
+            <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Cari Data Tidak Lengkap</h6>          
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>          
             </div>
             
-            <form method="post" id="cariTKeterangan">
+            <form method="post" id="cariTLengkap">
                 {% csrf_token %}
                 <div class="form-layout form-layout-1">
                 <div class="row mg-b-25">
@@ -160,17 +130,55 @@
         </div>
         </div><!-- modal-dialog -->
     </div>
+
 </div><!-- br-pagebody -->
+
+
+<div id="editIjin" class="modal fade" style="width:100%">
+    <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content bd-0 tx-14">
+        <div class="modal-header pd-y-20 pd-x-25">
+        <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Form Ubah Keterangan</h6>          
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>          
+        </div>
+        <div id="msgtket"></div>
+        <form id="ubah_ket" method="post">
+            {% csrf_token %}
+            <div class="form-layout form-layout-1">
+                <label for="ket">Daftar Ijin</label>
+                <select name="jenis_ijin" id="jenis_ijin" class="mb-4">
+                    <option value="">Pilih Ijin</option>
+                    {% for j in jenis_ijin %}
+                        <option value="{{j.id}}">{{j.jenis_ijin}}</option>
+                    {% endfor %}
+                </select>
+                <label for="ket">Keterangan Tambah</label>
+                {% comment %} <label for="ket">Keterangan Tambahan</label> {% endcomment %}
+                <textarea name="ket" class="form-control" id="ket" style="width: 600px;"></textarea>
+                <input type="hidden" name="sid" class="form-control" value="{{sid}}">
+                <input type="hidden" name="id" id="idAb" class="form-control">
+                <div class="mt-3 d-flex justify-content-end gap-3">
+                    <button type="submit" class="btn btn-primary mr-2">Ubah</button>
+                    <button class="btn btn-secondary" data-dismiss="modal">Batalkan</button>
+                </div>
+            </div>            
+        </form>              
+    </div>
+    </div><!-- modal-dialog -->
+</div>
+
 
 {% endblock breadcrumb %}
 {% block hrd_ajax %}
 <script>
+    $("#jenis_ijin").selectize()
     sid = "{{sid}}"
-    const jenis_ijin = $("#jenis_ijin").selectize()
     const token = document.querySelector("input[name=csrfmiddlewaretoken]").value
     const table = $("#tableku").DataTable({
         ajax:{
-            url:"{% url 'tketerangan_json' sid %}",
+            url:"{% url 'tlengkap_json' sid %}",
             method:"post",
             headers:{
                 "X-CSRFToken":token
@@ -183,13 +191,16 @@
             {data:"userid"},
             {data:"shift"},
             {data:"divisi"},
+            {data:"masuk"},
+            {data:"istirahat"},
+            {data:"kembali"},
+            {data:"pulang"},
             {
-                data: null,
-                "render": function(data, type, row, meta){    
-                    data = '<button class="btn btn-sm btn-warning mb-1 tx-12" data-toggle="modal" data-target="#editIjin" data-id="'+row.id+'">Edit</button>';
-                    return data;
-                } 
-            }
+                data:null,
+                render:(data,type,row,meta) => {
+                    return `<button class="btn btn-warning" data-target="#editIjin" data-toggle="modal" data-id="${row.id}">Edit</button>`    
+                }
+            },
         ],
         "rowCallback": function (row, data) {
             if(data.sln == 1){
@@ -207,9 +218,6 @@
             $('td', row).eq(8).addClass('hitam');
             $('td', row).eq(9).addClass('hitam');
             $('td', row).eq(10).addClass('hitam');
-            $('td', row).eq(11).addClass('hitam');
-            $('td', row).eq(12).addClass('hitam');
-            $('td', row).eq(13).addClass('hitam');
         },
         destroy: true,
         ordering: false,
@@ -229,13 +237,14 @@
             },
         },
     })
-    $("#cariTKeterangan").on("submit",function(e){
+    $("#cariTLengkap").on("submit",function(e){
         e.preventDefault()
         const tgl1 = $("#ctgl1").val()
         const tgl2 = $("#ctgl2").val()
+        console.log(tgl1,tgl2)
         $("#tableku").DataTable({
             ajax:{
-                url:"{% url 'tketerangan_json' sid %}",
+                url:"{% url 'tlengkap_json' sid %}",
                 method:"post",
                 data:{tgl1,tgl2},
                 headers:{
@@ -248,17 +257,16 @@
                 {data:"pegawai"},
                 {data:"shift"},
                 {data:"divisi"},
+                {data:"masuk"},
+                {data:"istirahat"},
+                {data:"kembali"},
+                {data:"pulang"},
                 {
-                    data: null,
-                    "render": function(data, type, row, meta){    
-                        if((row.masuk == null || row.pulang == null || row.masuk > row.jam_masuk) || (row.masuk_b == null || row.pulang_b == null || row.masuk_b > row.jam_masuk)){
-                            data = '<button class="btn btn-sm btn-warning mb-1 tx-12" data-toggle="modal" data-target="#editIjin" data-id="'+row.id+'">Edit</button>';
-                            return data;
-                        } else {
-                            return ""
-                        }
-                    } 
-                }
+                    data:null,
+                    render:(data,type,row,meta) => {
+                        return `<button class="btn btn-warning" data-target="#editIjin" data-toggle="modal" data-id="${row.id}">Edit</button>`    
+                    }
+                },
             ],
             "rowCallback": function (row, data) {
                 if(data.sln == 1){
@@ -275,10 +283,6 @@
                 $('td', row).eq(7).addClass('hitam');
                 $('td', row).eq(8).addClass('hitam');
                 $('td', row).eq(9).addClass('hitam');
-                $('td', row).eq(10).addClass('hitam');
-                $('td', row).eq(11).addClass('hitam');
-                $('td', row).eq(12).addClass('hitam');
-                $('td', row).eq(13).addClass('hitam');
             },
             destroy: true,
             ordering: false,
@@ -296,10 +300,12 @@
                     previous: '<i class="cs-chevron-left"></i>',
                     next: '<i class="cs-chevron-right"></i>',
                 },
-            }
+            },
         })
         $("#pilih_tgl_cari").modal("hide")
     })
+
+
     $("#editIjin").on('show.bs.modal', function(e){
         var id = $(e.relatedTarget).data('id');
         $("#idAb").val(id);
@@ -324,9 +330,17 @@
                 'sid': sid
             },
             success: function(data){
-                console.log(data)
+                $("#msgtket p").remove()
                 $("#editIjin").modal('hide')
                 table.ajax.reload();
+            },
+            error:(err) => {
+                $("#msgtket p").remove()
+                if(err.responseJSON?.msg){
+                    $("#msgtket").append(`<p class="alert alert-danger">${err.responseJSON.msg}</p>`)
+                }else{
+                    $("#msgtket").append(`<p class="alert alert-danger">Terjadi Kesalahan</p>`)
+                }
             }
         })
     })

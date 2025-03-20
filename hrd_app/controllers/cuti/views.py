@@ -50,13 +50,18 @@ def cuti(r, sid):
         tglac = ac.tgl + relativedelta(months=10)
         lastday = monthrange(tglac.year,tglac.month)
         tgl = datetime.strptime(f'{tglac.year}-{tglac.month}-{lastday[1]}',"%Y-%m-%d").date()
+        updatepgw = []
         for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if r.session["ccabang"] == "cirebon":
                 pgw = pegawai_cuti_lama.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk).last()
                 if pgw is not None:
-                    p.tgl_cuti = ac.tgl
-                    p.expired = tgl
-                    p.save(using=r.session["ccabang"])
+                    obj = {
+                        "idp":p.pk,
+                        "tgl_cuti":ac.tgl,
+                        "expired":tgl,
+                        "sisa_cuti":p.sisa_cuti
+                    }
+                    updatepgw.append(obj)
                 else:
                     if p.tgl_masuk is not None:
                         # jika sudah lebih dari satu tahun
@@ -65,16 +70,14 @@ def cuti(r, sid):
                         
                         mkerja = today - tmasuk
                         if int(mkerja.days) > 360:      
-                            tgl_masuk = p.tgl_masuk
+                            tgl_masuk = p.tgl_masuk # 2020-01-03
                             today = datetime.now()
-                            year = today.year
-                            tgl_masuk = datetime.strptime(f'{year}-{tgl_masuk.month}-{tgl_masuk.day}',"%Y-%m-%d")
+                            year = today.year # 2025-01-01
+                            tgl_masuk = datetime.strptime(f'{year}-{tgl_masuk.month}-{tgl_masuk.day}',"%Y-%m-%d") # 2025-01-03
                             tgl_cuti = tgl_masuk.date()
                             if today.date() < tgl_masuk.date():
                                 new_tglmasuk = tgl_masuk.date() - relativedelta(years=1)
                                 tgl_cuti = new_tglmasuk
-                                if p.pk == 10:
-                                    print(new_tglmasuk)
                                 exp = new_tglmasuk + relativedelta(months=10)
                             else:
                                 exp = tgl_masuk + relativedelta(months=10)
@@ -83,14 +86,23 @@ def cuti(r, sid):
                                     p.tgl_cuti = tgl_cuti
                                     p.expired = exp
                                     p.sisa_cuti = 12
-                                    p.save(using=r.session["ccabang"])
+                                    obj = {
+                                        "idp":p.pk,
+                                        "tgl_cuti":tgl_cuti,
+                                        "expired":exp,
+                                        "sisa_cuti":12
+                                    }
+                                    updatepgw.append(obj)
                                 else:
                                     pass
                             else:
-                                p.tgl_cuti = tgl_cuti
-                                p.sisa_cuti = 12
-                                p.expired = exp
-                                p.save(using=r.session["ccabang"])
+                                obj = {
+                                    "idp":p.pk,
+                                    "tgl_cuti":tgl_cuti,
+                                    "expired":exp,
+                                    "sisa_cuti":12
+                                }
+                                updatepgw.append(obj)
                         else:
                             exp = "-"
                     else:
@@ -115,7 +127,7 @@ def cuti(r, sid):
                     pegawai.append(data)
                 else:
                     pass    
-                        
+        pegawai_db.objects.using(r.session['ccabang']).bulk_update([absensi_db(id=dt.idp,tgl_cuti=dt.tgl_cuti,expired=dt.tgl_cuti,sisa_cuti=dt.sisa_cuti) for dt in updatepgw],["tgl_cuti","expired","sisa_cuti"])         
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
@@ -283,7 +295,7 @@ def cuti_json(r, dr, sp, sid):
                     'sisa_cuti':i.pegawai.sisa_cuti
                 }
                 data.append(ct)
-                               
+        print(data)       
         return JsonResponse({"data": data})
 
 
@@ -291,7 +303,7 @@ def cuti_json(r, dr, sp, sid):
 def dcuti_json(r, idp):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
-
+        print("OKOOKOK")
         if r.session["ccabang"] == "cirebon":
         
             data = []
@@ -319,6 +331,7 @@ def dcuti_json(r, idp):
                     }
                     data.append(ct) 
             else:
+                print(pegawai.tgl_cuti)
                 for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__gte=pegawai.tgl_cuti, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi):
                                 
                     ct = {
@@ -330,6 +343,7 @@ def dcuti_json(r, idp):
                         'etgl':datetime.strftime(i.edit_date, '%d-%m-%Y')
                     }
                     data.append(ct) 
+            print(data)
         else:
             data = []
             
@@ -348,6 +362,7 @@ def dcuti_json(r, idp):
                     'etgl':datetime.strftime(i.edit_date, '%d-%m-%Y')
                 }
                 data.append(ct) 
+        print(data)
         return JsonResponse({"data": data})
 
 

@@ -32,8 +32,8 @@ def tlengkap(r,sid):
             # "pegawai":pegawai,
             'modul_aktif' : 'Laporan'
         }
-        if r.session["ccabang"] == "cirebon":
-            return render(r,"hrd_app/ypc/tlengkap_non.html",data)
+        if not r.session["ccabang"] == "tasik":
+            return render(r,"hrd_app/ypc/non_b/tlengkap.html",data)
         else:
             return render(r,"hrd_app/ypc/tlengkap.html",data)
 
@@ -99,7 +99,10 @@ def terlambat(r,sid):
             # "pegawai":pegawai,
             'modul_aktif' : 'Laporan'
         }
-        return render(r,"hrd_app/ypc/terlambat.html",data)
+        if not r.session["ccabang"] == "tasik":
+            return render(r,"hrd_app/ypc/non_b/terlambat.html",data)
+        else:
+            return render(r,"hrd_app/ypc/terlambat.html",data)
     
     
 @authorization(["*"])
@@ -134,6 +137,7 @@ def tlengkap_json(r,sid):
                     "tanggal":ab.tgl_absen,
                     "pegawai":ab.pegawai.nama,
                     "nik":ab.pegawai.nik,
+                    "userid":ab.pegawai.userid,
                     "shift":ab.pegawai.shift,
                     "divisi":ab.pegawai.divisi.divisi,
                     "masuk":ab.masuk if ab.masuk is not None else "-",
@@ -184,6 +188,7 @@ def tketerangan_json(r,sid):
                         "tanggal":ab.tgl_absen,
                         "pegawai":ab.pegawai.nama,
                         "nik":ab.pegawai.nik,
+                        "userid":ab.pegawai.userid,
                         "shift":ab.pegawai.shift,
                         "divisi":ab.pegawai.divisi.divisi,
                         "masuk":ab.masuk,
@@ -234,9 +239,10 @@ def terlambat_json(r,sid):
                             "tanggal":ab.tgl_absen,
                             "pegawai":ab.pegawai.nama,
                             "nik":ab.pegawai.nik,
+                            "userid":ab.pegawai.userid,
                             "shift":ab.pegawai.shift,
                             "divisi":ab.pegawai.divisi.divisi,
-                            "masuk":ab.masuk if ab.masuk is not None else "-",
+                            "masuk":f'<span class="text-danger">{ab.masuk}</span>' if ab.masuk is not None else "-",
                             "istirahat":ab.istirahat if ab.istirahat is not None else "-",
                             "kembali":ab.kembali if ab.kembali is not None else "-",
                             "pulang":ab.pulang if ab.pulang is not None else "-",
@@ -249,6 +255,32 @@ def terlambat_json(r,sid):
                         data.append(obj)
                     else:
                         continue
+                elif ab.jam_masuk is not None and ab.masuk_b is not None:
+                    if ab.masuk_b > ab.jam_masuk:
+                        obj = {
+                            "id":ab.pk,
+                            "tanggal":ab.tgl_absen,
+                            "pegawai":ab.pegawai.nama,
+                            "nik":ab.pegawai.nik,
+                            "userid":ab.pegawai.userid,
+                            "shift":ab.pegawai.shift,
+                            "divisi":ab.pegawai.divisi.divisi,
+                            "masuk":ab.masuk if ab.masuk is not None else "-",
+                            "istirahat":ab.istirahat if ab.istirahat is not None else "-",
+                            "kembali":ab.kembali if ab.kembali is not None else "-",
+                            "pulang":ab.pulang if ab.pulang is not None else "-",
+                            "masuk_b":f'<span class="text-danger">{ab.masuk_b}</span>' if ab.masuk_b is not None else "-",
+                            "istirahat_b":ab.istirahat_b if ab.istirahat_b is not None else "-",
+                            "kembali_b":ab.kembali_b if ab.kembali_b is not None else "-",
+                            "pulang_b":ab.pulang_b if ab.pulang_b is not None else "-",
+                            "jam_masuk":ab.jam_masuk
+                        }
+                        data.append(obj)
+                    else:
+                        continue
+                else:
+                    continue
+
             # 
         return JsonResponse({"status":'success',"msg":"berhasil mengambil data","data":data})
             

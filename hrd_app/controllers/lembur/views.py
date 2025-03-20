@@ -438,7 +438,6 @@ def tambah_lembur(r):
                                             if absen_kmb > b:
                                                 pemotong_ist = (b_ist.index(b) + 1) * 0.5
                                                 pemotong_ist2 = 0 
-                                                s_ist.append(pemotong_ist) 
                                             else:
                                                 pass                                      
                             else:
@@ -482,7 +481,6 @@ def tambah_lembur(r):
                                     for b in b_ist:                             
                                         if absen_kmb > b:
                                             pemotong_ist = (b_ist.index(b) + 1) * 0.5  
-                                            s_ist.append(pemotong_ist) 
                                         else:
                                             pass 
                                 
@@ -514,17 +512,19 @@ def tambah_lembur(r):
                                         a2_ist2 = b_ist2[x] + timedelta(minutes=30)
                                         b_ist2.append(a2_ist2)
                                     if absen_kmb2 <= a_ist2:
-                                        selisihkmb = (a_ist2 - timedelta(minutes=5)) - absen_kmb2
-                                        tist = selisihkmb.total_seconds() / 3600
-                                        tist = round(abs(float(decimal_ist2) - tist),2)
-                                        decimal_part = abs(int(tist) - tist)
-                                        if decimal_part <= 0.5:
-                                            tist = int(tist) + 0.5
-                                        else:
-                                            tist = math.ceil(tist)    
+                                        # selisihkmb = (a_ist2 - timedelta(minutes=5)) - absen_kmb2
+                                        # tist = selisihkmb.total_seconds() / 3600
+                                        # tist = round(abs(float(decimal_ist2) - tist),2)
+                                        # decimal_part = abs(int(tist) - tist)
+                                        # if decimal_part <= 0.5:
+                                        #     tist = int(tist) + 0.5
+                                        # else:
+                                        #     tist = math.ceil(tist)    
 
                  
-                                        pemotong_ist2 = -abs(float(decimal_ist2) - tist)
+                                        # pemotong_ist2 = -abs(float(decimal_ist2) - tist)
+                                        pemotong_ist = 0
+                                        pemotong_ist2 = 0
                                     else:
                                         for b in b_ist2:                             
                                             if absen_kmb2 > b:
@@ -1070,24 +1070,25 @@ def proses_ulang_lembur(r, idl):
                                     a2_ist = b_ist[x] + timedelta(minutes=30)
                                     b_ist.append(a2_ist)
                                 if absen_kmb <= a_ist:
-                                    selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
-                                    tist = selisihkmb.total_seconds() / 3600
-                                    tist = round(abs(float(decimal_ist) - tist),2)
-                                    decimal_part = abs(int(tist) - tist)
-                                    if decimal_part <= 0.5:
-                                        tist = int(tist) + 0.5
-                                    else:
-                                        tist = math.ceil(tist)    
+                                    # selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
+                                    # tist = selisihkmb.total_seconds() / 3600
+                                    # tist = round(abs(float(decimal_ist) - tist),2)
+                                    # decimal_part = abs(int(tist) - tist)
+                                    # if decimal_part <= 0.5:
+                                    #     tist = int(tist) + 0.5
+                                    # else:
+                                    #     tist = math.ceil(tist)    
                 
-                                    pemotong_ist = -abs(float(decimal_ist) - tist)
+                                    # pemotong_ist = -abs(float(decimal_ist) - tist)
+                                    # pemotong_ist2 = 0
+                                    # s_ist.append(pemotong_ist)
+                                    pemotong_ist = 0
                                     pemotong_ist2 = 0
-                                    s_ist.append(pemotong_ist)
                                 else:
                                     for b in b_ist:                             
                                         if absen_kmb > b:
                                             pemotong_ist = (b_ist.index(b) + 1) * 0.5  
                                             pemotong_ist2 = 0 
-                                            s_ist.append(pemotong_ist) 
                                         else:
                                             pass                                      
                                 
@@ -1114,24 +1115,24 @@ def proses_ulang_lembur(r, idl):
                                 a2_ist = b_ist[x] + timedelta(minutes=30)
                                 b_ist.append(a2_ist)
                             if absen_kmb <= a_ist:
-                                selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
-                                tist = selisihkmb.total_seconds() / 3600
-                                tist = round(abs(float(decimal_ist) - tist),2)
-                                decimal_part = abs(int(tist) - tist)
-                                if decimal_part <= 0.5:
-                                    tist = int(tist) + 0.5
-                                else:
-                                    tist = math.ceil(tist)   
+                                # selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
+                                # tist = selisihkmb.total_seconds() / 3600
+                                # tist = round(abs(float(decimal_ist) - tist),2)
+                                # decimal_part = abs(int(tist) - tist)
+                                # if decimal_part <= 0.5:
+                                #     tist = int(tist) + 0.5
+                                # else:
+                                #     tist = math.ceil(tist)   
             
-                                pemotong_ist = -abs(float(decimal_ist) - tist)
+                                # pemotong_ist = -abs(float(decimal_ist) - tist)
+                                # pemotong_ist2 = 0
+                                pemotong_ist = 0
                                 pemotong_ist2 = 0
-                                s_ist.append(pemotong_ist)
                             else:
                                 for b in b_ist:                             
                                     if absen_kmb > b:
                                         pemotong_ist = (b_ist.index(b) + 1) * 0.5  
                                         pemotong_ist2 = 0 
-                                        s_ist.append(pemotong_ist) 
                                     else:
                                         pass 
                             
@@ -1163,21 +1164,22 @@ def proses_ulang_lembur(r, idl):
                                     a2_ist2 = b_ist2[x] + timedelta(minutes=30)
                                     b_ist2.append(a2_ist2)
                                 if absen_kmb2 <= a_ist2:
-                                    selisihkmb = (a_ist2 - timedelta(minutes=5)) - absen_kmb2
-                                    tist = selisihkmb.total_seconds() / 3600
-                                    tist = round(abs(float(decimal_ist2) - tist),2)
-                                    decimal_part = abs(int(tist) - tist)
-                                    if decimal_part <= 0.5:
-                                        tist = int(tist) + 0.5
-                                    else:
-                                        tist = math.ceil(tist)    
+                                    # selisihkmb = (a_ist2 - timedelta(minutes=5)) - absen_kmb2
+                                    # tist = selisihkmb.total_seconds() / 3600
+                                    # tist = round(abs(float(decimal_ist2) - tist),2)
+                                    # decimal_part = abs(int(tist) - tist)
+                                    # if decimal_part <= 0.5:
+                                    #     tist = int(tist) + 0.5
+                                    # else:
+                                    #     tist = math.ceil(tist)    
                 
-                                    pemotong_ist2 = -abs(float(decimal_ist2) - tist)
-                                    pemotong_ist = s_ist[0]
+                                    # pemotong_ist2 = -abs(float(decimal_ist2) - tist)
+                                    # pemotong_ist = s_ist[0]
+                                    pemotong_ist = 0
+                                    pemotong_ist2 = 0
                                 else:
                                     for b in b_ist2:                             
                                         if absen_kmb2 > b:
-                                            pemotong_ist = s_ist[0]  
                                             pemotong_ist2 = (b_ist2.index(b) + 1) * 0.5  
                                         else:
                                             pass                                      
@@ -1735,6 +1737,7 @@ def tambah_kompen(r):
             
             rkp.total_lembur = float(sisa_lembur_sbl + tlembur)
             rkp.total_kompen = float(tkompen)
+            print(sisa_lembur_sbl,tlembur,tkompen,rkp.lembur_jam_bayar)
             rkp.sisa_lembur = float(sisa_lembur_sbl + tlembur) - float(tkompen) - float(rkp.lembur_jam_bayar)
             rkp.edit_by = nama_user          
             rkp.save(using=r.session["ccabang"])     

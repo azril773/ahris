@@ -867,7 +867,14 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,cabang,ddt,ddtor,abs
                 ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]))
                 if ab["kembali"] is not None:
                     if ab["kembali"].hour > 9 and ab["kembali"].hour < 21:
-                        pass
+                        data = {
+                            "userid": a["userid"],
+                            "jam_absen": jam_absen,
+                            "punch": 3,
+                            "mesin": a["mesin"],
+                            "ket": "Kembali Istirahat"
+                        }
+                        dt.append(data)
                     else:
                         ab2["kembali"] = jam_absen.time()
                         data = {
@@ -914,7 +921,15 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,cabang,ddt,ddtor,abs
                 ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]))
                 if ab["kembali2"] is not None:
                     if ab["kembali2"].hour > 9 and ab["kembali2"].hour < 21:
-                        pass
+                        ab["kembali2"] = jam_absen.time()
+                        data = {
+                            "userid": a["userid"],
+                            "jam_absen": jam_absen,
+                            "punch": 5,
+                            "mesin": a["mesin"],
+                            "ket": "Kembali Istirahat 2"
+                        }
+                        dt.append(data)
                     else:
                         ab2["kembali2"] = jam_absen.time()
                         data = {

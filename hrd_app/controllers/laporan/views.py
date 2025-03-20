@@ -63,9 +63,7 @@ def laporan_json(r):
     sid = r.POST.get('sid')
     bulan = r.POST.get('bulan')
     tahun = r.POST.get('tahun')
-    date = tahun+"-"+bulan+"-25"
-    sp = datetime.strptime(date,"%Y-%m-%d")
-    dr = sp - timedelta(days=30)
+    dr,sp, _, _ = periode_absen(bulan,tahun)
     aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
     data = []
 
@@ -381,8 +379,7 @@ def print_laporan(r,sid,id,bulan,tahun):
             sid_lembur = 0
         jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()   
         date = tahun+"-"+bulan+"-25"
-        sp = datetime.strptime(date,"%Y-%m-%d")
-        dr = sp - timedelta(days=30)
+        dr, sp, _, _ = periode_absen(bulan,tahun)
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
@@ -531,11 +528,12 @@ def laporan_json_periode(r,sid,id,dr,sp):
                 sket += f'{ab.keterangan_ijin}, '
                 kijin = ''
             else:
-                if ab.masuk is not None and ab.jam_masuk is not None:
-                    if ab.masuk > ab.jam_masuk:
-                        tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
-                        trlmbt += 1
-                        sket += f"Terlambat masuk tanpa ijin, "
+                if not r.session["ccabang"] == "sumedang":
+                    if ab.masuk is not None and ab.jam_masuk is not None:
+                        if ab.masuk > ab.jam_masuk:
+                            tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
+                            trlmbt += 1
+                            sket += f"Terlambat masuk tanpa ijin, "
             if ab.keterangan_lain is not None:
                 sket += f'{ab.keterangan_lain}, '                    
             if ab.libur_nasional is not None:
@@ -585,8 +583,7 @@ def laporan_json_periode(r,sid,id,dr,sp):
 @authorization(["*"])
 def laporan_json_periode_excel(r,sid,id,bulan,tahun):        
         data = []
-        sampai = datetime.strptime(f'{tahun}-{bulan}-26',"%Y-%m-%d").date()
-        dari = sampai - timedelta(days=30)
+        dari,sampai, _,_ = periode_absen(bulan,tahun)
         
         kehadiran = 0
         tselisih = 0.0
@@ -718,11 +715,12 @@ def laporan_json_periode_excel(r,sid,id,bulan,tahun):
                 sket += f'{ab.keterangan_ijin}, '
                 kijin = ''
             else:
-                if ab.masuk is not None and ab.jam_masuk is not None:
-                    if ab.masuk > ab.jam_masuk:
-                        tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
-                        trlmbt += 1
-                        sket += f"Terlambat masuk tanpa ijin, "
+                if not r.session["ccabang"] == "sumedang":
+                    if ab.masuk is not None and ab.jam_masuk is not None:
+                        if ab.masuk > ab.jam_masuk:
+                            tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
+                            trlmbt += 1
+                            sket += f"Terlambat masuk tanpa ijin, "
             if ab.keterangan_lain is not None:
                 sket += f'{ab.keterangan_lain}, '                    
             if ab.libur_nasional is not None:
@@ -945,11 +943,12 @@ def print_laporan_pegawai(r):
                     sket += f'{ab.keterangan_ijin}, '
                     kijin = ''
                 else:
-                    if ab.masuk is not None and ab.jam_masuk is not None:
-                        if ab.masuk > ab.jam_masuk:
-                            tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
-                            trlmbt += 1
-                            sket += f"Terlambat masuk tanpa ijin, "
+                    if not r.session["ccabang"] == "sumedang":
+                        if ab.masuk is not None and ab.jam_masuk is not None:
+                            if ab.masuk > ab.jam_masuk:
+                                tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
+                                trlmbt += 1
+                                sket += f"Terlambat masuk tanpa ijin, "
                 if ab.keterangan_lain is not None:
                     sket += f'{ab.keterangan_lain}, '                    
                 if ab.libur_nasional is not None:
@@ -1158,11 +1157,12 @@ def print_laporan_divisi(r):
                         sket += f'{ab.keterangan_ijin}, '
                         kijin = ''
                     else:
-                        if ab.masuk is not None and ab.jam_masuk is not None:
-                            if ab.masuk > ab.jam_masuk:
-                                tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
-                                trlmbt += 1
-                                sket += f"Terlambat masuk tanpa ijin, "
+                        if not r.session["ccabang"] == "sumedang":
+                            if ab.masuk is not None and ab.jam_masuk is not None:
+                                if ab.masuk > ab.jam_masuk:
+                                    tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
+                                    trlmbt += 1
+                                    sket += f"Terlambat masuk tanpa ijin, "
                     if ab.keterangan_lain is not None:
                         sket += f'{ab.keterangan_lain}, '                    
                     if ab.libur_nasional is not None:
@@ -1366,11 +1366,12 @@ def print_laporan_divisi_excel(r):
                         sket += f'{ab.keterangan_ijin}, '
                         kijin = ''
                     else:
-                        if ab.masuk is not None and ab.jam_masuk is not None:
-                            if ab.masuk > ab.jam_masuk:
-                                tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
-                                trlmbt += 1
-                                sket += f"Terlambat masuk tanpa ijin, "
+                        if not r.session["ccabang"] == "sumedang":
+                            if ab.masuk is not None and ab.jam_masuk is not None:
+                                if ab.masuk > ab.jam_masuk:
+                                    tselisih += (datetime.combine(ab.tgl_absen,ab.masuk) - datetime.combine(ab.tgl_absen,ab.jam_masuk)).total_seconds() /60
+                                    trlmbt += 1
+                                    sket += f"Terlambat masuk tanpa ijin, "
                     if ab.keterangan_lain is not None:
                         sket += f'{ab.keterangan_lain}, '                    
                     if ab.libur_nasional is not None:
@@ -1507,146 +1508,160 @@ def print_laporan_shift(r):
 @authorization(["*"])
 def print_laporan_divisi_excel_cirebon(r):
     id_user = r.session["user"]["id"]
-    if r.session["ccabang"] == "cirebon":
-        divisi = r.POST.get("divisi")
-        dari = r.POST.get("dari")
-        sampai = r.POST.get("sampai")
+    sid = r.POST.get("sid")
+    try:
+        if r.session["ccabang"] == "cirebon" or r.session["ccabang"] == 'sumedang':
+            divisi = r.POST.get("divisi")
+            dari = r.POST.get("dari")
+            sampai = r.POST.get("sampai")
 
-        dr = datetime.strptime(datetime.strftime(datetime.strptime(dari,"%d-%m-%Y"),"%Y-%m-%d"),"%Y-%m-%d")
-        sp = datetime.strptime(datetime.strftime(datetime.strptime(sampai,"%d-%m-%Y"),"%Y-%m-%d"),"%Y-%m-%d")
+            dr = datetime.strptime(datetime.strftime(datetime.strptime(dari,"%d-%m-%Y"),"%Y-%m-%d"),"%Y-%m-%d")
+            sp = datetime.strptime(datetime.strftime(datetime.strptime(sampai,"%d-%m-%Y"),"%Y-%m-%d"),"%Y-%m-%d")
 
-        divisi = divisi_db.objects.using(r.session["ccabang"]).filter(pk=divisi).last()
-        if not divisi:
-            return JsonResponse({"status":'error',"msg":"Divisi tidak ada"},status=400)
-        obj = {
-            "nama":[],
-            "divisi":[],
-            "hari_off":[],
-            "jk":[],
-            "nik":[],
-            "sb":[],
-            "sdl":[],
-            "sdp":[],
-            "nkh":[],
-            "im":[],
-            "cm":[],
-            "wft":[],
-            "snt":[],
-            "ijin":[],
-            "af":[],
-            "ct":[],
-            "off":[],
-            "op":[],
-            "dl":[],
-            "terlambat_ijin":[],
-            "tanpa_ijin":[],
-            "t_hari_kerja":[],
-            "ket":[],
-        }
-        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=divisi):
-            obj["nik"].append(p.nik)
-            obj["nama"].append(p.nama)
-            obj["jk"].append(p.gender)
-            obj["divisi"].append(p.divisi.divisi)
-            obj["hari_off"].append(p.hari_off.hari)
-            sb=0
-            sdl=0
-            sdp=0
-            nkh=0
-            im=0
-            cm=0
-            wft=0
-            snt=0
-            ijin=0
-            af=0
-            ct=0
-            off=0
-            op=0
-            dl=0
-            terlambat_ijin=0
-            tanpa_ijin=0
-            t_hari_kerja=0
-            for ab in absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk,tgl_absen__range=[dr,sp]):
-                if ab.keterangan_absensi == "OFF":
-                    off += 1
-                if ab.masuk is not None and ab.pulang is not None:
-                    t_hari_kerja += 1
-                if ab.jam_masuk is not None and ab.masuk is not None:
-                    if ab.masuk > ab.jam_masuk:
-                        if ab.keterangan_ijin is None:
-                            tanpa_ijin += 1
-                # if ab.insentif is not None:
-                #     if ab.insentif == 0:
-                #         pass
-                #     else:
-                #         insentif.append(i)nt(ab.insentif)
-                if ab.keterangan_ijin is not None:
-                    if re.search("(sdp)",ab.keterangan_ijin,re.IGNORECASE):
-                        sdp += 1
-                    elif re.search("(sb)",ab.keterangan_ijin,re.IGNORECASE):
-                        sb += 1
-                    elif re.search("(cm)",ab.keterangan_ijin,re.IGNORECASE):
-                        cm += 1
-                    elif re.search("(sdl)",ab.keterangan_ijin,re.IGNORECASE):
-                        sdl += 1
-                    elif re.search("(nkh)",ab.keterangan_ijin,re.IGNORECASE):
-                        nkh += 1
-                    # elif re.search("(ma)",ab.keterangan_ijin,re.IGNORECASE):#      += 1
-                    elif re.search("(ktn)",ab.keterangan_ijin,re.IGNORECASE):
-                        snt += 1
-                    elif re.search("(im)",ab.keterangan_ijin,re.IGNORECASE):
-                        im += 1
-                    # elif re.search("(kwft)",ab.keterangan_ijin,re.IGNORECASE):
-                    # kw += 1
-                    elif re.search("(wft)",ab.keterangan_ijin,re.IGNORECASE):
-                        wft += 1
-                    # elif re.search("(urh)",ab.keterangan_ijin,re.IGNORECASE):
-                    # u += 1
-                    # elif re.search("(bs)",ab.keterangan_ijin,re.IGNORECASE):#      += 1
-                    elif re.search("terlambat",ab.keterangan_ijin,re.IGNORECASE):
-                        terlambat_ijin += 1
-                    elif re.search("(ijin|izin)",ab.keterangan_ijin,re.IGNORECASE):
-                        ijin += 1
-                    elif re.search("(dl)",ab.keterangan_ijin,re.IGNORECASE):
-                        dl += 1
-                if ab.keterangan_absensi is not None:
-                    if re.search("cuti",ab.keterangan_absensi,re.IGNORECASE):
-                        ct += 1
-                    # elif re.search("opg",ab.keterangan_absensi,re.IGNORECASE):
-                    # o += 1
-                elif ab.keterangan_absensi is None and ab.keterangan_ijin is None and ab.keterangan_lain is None and ab.libur_nasional is None:
-                    if ab.masuk is not None and ab.pulang is not None or ab.masuk_b is not None and ab.pulang_b is not None:
-                        pass
-                    else:
-                        af += 1
-                else:
-                    pass
+            divisi = divisi_db.objects.using(r.session["ccabang"]).filter(pk=divisi).last()
+            if not divisi:
+                return JsonResponse({"status":'error',"msg":"Divisi tidak ada"},status=400)
+            obj = {
+                "nama":[],
+                "divisi":[],
+                "hari_off":[],
+                "jk":[],
+                "nik":[],
+                "sb":[],
+                "sdl":[],
+                "sdp":[],
+                "nkh":[],
+                "im":[],
+                "cm":[],
+                "wft":[],
+                "snt":[],
+                "ijin":[],
+                "af":[],
+                "ct":[],
+                "off":[],
+                "op":[],
+                "dl":[],
+                "terlambat_ijin":[],
+                "tanpa_ijin":[],
+                "t_hari_kerja":[],
+                "ket":[],
+            }
+            for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=divisi):
+                obj["nik"].append(p.nik)
+                obj["nama"].append(p.nama)
+                obj["jk"].append(p.gender)
+                obj["divisi"].append(p.divisi.divisi)
+                obj["hari_off"].append(p.hari_off.hari)
+                sb=0
+                sdl=0
+                sdp=0
+                nkh=0
+                im=0
+                cm=0
+                wft=0
+                snt=0
+                ijin=0
+                af=0
+                ct=0
+                off=0
+                op=0
+                dl=0
+                terlambat_ijin=0
+                tanpa_ijin=0
+                t_hari_kerja=0
+                ab = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id = p.id, tgl_absen__range=[dr,sp])
+                if ab.exists():
+                    for a in ab:
+                        if a.keterangan_absensi == "OFF":
+                            off += 1
+                        if a.masuk is not None and a.pulang is not None:
+                            t_hari_kerja += 1
+                        if a.masuk_b is not None and a.pulang_b is not None:
+                            t_hari_kerja += 1
+                        if a.jam_masuk is not None and a.masuk is not None:
+                            if a.masuk > a.jam_masuk:
+                                if a.keterangan_ijin is None:
+                                    terlambat += 1
+                        if a.insentif is not None:
+                            if a.insentif == 0:
+                                pass
+                            else:
+                                insentif += int(a.insentif)
+                        if a.keterangan_ijin is not None:
+                            if re.search("(sdp)",a.keterangan_ijin,re.I):
+                                sdp += 1
+                            elif re.search("(sb)",a.keterangan_ijin,re.I):
+                                sb += 1
+                            elif re.search("(cm)",a.keterangan_ijin,re.I):
+                                cm += 1
+                            elif re.search("(sdl)",a.keterangan_ijin,re.I):
+                                sdl += 1
+                            elif re.search("(nkh)",a.keterangan_ijin,re.I):
+                                nkh += 1
+                            elif re.search("(ma)",a.keterangan_ijin,re.I):
+                                ma += 1
+                            elif re.search("(ktn)",a.keterangan_ijin,re.I):
+                                ktn += 1
+                            elif re.search("(im)",a.keterangan_ijin,re.I):
+                                im += 1
+                            elif re.search("(kwft)",a.keterangan_ijin,re.I):
+                                kwft += 1
+                            elif re.search("(wft)",a.keterangan_ijin,re.I):
+                                wft += 1
+                            elif re.search("(urh)",a.keterangan_ijin,re.I):
+                                urh += 1
+                            elif re.search("(bs)",a.keterangan_ijin,re.I):
+                                bs += 1
+                            elif re.search("terlambat",a.keterangan_ijin,re.I):
+                                terlambat_ijin += 1
+                            elif re.search("(ijin|izin)",a.keterangan_ijin,re.I):
+                                ijin += 1
+                            elif re.search("(dl)",a.keterangan_ijin,re.I):
+                                dl += 1
+                        if a.keterangan_absensi is not None:
+                            if re.search("cuti",a.keterangan_absensi,re.I):
+                                ct += 1
+                            elif re.search("opg",a.keterangan_absensi,re.I):
+                                opg += 1
+                        elif a.keterangan_absensi is None and a.keterangan_ijin is None and a.keterangan_lain is None and a.libur_nasional is None:
+                            if a.masuk is not None and a.pulang is not None or a.masuk_b is not None and a.pulang_b is not None:
+                                pass
+                            else:
+                                af += 1
+                        else:
+                            pass
 
-            obj["sb"].append(sb)
-            obj["sdl"].append(sdl)
-            obj["sdp"].append(sdp)
-            obj["nkh"].append(nkh)
-            obj["im"].append(im)
-            obj["cm"].append(cm)
-            obj["wft"].append(wft)
-            obj["snt"].append(snt)
-            obj["ijin"].append(ijin)
-            obj["af"].append(af)
-            obj["ct"].append(ct)
-            obj["off"].append(off)
-            obj["op"].append(op)
-            obj["dl"].append(dl)
-            obj["terlambat_ijin"].append(terlambat_ijin)
-            obj["tanpa_ijin"].append(tanpa_ijin)
-            obj["t_hari_kerja"].append(t_hari_kerja)
-            obj["ket"].append("")
+                obj["sb"].append(sb)
+                obj["sdl"].append(sdl)
+                obj["sdp"].append(sdp)
+                obj["nkh"].append(nkh)
+                obj["im"].append(im)
+                obj["cm"].append(cm)
+                obj["wft"].append(wft)
+                obj["snt"].append(snt)
+                obj["ijin"].append(ijin)
+                obj["af"].append(af)
+                obj["ct"].append(ct)
+                obj["off"].append(off)
+                obj["op"].append(op)
+                obj["dl"].append(dl)
+                obj["terlambat_ijin"].append(terlambat_ijin)
+                obj["tanpa_ijin"].append(tanpa_ijin)
+                obj["t_hari_kerja"].append(t_hari_kerja)
+                obj["ket"].append("")
 
-        df = pd.DataFrame(obj)
-        for f in os.listdir("static/excel/"):
-            if re.search(".*",f):
-                os.remove("static/excel/"+f)
-        df.to_excel(f"static/excel/{divisi.divisi}-{dr.date()}-{sp.date()}.xlsx",index=False)
-        with open(f"static/excel/{divisi.divisi}-{dr.date()}-{sp.date()}.xlsx","rb") as file:
-            http = HttpResponse(file.read(),content_type="application/vnd.ms-excel")
-            http["Content-Disposition"] = f"attachment; filename={divisi.divisi}-{dr.date()}-{sp.date()}.xlsx"
-            return http
+            df = pd.DataFrame(obj)
+            for f in os.listdir("static/excel/"):
+                if re.search(".*",f):
+                    os.remove("static/excel/"+f)
+            df.to_excel(f"static/excel/{divisi.divisi}-{dr.date()}-{sp.date()}.xlsx",index=False)
+            with open(f"static/excel/{divisi.divisi}-{dr.date()}-{sp.date()}.xlsx","rb") as file:
+                http = HttpResponse(file.read(),content_type="application/vnd.ms-excel")
+                http["Content-Disposition"] = f"attachment; filename={divisi.divisi}-{dr.date()}-{sp.date()}.xlsx"
+                return http
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        messages.error(r,"Terjadi kesalahan")
+        return redirect("laporan",sid=sid)

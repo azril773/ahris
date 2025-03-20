@@ -73,17 +73,14 @@
             <thead>
                 <tr>
                 <th nowrap>Tanggal</th>
-                <th>Nik</th>
                 <th>Nama</th>
+                <th>Nik</th>
+                <th>Userid</th>
                 <th>Shift</th>
                 <th>Divisi</th>
                 <th>Masuk</th>
-                <th>Keluar</th>
-                <th>Kembali</th>
                 <th>Pulang</th>
                 <th>Masuk (B)</th>
-                <th>Keluar (B)</th>
-                <th>Kembali (B)</th>
                 <th>Pulang (B)</th>
                 </tr>
             </thead>
@@ -151,17 +148,14 @@
         },
         columns:[
             {data:"tanggal"},
-            {data:"nik"},
             {data:"pegawai"},
+            {data:"nik"},
+            {data:"userid"},
             {data:"shift"},
             {data:"divisi"},
             {data:"masuk"},
-            {data:"istirahat"},
-            {data:"kembali"},
             {data:"pulang"},
             {data:"masuk_b"},
-            {data:"istirahat_b"},
-            {data:"kembali_b"},
             {data:"pulang_b"},
         ],
         "rowCallback": function (row, data) {
@@ -179,10 +173,6 @@
             $('td', row).eq(7).addClass('hitam');
             $('td', row).eq(8).addClass('hitam');
             $('td', row).eq(9).addClass('hitam');
-            $('td', row).eq(10).addClass('hitam');
-            $('td', row).eq(11).addClass('hitam');
-            $('td', row).eq(12).addClass('hitam');
-            $('td', row).eq(13).addClass('hitam');
         },
         destroy: true,
         ordering: false,
