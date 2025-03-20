@@ -650,7 +650,7 @@ def lh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,cabang,ddt,ddtor,abs
                     
                     
             # ++++++++++++++++++++++++++++++++++  MASUK  +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-            if a["punch"] == 0 and jam_absen.hour >= 4 and jam_absen.hour < 18 :
+            if a["punch"] == 0 and jam_absen.hour >= 1 and jam_absen.hour < 18 :
                 ab2 = next((abs for abs in absensi if abs["tgl_absen"] == tplus.date() and abs["pegawai_id"] == pg["idp"]),None)
                 if ab["masuk"] is not None:
                     if ab["masuk"].hour > 18:
