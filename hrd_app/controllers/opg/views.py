@@ -474,8 +474,9 @@ def hapus_opg(r):
 
 
 def readcuti(r):
-    with open("static/cuti_cirebon.json","rb") as f:
+    with open("static/pegawai_sumedang.json","rb") as f:
         data = json.loads(f.read())
+        pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=dt["id"],tgl_masuk=datetime.strptime(dt["tgl_aktif"],"%Y-%m-%d %H:%M:%S").date()) for dt in data["data"]],["tgl_masuk"])
         # idstr = ''
         # # for dt in data["data"]:
         # #     idstr += str(dt["id"]) +","
@@ -483,6 +484,8 @@ def readcuti(r):
         # datas = ''
         # patterjenis = ""
         # for j in jenis_ijin_db.objects.using(r.session["ccabang"]).all():
+        #     if re.search('opg|geser off|cuti',j.jenis_ijin) is not None:
+        #         continue
         #     patterjenis += j.jenis_ijin +"|"
         # pattern = patterjenis.strip().split("|")
         # pattern.pop()
@@ -526,12 +529,13 @@ def readcuti(r):
             
                     
         # absensi_db.objects.using(r.session['ccabang']).bulk_create([absensi_db(id=d["id"],tgl_absen=d["tgl_absen"],masuk=d["jam_absen_masuk"],istirahat=d["jam_absen_keluar"],kembali=d["jam_absen_kembali"],istirahat2=d["jam_absen_keluar2"],kembali2=d["jam_absen_kembali2"],pulang=d["jam_absen_pulang"],keterangan_absensi=d["keterangan_absensi"],keterangan_ijin=d["keterangan_ijin"],keterangan_lain=d["keterangan_lain"],libur_nasional=d["libur_nasional"],insentif=d["j_insentif"],jam_masuk=d["jadwal_masuk"],lama_istirahat=d["jadwal_ist"],jam_pulang=d["jadwal_pulang"],total_jam_kerja=d["lama_kerja"],total_jam_istirahat=d["lama_istirahat"],total_jam_istirahat2=d["lama_istirahat2"],lebih_jam_kerja=d["tplus"],pegawai_id=d["pegawai_id"]) for d in data["data"]],batch_size=3000)
-        for dt in data["data"]:
-            keterangan = dt["keterangan"]
 
-            cuti_ke = re.findall('\d{1,2}',keterangan)
-            dt["cuti_ke"] = cuti_ke[0]
-            dt["keterangan"] = "Cuti ke "+cuti_ke[0]+"-()"
+        # for dt in data["data"]:
+        #     keterangan = dt["keterangan"]
 
-        cuti_db.objects.using(r.session["ccabang"]).bulk_create([cuti_db(pegawai_id=int(d["pegawai_id"]),tgl_cuti=d["tgl_ijin"],cuti_ke=int(d["cuti_ke"]),keterangan=d["keterangan"],add_by=d["add_by"],edit_by=d["edit_by"],add_date=d["add_date"],edit_date=d["edit_date"]) for d in data["data"]]) 
+        #     cuti_ke = re.findall('\d{1,2}',keterangan)
+        #     dt["cuti_ke"] = cuti_ke[0]
+        #     dt["keterangan"] = "Cuti ke "+cuti_ke[0]+"-()"
+
+        # cuti_db.objects.using(r.session["ccabang"]).bulk_create([cuti_db(pegawai_id=int(d["pegawai_id"]),tgl_cuti=d["tgl_ijin"],cuti_ke=int(d["cuti_ke"]),keterangan=d["keterangan"],add_by=d["add_by"],edit_by=d["edit_by"],add_date=d["add_date"],edit_date=d["edit_date"]) for d in data["data"]]) 
         # pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=dt["id"],sisa_cuti=dt["cuti"]) for dt in data["data"]],["sisa_cuti"])

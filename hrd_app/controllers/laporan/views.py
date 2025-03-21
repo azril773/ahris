@@ -1581,7 +1581,7 @@ def print_laporan_divisi_excel_cirebon(r):
                         if a.jam_masuk is not None and a.masuk is not None:
                             if a.masuk > a.jam_masuk:
                                 if a.keterangan_ijin is None:
-                                    terlambat += 1
+                                    tanpa_ijin += 1
                         if a.insentif is not None:
                             if a.insentif == 0:
                                 pass
