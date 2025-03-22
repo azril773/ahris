@@ -1,62 +1,53 @@
 from ..lib import *
-
-def trxabsen_non(r):
+def get_data_non(hr,mesin):
     try:
-        hari = r.POST.get("hari")
-        hr = int(hari)
-        mesin = mesin_db.objects.using(r.session["ccabang"]).filter(status="Active")
         absen = []
         today = datetime.today()
         userids = []
         data = []
+        users = []
         for m in mesin:
             zk = ZK(m.ipaddress,4370,60)
-            print("OKOKO")
-            try:
-                conn = zk.connect()
-                conn.disable_device()   
-                for ab in conn.get_attendance():
-                    kode = str(today - ab.timestamp).split(" ")
-                    if len(kode) > 1:
-                        if int(kode[0]) <= hr and ab.user_id not in userids:
-                            userids.append(ab.user_id)
-                        else:
-                            pass
-                    else:
-                        pass
-                conn.enable_device()
-                conn.disconnect()
-            except Exception as e:
-                exc_type, exc_obj, exc_tb = sys.exc_info()
-                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                print(exc_type, fname, exc_tb.tb_lineno)
-                print(type(e))
-                if type(e) == exception.ZKNetworkError or type(e) == exception.ZKError or type(e) == exception.ZKErrorConnection or type(e) == exception.ZKErrorResponse:
-                    raise Exception(f"Terjadi kesalahan pada mesin {m.nama} - {m.ipaddress}")
+            conn = zk.connect()
+            conn.disable_device()   
+            for ab in conn.get_attendance():
+                data.append({"userid":ab.user_id,"jam_absen":ab.timestamp,"punch": ab.punch,"mesin":m.nama})
+            for user in conn.get_users():
+                users.append({"userid":user.user_id,"nama":user.name})
+            conn.enable_device()
+            conn.disconnect()
+
+        datas = sorted(data,key=lambda i: i["jam_absen"],reverse=True)
+        for dt in datas:
+            kode = str(today - dt["jam_absen"]).split(" ")
+            if len(kode) > 1:
+                if int(kode[0]) <= hr and dt["userid"] not in userids:
+                    userids.append(dt["userid"])
                 else:
-                    raise Exception("Terjadi kesalahan")
-        for msn in mesin:
-            zk1 = ZK(msn.ipaddress,4370,60)
-            try:
-                conn1 = zk1.connect()
-                conn1.disable_device()   
-                userid = [u.user_id for u in conn1.get_users()]
-                absen = conn1.get_attendance()
-                for id in userid:
-                    if id not in userids:
-                        data.append({"userid":id,"mesin":msn.nama})
-                conn1.enable_device()
-                conn1.disconnect()
-            except Exception as e:
-                exc_type, exc_obj, exc_tb = sys.exc_info()
-                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                print(exc_type, fname, exc_tb.tb_lineno)
-                print(type(e))
-                if type(e) == exception.ZKNetworkError or type(e) == exception.ZKError or type(e) == exception.ZKErrorConnection or type(e) == exception.ZKErrorResponse:
-                    raise Exception(f"Terjadi kesalahan pada mesin {msn.nama} - {msn.ipaddress}")
-                else:
-                    raise Exception("Terjadi kesalahan")
-        # print(absen)    
+                    pass
+            else:
+                pass
+        useridlama = []
+        for us in users:
+            if us["userid"] not in userids:
+                useridlama.append(us)
+        print(useridlama)
+        return useridlama
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        if type(e) == exception.ZKNetworkError or type(e) == exception.ZKError or type(e) == exception.ZKErrorConnection or type(e) == exception.ZKErrorResponse:
+            raise Exception(f"Terjadi kesalahan pada mesin {m.nama} - {m.ipaddress}")
+        else:
+            raise e
+
+def trxabsen_non(r):
+    try:
+        hari = r.POST.get("hari")
+        mesin = mesin_db.objects.using(r.session['ccabang']).filter(status="Active")
+        hr = int(hari)
+        data = get_data_non(hr,mesin)
         print(data)
         return JsonResponse({"status":"success","msg":"Berhasil mengambil data absensi","data":data},status=200)
     except Exception as e:
@@ -65,7 +56,29 @@ def trxabsen_non(r):
         print(exc_type, fname, exc_tb.tb_lineno)
         msg = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
         return JsonResponse({"status":"error","msg":msg},status=400)
-    
+
+def deleteNon(r):
+    try:
+        hari = r.POST.get("hari")
+        mesin = mesin_db.objects.using(cabang).filter(status="Active")
+        hr = int(hari)
+        data = get_data_non(hr,mesin,r.session["ccabang"])
+        for m in mesin:
+            zk = ZK(m.ipaddress,4370,60)
+            conn = zk.connect()
+            conn.disable_device()
+            for dt in data:
+                conn.delete_user(user_id=dt["userid"])
+            conn.enable_device()
+            conn.disconnect()
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+        print(exc_type, fname, exc_tb.tb_lineno)
+        msg = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
+        if type(e) == exception.ZKNetworkError or type(e) == exception.ZKError or type(e) == exception.ZKErrorConnection or type(e) == exception.ZKErrorResponse:
+            return JsonResponse({"status":"error","msg":f"Terjadi kesalahan pada mesin {m.nama} - {m.ipaddress}"},status=400)
+        return JsonResponse({"status":"error","msg":msg},status=400)
 
 def trxabsen_json(r):
     mesin = r.POST.getlist("mesin[]")

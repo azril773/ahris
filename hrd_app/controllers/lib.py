@@ -300,12 +300,11 @@ def authorization(roles):
                     if not akses.akses in roles:
                         messages.error(r,"Anda tidak memiliki akses")
                         return redirect("beranda")
-                    
-                res = func(r,*args, **kwargs)
-                return res
             except Exception as e:
                 messages.error(r,"Silahkan login terlebih dahulu")
                 return redirect("beranda")
+            res = func(r,*args, **kwargs)
+            return res
         return process
     return view
 

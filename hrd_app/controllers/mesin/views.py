@@ -485,9 +485,10 @@ def add_data(r,id):
         datamesin_db.objects.using(r.session['ccabang']).bulk_create(mesin)
         sidikjari_db.objects.using(r.session["ccabang"]).bulk_create(tmps)
         datamesin_db.objects.using(r.session["ccabang"]).bulk_update(mesinupdate,["uid","nama",'level','password'])
+        return redirect("amesin")
     except Exception as e:
         messages.error(r, "Process terminate : {}".format(e))
-    return redirect("amesin")
+        return redirect("amesin")
 
 
 
@@ -1024,7 +1025,7 @@ def byfilter(r):
                         user = []
                         # Check filter
                         if filter == 'nama':
-                            user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if user.name.strip() == dt.strip()]
+                            user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if re.search("^"+dt.strip()+"$",user.name.strip(),re.IGNORECASE)]
                         elif filter == 'userid':
                             user = [{"nama":user.name,'uid':user.uid,"userid":user.user_id,'level':user.privilege,"password":user.password,"mesin":m.nama} for user in users if str(user.user_id) == str(dt.strip())]
                         elif filter == 'uid':
