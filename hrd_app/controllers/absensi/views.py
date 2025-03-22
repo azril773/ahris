@@ -188,9 +188,10 @@ def cari_absensi(r):
                     sket += f'{a.keterangan_ijin}, '
                     kijin = ''
                 else:
-                    if a.masuk is not None and a.jam_masuk is not None:
-                        if a.masuk > a.jam_masuk:
-                            sket += f"Terlambat masuk tanpa ijin, "
+                    if not r.session["ccabang"] == "sumedang":
+                        if a.masuk is not None and a.jam_masuk is not None:
+                            if a.masuk > a.jam_masuk:
+                                sket += f"Terlambat masuk tanpa ijin, "
 
                 if a.keterangan_lain is not None:
                     sket += f'{a.keterangan_lain}, '                    
@@ -326,9 +327,10 @@ def cari_absensi(r):
                     sket += f'{a.keterangan_ijin}, '
                     kijin = ''
                 else:
-                    if a.masuk is not None and a.jam_masuk is not None:
-                        if a.masuk > a.jam_masuk:
-                            sket += f"Terlambat masuk tanpa ijin, "
+                    if not r.session["ccabang"] == "sumedang":
+                        if a.masuk is not None and a.jam_masuk is not None:
+                            if a.masuk > a.jam_masuk:
+                                sket += f"Terlambat masuk tanpa ijin, "
 
                 if a.keterangan_lain is not None:
                     sket += f'{a.keterangan_lain}, '                    

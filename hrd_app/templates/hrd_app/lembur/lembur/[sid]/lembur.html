@@ -18,7 +18,6 @@
       </button>
       <span id="pesan_berhasil"></span>
     </div>
-
     <!-- alert gagal-->
     {% for message in messages %}
         <div class="container-fluid p-0">
@@ -1045,13 +1044,6 @@
         jkompen: jkompen.getValue(),
       },
       success: function (response) {
-        if (response.status == "ok") {
-          console.log(response.status);
-        } else if (response.status == "lebih kompen") {
-          alert(
-            "Kompen/PJK yang diambil lebih besar daripada sisa lembur, proses dibatalkan"
-          );
-        }
         table.ajax.reload(null, false);
 
         $("#tambahKompen").modal("hide");
@@ -1059,7 +1051,7 @@
         jkompen.clear();
       },
       error: function (error) {
-        if(err.responseJSON?.msg){
+        if(error.responseJSON?.msg){
           alert(error.responseJSON.msg);
         }else{
           alert("Terjadi Kesalahan")
@@ -1083,14 +1075,6 @@
         id: id_batal.value,
       },
       success: function (response) {
-        if (response.status == "ok") {
-          console.log(response.status);
-        } else if (response.status == "batalkan kompen") {
-          alert(
-            "Jumlah lembur yang akan dibatalkan lebih besar dari sisa lembur, batalkan kompen atau kurangi bayar lembur terlebih dahulu agar total lembur lebih besar atau sama dengan sisa lembur."
-          );
-        }
-
         table.ajax.reload(null, false);
 
         $("#batalLembur").modal("hide");
@@ -1099,7 +1083,11 @@
         $("#detailLembur").modal("hide");
       },
       error: function (error) {
-        alert("Terjadi kesalahan sistem, hubungi IT.");
+        if(error.responseJSON?.msg){
+          alert(error.responseJSON.msg);
+        }else{
+          alert("Terjadi Kesalahan")
+        }
       },
     });
   });
@@ -1131,7 +1119,11 @@
         $("#detailKompen").modal("hide");
       },
       error: function (error) {
-        alert("Terjadi kesalahan sistem, hubungi IT.");
+        if(error.responseJSON?.msg){
+          alert(error.responseJSON.msg);
+        }else{
+          alert("Terjadi Kesalahan")
+        }
       },
     });
   });
@@ -1153,13 +1145,6 @@
         blembur: blembur.value,
       },
       success: function (response) {
-        if (response.status == "ok") {
-          console.log(response.status);
-        } else if (response.status == "lebih bayar") {
-          alert(
-            "Lembur yang dibayarkan lebih besar dari sisa lembur yang ada, proses dibatalkan"
-          );
-        }
 
         table.ajax.reload(null, false);
 
@@ -1167,7 +1152,11 @@
         $("#bayarlemburForm")[0].reset();
       },
       error: function (error) {
-        alert("Terjadi kesalahan sistem, hubungi IT.");
+        if(error.responseJSON?.msg){
+          alert(error.responseJSON.msg);
+        }else{
+          alert("Terjadi Kesalahan")
+        }
       },
     });
   });

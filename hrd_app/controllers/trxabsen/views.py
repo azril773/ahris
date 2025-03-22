@@ -174,7 +174,10 @@ def trxabsen(r):
     data = {
         "sid":akses.sid_id,
         "dsid":akses.sid_id,
-        "mesin":mesin
+        "mesin":mesin,
+        "cabang":r.session["cabang"],
+        "ccabang":r.session['ccabang'],
+        "nama":r.session["user"]["nama"],
     }
     return render(r,"hrd_app/trxabsen/trxabsen.html",data)
 
