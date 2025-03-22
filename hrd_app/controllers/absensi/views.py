@@ -112,25 +112,21 @@ def cari_absensi(r):
                         msk = f"{a.masuk}"
                 else:
                     msk = "-"
-                    msk = '-'
 
                 if a.pulang is not None:
                     plg = f"{a.pulang}"
                 else:
                     plg = "-"
-                    plg = '-'
 
                 if a.masuk_b is not None:
                     msk_b = f"{a.masuk_b}"
                 else:
                     msk_b = "-"
-                    msk_b = '-'
 
                 if a.pulang_b is not None:
                     plg_b = f"{a.pulang_b}"
                 else:
                     plg_b = "-"
-                    plg_b = '-'
 
                 if a.istirahat is not None and a.istirahat2 is not None:
                     ist = f'{a.istirahat} / {a.istirahat2}'
