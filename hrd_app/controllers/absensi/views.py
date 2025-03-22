@@ -201,6 +201,7 @@ def cari_absensi(r):
                     jmkem = None
                 if sket == "":
                     sket = "-"
+                    
                 absen = {
                     'id': a.id,
                     'tgl': datetime.strftime(a.tgl_absen,'%d-%m-%Y'),
