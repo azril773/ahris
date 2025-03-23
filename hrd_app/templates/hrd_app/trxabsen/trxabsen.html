@@ -344,7 +344,7 @@
     $("#deluser").on("click",function(e){
         const hari = $("#hari").val() ? $("#hari").val() : undefined
         $.ajax({
-            url:"{% url 'delNon' %}",
+            url:"{% url 'deleteNon' %}",
             data:{hari},
             method:"post",
             headers:{"X-CSRFToken":token},
