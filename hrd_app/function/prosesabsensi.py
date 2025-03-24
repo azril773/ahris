@@ -501,6 +501,27 @@ def nlh(att,luserid,ddr, rangetgl,pegawai,jamkerja,status_lh,cabang,ddt,ddtor,ab
                             "ket": "Pulang Malam"
                         }
                         dt.append(data)
+                # elif ab["masuk"] is not None:
+                #     if ab["masuk"].hour > 18:
+                #         ab["pulang"] = jam_absen.time()
+                #         data = {
+                #             "userid": a["userid"],
+                #             "jam_absen": jam_absen,
+                #             "punch": 7,
+                #             "mesin": a["mesin"],
+                #             "ket": "Pulang Malam"
+                #         }
+                #         dt.append(data)
+                #     else:
+                #         ab2["pulang"] = jam_absen.time()
+                #         data = {
+                #             "userid": a["userid"],
+                #             "jam_absen": jam_absen - timedelta(days=1),
+                #             "punch": 7,
+                #             "mesin": a["mesin"],
+                #             "ket": "Pulang Malam"
+                #         }
+                #         dt.append(data)
                 elif ab2["masuk"] is not None:
                     if ab2["masuk"].hour > 18:
                         ab2["pulang"] = jam_absen.time()
