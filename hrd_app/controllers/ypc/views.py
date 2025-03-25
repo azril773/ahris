@@ -32,10 +32,7 @@ def tlengkap(r,sid):
             # "pegawai":pegawai,
             'modul_aktif' : 'Laporan'
         }
-        if not r.session["ccabang"] == "tasik":
-            return render(r,"hrd_app/ypc/non_b/tlengkap.html",data)
-        else:
-            return render(r,"hrd_app/ypc/tlengkap.html",data)
+        return render(r,"hrd_app/ypc/non_b/tlengkap.html",data)
 
 @authorization(["*"])
 def tketerangan(r,sid):
@@ -99,10 +96,7 @@ def terlambat(r,sid):
             # "pegawai":pegawai,
             'modul_aktif' : 'Laporan'
         }
-        if not r.session["ccabang"] == "tasik":
-            return render(r,"hrd_app/ypc/non_b/terlambat.html",data)
-        else:
-            return render(r,"hrd_app/ypc/terlambat.html",data)
+        return render(r,"hrd_app/ypc/non_b/terlambat.html",data)
     
     
 @authorization(["*"])
