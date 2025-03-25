@@ -67,10 +67,7 @@ def absensi(r,sid):
             'modul_aktif' : 'Absensi'
         }
 
-        if r.session["ccabang"] != "tasik":
-            return render(r,'hrd_app/absensi/absensi_non.html', data)
-        else:
-            return render(r,'hrd_app/absensi/absensi.html', data)
+        return render(r,'hrd_app/absensi/absensi_non.html', data)
         
         
     else:    
