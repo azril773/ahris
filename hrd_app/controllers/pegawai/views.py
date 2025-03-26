@@ -627,8 +627,8 @@ def tambah_pegawai(r):
                     status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(pk=status)
                 except:
                     status_pegawai = None
-                if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
-                    return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
+                # if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
+                #     return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
                 if email != "":
                     if pribadi_db.objects.using(r.session["ccabang"]).filter(email=email).exists():
                         return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
@@ -709,18 +709,24 @@ def tambah_pegawai(r):
                         ).save(using=r.session["ccabang"])
 
                     # Tambah Data Pribadi
-                    pribadi_db(
-                        pegawai_id=int(pgw.pk),
-                        alamat=alamat,
-                        phone=phone,
-                        email=email,
-                        kota_lahir=kota_lahir,
-                        tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
-                        tinggi_badan=tinggi if tinggi != "" else 0,
-                        berat_badan=berat if berat != "" else 0,
-                        gol_darah=goldarah,
-                        agama=agama
-                    ).save(using=r.session["ccabang"])
+                    if alamat != '' or  phone != '' or email != '' or kota_lahir != '' or tgl_lahir != 'Invalid date' or tgl_lahir != '' or agama != '' or tinggi != '' or berat != '':
+                        if tgl_lahir != '':
+                            tgll = datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d")
+                        else:
+                            tgll = datetime.now().date()
+                        print(tgll,email,alamat,phone,kota_lahir,agama,tinggi,berat)
+                        pribadi_db(
+                            pegawai_id=int(pgw.pk),
+                            alamat=alamat,
+                            phone=phone,
+                            email=email,
+                            kota_lahir=kota_lahir,
+                            tgl_lahir=tgll,
+                            tinggi_badan=tinggi if tinggi != "" else 0,
+                            berat_badan=berat if berat != "" else 0,
+                            gol_darah=goldarah,
+                            agama=agama
+                        ).save(using=r.session["ccabang"])
                     for pgl in pengalaman:
                         pengalaman_db(
                             pegawai_id=int(pgw.pk),
@@ -745,9 +751,12 @@ def tambah_pegawai(r):
                     status = "ok"
                     
             except Exception as e:
+                print(e)
                 transaction.set_rollback(True,using=r.session["ccabang"])
-                print(e,"OSKODKOSKD")
-                return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                msg  = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
+                return JsonResponse({"status":"error","msg":msg},status=500)
             
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
 
@@ -2644,18 +2653,25 @@ def tambah_pegawai_non_validasi(r):
                         ).save(using=r.session["ccabang"])
 
                     # Tambah Data Pribadi
-                    pribadi_db(
-                        pegawai_id=int(pgw.pk),
-                        alamat=alamat,
-                        phone=phone,
-                        email=email,
-                        kota_lahir=kota_lahir,
-                        tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
-                        tinggi_badan=tinggi if tinggi != "" else 0,
-                        berat_badan=berat  if berat != "" else 0,
-                        gol_darah=goldarah,
-                        agama=agama
-                    ).save(using=r.session["ccabang"])
+                     # Tambah Data Pribadi
+                    if alamat != '' or  phone != '' or email != '' or kota_lahir != '' or tgl_lahir != 'Invalid date' or tgl_lahir != '' or agama != '' or tinggi != '' or berat != '':
+                        if tgl_lahir != '':
+                            tgll = datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d")
+                        else:
+                            tgll = datetime.now().date()
+                        print(tgll,email,alamat,phone,kota_lahir,agama,tinggi,berat)
+                        pribadi_db(
+                            pegawai_id=int(pgw.pk),
+                            alamat=alamat,
+                            phone=phone,
+                            email=email,
+                            kota_lahir=kota_lahir,
+                            tgl_lahir=tgll,
+                            tinggi_badan=tinggi if tinggi != "" else 0,
+                            berat_badan=berat if berat != "" else 0,
+                            gol_darah=goldarah,
+                            agama=agama
+                        ).save(using=r.session["ccabang"])
                     for pgl in pengalaman:
                         pengalaman_db(
                             pegawai_id=int(pgw.pk),
@@ -2681,7 +2697,10 @@ def tambah_pegawai_non_validasi(r):
             except Exception as e:
                 print(e)
                 transaction.set_rollback(True,using=r.session["ccabang"])
-                return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                msg  = e.args[0] if len(e.args) > 0 else "Terjadi kesalahan"
+                return JsonResponse({"status":"error","msg":msg},status=500)
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)
 
 
