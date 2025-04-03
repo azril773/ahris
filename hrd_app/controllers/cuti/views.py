@@ -51,6 +51,7 @@ def cuti(r, sid):
         lastday = monthrange(tglac.year,tglac.month)
         tgl = datetime.strptime(f'{tglac.year}-{tglac.month}-{lastday[1]}',"%Y-%m-%d").date()
         updatepgw = []
+        id = []
         for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
             if r.session["ccabang"] == "cirebon":
                 pgw = pegawai_cuti_lama.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk).last()
@@ -63,6 +64,7 @@ def cuti(r, sid):
                     }
                     updatepgw.append(obj)
                 else:
+                    id.append(p.pk)
                     if p.tgl_masuk is not None:
                         # jika sudah lebih dari satu tahun
                         today = date.today()
@@ -70,10 +72,12 @@ def cuti(r, sid):
                         
                         mkerja = today - tmasuk
                         if int(mkerja.days) > 360:      
-                            tgl_masuk = p.tgl_masuk # 2020-01-03
+                            tgl_masuk = p.tgl_masuk # 2011-04-19
                             today = datetime.now()
-                            year = today.year # 2025-01-01
-                            tgl_masuk = datetime.strptime(f'{year}-{tgl_masuk.month}-{tgl_masuk.day}',"%Y-%m-%d") # 2025-01-03
+                            year = today.year # 2025
+                            tgl_masuk = datetime.strptime(f'{year}-{tgl_masuk.month}-{tgl_masuk.day}',"%Y-%m-%d") # 2025-04-19
+                            if p.pk == 1089:
+                                print(tgl_masuk)
                             tgl_cuti = tgl_masuk.date()
                             if today.date() < tgl_masuk.date():
                                 new_tglmasuk = tgl_masuk.date() - relativedelta(years=1)
@@ -100,7 +104,7 @@ def cuti(r, sid):
                                     "idp":p.pk,
                                     "tgl_cuti":tgl_cuti,
                                     "expired":exp,
-                                    "sisa_cuti":12
+                                    "sisa_cuti":p.sisa_cuti
                                 }
                                 updatepgw.append(obj)
                         else:
@@ -127,6 +131,7 @@ def cuti(r, sid):
                     pegawai.append(data)
                 else:
                     pass    
+        print(id)
         pegawai_db.objects.using(r.session['ccabang']).bulk_update([pegawai_db(id=dt["idp"],tgl_cuti=dt["tgl_cuti"],expired=dt["expired"],sisa_cuti=dt["sisa_cuti"]) for dt in updatepgw],["tgl_cuti","expired","sisa_cuti"])         
         data = {
             'akses' : akses,
