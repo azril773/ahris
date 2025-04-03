@@ -420,7 +420,6 @@ def batal_opg(r):
     tgl = opg.diambil_tgl
     
     ab = absensi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(idp), tgl_absen=tgl).last()
-    print(ab)
     if ab is not None:
         ab.keterangan_absensi = None
         ab.save(using=r.session["ccabang"])
@@ -474,14 +473,19 @@ def hapus_opg(r):
 
 
 def readcuti(r):
-    with open("static/absen_cirebon.json","rb") as f:
+    with open("static/absensi_cirebon.json","rb") as f:
         data = json.loads(f.read())
         # pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=dt["id"],tgl_masuk=datetime.strptime(dt["tgl_aktif"],"%Y-%m-%d %H:%M:%S").date()) for dt in data["data"]],["tgl_masuk"])
         # idstr = ''
         # for dt in data["data"]:
-        #     idstr += str(dt["id"]) +","
+        #     idstr += str(dt["id"])+","
         # print(idstr)
-        # datas = ''
+        # for m in ["15.63.254.204","15.63.254.210","15.63.254.209","15.63.254.207",'15.63.254.207',"15.63.254.206",'15.63.254.211']:
+        #     zk = ZK(m, port=4370, timeout=60)
+        #     conn = zk.connect()
+        #     conn.disable_device()
+
+        datas = ''
         patterjenis = ""
         for j in jenis_ijin_db.objects.using(r.session["ccabang"]).all():
             if re.search('opg|geser off|cuti|alfa',j.jenis_ijin,re.IGNORECASE) is not None:

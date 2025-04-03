@@ -127,7 +127,7 @@ def cuti(r, sid):
                     pegawai.append(data)
                 else:
                     pass    
-        pegawai_db.objects.using(r.session['ccabang']).bulk_update([absensi_db(id=dt.idp,tgl_cuti=dt.tgl_cuti,expired=dt.tgl_cuti,sisa_cuti=dt.sisa_cuti) for dt in updatepgw],["tgl_cuti","expired","sisa_cuti"])         
+        pegawai_db.objects.using(r.session['ccabang']).bulk_update([absensi_db(id=dt["idp"],tgl_cuti=dt["tgl_cuti"],expired=dt["exp"],sisa_cuti=dt["sisa_cuti"]) for dt in updatepgw],["tgl_cuti","expired","sisa_cuti"])         
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],
@@ -718,4 +718,3 @@ def batal_cuti(r):
     status = "ok"
         
     return JsonResponse({"status": status})
-
