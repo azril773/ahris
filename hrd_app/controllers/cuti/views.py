@@ -100,7 +100,7 @@ def cuti(r, sid):
                                     "idp":p.pk,
                                     "tgl_cuti":tgl_cuti,
                                     "expired":exp,
-                                    # "sisa_cuti":12 (optional)
+                                    "sisa_cuti":12
                                 }
                                 updatepgw.append(obj)
                         else:
