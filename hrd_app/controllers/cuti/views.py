@@ -131,7 +131,6 @@ def cuti(r, sid):
                     pegawai.append(data)
                 else:
                     pass    
-        print(id)
         pegawai_db.objects.using(r.session['ccabang']).bulk_update([pegawai_db(id=dt["idp"],tgl_cuti=dt["tgl_cuti"],expired=dt["expired"],sisa_cuti=dt["sisa_cuti"]) for dt in updatepgw],["tgl_cuti","expired","sisa_cuti"])         
         data = {
             'akses' : akses,
