@@ -397,7 +397,7 @@ def pakai_opg(r):
     else:
         if diambil_tgl < datetime.strptime(opg_tgl,"%d-%m-%Y").date():
             return JsonResponse({"status":"error","msg":"'diambil tanggal' harus lebih besar dari tanggal opg. Silahkan gunakan geser off"},status=400)
-        opg.status = 0
+        opg.status = 1
         opg.diambil_tgl = diambil_tgl
         opg.edit_by = nama_user
         opg.save(using=r.session["ccabang"])

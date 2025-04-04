@@ -648,18 +648,21 @@ def edit_sisa_cuti(r):
     id_user = r.session["user"]["id"]
     akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user).last()
     modul = r.POST.get('modul')
-    try:
-        pg = pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").get(id=int(idp),divisi_id__in=aksesdivisi)
-    except:
-        return JsonResponse({"status":'error',"msg":"Pegawai tidak ada"},status=400)
     
     if modul == 'ecuti':
+        pg = pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi_id__in=aksesdivisi).last()
+        if pg is None:
+            return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
         pg.sisa_cuti = int(scuti)
         pg.save(using=r.session["ccabang"])
     elif modul == 'reset_cuti':
+        pg = pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp),divisi_id__in=aksesdivisi).last()
+        if pg is None:
+            return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
         pg.sisa_cuti = 12
         pg.save(using=r.session["ccabang"])   
     else:
+        pegawai_id = []
         for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if p.tgl_masuk is None:
                 pass
@@ -672,11 +675,11 @@ def edit_sisa_cuti(r):
                 mkerja = today - tmasuk
                 
                 # jika sudah lebih dari satu tahun
-                if int(mkerja.days) > 360:                
-                    pg.sisa_cuti = 12
-                    pg.save(using=r.session["ccabang"])        
+                if int(mkerja.days) > 360:          
+                    pegawai_id.append(p.pk)      
                 else:
-                    pass                         
+                    pass 
+        pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=p,sisa_cuti=12) for p in pegawai_id],["sisa_cuti"])             
     
     
     return JsonResponse({"status": "success","msg":"Berhasil edit cuti"})
