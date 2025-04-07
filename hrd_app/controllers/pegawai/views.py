@@ -283,8 +283,6 @@ def epegawai(r,idp):
                 berat = r.POST.get("berat")
                 goldarah = r.POST.get("goldarah")
                 agama = r.POST.get("agama")
-                if alamat == '' or phone == '' or email == '' or kota_lahir == '' or tgl_lahir == '' or agama == '':
-                    return JsonResponse({"status":"error","msg":"data pribadi tidak boleh kosong"},status=400)
                 keluarga = r.POST.get("keluarga")
                 pihak = r.POST.get("pihak")
                 pengalaman = r.POST.get("pengalaman")
@@ -464,40 +462,45 @@ def epegawai(r,idp):
                             pass
 
                     # Tambah Data Pribadi
-                    pribadi = pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","alamat","phone","email","kota_lahir","tgl_lahir","tinggi_badan","berat_badan","gol_darah","agama").last()
-                    if pribadi is not None:
-                        pribadi["history"] = history
-                        history_pribadi_db(**pribadi).save(using=r.session["ccabang"])
-                        pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).update(
-                            pegawai_id=int(pgw.pk),
-                            alamat=alamat,
-                            phone=phone,
-                            email=email,
-                            kota_lahir=kota_lahir,
-                            tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
-                            tinggi_badan=tinggi if tinggi != "" else 0,
-                            berat_badan=berat if berat != "" else 0,
-                            gol_darah=goldarah,
-                            agama=agama
-                        )
-                    else: 
-                        print("MASUKKKK")
-                        pribadi_db(
-                            pegawai_id=int(pgw.pk),
-                            alamat=alamat,
-                            phone=phone,
-                            email=email,
-                            kota_lahir=kota_lahir,
-                            tgl_lahir=datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d"),
-                            tinggi_badan=tinggi,
-                            berat_badan=berat,
-                            gol_darah=goldarah,
-                            agama=agama
-                        ).save(using=r.session["ccabang"])
+                    if alamat != '' or phone != '' or email != '' or kota_lahir != '' or tgl_lahir != '' or agama != '':
                         pribadi = pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","alamat","phone","email","kota_lahir","tgl_lahir","tinggi_badan","berat_badan","gol_darah","agama").last()
-                        pribadi["history"] = history
-                        print(pribadi)
-                        history_pribadi_db(**pribadi).save(using=r.session["ccabang"])
+                        if tgl_lahir != '':
+                            tgll = datetime.strptime(tgl_lahir,"%d-%m-%Y").strftime("%Y-%m-%d")
+                        else:
+                            tgll = datetime.now().date()
+                        if pribadi is not None:
+                            pribadi["history"] = history
+                            history_pribadi_db(**pribadi).save(using=r.session["ccabang"])
+                            pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).update(
+                                pegawai_id=int(pgw.pk),
+                                alamat=alamat,
+                                phone=phone,
+                                email=email,
+                                kota_lahir=kota_lahir,
+                                tgl_lahir=tgll,
+                                tinggi_badan=tinggi if tinggi != "" else 0,
+                                berat_badan=berat if berat != "" else 0,
+                                gol_darah=goldarah,
+                                agama=agama
+                            )
+                        else: 
+                            print("MASUKKKK")
+                            pribadi_db(
+                                pegawai_id=int(pgw.pk),
+                                alamat=alamat,
+                                phone=phone,
+                                email=email,
+                                kota_lahir=kota_lahir,
+                                tgl_lahir=tgll,
+                                tinggi_badan=tinggi,
+                                berat_badan=berat,
+                                gol_darah=goldarah,
+                                agama=agama
+                            ).save(using=r.session["ccabang"])
+                            pribadi = pribadi_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","alamat","phone","email","kota_lahir","tgl_lahir","tinggi_badan","berat_badan","gol_darah","agama").last()
+                            pribadi["history"] = history
+                            print(pribadi)
+                            history_pribadi_db(**pribadi).save(using=r.session["ccabang"])
 
                     status= 'OK'
             except Exception as e:
