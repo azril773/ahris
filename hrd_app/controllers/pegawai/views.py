@@ -2567,9 +2567,9 @@ def tambah_pegawai_non_validasi(r):
                     print(e)
                     transaction.set_rollback(True,using=r.session["ccabang"])
                     return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=500)
-                if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
-                    transaction.set_rollback(True,using=r.session["ccabang"])
-                    return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
+                # if alamat == '' or  phone == '' or kota_lahir == '' or tgl_lahir == 'Invalid date' or tgl_lahir == '' or agama == '':
+                #     transaction.set_rollback(True,using=r.session["ccabang"])
+                #     return JsonResponse({'status':"error","msg":"data pribadi tidak boleh kosong"},status=400,safe=False)
                 if email != "":
                     if pribadi_db.objects.using(r.session["ccabang"]).filter(email=email).exists():
                         transaction.set_rollback(True,using=r.session["ccabang"])
