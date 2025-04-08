@@ -491,8 +491,8 @@ def epegawai(r,idp):
                                 email=email,
                                 kota_lahir=kota_lahir,
                                 tgl_lahir=tgll,
-                                tinggi_badan=tinggi,
-                                berat_badan=berat,
+                                tinggi_badan=tinggi if tinggi != "" else 0,
+                                berat_badan=berat if berat != "" else 0,
                                 gol_darah=goldarah,
                                 agama=agama
                             ).save(using=r.session["ccabang"])
