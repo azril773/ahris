@@ -484,7 +484,6 @@ def epegawai(r,idp):
                                 agama=agama
                             )
                         else: 
-                            print("MASUKKKK")
                             pribadi_db(
                                 pegawai_id=int(pgw.pk),
                                 alamat=alamat,

@@ -303,44 +303,42 @@ def tambah_opg(r):
             status = 'ada geseroff'
         else:
             # cek jika absen di tanggal opg tgl tidak ada absen masuk atau absen pulangnya, batalkan
-            if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=tgl).exists():
+            # if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').filter(pegawai_id=int(dpegawai), tgl_absen=tgl).exists():
                 
-                ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=tgl)
+            #     ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai').get(pegawai_id=int(dpegawai), tgl_absen=tgl)
 
-                if ab.masuk is None and ab.pulang is None:
-                    status = 'pegawai tidak masuk'
-                else:
-                    if nh == off:
+            #     if ab.masuk is None and ab.pulang is None:
+            #         status = 'pegawai tidak masuk'
+            #     else:
+            if nh == off:
+                topg = opg_db(
+                    
+                    pegawai_id = int(dpegawai),
+                    opg_tgl = tgl,
+                    keterangan = 'OFF Pengganti Reguler',
+                    add_by = nama_user,
+                    edit_by = nama_user
+                )
+                topg.save(using=r.session["ccabang"])
+                
+                status = 'ok'
+            else:
+                if tln is not None:
+                    if tln == tgl:
                         topg = opg_db(
-                            
                             pegawai_id = int(dpegawai),
                             opg_tgl = tgl,
-                            keterangan = 'OFF Pengganti Reguler',
+                            keterangan = 'OFF Pengganti Tgl Merah',
                             add_by = nama_user,
                             edit_by = nama_user
                         )
                         topg.save(using=r.session["ccabang"])
-                        
+                
                         status = 'ok'
                     else:
-                        if tln is not None:
-                            if tln == tgl:
-                                topg = opg_db(
-                                    pegawai_id = int(dpegawai),
-                                    opg_tgl = tgl,
-                                    keterangan = 'OFF Pengganti Tgl Merah',
-                                    add_by = nama_user,
-                                    edit_by = nama_user
-                                )
-                                topg.save(using=r.session["ccabang"])
-                        
-                                status = 'ok'
-                            else:
-                                status = 'bukan tgl merah'
-                        else:
-                            status = 'bukan off reguler'   
-            else:
-                status = 'belum ada data absensi'                                 
+                        status = 'bukan tgl merah'
+                else:
+                    status = 'bukan off reguler'   
                                     
     return JsonResponse({"status": status})
 
