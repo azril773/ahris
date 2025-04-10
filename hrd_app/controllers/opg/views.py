@@ -484,53 +484,53 @@ def readcuti(r):
         #     conn.disable_device()
 
         # datas = ''
-        # patterjenis = ""
-        # for j in jenis_ijin_db.objects.using(r.session["ccabang"]).all():
-        #     if re.search('opg|geser off|cuti|alfa',j.jenis_ijin,re.IGNORECASE) is not None:
-        #         continue
-        #     patterjenis += j.jenis_ijin +"|"
-        # pattern = patterjenis.strip().split("|")
-        # pattern.pop()
-        # patternjoin = "|".join(pattern)
-        # for dt in data["data"]:
-        #     if dt["jam_absen_masuk"] is not None:
-        #         dt["jam_absen_masuk"] = dt["jam_absen_masuk"].split(" ")[1]
-        #     if dt["jam_absen_keluar"] is not None:
-        #         dt["jam_absen_keluar"] = dt["jam_absen_keluar"].split(" ")[1]
-        #     if dt["jam_absen_kembali"] is not None:
-        #         dt["jam_absen_kembali"] = dt["jam_absen_kembali"].split(" ")[1]
-        #     if dt["jam_absen_pulang"] is not None:
-        #         dt["jam_absen_pulang"] = dt["jam_absen_pulang"].split(" ")[1]
-        #     if dt["jam_absen_masuk2"] is not None:
-        #         dt["jam_absen_masuk2"] = dt["jam_absen_masuk2"].split(" ")[1]
-        #     if dt["jam_absen_keluar2"] is not None:
-        #         dt["jam_absen_keluar2"] = dt["jam_absen_keluar2"].split(" ")[1]
-        #     if dt["jam_absen_kembali2"] is not None:
-        #         dt["jam_absen_kembali2"] = dt["jam_absen_kembali2"].split(" ")[1]
-        #     if dt["jam_absen_pulang2"] is not None:
-        #         dt["jam_absen_pulang2"] = dt["jam_absen_pulang2"].split(" ")[1]
-        #     dt["keterangan_ijin"] = None
-        #     dt["keterangan_lain"] = None
-        #     dt["keterangan_absensi"] = None
-        #     if dt["keterangan"] is not None:
-        #         if re.search(patternjoin,dt["keterangan"],re.IGNORECASE) is not None:
-        #             dt["keterangan_ijin"] = dt["keterangan"]
-        #         elif re.search("kompensasi",dt["keterangan"],re.IGNORECASE) is not None:
-        #             dt["keterangan_lain"] = dt["keterangan"]
-        #         else:
-        #             dt["keterangan_absensi"] = dt["keterangan"]
-        #     elif dt["ubah_keterangan"] is not None:
-        #         if re.search(patternjoin,dt["ubah_keterangan"],re.IGNORECASE) is not None:
-        #             dt["keterangan_ijin"] = dt["ubah_keterangan"]
-        #         elif re.search("kompensasi",dt["ubah_keterangan"],re.IGNORECASE) is not None:
-        #             dt["keterangan_lain"] = dt["ubah_keterangan"]
-        #         else:
-        #             dt["keterangan_absensi"] = dt["ubah_keterangan"]
-        #     del dt["keterangan"]
-        #     del dt["ubah_keterangan"]
+        patterjenis = ""
+        for j in jenis_ijin_db.objects.using(r.session["ccabang"]).all():
+            if re.search('opg|geser off|cuti|alfa',j.jenis_ijin,re.IGNORECASE) is not None:
+                continue
+            patterjenis += j.jenis_ijin +"|"
+        pattern = patterjenis.strip().split("|")
+        pattern.pop()
+        patternjoin = "|".join(pattern)
+        for dt in data["data"]:
+            if dt["jam_absen_masuk"] is not None:
+                dt["jam_absen_masuk"] = dt["jam_absen_masuk"].split(" ")[1]
+            if dt["jam_absen_keluar"] is not None:
+                dt["jam_absen_keluar"] = dt["jam_absen_keluar"].split(" ")[1]
+            if dt["jam_absen_kembali"] is not None:
+                dt["jam_absen_kembali"] = dt["jam_absen_kembali"].split(" ")[1]
+            if dt["jam_absen_pulang"] is not None:
+                dt["jam_absen_pulang"] = dt["jam_absen_pulang"].split(" ")[1]
+            if dt["jam_absen_masuk2"] is not None:
+                dt["jam_absen_masuk2"] = dt["jam_absen_masuk2"].split(" ")[1]
+            if dt["jam_absen_keluar2"] is not None:
+                dt["jam_absen_keluar2"] = dt["jam_absen_keluar2"].split(" ")[1]
+            if dt["jam_absen_kembali2"] is not None:
+                dt["jam_absen_kembali2"] = dt["jam_absen_kembali2"].split(" ")[1]
+            if dt["jam_absen_pulang2"] is not None:
+                dt["jam_absen_pulang2"] = dt["jam_absen_pulang2"].split(" ")[1]
+            dt["keterangan_ijin"] = None
+            dt["keterangan_lain"] = None
+            dt["keterangan_absensi"] = None
+            if dt["keterangan"] is not None:
+                if re.search(patternjoin,dt["keterangan"],re.IGNORECASE) is not None:
+                    dt["keterangan_ijin"] = dt["keterangan"]
+                elif re.search("kompensasi",dt["keterangan"],re.IGNORECASE) is not None:
+                    dt["keterangan_lain"] = dt["keterangan"]
+                else:
+                    dt["keterangan_absensi"] = dt["keterangan"]
+            elif dt["ubah_keterangan"] is not None:
+                if re.search(patternjoin,dt["ubah_keterangan"],re.IGNORECASE) is not None:
+                    dt["keterangan_ijin"] = dt["ubah_keterangan"]
+                elif re.search("kompensasi",dt["ubah_keterangan"],re.IGNORECASE) is not None:
+                    dt["keterangan_lain"] = dt["ubah_keterangan"]
+                else:
+                    dt["keterangan_absensi"] = dt["ubah_keterangan"]
+            del dt["keterangan"]
+            del dt["ubah_keterangan"]
             
                     
-        # absensi_db.objects.using(r.session['ccabang']).bulk_create([absensi_db(id=d["id"],tgl_absen=d["tgl_absen"],masuk=d["jam_absen_masuk"],istirahat=d["jam_absen_keluar"],kembali=d["jam_absen_kembali"],istirahat2=d["jam_absen_keluar2"],kembali2=d["jam_absen_kembali2"],pulang=d["jam_absen_pulang"],keterangan_absensi=d["keterangan_absensi"],keterangan_ijin=d["keterangan_ijin"],keterangan_lain=d["keterangan_lain"],libur_nasional=d["libur_nasional"],insentif=d["j_insentif"],jam_masuk=d["jadwal_masuk"],lama_istirahat=d["jadwal_ist"],jam_pulang=d["jadwal_pulang"],total_jam_kerja=d["lama_kerja"],total_jam_istirahat=d["lama_istirahat"],total_jam_istirahat2=d["lama_istirahat2"],lebih_jam_kerja=d["tplus"],pegawai_id=d["pegawai_id"]) for d in data["data"]],batch_size=3000)
+        absensi_db.objects.using(r.session['ccabang']).bulk_create([absensi_db(tgl_absen=d["tgl_absen"],masuk=d["jam_absen_masuk"],istirahat=d["jam_absen_keluar"],kembali=d["jam_absen_kembali"],istirahat2=d["jam_absen_keluar2"],kembali2=d["jam_absen_kembali2"],pulang=d["jam_absen_pulang"],keterangan_absensi=d["keterangan_absensi"],keterangan_ijin=d["keterangan_ijin"],keterangan_lain=d["keterangan_lain"],libur_nasional=d["libur_nasional"],insentif=d["j_insentif"],jam_masuk=d["jadwal_masuk"],lama_istirahat=d["jadwal_ist"],jam_pulang=d["jadwal_pulang"],total_jam_kerja=d["lama_kerja"],total_jam_istirahat=d["lama_istirahat"],total_jam_istirahat2=d["lama_istirahat2"],lebih_jam_kerja=d["tplus"],pegawai_id=d["pegawai_id"]) for d in data["data"]],batch_size=3000)
 
         # for dt in data["data"]:
         #     keterangan = dt["keterangan"]
@@ -548,19 +548,19 @@ def readcuti(r):
         #     # print(raw.jam_absen).
         #     absensi_db.objects.using(r.session['ccabang']).filter(pegawai__userid=raw.userid,tgl_absen='2025-03-22').update(pulang=raw.jam_absen.time())
         # data_trans_db.objects.using(r.session["ccabang"]).bulk_create([data_trans_db(userid=raw.userid,jam_absen='2025-03-22 '+str(raw.jam_absen.time()),punch=7,mesin=raw.mesin,keterangan="Pulang Malam") for raw in dataraw])
-        hari = ["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]
-        create = []
-        for j in jamkerja_db.objects.using(r.session["ccabang"]).all():
-            if j.hari == "All":
-                for i in range(0,7):
-                    create.append(jamkerja_db(kk_id=j.kk_id,jam_masuk=j.jam_masuk,jam_pulang=j.jam_pulang,lama_istirahat=j.lama_istirahat,hari=hari[i],add_by=j.add_by,edit_by=j.edit_by,add_date=j.add_date,edit_date=j.edit_date,shift_id=1))
-                j.delete(using=r.session["ccabang"])
-            elif j.hari == 'Biasa':
-                for i in range(0,5):
-                    create.append(jamkerja_db(kk_id=j.kk_id,jam_masuk=j.jam_masuk,jam_pulang=j.jam_pulang,lama_istirahat=j.lama_istirahat,hari=hari[i],add_by=j.add_by,edit_by=j.edit_by,add_date=j.add_date,edit_date=j.edit_date,shift_id=1))
-                j.delete(using=r.session["ccabang"])
-            else:
-                continue
-        jamkerja_db.objects.using(r.session["ccabang"]).bulk_create(create)
+        # hari = ["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu","Minggu"]
+        # create = []
+        # for j in jamkerja_db.objects.using(r.session["ccabang"]).all():
+        #     if j.hari == "All":
+        #         for i in range(0,7):
+        #             create.append(jamkerja_db(kk_id=j.kk_id,jam_masuk=j.jam_masuk,jam_pulang=j.jam_pulang,lama_istirahat=j.lama_istirahat,hari=hari[i],add_by=j.add_by,edit_by=j.edit_by,add_date=j.add_date,edit_date=j.edit_date,shift_id=1))
+        #         j.delete(using=r.session["ccabang"])
+        #     elif j.hari == 'Biasa':
+        #         for i in range(0,5):
+        #             create.append(jamkerja_db(kk_id=j.kk_id,jam_masuk=j.jam_masuk,jam_pulang=j.jam_pulang,lama_istirahat=j.lama_istirahat,hari=hari[i],add_by=j.add_by,edit_by=j.edit_by,add_date=j.add_date,edit_date=j.edit_date,shift_id=1))
+        #         j.delete(using=r.session["ccabang"])
+        #     else:
+        #         continue
+        # jamkerja_db.objects.using(r.session["ccabang"]).bulk_create(create)
         
 

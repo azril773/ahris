@@ -299,8 +299,9 @@ def epegawai(r,idp):
                 if not pgw:
                     return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses ke pegawai ini"},status=400)
                 status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(pk=status)
-                if pribadi_db.objects.using(r.session["ccabang"]).filter(~Q(pegawai__userid=userid), ~Q(pegawai__userid=pgw.userid),email=email).exists():
-                    return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
+                if email != "" or email is not None :
+                    if pribadi_db.objects.using(r.session["ccabang"]).filter(~Q(pegawai__userid=userid), ~Q(pegawai__userid=pgw.userid),email=email).exists():
+                        return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
                 if pegawai_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idp)),userid=userid).exists():
                     return JsonResponse({"status":"error","msg":"duplikat data"},status=400)
                 elif pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(~Q(pk=int(idp)),userid=userid).exists():
