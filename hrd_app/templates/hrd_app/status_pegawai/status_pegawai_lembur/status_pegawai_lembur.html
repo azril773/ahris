@@ -288,6 +288,17 @@
         },
         order:[[2, "asc"]],
         processing: true,
+        "language": {
+            searchPlaceholder: 'Cari...',
+            sSearch: '',
+            loadingRecords: '&nbsp;',
+            processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+            emptyTable: "&nbsp;",
+            paginate: {
+                previous: '<i class="cs-chevron-left"></i>',
+                next: '<i class="cs-chevron-right"></i>',
+            },
+        },
     })
 
     $("#editForm").on("submit",function(e){
