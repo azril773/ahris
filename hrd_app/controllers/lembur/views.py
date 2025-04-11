@@ -2152,6 +2152,8 @@ def status_pegawai_lembur_json(r):
     for r in result:
         obj = {
             'pegawai':r.pegawai.nama,
+            "divisi":r.pegawai.divisi.divisi,
+            "status":r.pegawai.status.status,
             'pk':r.pk,
             "pegawai_id":r.pegawai_id
         }
@@ -2307,6 +2309,8 @@ def status_pegawai_libur_nasional_json(r):
     for r in result:
         obj = {
             'pegawai':r.pegawai.nama,
+            "divisi":r.pegawai.divisi.divisi,
+            "status":r.pegawai.status.status,
             'pk':r.pk,
             "pegawai_id":r.pegawai_id
         }
