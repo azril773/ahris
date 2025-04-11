@@ -1,7 +1,7 @@
 from hrd_app.controllers.lib import *
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def shift(r):
     id_user = r.session["user"]["id"]
     akses = akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
@@ -10,6 +10,7 @@ def shift(r):
         akses = akses[0]
         data = {
             'dsid':akses.sid_id,
+            "akses":akses.akses,
             "shift":shift,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
@@ -19,7 +20,7 @@ def shift(r):
         return render(r,"hrd_app/shift/shift.html",data)
     
 
-@authorization(["root","it"])
+@authorization(["*"])
 def shift_json(r):
     shift = shift_db.objects.using(r.session["ccabang"])
     data = []
@@ -33,7 +34,7 @@ def shift_json(r):
 
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def tshift_json(r):
     shift = r.POST.get("shift")
     sh = shift_db.objects.using(r.session["ccabang"]).filter(shift=shift)
@@ -45,7 +46,7 @@ def tshift_json(r):
     return JsonResponse({'status':"success","msg":"Berhasil tambah shift"})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def eshift_json(r):
     shift = r.POST.get("shift")
     id = r.POST.get("id")
@@ -59,7 +60,7 @@ def eshift_json(r):
     return JsonResponse({'status':"success","msg":"Berhasil edit shift"})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def hshift_json(r):
     id = r.POST.get("id")
     s = shift_db.objects.using(r.session["ccabang"]).filter(pk=int(id)).delete()

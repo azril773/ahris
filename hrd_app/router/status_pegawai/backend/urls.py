@@ -10,19 +10,36 @@ urlpatterns = [
 
 
     path('estatus_pegawai_lembur', views.estatus_pegawai_lembur, name='espgl'),
+
+
     path('tstatus_pegawai_lembur', views.tstatus_pegawai_lembur, name='tspgl'),
+    path('tstatus_pegawai_lembur_divisi', views.tstatus_pegawai_lembur_divisi, name='tspgldivisi'),
+    path('tstatus_pegawai_lembur_status', views.tstatus_pegawai_lembur_status, name='tspglstatus'),
+
+
     path('hstatus_pegawai_lembur', views.hstatus_pegawai_lembur, name='hspgl'),
     path('status_pegawai_lembur_json', views.status_pegawai_lembur_json, name='spgljson'),
     
 
     path('estatus_pegawai_libur_nasional', views.estatus_pegawai_libur_nasional, name='espgln'),
+    
+    
     path('tstatus_pegawai_libur_nasional', views.tstatus_pegawai_libur_nasional, name='tspgln'),
+    path('tstatus_pegawai_libur_nasional_divisi', views.tstatus_pegawai_libur_nasional_divisi, name='tspgln_divisi'),
+    path('tstatus_pegawai_libur_nasional_status', views.tstatus_pegawai_libur_nasional_status, name='tspgln_status'),
+
     path('hstatus_pegawai_libur_nasional', views.hstatus_pegawai_libur_nasional, name='hspgln'),
     path('status_pegawai_libur_nasional_json', views.status_pegawai_libur_nasional_json, name='spglnjson'),
 
 
     path('estatus_pegawai_opg', views.estatus_pegawai_opg, name='espgopg'),
+
+
     path('tstatus_pegawai_opg', views.tstatus_pegawai_opg, name='tspgopg'),
+    path('tstatus_pegawai_opg_divisi', views.tstatus_pegawai_opg_divisi, name='tspopgdivisi'),
+    path('tstatus_pegawai_opg_status', views.tstatus_pegawai_opg_status, name='tspopgstatus'),
+
+
     path('hstatus_pegawai_opg', views.hstatus_pegawai_opg, name='hspgopg'),
     path('status_pegawai_opg_json', views.status_pegawai_opg_json, name='spgopgjson'),
 

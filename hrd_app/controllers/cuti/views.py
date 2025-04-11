@@ -35,11 +35,7 @@ def cuti(r, sid):
             statusid.append(p.status_id)
             # print(p)
         status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
-        try:
-            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
-            sid_lembur = sid_lembur.status_pegawai.pk
-        except:
-            sid_lembur = 0
+        sid_lembur = 0
         pegawai = []
             
 
@@ -174,11 +170,7 @@ def detail_cuti(r, sid, idp):
             messages.error(r,'Pegawai tidak ada')
             return redirect("cuti",sid=sid)
         
-        try:
-            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
-            sid_lembur = sid_lembur.status_pegawai.pk
-        except:
-            sid_lembur = 0
+        sid_lembur = 0
         
         ac = awal_cuti_db.objects.using(r.session["ccabang"]).filter().last()
         if not ac:
@@ -234,11 +226,7 @@ def cari_cuti(r):
         pg = pegawai_db.objects.using(r.session["ccabang"]).get(id=int(idp))
         sid = pg.status_id      
         
-        try:
-            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
-            sid_lembur = sid_lembur.status_pegawai.pk
-        except:
-            sid_lembur = 0
+        sid_lembur = 0
         data = {
             'akses' : akses,
             "cabang":r.session["cabang"],

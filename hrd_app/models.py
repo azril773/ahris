@@ -540,8 +540,8 @@ class jamkerja_db(models.Model):
         verbose_name_plural = 'Jam Kerja'
 
 
-class list_status_opg_db(models.Model):
-    status = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE, null=True)
+class list_pegawai_opg_db(models.Model):
+    pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE, null=True)
     
     add_by = models.CharField(max_length=100, null=True)
     edit_by = models.CharField(max_length=100, null=True)
@@ -549,14 +549,14 @@ class list_status_opg_db(models.Model):
     edit_date = models.DateTimeField(auto_now=True, null=True)
 
     def __int__(self):
-        return self.status
+        return self.pegawai
     
     class Meta:
-        verbose_name = 'Status Pegawai yang dapat OPG'
-        verbose_name_plural = 'Status Pegawai yang dapat OPG'
+        verbose_name = 'Pegawai yang dapat OPG'
+        verbose_name_plural = 'Pegawai yang dapat OPG'
 
-class list_status_opg_libur_nasional_db(models.Model):
-    status = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE, null=True)
+class list_pegawai_opg_libur_nasional_db(models.Model):
+    pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE, null=True)
     
     add_by = models.CharField(max_length=100, null=True)
     edit_by = models.CharField(max_length=100, null=True)
@@ -564,11 +564,11 @@ class list_status_opg_libur_nasional_db(models.Model):
     edit_date = models.DateTimeField(auto_now=True, null=True)
 
     def __int__(self):
-        return self.status
+        return self.pegawai
     
     class Meta:
-        verbose_name = 'Status Pegawai yang dapat OPG Libur Nasional'
-        verbose_name_plural = 'Status Pegawai yang dapat OPG Libur Nasional'
+        verbose_name = 'Pegawai yang dapat OPG Libur Nasional'
+        verbose_name_plural = 'Pegawai yang dapat OPG Libur Nasional'
 
 
 class awal_cuti_db(models.Model):
@@ -587,15 +587,15 @@ class awal_cuti_db(models.Model):
         verbose_name_plural = 'Awal Cuti'
 
  
-class status_pegawai_lembur_db(models.Model):
-    status_pegawai = models.ForeignKey(status_pegawai_db, on_delete=models.CASCADE, null=True)
+class list_pegawai_lembur_db(models.Model):
+    pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE, null=True)
     
     def __int__(self):
-        return self.status_pegawai
+        return self.pegawai
     
     class Meta:
-        verbose_name = 'Status Pegawai yg Lembur'
-        verbose_name_plural = 'Status Pegawai yg Lembur'
+        verbose_name = 'Pegawai yg Lembur'
+        verbose_name_plural = 'Pegawai yg Lembur'
     
     
 class status_pegawai_lintas_hari_db(models.Model):

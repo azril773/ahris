@@ -22,40 +22,33 @@ def lembur(r, sid):
         
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')                 
-        try:
-            ids = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
-            ids = ids.status_pegawai.pk
-        except:
-            ids = 0
-            
+        statuspgw = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id = sid).last()
+        ids = 0            
+        if statuspgw is not None:
+            ids = statuspgw.pk
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
         statusid=[]
-        for pp in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
-            statusid.append(pp.status_id)
+        for pp in list_pegawai_lembur_db.objects.select_related("pegawai__divisi","pegawai__status").using(r.session["ccabang"]).filter(pegawai__divisi_id__in=aksesdivisi).distinct("pegawai__status_id"):
+            statusid.append(pp.pegawai.status_id)
             # print(p)
-        status = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(status_pegawai_id__in=statusid).order_by("id").values("status_pegawai_id","status_pegawai__status")
-        print(status)
-        if sid == 0:
-            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).all()
-        else:
-            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
         pegawai = []
-        for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
+        for p in list_pegawai_lembur_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").filter(pegawai__divisi_id__in=aksesdivisi):
             if int(sid) == 0:
                 data = {
-                    'idp':p.id,
-                    'nama':p.nama,
-                    'nik':p.nik,
-                    'userid':p.userid
+                    'idp':p.pegawai.id,
+                    'nama':p.pegawai.nama,
+                    'nik':p.pegawai.nik,
+                    'userid':p.pegawai.userid
                 }    
                 pegawai.append(data)
             else:
-                if p.status_id == sid:     
+                if p.pegawai.status_id == sid:     
                     data = {
-                        'idp':p.id,
-                        'nama':p.nama,
-                        'nik':p.nik,
-                        'userid':p.userid
+                        'idp':p.pegawai.id,
+                        'nama':p.pegawai.nama,
+                        'nik':p.pegawai.nik,
+                        'userid':p.pegawai.userid
                     }    
                     pegawai.append(data)
                 else:
@@ -107,17 +100,17 @@ def lembur_belum_proses(r, sid):
         
         dr = datetime.strftime(dari,'%d-%m-%Y')
         sp = datetime.strftime(sampai,'%d-%m-%Y')                 
+        statuspgw = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id = sid).last()
+        ids = 0            
+        if statuspgw is not None:
+            ids = statuspgw.pk
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
         statusid=[]
-        for pp in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
-            statusid.append(pp.status_id)
+        for pp in list_pegawai_lembur_db.objects.select_related("pegawai__divisi","pegawai__status").using(r.session["ccabang"]).filter(pegawai__divisi_id__in=aksesdivisi).distinct("pegawai__status_id"):
+            statusid.append(pp.pegawai.status_id)
             # print(p)
-        status = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(status_pegawai_id__in=statusid).order_by("id").values("status_pegawai_id","status_pegawai__status")
-        try:
-            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
-            sid_lembur = sid_lembur.status_pegawai.pk
-        except:
-            sid_lembur = 0
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
+        sid_lembur = 0
         pegawai = []
         for p in pegawai_db.objects.using(r.session["ccabang"]).filter(aktif=1):
             if int(sid) == 0:
@@ -183,11 +176,7 @@ def cari_lembur(r):
         bln = nama_bulan(int(periode))
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
         lstatus = []
-        try:
-            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = sid)
-            sid_lembur = sid_lembur.status_pegawai.pk
-        except:
-            sid_lembur = 0
+        sid_lembur = 0
         pegawai = []
             
         for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
@@ -892,182 +881,228 @@ def proses_ulang_lembur(r, idl):
         # ------------------------------------------------------------- 
         aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
         # jika absensi ada
-        try:
-            if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(tgl_absen=tgl, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi).exists():
-                ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(tgl_absen=tgl, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi)            
-                
-                # Tanpa istirahat (di jadwal kerja)
-                if (ab.lama_istirahat == 0 and ab.lama_istirahat is not None) or ab.lama_istirahat is None:
-                    if ab.masuk is not None and ab.pulang is not None:
-                        
-                        jadwal_masuk = datetime.combine(ab.tgl_absen, ab.jam_masuk)
-                        jadwal_pulang = datetime.combine(ab.tgl_absen, ab.jam_pulang)
+        with transaction.atomic(using=r.session['ccabang']):
+            try:
+                if absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(tgl_absen=tgl, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi).exists():
+                    ab = absensi_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(tgl_absen=tgl, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi)            
+                    
+                    # Tanpa istirahat (di jadwal kerja)
+                    if (ab.lama_istirahat == 0 and ab.lama_istirahat is not None) or ab.lama_istirahat is None:
+                        if ab.masuk is not None and ab.pulang is not None:
                             
-                        absen_masuk = datetime.combine(ab.tgl_absen, ab.masuk)
-                        absen_pulang = datetime.combine(ab.tgl_absen, ab.pulang)
-                        
-                        bm = jadwal_masuk + timedelta(minutes=4)
-                        batas_masuk = datetime.strptime(str(bm), "%Y-%m-%d %H:%M:%S")            
-                                                
-                        # pengelolaan lembur
-                        if ab.pulang < ab.masuk:
-                            raise Exception('Jam Masuk lebih besar dari Jam Pulang.') 
-                        else:
-                            # -------------------------------------------------
-                            # pemotong jam masuk
-                            
-                            if awal > 0:
-                                mulai_msk = batas_masuk-timedelta(hours=awal)
-                            else:
-                                mulai_msk = batas_masuk
-                                        
-                            b_msk.append(mulai_msk)
-
-                            for x in range(int(looping) - 1):
-                                a2_msk = b_msk[x] + timedelta(minutes=30)
-                                b_msk.append(a2_msk)
-                            
-                            if absen_masuk <= mulai_msk:
-                                pemotong_msk = 0
-                            else:
-                                for b in b_msk:
-                                    if absen_masuk > b:
-                                        pemotong_msk = (b_msk.index(b) + 1) * 0.5 
-                                    else:
-                                        pass                     
-                            
-                            # -------------------------------------------------
-                            # pemotong jam istirahat 1 & 2
-                            pemotong_ist = 0
-                            pemotong_ist2 = 0
-                            
-                            # -------------------------------------------------
-                            # pemotong jam pulang                                
-                            
-                            if akhir == 0:                                       
-                                batas_pulang = jadwal_pulang
-                            else:  
-                                batas_pulang = jadwal_pulang + timedelta(hours=akhir)                                      
+                            jadwal_masuk = datetime.combine(ab.tgl_absen, ab.jam_masuk)
+                            jadwal_pulang = datetime.combine(ab.tgl_absen, ab.jam_pulang)
                                 
-                            mulai_plg = batas_pulang - timedelta(minutes=5) 
-                            tutuptoko = tutup_toko_db.objects.using(r.session["ccabang"]).all().last() 
-                            b_plg.append(mulai_plg)                              
-                            for x in range(int(looping) - 1):
-                                a2_plg = b_plg[x] - timedelta(minutes=30)
-                                b_plg.append(a2_plg)
+                            absen_masuk = datetime.combine(ab.tgl_absen, ab.masuk)
+                            absen_pulang = datetime.combine(ab.tgl_absen, ab.pulang)
                             
-                            if absen_pulang >= mulai_plg:
-                                pemotong_plg = 0
-                            else: 
-                                for b in b_plg:
-                                    if absen_pulang < b:
-                                        pemotong_plg = (b_plg.index(b) + 1) * 0.5
-                                    else:
-                                        pass             
-                            if absen_pulang >= (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
-                                pemotong_plg += 0.5                        
-                            
-                            # perhitungan lembur
-                            if awal > 0 and akhir > 0:
-                                lembur = (awal + akhir) - (pemotong_msk + pemotong_ist + pemotong_ist2 + pemotong_plg)
-                            elif awal > 0 and akhir == 0:     
-                                lembur = (awal) - (pemotong_msk + pemotong_ist + pemotong_ist2 + pemotong_plg)
-                            elif awal == 0 and akhir > 0:
-                                lembur = (akhir) - (pemotong_msk + pemotong_ist + pemotong_ist2 + pemotong_plg)                    
-                        
-                            lb.status = 1
-                            lb.keterangan = ''
-                            lb.proses_lembur = lembur
-                            
-                            if lb.lebih_nproses > 0: 
-                                lb.keterangan = 'Diproses tanpa menambahkan kelebihan jam'
+                            bm = jadwal_masuk + timedelta(minutes=4)
+                            batas_masuk = datetime.strptime(str(bm), "%Y-%m-%d %H:%M:%S")            
+                                                    
+                            # pengelolaan lembur
+                            if ab.pulang < ab.masuk:
+                                raise Exception('Jam Masuk lebih besar dari Jam Pulang.') 
                             else:
-                                lb.keterangan = ''
+                                # -------------------------------------------------
+                                # pemotong jam masuk
+                                
+                                if awal > 0:
+                                    mulai_msk = batas_masuk-timedelta(hours=awal)
+                                else:
+                                    mulai_msk = batas_masuk
+                                            
+                                b_msk.append(mulai_msk)
+
+                                for x in range(int(looping) - 1):
+                                    a2_msk = b_msk[x] + timedelta(minutes=30)
+                                    b_msk.append(a2_msk)
+                                
+                                if absen_masuk <= mulai_msk:
+                                    pemotong_msk = 0
+                                else:
+                                    for b in b_msk:
+                                        if absen_masuk > b:
+                                            pemotong_msk = (b_msk.index(b) + 1) * 0.5 
+                                        else:
+                                            pass                     
+                                
+                                # -------------------------------------------------
+                                # pemotong jam istirahat 1 & 2
+                                pemotong_ist = 0
+                                pemotong_ist2 = 0
+                                
+                                # -------------------------------------------------
+                                # pemotong jam pulang                                
+                                
+                                if akhir == 0:                                       
+                                    batas_pulang = jadwal_pulang
+                                else:  
+                                    batas_pulang = jadwal_pulang + timedelta(hours=akhir)                                      
                                     
-                            lb.edit_by = nama_user
-                            lb.save(using=r.session["ccabang"])                        
+                                mulai_plg = batas_pulang - timedelta(minutes=5) 
+                                tutuptoko = tutup_toko_db.objects.using(r.session["ccabang"]).all().last() 
+                                b_plg.append(mulai_plg)                              
+                                for x in range(int(looping) - 1):
+                                    a2_plg = b_plg[x] - timedelta(minutes=30)
+                                    b_plg.append(a2_plg)
+                                
+                                if absen_pulang >= mulai_plg:
+                                    pemotong_plg = 0
+                                else: 
+                                    for b in b_plg:
+                                        if absen_pulang < b:
+                                            pemotong_plg = (b_plg.index(b) + 1) * 0.5
+                                        else:
+                                            pass             
+                                if absen_pulang >= (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
+                                    pemotong_plg += 0.5                        
+                                
+                                # perhitungan lembur
+                                if awal > 0 and akhir > 0:
+                                    lembur = (awal + akhir) - (pemotong_msk + pemotong_ist + pemotong_ist2 + pemotong_plg)
+                                elif awal > 0 and akhir == 0:     
+                                    lembur = (awal) - (pemotong_msk + pemotong_ist + pemotong_ist2 + pemotong_plg)
+                                elif awal == 0 and akhir > 0:
+                                    lembur = (akhir) - (pemotong_msk + pemotong_ist + pemotong_ist2 + pemotong_plg)                    
+                            
+                                lb.status = 1
+                                lb.keterangan = ''
+                                lb.proses_lembur = lembur
+                                
+                                if lb.lebih_nproses > 0: 
+                                    lb.keterangan = 'Diproses tanpa menambahkan kelebihan jam'
+                                else:
+                                    lb.keterangan = ''
                                         
-                    else:
-                        raise Exception('Absen Tidak Lengkap.')
-            
-                # Dengan Istirahat (di jadwal kerja)
-                else:
-                    if ab.masuk is not None and ab.pulang is not None:
-                        
-                        jadwal_masuk = datetime.combine(ab.tgl_absen, ab.jam_masuk) 
-                        jadwal_pulang = datetime.combine(ab.tgl_absen, ab.jam_pulang)
-                            
-                        absen_masuk = datetime.combine(ab.tgl_absen, ab.masuk)
-                        absen_pulang = datetime.combine(ab.tgl_absen, ab.pulang)
-                        
-                        bm = jadwal_masuk + timedelta(minutes=4)
-                        batas_masuk = datetime.strptime(str(bm), "%Y-%m-%d %H:%M:%S")
-                            
-                        # pengolahan lembur                
-                        if ab.pulang < ab.masuk:
-                            raise Exception('Jam Masuk lebih besar dari Jam Pulang.')
+                                lb.edit_by = nama_user
+                                lb.save(using=r.session["ccabang"])                        
+                                            
                         else:
-                            # -------------------------------------------------
-                            # pemotong jam masuk
+                            raise Exception('Absen Tidak Lengkap.')
+                
+                    # Dengan Istirahat (di jadwal kerja)
+                    else:
+                        if ab.masuk is not None and ab.pulang is not None:
                             
-                            if awal > 0:
-                                mulai_msk = batas_masuk-timedelta(hours=awal)
-                            else:
-                                mulai_msk = batas_masuk
-                                        
-                            b_msk.append(mulai_msk)
-                                                            
-                            for x in range(int(looping) - 1):
-                                a2_msk = b_msk[x] + timedelta(minutes=30)
-                                b_msk.append(a2_msk)
-                            
-                            if absen_masuk <= mulai_msk:
-                                pemotong_msk = 0
-                            else:
-                                for b in b_msk:
-                                    if absen_masuk > b:
-                                        pemotong_msk = (b_msk.index(b) + 1) * 0.5 
-                                    else:
-                                        pass                                   
+                            jadwal_masuk = datetime.combine(ab.tgl_absen, ab.jam_masuk) 
+                            jadwal_pulang = datetime.combine(ab.tgl_absen, ab.jam_pulang)
                                 
-                            # -------------------------------------------------
-                            # pemotong jam pulang                                
+                            absen_masuk = datetime.combine(ab.tgl_absen, ab.masuk)
+                            absen_pulang = datetime.combine(ab.tgl_absen, ab.pulang)
                             
-                            if akhir > 0:                                       
-                                batas_pulang = jadwal_pulang + timedelta(hours=akhir)                                      
-                            else:  
-                                batas_pulang = jadwal_pulang
+                            bm = jadwal_masuk + timedelta(minutes=4)
+                            batas_masuk = datetime.strptime(str(bm), "%Y-%m-%d %H:%M:%S")
                                 
-                            mulai_plg = batas_pulang - timedelta(minutes=5)  
-                            tutuptoko = tutup_toko_db.objects.using(r.session["ccabang"]).all().last()
-                            b_plg.append(mulai_plg)
+                            # pengolahan lembur                
+                            if ab.pulang < ab.masuk:
+                                raise Exception('Jam Masuk lebih besar dari Jam Pulang.')
+                            else:
+                                # -------------------------------------------------
+                                # pemotong jam masuk
+                                
+                                if awal > 0:
+                                    mulai_msk = batas_masuk-timedelta(hours=awal)
+                                else:
+                                    mulai_msk = batas_masuk
+                                            
+                                b_msk.append(mulai_msk)
+                                                                
+                                for x in range(int(looping) - 1):
+                                    a2_msk = b_msk[x] + timedelta(minutes=30)
+                                    b_msk.append(a2_msk)
+                                
+                                if absen_masuk <= mulai_msk:
+                                    pemotong_msk = 0
+                                else:
+                                    for b in b_msk:
+                                        if absen_masuk > b:
+                                            pemotong_msk = (b_msk.index(b) + 1) * 0.5 
+                                        else:
+                                            pass                                   
+                                    
+                                # -------------------------------------------------
+                                # pemotong jam pulang                                
+                                
+                                if akhir > 0:                                       
+                                    batas_pulang = jadwal_pulang + timedelta(hours=akhir)                                      
+                                else:  
+                                    batas_pulang = jadwal_pulang
+                                    
+                                mulai_plg = batas_pulang - timedelta(minutes=5)  
+                                tutuptoko = tutup_toko_db.objects.using(r.session["ccabang"]).all().last()
+                                b_plg.append(mulai_plg)
 
-                            for x in range(int(looping) - 1):
-                                a2_plg = b_plg[x] - timedelta(minutes=30)
-                                b_plg.append(a2_plg)
+                                for x in range(int(looping) - 1):
+                                    a2_plg = b_plg[x] - timedelta(minutes=30)
+                                    b_plg.append(a2_plg)
+                                
+                                if absen_pulang >= mulai_plg:
+                                    pemotong_plg = 0
+                                else:
+                                    for b in b_plg:
+                                        if absen_pulang < b:
+                                            pemotong_plg = (b_plg.index(b) + 1) * 0.5
+                                        else:
+                                            pass
+                                if absen_pulang > (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
+                                    pemotong_plg += 0.5       
+                                # -------------------------------------------------
+                                # pemotong jam istirahat
+                                
+                                if ab.istirahat is not None and ab.kembali is not None:
+                                    
+                                    absen_ist = datetime.combine(ab.tgl_absen, ab.istirahat)
+                                    absen_kmb = datetime.combine(ab.tgl_absen, ab.kembali)
+                                    
+                                    if ab.istirahat2 is None and ab.kembali2 is None:
+                                        if ab.kembali < ab.istirahat:
+                                            raise Exception('Jam istirahat lebih besar dari jam kembali istirahat.')
+                                        else:                                    
+                                            # -------------------------------------------------
+                                            # istirahat 1
+                                            
+                                            if ab.lama_istirahat is not None:
+                                                if ist_1 > ab.lama_istirahat:
+                                                    lama_ist = (ab.lama_istirahat * 60) + 5
+                                                    decimal_ist = ab.lama_istirahat
+                                                else:
+                                                    if ist_1 == 0:
+                                                        lama_ist = (ab.lama_istirahat * 60) + 5
+                                                        decimal_ist = ab.lama_istirahat
+                                                    else:
+                                                        lama_ist = (ist_1 * 60) + 5
+                                                        decimal_ist = ist_1
+                                                        
+                                            lama_ist = round(lama_ist)
+                                            a_ist = absen_ist + timedelta(minutes=lama_ist)
+                                            b_ist.append(a_ist)
+                                            for x in range(int(looping) - 1):
+                                                a2_ist = b_ist[x] + timedelta(minutes=30)
+                                                b_ist.append(a2_ist)
+                                            if absen_kmb <= a_ist:
+                                                # selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
+                                                # tist = selisihkmb.total_seconds() / 3600
+                                                # tist = round(abs(float(decimal_ist) - tist),2)
+                                                # decimal_part = abs(int(tist) - tist)
+                                                # if decimal_part <= 0.5:
+                                                #     tist = int(tist) + 0.5
+                                                # else:
+                                                #     tist = math.ceil(tist)    
                             
-                            if absen_pulang >= mulai_plg:
-                                pemotong_plg = 0
-                            else:
-                                for b in b_plg:
-                                    if absen_pulang < b:
-                                        pemotong_plg = (b_plg.index(b) + 1) * 0.5
+                                                # pemotong_ist = -abs(float(decimal_ist) - tist)
+                                                # pemotong_ist2 = 0
+                                                # s_ist.append(pemotong_ist)
+                                                pemotong_ist = 0
+                                                pemotong_ist2 = 0
+                                            else:
+                                                for b in b_ist:                             
+                                                    if absen_kmb > b:
+                                                        pemotong_ist = (b_ist.index(b) + 1) * 0.5  
+                                                        pemotong_ist2 = 0 
+                                                    else:
+                                                        pass                                      
+                                            
                                     else:
-                                        pass
-                            if absen_pulang > (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=30)) and absen_pulang < (datetime.combine(ab.tgl_absen,tutuptoko.jam_tutup) - timedelta(minutes=3)):
-                                pemotong_plg += 0.5       
-                            # -------------------------------------------------
-                            # pemotong jam istirahat
-                            
-                            if ab.istirahat is not None and ab.kembali is not None:
-                                
-                                absen_ist = datetime.combine(ab.tgl_absen, ab.istirahat)
-                                absen_kmb = datetime.combine(ab.tgl_absen, ab.kembali)
-                                
-                                if ab.istirahat2 is None and ab.kembali2 is None:
-                                    if ab.kembali < ab.istirahat:
-                                        raise Exception('Jam istirahat lebih besar dari jam kembali istirahat.')
-                                    else:                                    
                                         # -------------------------------------------------
                                         # istirahat 1
                                         
@@ -1097,11 +1132,10 @@ def proses_ulang_lembur(r, idl):
                                             # if decimal_part <= 0.5:
                                             #     tist = int(tist) + 0.5
                                             # else:
-                                            #     tist = math.ceil(tist)    
+                                            #     tist = math.ceil(tist)   
                         
                                             # pemotong_ist = -abs(float(decimal_ist) - tist)
                                             # pemotong_ist2 = 0
-                                            # s_ist.append(pemotong_ist)
                                             pemotong_ist = 0
                                             pemotong_ist2 = 0
                                         else:
@@ -1110,200 +1144,156 @@ def proses_ulang_lembur(r, idl):
                                                     pemotong_ist = (b_ist.index(b) + 1) * 0.5  
                                                     pemotong_ist2 = 0 
                                                 else:
-                                                    pass                                      
+                                                    pass 
                                         
-                                else:
-                                    # -------------------------------------------------
-                                    # istirahat 1
-                                    
-                                    if ab.lama_istirahat is not None:
-                                        if ist_1 > ab.lama_istirahat:
-                                            lama_ist = (ab.lama_istirahat * 60) + 5
-                                            decimal_ist = ab.lama_istirahat
+                                        if ab.kembali2 < ab.istirahat2:
+                                            raise Exception('Jam istirahat 2 lebih besar dari jam kembali istirahat 2.')
                                         else:
-                                            if ist_1 == 0:
-                                                lama_ist = (ab.lama_istirahat * 60) + 5
-                                                decimal_ist = ab.lama_istirahat
-                                            else:
-                                                lama_ist = (ist_1 * 60) + 5
-                                                decimal_ist = ist_1
-                                                
-                                    lama_ist = round(lama_ist)
-                                    a_ist = absen_ist + timedelta(minutes=lama_ist)
-                                    b_ist.append(a_ist)
-                                    for x in range(int(looping) - 1):
-                                        a2_ist = b_ist[x] + timedelta(minutes=30)
-                                        b_ist.append(a2_ist)
-                                    if absen_kmb <= a_ist:
-                                        # selisihkmb = (a_ist - timedelta(minutes=5)) - absen_kmb
-                                        # tist = selisihkmb.total_seconds() / 3600
-                                        # tist = round(abs(float(decimal_ist) - tist),2)
-                                        # decimal_part = abs(int(tist) - tist)
-                                        # if decimal_part <= 0.5:
-                                        #     tist = int(tist) + 0.5
-                                        # else:
-                                        #     tist = math.ceil(tist)   
-                    
-                                        # pemotong_ist = -abs(float(decimal_ist) - tist)
-                                        # pemotong_ist2 = 0
-                                        pemotong_ist = 0
-                                        pemotong_ist2 = 0
-                                    else:
-                                        for b in b_ist:                             
-                                            if absen_kmb > b:
-                                                pemotong_ist = (b_ist.index(b) + 1) * 0.5  
-                                                pemotong_ist2 = 0 
-                                            else:
-                                                pass 
-                                    
-                                    if ab.kembali2 < ab.istirahat2:
-                                        raise Exception('Jam istirahat 2 lebih besar dari jam kembali istirahat 2.')
-                                    else:
-                                        # -------------------------------------------------
-                                        # istirahat 2
-                                        
-                                        absen_ist2 = datetime.combine(ab.tgl_absen, ab.istirahat2)
-                                        absen_kmb2 = datetime.combine(ab.tgl_absen, ab.kembali2)
-                                        
-                                        if ab.lama_istirahat2 is not None:
-                                            if ist_2 > ab.lama_istirahat2:
-                                                lama_ist2 = (ab.lama_istirahat2 * 60) + 5
-                                                decimal_ist2 = ab.lama_istirahat2
-                                            else:
-                                                if ist_2 == 0:
+                                            # -------------------------------------------------
+                                            # istirahat 2
+                                            
+                                            absen_ist2 = datetime.combine(ab.tgl_absen, ab.istirahat2)
+                                            absen_kmb2 = datetime.combine(ab.tgl_absen, ab.kembali2)
+                                            
+                                            if ab.lama_istirahat2 is not None:
+                                                if ist_2 > ab.lama_istirahat2:
                                                     lama_ist2 = (ab.lama_istirahat2 * 60) + 5
                                                     decimal_ist2 = ab.lama_istirahat2
                                                 else:
-                                                    lama_ist2 = (ist_2 * 60) + 5
-                                                    decimal_ist2 = ist_2
-                                        lama_ist2 = round(lama_ist2)
-                                        a_ist2 = absen_ist2 + timedelta(minutes=lama_ist2)  
-                                        b_ist2.append(a_ist2)     
-                                        
-                                        for x in range(int(looping) - 1):
-                                            a2_ist2 = b_ist2[x] + timedelta(minutes=30)
-                                            b_ist2.append(a2_ist2)
-                                        if absen_kmb2 <= a_ist2:
-                                            # selisihkmb = (a_ist2 - timedelta(minutes=5)) - absen_kmb2
-                                            # tist = selisihkmb.total_seconds() / 3600
-                                            # tist = round(abs(float(decimal_ist2) - tist),2)
-                                            # decimal_part = abs(int(tist) - tist)
-                                            # if decimal_part <= 0.5:
-                                            #     tist = int(tist) + 0.5
-                                            # else:
-                                            #     tist = math.ceil(tist)    
-                        
-                                            # pemotong_ist2 = -abs(float(decimal_ist2) - tist)
-                                            # pemotong_ist = s_ist[0]
-                                            pemotong_ist = 0
-                                            pemotong_ist2 = 0
-                                        else:
-                                            for b in b_ist2:                             
-                                                if absen_kmb2 > b:
-                                                    pemotong_ist2 = (b_ist2.index(b) + 1) * 0.5  
-                                                else:
-                                                    pass                                      
-                                    
-                            else:                                
-                                pemotong_ist = Decimal(-ab.lama_istirahat)
-                                pemotong_ist2 = Decimal(-ab.lama_istirahat2)
-
-                            # additional perhitungan istirahat
-                            if ist_1 + ist_2 > 1:
-                                selisih_pi = (ist_1+ist_2) - 1
-                                pi = (pemotong_ist + pemotong_ist2) + selisih_pi
-                            else:
-                                pi = pemotong_ist + pemotong_ist2    
+                                                    if ist_2 == 0:
+                                                        lama_ist2 = (ab.lama_istirahat2 * 60) + 5
+                                                        decimal_ist2 = ab.lama_istirahat2
+                                                    else:
+                                                        lama_ist2 = (ist_2 * 60) + 5
+                                                        decimal_ist2 = ist_2
+                                            lama_ist2 = round(lama_ist2)
+                                            a_ist2 = absen_ist2 + timedelta(minutes=lama_ist2)  
+                                            b_ist2.append(a_ist2)     
+                                            
+                                            for x in range(int(looping) - 1):
+                                                a2_ist2 = b_ist2[x] + timedelta(minutes=30)
+                                                b_ist2.append(a2_ist2)
+                                            if absen_kmb2 <= a_ist2:
+                                                # selisihkmb = (a_ist2 - timedelta(minutes=5)) - absen_kmb2
+                                                # tist = selisihkmb.total_seconds() / 3600
+                                                # tist = round(abs(float(decimal_ist2) - tist),2)
+                                                # decimal_part = abs(int(tist) - tist)
+                                                # if decimal_part <= 0.5:
+                                                #     tist = int(tist) + 0.5
+                                                # else:
+                                                #     tist = math.ceil(tist)    
                             
-                            # perhitungan lembur
-                            pi = pemotong_ist + pemotong_ist2
-                            pemotong_msk = Decimal(pemotong_msk)
-                            pi = Decimal(pi)
-                            pemotong_plg = Decimal(pemotong_plg)
-                            awal = Decimal(awal)
-                            akhir = Decimal(akhir)
-                            if awal > 0 and akhir > 0:
-                                lembur = Decimal((awal + akhir)) - (pemotong_msk + pi + pemotong_plg)
-                            elif awal > 0 and akhir == 0:     
-                                lembur = (awal) - (pemotong_msk + pi + pemotong_plg)
-                            elif awal == 0 and akhir > 0:
-                                lembur = (akhir) - (pemotong_msk + pi + pemotong_plg)
-                                
-                            lb.status = 1
-                            lb.proses_lembur = lembur
-                            if lb.lebih_nproses > 0:
-                                lb.keterangan = 'Diproses tanpa menambahkan kelebihan jam' 
-                            else:
-                                lb.keterangan = ''
-                            lb.edit_by = nama_user
-                            lb.save(using=r.session["ccabang"])             
-                    else:
-                        raise Exception('Absen Tidak Lengkap.')
-            
-            # jika tidak ada absensi
-            else:   
-                return redirect('lembur_bproses', int(sid))
+                                                # pemotong_ist2 = -abs(float(decimal_ist2) - tist)
+                                                # pemotong_ist = s_ist[0]
+                                                pemotong_ist = 0
+                                                pemotong_ist2 = 0
+                                            else:
+                                                for b in b_ist2:                             
+                                                    if absen_kmb2 > b:
+                                                        pemotong_ist2 = (b_ist2.index(b) + 1) * 0.5  
+                                                    else:
+                                                        pass                                      
+                                        
+                                else:                                
+                                    pemotong_ist = Decimal(-ab.lama_istirahat)
+                                    pemotong_ist2 = Decimal(-ab.lama_istirahat2)
 
-            # insert or update rekap lembur
-            # -------------------------------------------------------------
-            # hitung total lembur
-            tl = lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), tgl_lembur__range=(dr,sp)).aggregate(total=Sum('proses_lembur'))
-            if tl['total'] is None:
-                tlembur = 0
-            else:
-                tlembur = tl['total']    
-            
-            # hitung total kompen
-            kp = kompen_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), tgl_kompen__range=(dr,sp)).aggregate(total=Sum('kompen')) 
-            if kp['total'] is None:
-                tkompen = 0
-            else:
-                tkompen = kp['total']        
+                                # additional perhitungan istirahat
+                                if ist_1 + ist_2 > 1:
+                                    selisih_pi = (ist_1+ist_2) - 1
+                                    pi = (pemotong_ist + pemotong_ist2) + selisih_pi
+                                else:
+                                    pi = pemotong_ist + pemotong_ist2    
+                                
+                                # perhitungan lembur
+                                pi = pemotong_ist + pemotong_ist2
+                                pemotong_msk = Decimal(pemotong_msk)
+                                pi = Decimal(pi)
+                                pemotong_plg = Decimal(pemotong_plg)
+                                awal = Decimal(awal)
+                                akhir = Decimal(akhir)
+                                if awal > 0 and akhir > 0:
+                                    lembur = Decimal((awal + akhir)) - (pemotong_msk + pi + pemotong_plg)
+                                elif awal > 0 and akhir == 0:     
+                                    lembur = (awal) - (pemotong_msk + pi + pemotong_plg)
+                                elif awal == 0 and akhir > 0:
+                                    lembur = (akhir) - (pemotong_msk + pi + pemotong_plg)
+                                    
+                                lb.status = 1
+                                lb.proses_lembur = lembur
+                                if lb.lebih_nproses > 0:
+                                    lb.keterangan = 'Diproses tanpa menambahkan kelebihan jam' 
+                                else:
+                                    lb.keterangan = ''
+                                lb.edit_by = nama_user
+                                lb.save(using=r.session["ccabang"])             
+                        else:
+                            raise Exception('Absen Tidak Lengkap.')
                 
-            if prd == 1:
-                prds = 12
-                thns = thn - 1
-            else:
-                prds = prd - 1
-                thns = thn    
+                # jika tidak ada absensi
+                else:   
+                    return redirect('lembur_bproses', int(sid))
+
+                # insert or update rekap lembur
+                # -------------------------------------------------------------
+                # hitung total lembur
+                tl = lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), tgl_lembur__range=(dr,sp)).aggregate(total=Sum('proses_lembur'))
+                if tl['total'] is None:
+                    tlembur = 0
+                else:
+                    tlembur = tl['total']    
                 
-            # hitung sisa lembur
-            if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prds, tahun=thns).exists():
-                rkps = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prds, tahun=thns)
-                sisa_lembur_sbl = rkps.sisa_lembur
-            else:
-                sisa_lembur_sbl = 0     
+                # hitung total kompen
+                kp = kompen_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), tgl_kompen__range=(dr,sp)).aggregate(total=Sum('kompen')) 
+                if kp['total'] is None:
+                    tkompen = 0
+                else:
+                    tkompen = kp['total']        
+                    
+                if prd == 1:
+                    prds = 12
+                    thns = thn - 1
+                else:
+                    prds = prd - 1
+                    thns = thn    
+                    
+                # hitung sisa lembur
+                if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prds, tahun=thns).exists():
+                    rkps = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prds, tahun=thns)
+                    sisa_lembur_sbl = rkps.sisa_lembur
+                else:
+                    sisa_lembur_sbl = 0     
+                    
+                # input or update rekap lembur  
+                if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prd, tahun=thn).exists():
+                    rk = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prd, tahun=thn)
+                    
+                    rk.total_lembur = float(sisa_lembur_sbl + tlembur)
+                    rk.total_kompen = float(tkompen)
+                    rk.sisa_lembur = float(sisa_lembur_sbl + tlembur) - float(tkompen) - float(rk.lembur_jam_bayar)
+                    rk.edit_by = nama_user          
+                    rk.save(using=r.session["ccabang"])
+                else:  
+                    tambah_rekap = rekap_lembur_db(
+                        pegawai_id = int(idp),
+                        periode = prd,
+                        tahun = thn,
+                        total_lembur = float(sisa_lembur_sbl) + float(tlembur),
+                        total_kompen = float(tkompen),
+                        sisa_lembur = float(sisa_lembur_sbl + tlembur) - float(tkompen),
+                        add_by = nama_user,
+                        edit_by = nama_user
+                    )    
+                    tambah_rekap.save(using=r.session["ccabang"])
                 
-            # input or update rekap lembur  
-            if rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').filter(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prd, tahun=thn).exists():
-                rk = rekap_lembur_db.objects.using(r.session["ccabang"]).select_related('pegawai','pegawai__divisi').get(pegawai__divisi_id__in=aksesdivisi,pegawai_id=int(idp), periode=prd, tahun=thn)
-                
-                rk.total_lembur = float(sisa_lembur_sbl + tlembur)
-                rk.total_kompen = float(tkompen)
-                rk.sisa_lembur = float(sisa_lembur_sbl + tlembur) - float(tkompen) - float(rk.lembur_jam_bayar)
-                rk.edit_by = nama_user          
-                rk.save(using=r.session["ccabang"])
-            else:  
-                tambah_rekap = rekap_lembur_db(
-                    pegawai_id = int(idp),
-                    periode = prd,
-                    tahun = thn,
-                    total_lembur = float(sisa_lembur_sbl) + float(tlembur),
-                    total_kompen = float(tkompen),
-                    sisa_lembur = float(sisa_lembur_sbl + tlembur) - float(tkompen),
-                    add_by = nama_user,
-                    edit_by = nama_user
-                )    
-                tambah_rekap.save(using=r.session["ccabang"])
-            
-            return redirect('lembur', sid=int(sid))
-        except Exception as e:
-            transaction.set_rollback(True,using=r.session['ccabang'])
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
-            msg = e.args[0] if e.args is not None else "Terjadi kesalahan"
-            raise Exception(msg)
+                return redirect('lembur', sid=int(sid))
+            except Exception as e:
+                transaction.set_rollback(True,using=r.session['ccabang'])
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
+                msg = e.args[0] if e.args is not None else "Terjadi kesalahan"
+                raise Exception(msg)
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
@@ -2037,11 +2027,7 @@ def kompen(r):
         status = status_pegawai_db.objects.using(r.session["ccabang"]).all().order_by('id')
         
         ###
-        try:
-            sid_lembur = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(status_pegawai_id = pgw.status_id)
-            sid_lembur = sid_lembur.status_pegawai.pk
-        except:
-            sid_lembur = 0
+        sid_lembur = 0
 
         data = {
             'akses' : akses,
@@ -2060,25 +2046,33 @@ def kompen(r):
         return render(r,'hrd_app/kompen/kompen.html', data)
 
 
-@authorization(["*"])
+@authorization(["root","it"])
 def status_pegawai_lembur(r):
     iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-        status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        if r.session["user"]["admin"]:
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
+        else:
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(divisi__in=aksesdivisi)
+        divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=aksesdivisi)
+        sids = [s.status_id for s in pegawai.distinct("status_id")]
+        status = status_pegawai_db.objects.using(r.session['ccabang']).filter(id__in=sids)
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
         
         data = {       
             'dsid': dsid,
-
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
             "nama":r.session["user"]["nama"],
-            "status":status_pegawai,
-            'modul_aktif' : 'Status Pegawai Lembur'     
+            "pegawai":pegawai,
+            "divisi":divisi,
+            "status":status,
+            'modul_aktif' : 'Pegawai Lembur'     
         }
         
         return render(r,'hrd_app/status_pegawai/status_pegawai_lembur/status_pegawai_lembur.html', data)
@@ -2088,56 +2082,114 @@ def status_pegawai_lembur(r):
         return redirect('beranda')
 
 
-@authorization(["*"])
+@authorization(["root","it"])
 def tstatus_pegawai_lembur(r):
-    status = r.POST.get("status")
-    
-    if status_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(status_pegawai_id=status).exists():
-        return JsonResponse({'status':'duplikat'},safe=False,status=400)
-    else:
-        status_pegawai_lembur_db(status_pegawai_id=int(status)).save(using=r.session["ccabang"])
-        return JsonResponse({'status':'berhasil'},safe=False,status=201)
+    idp = r.POST.get("idp")
+    if idp == "":
+        return JsonResponse({'status':'error',"msg":"Pegawai tidak boleh kosong"},safe=False,status=400)
 
-@authorization(["*"])
+    if list_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(pegawai_id=idp).exists():
+        return JsonResponse({'status':'error',"msg":"Pegawai sudah didaftarkan"},safe=False,status=400)
+    else:
+        if not pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp)).exists():
+            return JsonResponse({'status':'error',"msg":"Pegawai tidak ada"},safe=False,status=400)
+        list_pegawai_lembur_db(pegawai_id=int(idp)).save(using=r.session["ccabang"])
+        return JsonResponse({'status':'success',"msg":"Berhasil menambahkan pegawai"},safe=False,status=201)
+
+@authorization(["root","it"])
+def tstatus_pegawai_lembur_divisi(r):
+    divisi = r.POST.get("divisi")
+    if divisi == "":
+        return JsonResponse({'status':'error',"msg":"Divisi tidak boleh kosong"},safe=False,status=400)
+    
+    dvs = divisi_db.objects.using(r.session["ccabang"]).filter(pk=int(divisi)).last()
+    if not dvs:
+        return JsonResponse({"status":"error","msg":"Divisi tidak ada"},safe=False,status=400)
+    
+
+    pgw = [p.pk for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=dvs)]
+    data = []
+    for pg in pgw:
+        if list_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(pegawai_id=pg).exists():
+            continue
+        else:
+            data.append(list_pegawai_lembur_db(pegawai_id=int(pg)))
+    
+    list_pegawai_lembur_db.objects.using(r.session['ccabang']).bulk_create(data)
+
+    return JsonResponse({'status':'success',"msg":"Berhasil menambahkan pegawai"},safe=False,status=201)
+
+@authorization(["root",'it'])
+def tstatus_pegawai_lembur_status(r):
+    status = r.POST.get("status")
+    if status == "":
+        return JsonResponse({'status':'error',"msg":"Status tidak boleh kosong"},safe=False,status=400)
+    st = status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(status)).last()
+    if not st:
+        return JsonResponse({"status":"error","msg":"Status tidak ada"},safe=False,status=400)
+    
+
+    pgw = [p.pk for p in pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=status)]
+    data = []
+    for pg in pgw:
+        if list_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(pegawai_id=pg).exists():
+            continue
+        else:
+            data.append(list_pegawai_lembur_db(pegawai_id=int(pg)))
+    
+    list_pegawai_lembur_db.objects.using(r.session['ccabang']).bulk_create(data)
+
+    return JsonResponse({'status':'success',"msg":"Berhasil menambahkan pegawai"},safe=False,status=201)
+
+
+
+
+
+@authorization(["root","it"])
 def status_pegawai_lembur_json(r):
-    result = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).all()
+    result = list_pegawai_lembur_db.objects.using(r.session["ccabang"]).all()
     data = []
     for r in result:
         obj = {
-            'status_pegawai':r.status_pegawai.status,
+            'pegawai':r.pegawai.nama,
             'pk':r.pk,
-            "status_id":r.status_pegawai_id
+            "pegawai_id":r.pegawai_id
         }
         data.append(obj)
     
     return JsonResponse({"data":data},status=200,safe=False)
 
-@authorization(["*"])
+@authorization(["root","it"])
 def estatus_pegawai_lembur(r):
-    status = r.POST.get("status")
+    idp = r.POST.get("idp")
     id = r.POST.get('id')
-
+    if id == "" or idp == '':
+        return JsonResponse({'status':'error',"msg":"Data tidak lengkap"},safe=False,status=400)
     try:
-        get = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(pk=int(id))
-        status_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(pk=int(id)).update(status_pegawai_id=int(status))
-        return JsonResponse({'status':'ok'},safe=False,status=200)
+        get = list_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(pk=int(id))
+        if list_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(id)), pegawai_id=int(idp)).exists():
+            return JsonResponse({"status":"erorr","msg":"Pegawai sudah didaftarkan"},status=400)
+        list_pegawai_lembur_db.objects.using(r.session["ccabang"]).filter(pk=int(id)).update(pegawai_id=int(idp))
+        return JsonResponse({'status':'success',"msg":"Berhasil update pegawai"},safe=False,status=200)
     except:
-        return JsonResponse({"status":"gagal update"},safe=False,status=400)
+        return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},safe=False,status=400)
 
-@authorization(["*"])
+@authorization(["root","it"])
 def hstatus_pegawai_lembur(r):
     id = r.POST.get('id')
+    if id == "":
+        return JsonResponse({'status':'error',"msg":"Data tidak lengkap"},safe=False,status=400)
     nama_user = r.session["user"]["nama"]
     try:
-        get = status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(pk=int(id))
+        get = list_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(pk=int(id))
         histori_hapus_db(
             delete_by = nama_user,
-            delete_item = f'hapus status pegawai lembur : {get.status_pegawai.status}'
+            delete_item = f'hapus pegawai lembur : {get.pegawai.nama}'
         ).save(using=r.session["ccabang"])
-        status_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
-        return JsonResponse({'status':'ok'},safe=False,status=200)
+        list_pegawai_lembur_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
+        return JsonResponse({'status':'success',"msg":"Berhasil hapus pegawai"},safe=False,status=200)
     except:
-        return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
+        return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},safe=False,status=400)
     
 
 
@@ -2147,15 +2199,23 @@ def hstatus_pegawai_lembur(r):
 
 
 
-
+@authorization(["root","it"])
 def status_pegawai_libur_nasional(r):
     iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-        status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        if r.session["user"]["admin"]:
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
+        else:
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(divisi__in=aksesdivisi)
+        divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=aksesdivisi)
+        sids = [s.status_id for s in pegawai.distinct("status_id")]
+        status = status_pegawai_db.objects.using(r.session['ccabang']).filter(id__in=sids)
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
+        print(akses)
         
         data = {       
             'dsid': dsid,
@@ -2164,8 +2224,10 @@ def status_pegawai_libur_nasional(r):
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
             "nama":r.session["user"]["nama"],
-            "status":status_pegawai,
-            'modul_aktif' : 'Status Pegawai Libur Nasional'     
+            "divisi":divisi,
+            "status":status,
+            "pegawai":pegawai,
+            'modul_aktif' : 'Pegawai Libur Nasional'     
         }
         
         return render(r,'hrd_app/status_pegawai/status_pegawai_libur_nasional.html', data)
@@ -2176,54 +2238,111 @@ def status_pegawai_libur_nasional(r):
 
     
     
-
+@authorization(["root","it"])
 def tstatus_pegawai_libur_nasional(r):
-    status = r.POST.get("status")
-    
-    if list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).filter(status_id=status).exists():
-        return JsonResponse({'status':'duplikat'},safe=False,status=400)
+    idp = r.POST.get("idp")
+    if idp == '':
+        return JsonResponse({"status":"error","msg":"Data tidak lengkap"},safe=False,status=400)
+    if list_pegawai_opg_libur_nasional_db.objects.using(r.session["ccabang"]).filter(pegawai_id=idp).exists():
+        return JsonResponse({'status':'error',"msg":"Pegawai sudah didaftarkan"},safe=False,status=400)
     else:
-        list_status_opg_libur_nasional_db(status_id=int(status)).save(using=r.session["ccabang"])
-        return JsonResponse({'status':'berhasil'},safe=False,status=201)
+        if  not pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp)).exists():
+            return JsonResponse({'status':'error',"msg":"Pegawai tidak ada"},safe=False,status=400)
+        list_pegawai_opg_libur_nasional_db(pegawai_id=int(idp)).save(using=r.session["ccabang"])
+        return JsonResponse({'status':'success',"msg":"Berhasil menambahkan pegawai"},safe=False,status=201)
 
 
+
+@authorization(["root","it"])
+def tstatus_pegawai_libur_nasional_divisi(r):
+    divisi = r.POST.get("divisi")
+    if divisi == "":
+        return JsonResponse({'status':'error',"msg":"Divisi tidak boleh kosong"},safe=False,status=400)
+    
+    dvs = divisi_db.objects.using(r.session["ccabang"]).filter(pk=int(divisi)).last()
+    if not dvs:
+        return JsonResponse({"status":"error","msg":"Divisi tidak ada"},safe=False,status=400)
+    
+
+    pgw = [p.pk for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=dvs)]
+    data = []
+    for pg in pgw:
+        if list_pegawai_opg_libur_nasional_db.objects.using(r.session["ccabang"]).filter(pegawai_id=pg).exists():
+            continue
+        else:
+            data.append(list_pegawai_opg_libur_nasional_db(pegawai_id=int(pg)))
+    
+    list_pegawai_opg_libur_nasional_db.objects.using(r.session['ccabang']).bulk_create(data)
+
+    return JsonResponse({'status':'success',"msg":"Berhasil menambahkan pegawai"},safe=False,status=201)
+
+@authorization(["root",'it'])
+def tstatus_pegawai_libur_nasional_status(r):
+    status = r.POST.get("status")
+    if status == "":
+        return JsonResponse({'status':'error',"msg":"Status tidak boleh kosong"},safe=False,status=400)
+    st = status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(status)).last()
+    if not st:
+        return JsonResponse({"status":"error","msg":"Status tidak ada"},safe=False,status=400)
+    
+
+    pgw = [p.pk for p in pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=status)]
+    data = []
+    for pg in pgw:
+        if list_pegawai_opg_libur_nasional_db.objects.using(r.session["ccabang"]).filter(pegawai_id=pg).exists():
+            continue
+        else:
+            data.append(list_pegawai_opg_libur_nasional_db(pegawai_id=int(pg)))
+    
+    list_pegawai_opg_libur_nasional_db.objects.using(r.session['ccabang']).bulk_create(data)
+
+    return JsonResponse({'status':'success',"msg":"Berhasil menambahkan pegawai"},safe=False,status=201)
+
+
+
+@authorization(["root","it"])
 def status_pegawai_libur_nasional_json(r):
-    result = list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).all()
+    result = list_pegawai_opg_libur_nasional_db.objects.using(r.session["ccabang"]).all()
     data = []
     for r in result:
         obj = {
-            'status_pegawai':r.status.status,
+            'pegawai':r.pegawai.nama,
             'pk':r.pk,
-            "status_id":r.status_id
+            "pegawai_id":r.pegawai_id
         }
         data.append(obj)
     
     return JsonResponse({"data":data},status=200,safe=False)
 
-
+@authorization(["root","it"])
 def estatus_pegawai_libur_nasional(r):
-    status = r.POST.get("status")
+    idp = r.POST.get("idp")
     id = r.POST.get('id')
-
+    if id == "" or idp == '':
+        return JsonResponse({'status':'error',"msg":"Data tidak lengkap"},safe=False,status=400)
     try:
-        get = list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).get(pk=int(id))
-        list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).filter(pk=int(id)).update(status_id=int(status))
+        get = list_pegawai_opg_libur_nasional_db.objects.using(r.session["ccabang"]).get(pk=int(id))
+        if list_pegawai_opg_libur_nasional_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(id)), pegawai_id=int(idp)).exists():
+            return JsonResponse({"status":"error","msg":"Pegawai sudah didaftarkan"},status=400)
+        list_pegawai_opg_libur_nasional_db.objects.using(r.session["ccabang"]).filter(pk=int(id)).update(pegawai_id=int(idp))
         return JsonResponse({'status':'ok'},safe=False,status=200)
     except Exception as err:
         
         return JsonResponse({"status":"gagal update"},safe=False,status=400)
 
-
+@authorization(["root","it"])
 def hstatus_pegawai_libur_nasional(r):
     id = r.POST.get('id')
+    if id == "":
+        return JsonResponse({'status':'error',"msg":"Data tidak lengkap"},safe=False,status=400)
     nama_user = r.session["user"]["nama"]
     try:
-        get = list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).get(pk=int(id))
+        get = list_pegawai_opg_libur_nasional_db.objects.using(r.session["ccabang"]).get(pk=int(id))
         histori_hapus_db(
             delete_by = nama_user,
-            delete_item = f'hapus status pegawai libur nasional : {get.status.status}'
+            delete_item = f'hapus pegawai libur nasional : {get.pegawai.nama}'
         ).save(using=r.session["ccabang"])
-        list_status_opg_libur_nasional_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
+        list_pegawai_opg_libur_nasional_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
         return JsonResponse({'status':'ok'},safe=False,status=200)
     except:
         return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
@@ -2231,12 +2350,20 @@ def hstatus_pegawai_libur_nasional(r):
 
 # status pegawai opg
 
-
+@authorization(["root","it"])
 def status_pegawai_opg(r):
     iduser = r.session["user"]["id"]
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
-        status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).all()
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        if r.session["user"]["admin"]:
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).all()
+        else:
+            pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(divisi__in=aksesdivisi)
+        divisi = divisi_db.objects.using(r.session["ccabang"]).filter(id__in=aksesdivisi)
+        print(pegawai.distinct("status_id"))
+        sids = [s.status_id for s in pegawai.distinct("status_id")]
+        status = status_pegawai_db.objects.using(r.session['ccabang']).filter(id__in=sids)
         dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
         akses = dakses.akses
         dsid = dakses.sid_id
@@ -2248,8 +2375,10 @@ def status_pegawai_opg(r):
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],
             "nama":r.session["user"]["nama"],
-            "status":status_pegawai,
-            'modul_aktif' : 'Status Pegawai OPG'     
+            "pegawai":pegawai,
+            "divisi":divisi,
+            "status":status,
+            'modul_aktif' : 'Pegawai OPG'     
         }
         
         return render(r,'hrd_app/status_pegawai/status_pegawai_opg.html', data)
@@ -2260,57 +2389,114 @@ def status_pegawai_opg(r):
 
     
     
-
+@authorization(["root","it"])
 def tstatus_pegawai_opg(r):
-    status = r.POST.get("status")
+    idp = r.POST.get("idp")
     
-    if list_status_opg_db.objects.using(r.session["ccabang"]).filter(status_id=status).exists():
-        return JsonResponse({'status':'duplikat'},safe=False,status=400)
+    if list_pegawai_opg_db.objects.using(r.session["ccabang"]).filter(pegawai_id=idp).exists():
+        return JsonResponse({'status':'error',"msg":"Pegawai sudah didaftarkan"},safe=False,status=400)
     else:
-        list_status_opg_db(status_id=int(status)).save(using=r.session["ccabang"])
-        return JsonResponse({'status':'berhasil'},safe=False,status=201)
+        if not pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(idp)).exists():
+            return JsonResponse({'status':'error',"msg":"Pegawai tidak ada"},safe=False,status=400)
+        list_pegawai_opg_db(pegawai_id=int(idp)).save(using=r.session["ccabang"])
+        return JsonResponse({'status':'success',"msg":"Berhasil menambahkan pegawai"},safe=False,status=201)
+    
+
+@authorization(["root","it"])  
+def tstatus_pegawai_opg_divisi(r):
+    divisi = r.POST.get("divisi")
+    if divisi == "":
+        return JsonResponse({'status':'error',"msg":"Divisi tidak boleh kosong"},safe=False,status=400)
+    dvs = divisi_db.objects.using(r.session["ccabang"]).filter(pk=int(divisi)).last()
+    if not dvs:
+        return JsonResponse({"status":"error","msg":"Divisi tidak ada"},safe=False,status=400)
+    
+
+    pgw = [p.pk for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id=dvs)]
+    data = []
+    for pg in pgw:
+        if list_pegawai_opg_db.objects.using(r.session["ccabang"]).filter(pegawai_id=pg).exists():
+            continue
+        else:
+            data.append(list_pegawai_opg_db(pegawai_id=int(pg)))
+    
+    list_pegawai_opg_db.objects.using(r.session['ccabang']).bulk_create(data)
+
+    return JsonResponse({'status':'success',"msg":"Berhasil menambahkan pegawai"},safe=False,status=201)
 
 
+@authorization(["root","it"])
+def tstatus_pegawai_opg_status(r):
+    status = r.POST.get("status")
+    if status == "":
+        return JsonResponse({'status':'error',"msg":"Status tidak boleh kosong"},safe=False,status=400)
+    st = status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(status)).last()
+    if not st:
+        return JsonResponse({"status":"error","msg":"Status tidak ada"},safe=False,status=400)
+    
+
+    pgw = [p.pk for p in pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=status)]
+    data = []
+    for pg in pgw:
+        if list_pegawai_opg_db.objects.using(r.session["ccabang"]).filter(pegawai_id=pg).exists():
+            continue
+        else:
+            data.append(list_pegawai_opg_db(pegawai_id=int(pg)))
+    
+    list_pegawai_opg_db.objects.using(r.session['ccabang']).bulk_create(data)
+
+    return JsonResponse({'status':'success',"msg":"Berhasil menambahkan pegawai"},safe=False,status=201)
+
+
+
+
+@authorization(["root","it"])
 def status_pegawai_opg_json(r):
-    result = list_status_opg_db.objects.using(r.session["ccabang"]).all()
+    result = list_pegawai_opg_db.objects.using(r.session["ccabang"]).all()
     data = []
     for r in result:
         obj = {
-            'status_pegawai':r.status.status,
+            'pegawai':r.pegawai.nama,
+            "divisi":r.pegawai.divisi.divisi,
+            "status":r.pegawai.status.status,
             'pk':r.pk,
-            "status_id":r.status_id
+            "pegawai_id":r.pegawai_id
         }
         data.append(obj)
     
     return JsonResponse({"data":data},status=200,safe=False)
 
 
+@authorization(["root","it"])
 def estatus_pegawai_opg(r):
-    status = r.POST.get("status")
+    idp = r.POST.get("idp")
     id = r.POST.get('id')
 
     try:
-        get = list_status_opg_db.objects.using(r.session["ccabang"]).get(pk=int(id))
-        list_status_opg_db.objects.using(r.session["ccabang"]).filter(pk=int(id)).update(status_id=int(status))
-        return JsonResponse({'status':'ok'},safe=False,status=200)
+        get = list_pegawai_opg_db.objects.using(r.session["ccabang"]).get(pk=int(id))
+        if list_pegawai_opg_db.objects.using(r.session["ccabang"]).filter(~Q(pk=int(id)), pegawai_id=int(idp)).exists():
+            return JsonResponse({"status":"error","msg":"Pegawai sudah didaftarkan"},status=400)
+        list_pegawai_opg_db.objects.using(r.session["ccabang"]).filter(pk=int(id)).update(pegawai_id=int(idp))
+        return JsonResponse({'status':'success',"msg":"Berhasil edit pegawai"},safe=False,status=200)
     except Exception as err:
         
-        return JsonResponse({"status":"gagal update"},safe=False,status=400)
+        return JsonResponse({"status":"error",'msg':"Terjadi kesalahan"},safe=False,status=400)
 
 
+@authorization(["root","it"])
 def hstatus_pegawai_opg(r):
     id = r.POST.get('id')
     nama_user = r.session["user"]["nama"]
     try:
-        get = list_status_opg_db.objects.using(r.session["ccabang"]).get(pk=int(id))
+        get = list_pegawai_opg_db.objects.using(r.session["ccabang"]).get(pk=int(id))
         histori_hapus_db(
             delete_by = nama_user,
-            delete_item = f'hapus status pegawai libur nasional : {get.status.status}'
+            delete_item = f'hapus pegawai opg: {get.pegawai.nama}'
         ).save(using=r.session["ccabang"])
-        list_status_opg_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
-        return JsonResponse({'status':'ok'},safe=False,status=200)
+        list_pegawai_opg_db.objects.using(r.session["ccabang"]).get(pk=int(id)).delete(using=r.session["ccabang"])
+        return JsonResponse({'status':"success","msg":"Berhasil hapus pegawai"},safe=False,status=200)
     except:
-        return JsonResponse({"status":"gagal hapus"},safe=False,status=400)
+        return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},safe=False,status=400)
 
 
 
@@ -2336,7 +2522,7 @@ def get_jam_kerja(r):
             return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=400)
         
 
-@authorization(["*"])
+@authorization(["root","it"])
 def rp_lembur(r):
     user = r.session["user"]
     akses = akses_db.objects.using(r.session['ccabang']).filter(user_id=user["id"]).last()
@@ -2351,7 +2537,7 @@ def rp_lembur(r):
     return render(r,"hrd_app/lembur/rp_lembur/rp_lembur.html",data)
 
 
-@authorization(["*"])
+@authorization(["root","it"])
 def trp_lembur(r):
     rp = r.POST.get("rupiah")
     if rp == "":
@@ -2366,7 +2552,7 @@ def trp_lembur(r):
     messages.success(r,"Berhasil menambahkan rupiah lembur")
     return redirect("rp_lembur")    
 
-@authorization(["*"])
+@authorization(["root","it"])
 def erp_lembur(r):
     id = r.POST.get("edit_id")
     rp = r.POST.get("rupiah")
@@ -2383,7 +2569,7 @@ def erp_lembur(r):
     messages.success(r,"Berhasil edit rupiah lembur")
     return redirect("rp_lembur")    
 
-@authorization(["*"])
+@authorization(["root","it"])
 def drp_lembur(r):
     id = r.POST.get("hapus_id")
     rp_lembur_db.objects.using(r.session["ccabang"]).filter(pk=id).delete()

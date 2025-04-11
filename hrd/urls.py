@@ -73,6 +73,7 @@ def callback(r):
 
         if is_admin[0]:
             akses = akses_db.objects.using(c.cabang).filter(user_id=user.pk).last()
+            print(c.cabang)
             status = status_pegawai_db.objects.using(c.cabang).all().first()
             if not status:
                 continue
@@ -99,6 +100,7 @@ def beranda(r):
     nama = None
     cabang = ''
     ccabang = []
+    print(r.session["user"])
     try:
         if r.session["user"] and r.session["ccabang"] and r.session["cabang"]:
             user = r.session["user"]

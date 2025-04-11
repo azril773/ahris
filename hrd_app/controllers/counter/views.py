@@ -3,7 +3,7 @@ from hrd_app.controllers.lib import *
 
 # Counter
 # ++++++++++++++
-@authorization(["root","it"])
+@authorization(["*"])
 def counter(r):
     iduser = r.session["user"]["id"]
         
@@ -30,7 +30,7 @@ def counter(r):
         return redirect('beranda')
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def counter_json(r):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -48,7 +48,7 @@ def counter_json(r):
         return JsonResponse({"data": data})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def tambah_counter(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -68,7 +68,7 @@ def tambah_counter(r):
         return JsonResponse({"status": status})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def edit_counter(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -88,7 +88,7 @@ def edit_counter(r):
         return JsonResponse({"status": status})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def hapus_counter(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -116,7 +116,7 @@ def hapus_counter(r):
 
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def scounter_payroll(r):
     id_user = r.session["user"]["id"]
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):

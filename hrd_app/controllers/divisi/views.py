@@ -3,7 +3,7 @@ from hrd_app.controllers.lib import *
 
 # Divisi
 # ++++++++++++++
-@authorization(["root","it"])
+@authorization(["*"])
 def divisi(r):
     iduser = r.session["user"]["id"]
         
@@ -30,7 +30,7 @@ def divisi(r):
         return redirect('beranda')
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def divisi_json(r):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -48,7 +48,7 @@ def divisi_json(r):
         return JsonResponse({"data": data})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def tambah_divisi(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -68,7 +68,7 @@ def tambah_divisi(r):
         return JsonResponse({"status": status})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def edit_divisi(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -88,7 +88,7 @@ def edit_divisi(r):
         return JsonResponse({"status": status})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def hapus_divisi(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -116,7 +116,7 @@ def hapus_divisi(r):
         return JsonResponse({"status": status})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def sdivisi_payroll(r):
     id_user = r.session["user"]["id"]
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=id_user):

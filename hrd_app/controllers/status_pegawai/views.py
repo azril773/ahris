@@ -3,7 +3,7 @@ from hrd_app.controllers.lib import *
 
 # Status Pegawai
 # ++++++++++++++
-@authorization(["root","it"])
+@authorization(["*"])
 def status_pegawai(r):
     iduser = r.session["user"]["id"]
         
@@ -29,7 +29,7 @@ def status_pegawai(r):
         return redirect('beranda')
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def status_pegawai_json(r):
         
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -47,7 +47,7 @@ def status_pegawai_json(r):
         return JsonResponse({"data": data})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def tambah_status_pegawai(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -67,7 +67,7 @@ def tambah_status_pegawai(r):
         return JsonResponse({"status": status})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def edit_status_pegawai(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":
@@ -87,7 +87,7 @@ def edit_status_pegawai(r):
         return JsonResponse({"status": status})
 
 
-@authorization(["root","it"])
+@authorization(["*"])
 def hapus_status_pegawai(r):
     
     if r.headers["X-Requested-With"] == "XMLHttpRequest":

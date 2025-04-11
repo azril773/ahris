@@ -99,9 +99,9 @@ class jam_kerja(ImportExportModelAdmin):
     list_display = ('hari',)
     
     
-@admin.register(list_status_opg_db)
-class status_opg(ImportExportModelAdmin):
-    list_display = ('status',)
+@admin.register(list_pegawai_opg_db)
+class pegawai_opg(ImportExportModelAdmin):
+    list_display = ('pegawai',)
 
 
 @admin.register(awal_cuti_db)
@@ -124,9 +124,9 @@ class keluarga(ImportExportModelAdmin):
     list_display = ("pegawai","nama","hubungan",'gender')
     
     
-@admin.register(status_pegawai_lembur_db)
-class status_pegawai_lembur(ImportExportModelAdmin):
-    list_display = ('status_pegawai',)                    
+@admin.register(list_pegawai_lembur_db)
+class pegawai_lembur(ImportExportModelAdmin):
+    list_display = ('pegawai',)                    
 
 
 @admin.register(status_pegawai_lintas_hari_db)

@@ -320,7 +320,7 @@ def pengaturan(r):
         dsid = dakses.sid_id
         
         data = {       
-
+            "nama":r.session["user"]["nama"],
             'akses' : akses,
             "cabang":r.session["cabang"],
             "ccabang":r.session["ccabang"],

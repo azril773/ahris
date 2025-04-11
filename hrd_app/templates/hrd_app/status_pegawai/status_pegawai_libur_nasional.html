@@ -38,31 +38,34 @@
         {% endfor %}
 
         <!-- Pengaturan -->
-        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Pengaturan Status Pegawai Libur Nasional</h6>
+        <h6 class="tx-gray-800 tx-uppercase tx-bold tx-14 mg-b-10">Pengaturan Pegawai Libur Nasional</h6>
     
         <!-- Modul Pengaturan -->        
         <div class="d-flex align-items-center justify-content-start">     
             {% csrf_token %}
             <div class="mg-r-auto">   
-                <button data-target="#tambah" data-toggle="modal" class="btn btn-primary mg-b-6">Tambah</button> &nbsp; &nbsp; &nbsp; &nbsp;
+                <button data-target="#tambah" data-toggle="modal" class="btn btn-primary mg-b-6">Tambah</button>
+                <button class="btn btn-warning mg-b-6" data-target="#tambahdivisi" data-toggle="modal">Tambah Berdasarkan Divisi</button>
+                <button class="btn btn-secondary mg-b-6" data-target="#tambahstatus" data-toggle="modal">Tambah Berdasarkan Status Pegawai</button> &nbsp; &nbsp; &nbsp;
+                
                 {% include 'hrd_app/master/modul_pengaturan.html' %}
             </div>          
         </div>
 
         <br>
-
+        <div id="msg"></div>
         <div id="loader"></div>            
         <div class="table-wrapper">
             <table id="tabelku" class="table display responsive" style="width:100%">
             <thead>
                 <tr>
-                <th nowrap>Status Pegawai</th>
+                <th nowrap>Pegawai</th>
                 <th>Action</th>
                 </tr>
             </thead>
             </table>
         </div>
-        <div id="tambah" class="modal fade">
+            <div id="tambah" class="modal fade">
             <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content bd-0 tx-14">
                 <div class="modal-header pd-y-20 pd-x-25">
@@ -78,8 +81,80 @@
                     <div class="row mg-b-25">
                         <div class="col-lg-12">
                             <div class="form-group mg-b-10-force">
-                                <select name="tstatus" id="tstatus">
-                                    <option value="">Pilih Status Pegawai</option>
+                                <select name="tspegawai" id="tspegawai">
+                                    <option value="">Pilih Pegawai</option>
+                                    {% for s in pegawai %}
+                                        <option value="{{s.pk}}">{{s.nama}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div>
+            </div>
+            <div id="tambahdivisi" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Tambah {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form id="tambahDivisiForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                <select name="tsdivisi" id="tsdivisi">
+                                    <option value="">Pilih Divisi</option>
+                                    {% for s in divisi %}
+                                        <option value="{{s.pk}}">{{s.divisi}}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+        
+                        <div class="modal-footer">
+                        <button type="submit" id="submit_button" class="btn btn-info tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium">Tambah</button>
+                        <button type="button" class="btn btn-danger tx-11 tx-uppercase pd-y-12 pd-x-25 tx-mont tx-medium" data-dismiss="modal">Batalkan</button>
+                        </div>              
+        
+                    </div>
+                    </div>            
+                </form>              
+            </div>
+            </div>
+            </div>
+            <div id="tambahstatus" class="modal fade">
+            <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content bd-0 tx-14">
+                <div class="modal-header pd-y-20 pd-x-25">
+                <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Tambah {{modul_aktif}}</h6>          
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>          
+                </div>
+                
+                <form id="tambahStatusForm" method="post">
+                    {% csrf_token %}
+                    <div class="form-layout form-layout-1">
+                    <div class="row mg-b-25">
+                        <div class="col-lg-12">
+                            <div class="form-group mg-b-10-force">
+                                <select name="tsstatus" id="tsstatus">
+                                    <option value="">Pilih Status</option>
                                     {% for s in status %}
                                         <option value="{{s.pk}}">{{s.status}}</option>
                                     {% endfor %}
@@ -116,10 +191,10 @@
             
                             <div class="col-lg-12">
                                 <div class="form-group mg-b-10-force">
-                                    <select name="estatus" id="estatus">
-                                    <option value="">Pilih Status Pegawai</option>
-                                    {% for s in status %}
-                                        <option value="{{s.pk}}">{{s.status}}</option>
+                                    <select name="espegawai" id="espegawai">
+                                    <option value="">Pilih Pegawai</option>
+                                    {% for s in pegawai %}
+                                        <option value="{{s.pk}}">{{s.nama}}</option>
                                     {% endfor %}
                                 </select>
                                 </div>
@@ -141,7 +216,7 @@
                 <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content bd-0 tx-14">
                     <div class="modal-header pd-y-20 pd-x-25">
-                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Tambah {{modul_aktif}}</h6>          
+                    <h6 class="tx-14 mg-b-0 tx-uppercase tx-inverse tx-bold">Hapus {{modul_aktif}}</h6>          
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>          
@@ -179,8 +254,10 @@
 
 <script>
     const token = document.querySelector("[name=csrfmiddlewaretoken]").value
-    const tstatus_selectize = $("#tstatus").selectize()
-    const estatus_selectize = $("#estatus").selectize()
+    const tsdivisi_selectize = $("#tsdivisi").selectize()
+    const tsstatus_selectize = $("#tsstatus").selectize()
+    const tspegawai_selectize = $("#tspegawai").selectize()
+    const espegawai_selectize = $("#espegawai").selectize()
 
 
     const table = $("#tabelku").DataTable({
@@ -190,11 +267,11 @@
             headers:{"X-CSRFToken":token},
         },
         columns:[
-            {data:"status_pegawai"},
+            {data:"pegawai"},
             {
                 data:"pk",
                 render: function(data, type, row, meta){    
-                        data = `<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-target="#edit" data-toggle="modal" data-status='${row.status_id}' data-eid='${data}'>Edit</button> &nbsp; <button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-hid='${data}' data-status='${row.status_id}' data-toggle="modal">Hapus</button>`;
+                        data = `<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-target="#edit" data-toggle="modal" data-idp='${row.pegawai_id}' data-eid='${data}'>Edit</button> &nbsp; <button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-hid='${data}' data-idp='${row.pegawai_id}' data-toggle="modal">Hapus</button>`;
                         return data;
                     } 
             }
@@ -208,37 +285,165 @@
 
     $("#editForm").on("submit",function(e){
         e.preventDefault()
-        const status = $("#estatus").val()
+        const idp = $("#espegawai").val()
         const id = $("#edit_id").val()
         $.ajax({
             url:"{% url 'espgln' %}",
             method:'post',
-            data:{status,id},
+            data:{idp,id},
             headers:{"X-CSRFToken":token},
             success(e){
                 $("#edit").modal("hide")
                 table.ajax.reload()
                 $("#editForm")[0].reset()
-                estatus_selectize[0].selectize.clear()
+                espegawai_selectize[0].selectize.clear()
                 console.log(e)
+            },
+            error(err){
+                $("#edit").modal("hide")
+                $("#msg p").remove()
+                if(err.responseJSON?.msg){
+                    $("#msg").append(`
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            <p>${err.responseJSON.msg}</p>
+                        </div>
+                    `)
+                }else{
+                    $("#msg").append(`
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            <p>Terjadi kesahalan</p>
+                        </div>
+                    `)
+                }
             }
         })
     })
 
     $("#tambahForm").on("submit",function(e){
         e.preventDefault()
-        const status = $("#tstatus").val()
+        const idp = $("#tspegawai").val()
         $.ajax({
             url:"{% url 'tspgln' %}",
             method:'post',
-            data:{status},
+            data:{idp},
             headers:{"X-CSRFToken":token},
             success(e){
                 $("#tambah").modal("hide")
                 table.ajax.reload()
                 $("#tambahForm")[0].reset()
-                tstatus_selectize[0].selectize.clear()
+                tspegawai_selectize[0].selectize.clear()
                 console.log(e)
+            },
+            error(err){
+                $("#tambah").modal("hide")
+                $("#msg p").remove()
+                if(err.responseJSON?.msg){
+                    $("#msg").append(`
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            <p>${err.responseJSON.msg}</p>
+                        </div>
+                    `)
+                }else{
+                    $("#msg").append(`
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            <p>Terjadi kesahalan</p>
+                        </div>
+                    `)
+                }
+            }
+        })
+    })
+
+    $("#tambahDivisiForm").on("submit",function(e){
+        e.preventDefault()
+        const divisi = $("#tsdivisi").val()
+        $.ajax({
+            url:"{% url 'tspgln_divisi' %}",
+            method:'post',
+            data:{divisi},
+            headers:{"X-CSRFToken":token},
+            success(e){
+                $("#tambahdivisi").modal("hide")
+                table.ajax.reload()
+                $("#tambahDivisiForm")[0].reset()
+                tsdivisi_selectize[0].selectize.clear()
+                console.log(e)
+            },
+            error(err){
+                $("#tambahdivisi").modal("hide")
+                $("#msg p").remove()
+                if(err.responseJSON?.msg){
+                    $("#msg").append(`
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            <p>${err.responseJSON.msg}</p>
+                        </div>
+                    `)
+                }else{
+                    $("#msg").append(`
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            <p>Terjadi kesahalan</p>
+                        </div>
+                    `)
+                }
+            }
+        })
+    })
+
+    $("#tambahStatusForm").on("submit",function(e){
+        e.preventDefault()
+        const status = $("#tsstatus").val()
+        $.ajax({
+            url:"{% url 'tspgln_status' %}",
+            method:'post',
+            data:{status},
+            headers:{"X-CSRFToken":token},
+            success(e){
+                $("#tambahstatus").modal("hide")
+                table.ajax.reload()
+                $("#tambahStatusForm")[0].reset()
+                tsstatus_selectize[0].selectize.clear()
+                console.log(e)
+            },
+            error(err){
+                $("#tambahstatus").modal("hide")
+                $("#msg p").remove()
+                if(err.responseJSON?.msg){
+                    $("#msg").append(`
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            <p>${err.responseJSON.msg}</p>
+                        </div>
+                    `)
+                }else{
+                    $("#msg").append(`
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            <p>Terjadi kesahalan</p>
+                        </div>
+                    `)
+                }
             }
         })
     })
@@ -255,16 +460,39 @@
                 $("#hapus").modal("hide")
                 table.ajax.reload()
                 $("#hapusForm")[0].reset()
+            },
+            error(err){
+                $("#hapus").modal("hide")
+                $("#msg p").remove()
+                if(err.responseJSON?.msg){
+                    $("#msg").append(`
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            <p>${err.responseJSON.msg}</p>
+                        </div>
+                    `)
+                }else{
+                    $("#msg").append(`
+                        <div class="alert alert-danger alert-dismissible" role="alert">
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                            <p>Terjadi kesahalan</p>
+                        </div>
+                    `)
+                }
             }
         })
     })
 
 
     $("#edit").on("show.bs.modal",function(e){
-        const status = $(e.relatedTarget).data("status")
+        const idp = $(e.relatedTarget).data("idp")
         const id = $(e.relatedTarget).data("eid")
         $("#edit_id").val(id)
-        estatus_selectize[0].selectize.setValue(status)
+        espegawai_selectize[0].selectize.setValue(idp)
     })
 
     $("#hapus").on("show.bs.modal",function(e){
