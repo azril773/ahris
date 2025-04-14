@@ -8,9 +8,9 @@ from multiprocessing import Pool
 import ast
 from hrd_app.function import prosesabsensi
 import cProfile
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-# Absensi
+ 
+# ++++++++++++++++++++++++++++ ++++++++++++++++++++++++++++++++
+# Absensi 
 @authorization(["*"])
 def absensi(r,sid):
     iduser = r.session['user']['id']
@@ -640,7 +640,7 @@ def absensi_json(r, dr, sp, sid):
                     sket += f'{a.keterangan_absensi}, '                 
                 if a.keterangan_ijin is not None:
                     sket += f'{a.keterangan_ijin}, '
-                    kijin = ''
+                    kijin = '' 
                 else: 
                     if not r.session["ccabang"] in ['cihideung','sumedang']:
                         if a.masuk is not None and a.jam_masuk is not None:
