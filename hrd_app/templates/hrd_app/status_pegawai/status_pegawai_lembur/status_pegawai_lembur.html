@@ -175,7 +175,7 @@
             </div>
             </div>
             <!-- akhir modal tambah -->
-            <div id="edit" class="modal fade">
+            {% comment %} <div id="edit" class="modal fade">
                 <div class="modal-dialog modal-lg" role="document">
                 <div class="modal-content bd-0 tx-14">
                     <div class="modal-header pd-y-20 pd-x-25">
@@ -211,7 +211,7 @@
                     </form>              
                 </div>
                 </div>
-            </div>
+            </div> {% endcomment %}
             <!-- akhir modal edit -->
             <div id="hapus" class="modal fade">
                 <div class="modal-dialog modal-lg" role="document">
@@ -275,7 +275,7 @@
             {
                 data:"pk",
                 render: function(data, type, row, meta){    
-                        data = `<button type="button" class="btn btn-sm btn-warning mb-1 tx-12" data-target="#edit" data-toggle="modal" data-pegawai='${row.pegawai_id}' data-eid='${data}'>Edit</button> &nbsp; <button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-hid='${data}' data-pegawai='${row.pegawai_id}' data-toggle="modal">Hapus</button>`;
+                        data = `<button type="button" class="btn btn-sm btn-danger mb-1 tx-12" data-target="#hapus" data-hid='${data}' data-pegawai='${row.pegawai_id}' data-toggle="modal">Hapus</button>`;
                         return data;
                     } 
             }

@@ -174,7 +174,7 @@ def cari_absensi(r):
                     sket += f'{a.keterangan_ijin}, '
                     kijin = ''
                 else:
-                    if not r.session["ccabang"] == "sumedang":
+                    if not r.session["ccabang"] in ['cihideung','sumedang']:
                         if a.masuk is not None and a.jam_masuk is not None:
                             if a.masuk > a.jam_masuk:
                                 sket += f"Terlambat masuk tanpa ijin, "
@@ -313,7 +313,7 @@ def cari_absensi(r):
                     sket += f'{a.keterangan_ijin}, '
                     kijin = ''
                 else:
-                    if not r.session["ccabang"] == "sumedang":
+                    if not r.session["ccabang"] in ['cihideung','sumedang']:
                         if a.masuk is not None and a.jam_masuk is not None:
                             if a.masuk > a.jam_masuk:
                                 sket += f"Terlambat masuk tanpa ijin, "
@@ -507,7 +507,7 @@ def absensi_json(r, dr, sp, sid):
                     sket += f'{a.keterangan_ijin}, '
                     kijin = ''
                 else:
-                    if not r.session["ccabang"] == "sumedang":
+                    if not r.session["ccabang"] in ['cihideung','sumedang']:
                         if a.masuk is not None and a.jam_masuk is not None:
                             if a.masuk > a.jam_masuk:
                                 sket += f"Terlambat masuk tanpa ijin, "
@@ -642,7 +642,7 @@ def absensi_json(r, dr, sp, sid):
                     sket += f'{a.keterangan_ijin}, '
                     kijin = ''
                 else: 
-                    if not r.session["ccabang"] == "sumedang":
+                    if not r.session["ccabang"] in ['cihideung','sumedang']:
                         if a.masuk is not None and a.jam_masuk is not None:
                             if a.masuk > a.jam_masuk:
                                 sket += f"Terlambat masuk tanpa ijin, "
