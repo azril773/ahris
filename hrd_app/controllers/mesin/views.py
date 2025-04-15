@@ -853,9 +853,9 @@ def sesuaikanjam(r,id):
         zk = ZK(mesin.ipaddress,4370)
         conn = zk.connect()
         conn.disable_device()
-        today  = datetime.today()
+        today  = datetime.strptime("2025-04-14 07:58:44","%Y-%m-%d %H:%M:%S")
         conn.set_time(today)
-        messages.success(r,"Berhasil sesuaikan jam mesin" + mesin.nama)
+        messages.success(r,"Berhasil sesuaikan jam mesin " + mesin.nama)
         conn.enable_device()
         conn.disconnect()
     except Exception as e:
