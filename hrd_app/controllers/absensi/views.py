@@ -761,6 +761,7 @@ def absensi_json(r, dr, sp, sid):
 def pabsen(req):    
     try:
         print(datetime.now())
+        startglobal = time.perf_counter()
         t1 = req.POST.get('tgl1')
         t2 = req.POST.get('tgl2')
         sid = req.POST.get('sid')
@@ -2804,7 +2805,7 @@ def edit_ijin(r):
     return JsonResponse({"ok":"ok"})
 
 @authorization(["*"])
-def edit_jamkerja(r,userid,tgl,sid):
+def edit_jamkerja(r,userid,tgl,sid,dr,sp):
     masuk = r.POST.get("jam_masuk")
     keluar = r.POST.get("jam_keluar")
     lama_ist = r.POST.get("lama_istirahat")
@@ -2824,7 +2825,7 @@ def edit_jamkerja(r,userid,tgl,sid):
     else:
         messages.error(r,"Anda tidak memiliki akses")
         return redirect("absensi",sid=sid)
-    return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
+    return redirect("dabsen",userid=userid,tgl=tgl,sid=sid,dr=dr,sp=sp)
 
 @authorization(["*"])
 def absensi_id(r):
