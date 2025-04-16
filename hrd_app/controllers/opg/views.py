@@ -459,9 +459,10 @@ def hapus_opg(r):
 
 
 def readcuti(r):
-    with open("static/absensi_chd.json","rb") as f:
+    with open("static/pegawai.json","rb") as f:
         data = json.loads(f.read())
-        # pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=dt["id"],tgl_masuk=datetime.strptime(dt["tgl_aktif"],"%Y-%m-%d %H:%M:%S").date()) for dt in data["data"]],["tgl_masuk"])
+        print([dt for dt in data["data"] if dt["tgl_aktif"] is None])
+        pegawai_db.objects.using(r.session["ccabang"]).bulk_update([pegawai_db(id=dt["id"],tgl_masuk=datetime.strptime(dt["tgl_aktif"],"%Y-%m-%d %H:%M:%S").date()) for dt in data["data"] if dt["tgl_aktif"] is not None],["tgl_masuk"])
         # idstr = ''
         # for dt in data["data"]:
         #     idstr += str(dt["id"])+","
@@ -472,53 +473,53 @@ def readcuti(r):
         #     conn.disable_device()
 
         # datas = ''
-        patterjenis = ""
-        for j in jenis_ijin_db.objects.using(r.session["ccabang"]).all():
-            if re.search('opg|geser off|cuti|alfa',j.jenis_ijin,re.IGNORECASE) is not None:
-                continue
-            patterjenis += j.jenis_ijin +"|"
-        pattern = patterjenis.strip().split("|")
-        pattern.pop()
-        patternjoin = "|".join(pattern)
-        for dt in data["data"]:
-            if dt["jam_absen_masuk"] is not None:
-                dt["jam_absen_masuk"] = dt["jam_absen_masuk"].split(" ")[1]
-            if dt["jam_absen_keluar"] is not None:
-                dt["jam_absen_keluar"] = dt["jam_absen_keluar"].split(" ")[1]
-            if dt["jam_absen_kembali"] is not None:
-                dt["jam_absen_kembali"] = dt["jam_absen_kembali"].split(" ")[1]
-            if dt["jam_absen_pulang"] is not None:
-                dt["jam_absen_pulang"] = dt["jam_absen_pulang"].split(" ")[1]
-            if dt["jam_absen_masuk2"] is not None:
-                dt["jam_absen_masuk2"] = dt["jam_absen_masuk2"].split(" ")[1]
-            if dt["jam_absen_keluar2"] is not None:
-                dt["jam_absen_keluar2"] = dt["jam_absen_keluar2"].split(" ")[1]
-            if dt["jam_absen_kembali2"] is not None:
-                dt["jam_absen_kembali2"] = dt["jam_absen_kembali2"].split(" ")[1]
-            if dt["jam_absen_pulang2"] is not None:
-                dt["jam_absen_pulang2"] = dt["jam_absen_pulang2"].split(" ")[1]
-            dt["keterangan_ijin"] = None
-            dt["keterangan_lain"] = None
-            dt["keterangan_absensi"] = None
-            if dt["keterangan"] is not None:
-                if re.search(patternjoin,dt["keterangan"],re.IGNORECASE) is not None:
-                    dt["keterangan_ijin"] = dt["keterangan"]
-                elif re.search("kompensasi",dt["keterangan"],re.IGNORECASE) is not None:
-                    dt["keterangan_lain"] = dt["keterangan"]
-                else:
-                    dt["keterangan_absensi"] = dt["keterangan"]
-            elif dt["ubah_keterangan"] is not None:
-                if re.search(patternjoin,dt["ubah_keterangan"],re.IGNORECASE) is not None:
-                    dt["keterangan_ijin"] = dt["ubah_keterangan"]
-                elif re.search("kompensasi",dt["ubah_keterangan"],re.IGNORECASE) is not None:
-                    dt["keterangan_lain"] = dt["ubah_keterangan"]
-                else:
-                    dt["keterangan_absensi"] = dt["ubah_keterangan"]
-            del dt["keterangan"]
-            del dt["ubah_keterangan"]
+        # patterjenis = ""
+        # for j in jenis_ijin_db.objects.using(r.session["ccabang"]).all():
+        #     if re.search('opg|geser off|cuti|alfa',j.jenis_ijin,re.IGNORECASE) is not None:
+        #         continue
+        #     patterjenis += j.jenis_ijin +"|"
+        # pattern = patterjenis.strip().split("|")
+        # pattern.pop()
+        # patternjoin = "|".join(pattern)
+        # for dt in data["data"]:
+        #     if dt["jam_absen_masuk"] is not None:
+        #         dt["jam_absen_masuk"] = dt["jam_absen_masuk"].split(" ")[1]
+        #     if dt["jam_absen_keluar"] is not None:
+        #         dt["jam_absen_keluar"] = dt["jam_absen_keluar"].split(" ")[1]
+        #     if dt["jam_absen_kembali"] is not None:
+        #         dt["jam_absen_kembali"] = dt["jam_absen_kembali"].split(" ")[1]
+        #     if dt["jam_absen_pulang"] is not None:
+        #         dt["jam_absen_pulang"] = dt["jam_absen_pulang"].split(" ")[1]
+        #     if dt["jam_absen_masuk2"] is not None:
+        #         dt["jam_absen_masuk2"] = dt["jam_absen_masuk2"].split(" ")[1]
+        #     if dt["jam_absen_keluar2"] is not None:
+        #         dt["jam_absen_keluar2"] = dt["jam_absen_keluar2"].split(" ")[1]
+        #     if dt["jam_absen_kembali2"] is not None:
+        #         dt["jam_absen_kembali2"] = dt["jam_absen_kembali2"].split(" ")[1]
+        #     if dt["jam_absen_pulang2"] is not None:
+        #         dt["jam_absen_pulang2"] = dt["jam_absen_pulang2"].split(" ")[1]
+        #     dt["keterangan_ijin"] = None
+        #     dt["keterangan_lain"] = None
+        #     dt["keterangan_absensi"] = None
+        #     if dt["keterangan"] is not None:
+        #         if re.search(patternjoin,dt["keterangan"],re.IGNORECASE) is not None:
+        #             dt["keterangan_ijin"] = dt["keterangan"]
+        #         elif re.search("kompensasi",dt["keterangan"],re.IGNORECASE) is not None:
+        #             dt["keterangan_lain"] = dt["keterangan"]
+        #         else:
+        #             dt["keterangan_absensi"] = dt["keterangan"]
+        #     elif dt["ubah_keterangan"] is not None:
+        #         if re.search(patternjoin,dt["ubah_keterangan"],re.IGNORECASE) is not None:
+        #             dt["keterangan_ijin"] = dt["ubah_keterangan"]
+        #         elif re.search("kompensasi",dt["ubah_keterangan"],re.IGNORECASE) is not None:
+        #             dt["keterangan_lain"] = dt["ubah_keterangan"]
+        #         else:
+        #             dt["keterangan_absensi"] = dt["ubah_keterangan"]
+        #     del dt["keterangan"]
+        #     del dt["ubah_keterangan"]
             
                     
-        absensi_db.objects.using(r.session['ccabang']).bulk_create([absensi_db(tgl_absen=d["tgl_absen"],masuk=d["jam_absen_masuk"],istirahat=d["jam_absen_keluar"],kembali=d["jam_absen_kembali"],istirahat2=d["jam_absen_keluar2"],kembali2=d["jam_absen_kembali2"],pulang=d["jam_absen_pulang"],keterangan_absensi=d["keterangan_absensi"],keterangan_ijin=d["keterangan_ijin"],keterangan_lain=d["keterangan_lain"],libur_nasional=d["libur_nasional"],insentif=d["j_insentif"],jam_masuk=d["jadwal_masuk"],lama_istirahat=d["jadwal_ist"],jam_pulang=d["jadwal_pulang"],total_jam_kerja=d["lama_kerja"],total_jam_istirahat=d["lama_istirahat"],total_jam_istirahat2=d["lama_istirahat2"],lebih_jam_kerja=d["tplus"],pegawai_id=d["pegawai_id"]) for d in data["data"]],batch_size=3000)
+        # absensi_db.objects.using(r.session['ccabang']).bulk_create([absensi_db(tgl_absen=d["tgl_absen"],masuk=d["jam_absen_masuk"],istirahat=d["jam_absen_keluar"],kembali=d["jam_absen_kembali"],istirahat2=d["jam_absen_keluar2"],kembali2=d["jam_absen_kembali2"],pulang=d["jam_absen_pulang"],keterangan_absensi=d["keterangan_absensi"],keterangan_ijin=d["keterangan_ijin"],keterangan_lain=d["keterangan_lain"],libur_nasional=d["libur_nasional"],insentif=d["j_insentif"],jam_masuk=d["jadwal_masuk"],lama_istirahat=d["jadwal_ist"],jam_pulang=d["jadwal_pulang"],total_jam_kerja=d["lama_kerja"],total_jam_istirahat=d["lama_istirahat"],total_jam_istirahat2=d["lama_istirahat2"],lebih_jam_kerja=d["tplus"],pegawai_id=d["pegawai_id"]) for d in data["data"]],batch_size=3000)
 
         # for dt in data["data"]:
         #     keterangan = dt["keterangan"]

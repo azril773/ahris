@@ -74,20 +74,20 @@
         <div class="d-flex align-items-center justify-content-start">
             <div class="col-md-12 pd-x-0">  
                 {% if sid == 0 %}
-                    <a href="{% url 'absensi' 0 %}" class="btn btn-info mg-b-8">Semua Data</a> &nbsp; 
+                    <a href="{% url 'absensi_tgl' 0 dr sp %}" class="btn btn-info mg-b-8 foldersemua">Semua Data</a> &nbsp; 
                         
                     {% for s in status %}   
-                        <a href="{% url 'absensi' s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp;  
+                        <a href="{% url 'absensi_tgl' s.id dr sp%}" class="btn btn-outline-info mg-b-8 folderstatus">{{s.status}}</a> &nbsp;  
                     {% endfor %}
 
                 {% else %}
-                    <a href="{% url 'absensi' 0 %}" class="btn btn-outline-info mg-b-8">Semua Data</a> &nbsp; 
+                    <a href="{% url 'absensi_tgl' 0 dr sp %}" class="btn btn-outline-info mg-b-8 foldersemua">Semua Data</a> &nbsp; 
                     
                     {% for s in status %}   
                         {% if s.id == sid %}
-                            <a href="{% url 'absensi' s.id%}" class="btn btn-info mg-b-8">{{s.status}}</a> &nbsp;   
+                            <a href="{% url 'absensi_tgl' s.id dr sp%}" class="btn btn-info mg-b-8 folderstatus">{{s.status}}</a> &nbsp;   
                         {% else %}
-                            <a href="{% url 'absensi' s.id%}" class="btn btn-outline-info mg-b-8">{{s.status}}</a> &nbsp; 
+                            <a href="{% url 'absensi_tgl' s.id dr sp %}" class="btn btn-outline-info mg-b-8 folderstatus">{{s.status}}</a> &nbsp; 
                         {% endif %}
                     {% endfor %}
                 {% endif %}
@@ -142,9 +142,9 @@
                             <div class="form-group mg-b-10-force">
                                 <label class="form-control-label tx-inverse">Dari Tanggal-(tgl-bln-tahun):</label>
                                 {% if akses == 'root' %}
-                                <input type="text" name="tgl1" id="tgl1" class="form-control tgl1" placeholder="Dari Tanggal">
+                                <input type="text" name="tgl1" id="tgl1" class="form-control tgl1" placeholder="Dari Tanggal" value="{{tmin}}">
                                 {% else %}
-                                <input type="text" name="tgl1" id="tgl1" class="form-control tgl1" placeholder="Dari Tanggal" disabled>
+                                <input type="text" name="tgl1" id="tgl1" class="form-control tgl1" placeholder="Dari Tanggal" value="{{tmin}}" disabled>
                                 {% endif %}
                             </div>
                         </div>
@@ -153,9 +153,9 @@
                             <div class="form-group mg-b-10-force">
                                 <label class="form-control-label tx-inverse">Sampai Tanggal-(tgl-bln-tahun):</label>
                                 {% if akses == 'root' %}
-                                <input type="text" name="tgl2" id="tgl2" class="form-control tgl1" placeholder="Dari Tanggal">
+                                <input type="text" name="tgl2" id="tgl2" class="form-control tgl1" placeholder="Dari Tanggal" value="{{sp}}">
                                 {% else %}
-                                <input type="text" name="tgl2" id="tgl2" class="form-control tgl1" placeholder="Dari Tanggal" disabled>
+                                <input type="text" name="tgl2" id="tgl2" class="form-control tgl1" placeholder="Dari Tanggal" value="{{sp}}" disabled>
                                 {% endif %}
                             </div>
                         </div>
@@ -284,7 +284,7 @@
                     "render": function(data, type, row, meta){    
                         tgl_absen = ""+row.tgl_absen+"";
                         userid = ""+row.userid+"";
-                        data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}'>${row.nama}</a>`;
+                        data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}/${dr}/${sp}'>${row.nama}</a>`;
                         return data;
                     }
                 },
@@ -372,110 +372,11 @@
         var tgl1 = $("#ctgl1").val();
         var tgl2 = $("#ctgl2").val();
         var sid = "{{sid}}";
-        $("#tabelku").DataTable().destroy();
-        $("#tabelku").DataTable({
-            ajax:{
-                url: "{% url 'cabsen' %}",
-                type: "POST",
-                headers: {'X-CSRFToken': token},
-                data: {
-                    'ctgl1': tgl1,
-                    'ctgl2': tgl2,
-                    'sid': sid
-                },
-            },
-            columns: [
+        if(tgl1 == "" || tgl2 == ""){
+            alert("Tanggal tidak boleh kosong")
+        }
 
-                { data: 'tgl' },
-                { 
-                    data: 'nama',
-                    "render": function(data, type, row, meta){    
-                        tgl_absen = ""+row.tgl_absen+"";
-                        userid = ""+row.userid+"";
-                        data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}'>${row.nama}</a>`;
-                        return data;
-                    }
-                },
-                { data: 'nik' },
-                { data: 'userid' },
-                { data: 'bagian' },
-                {
-                    data: 'masuk',
-                },
-                { data: 'keluar' },
-                {
-                    data: 'kembali',
-                },
-                { data: 'pulang' },
-                { data: 'tj' },
-                {
-                    data: 'ket',
-                },
-                
-            ],   
-
-            "rowCallback": function (row, data) {
-                if(data.sln == 1){
-                    $('td', row).eq(0).addClass('merah');
-                } else{
-                    $('td', row).eq(0).addClass('hitam');
-                }
-                $('td', row).eq(1).addClass('hitam');
-                $('td', row).eq(2).addClass('hitam');
-                $('td', row).eq(3).addClass('hitam');
-                $('td', row).eq(4).addClass('hitam');
-                $('td', row).eq(5).addClass('hitam');
-                $('td', row).eq(6).addClass('hitam');
-                $('td', row).eq(7).addClass('hitam');
-                $('td', row).eq(8).addClass('hitam');
-                $('td', row).eq(9).addClass('hitam');
-                $('td', row).eq(10).addClass('hitam');
-            },
-
-            destroy: true,
-            paging: false,
-            scrollX:"100%",
-            scrollY: 300,
-            processing: true,
-            dom: 'Bfrtip',  
-            order:[[2, "asc"]],
-            buttons: [
-                {
-                    extend: 'excel',
-                    text: 'Export Excel',
-                    title: 'Data Absensi',
-                    exportOptions: {
-                        columns: [0,1,2,3,4,5,6,7,8,9,10]
-                    }
-                },
-                {
-                    extend: 'csv',
-                    text: 'Export CSV',
-                    title: 'Data Absensi',
-                    exportOptions: {
-                        columns: [0,1,2,3,4,5,6,7,8,9,10]
-                    }
-                },
-            ],    
-
-            "language": {
-                searchPlaceholder: 'Cari...',
-                sSearch: '',
-                loadingRecords: '&nbsp;',
-                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
-                emptyTable: "&nbsp;",
-
-                paginate: {
-                    previous: '<i class="cs-chevron-left"></i>',
-                    next: '<i class="cs-chevron-right"></i>',
-                },
-            },
-        })
-
-        moment.locale("id")
-        $("#infotgl").html(`DATA ABSENSI : ${moment(tgl1,"DD-MM-YYYY").format("DD MMM. YYYY")} S/D ${moment(tgl2,"DD-MM-YYYY").format("DD MMM. YYYY")}`)
-        $("#pilih_tgl_cari").modal('hide')
-        
+        window.location.href = `/hrd/absensi/${sid}/${tgl1}/${tgl2}`
     })
     const jenisIjin = $("#jenis_ijin").selectize();
 

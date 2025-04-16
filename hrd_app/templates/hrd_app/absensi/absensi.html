@@ -286,7 +286,7 @@
                     "render": function(data, type, row, meta){    
                         tgl_absen = ""+row.tgl_absen+"";
                         userid = ""+row.userid+"";
-                        data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}'>${row.nama}</a>`;
+                        data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}/${dr}/${sp}'>${row.nama}</a>`;
                         return data;
                     }
                 },
@@ -391,7 +391,7 @@
                     "render": function(data, type, row, meta){    
                         tgl_absen = ""+row.tgl_absen+"";
                         userid = ""+row.userid+"";
-                        data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}'>${row.nama}</a>`;
+                        data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}/${dr}/${sp}'>${row.nama}</a>`;
                         return data;
                     }
                 },

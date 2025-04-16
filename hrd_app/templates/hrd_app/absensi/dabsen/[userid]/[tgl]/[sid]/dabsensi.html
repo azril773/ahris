@@ -28,11 +28,11 @@
                     </table>
                 </div>
                 <!-- Button Proses Data -->
-            <a href="{% url 'absensi' sid %}" class="btn btn-info mg-b-6">KEMBALI</a>&nbsp; &nbsp;
+            <a href="{% url 'absensi_tgl' sid dr sp %}" class="btn btn-info mg-b-6">KEMBALI</a>&nbsp; &nbsp;
             <input type="hidden" name="" id="now" value="{{tgl}}">
             <!-- Button Cari Data Absen -->
             <button data-target="#tambah_jam_absen" data-toggle="modal" class="btn btn-warning mg-b-6">TAMBAH JAM ABSEN</button>  &nbsp; &nbsp;
-            <a href="{% url 'pu' tgl pegawai.userid sid %}" class="btn btn-success mg-b-6">PROSES ULANG ABSENSI</a>  &nbsp; &nbsp;
+            <a href="{% url 'pu' tgl pegawai.userid sid dr sp %}" class="btn btn-success mg-b-6">PROSES ULANG ABSENSI</a>  &nbsp; &nbsp;
 
             </div>
         </div>

@@ -100,7 +100,6 @@ def beranda(r):
     nama = None
     cabang = ''
     ccabang = []
-    print(r.session["user"])
     try:
         if r.session["user"] and r.session["ccabang"] and r.session["cabang"]:
             user = r.session["user"]

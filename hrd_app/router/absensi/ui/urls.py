@@ -8,6 +8,7 @@ urlpatterns = [
 
     
     path('absensi/<int:sid>', views.absensi, name='absensi'),
-    path('dabsen/<str:userid>/<str:tgl>/<int:sid>', views.detail_absensi, name='dabsen'),
+    path('absensi/<int:sid>/<str:dr>/<str:sp>', views.absensi_tgl, name='absensi_tgl'),
+    path('dabsen/<str:userid>/<str:tgl>/<int:sid>/<str:dr>/<str:sp>', views.detail_absensi, name='dabsen'),
     path('edit_jamkerja/<str:userid>/<str:tgl>/<int:sid>', views.edit_jamkerja, name='edit_jamkerja'),
 ] 

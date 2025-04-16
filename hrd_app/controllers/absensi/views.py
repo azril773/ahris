@@ -24,7 +24,7 @@ def absensi(r,sid):
         
         today = date.today()
         today_datetime = datetime.strptime(f'{today}','%Y-%m-%d')       
-        tmin = today_datetime - timedelta(days=1)
+        tmin = datetime.strftime(today_datetime - timedelta(days=1),'%d-%m-%Y')
         
         dari = today
         sampai = today
@@ -53,6 +53,71 @@ def absensi(r,sid):
             'dsid': dsid,
             'sid': sid,
             'sil': sid_lembur,
+            'dari': dari,
+            'sampai': sampai,
+            'tmin': tmin,
+            'dr' : dr,
+            'sp' : sp,
+            "mesin":mesin,
+            'jenis_ijin' : jenis_ijin,
+            'modul_aktif' : 'Absensi'
+        }
+
+        return render(r,'hrd_app/absensi/absensi_non.html', data)
+        
+        
+    else:    
+        messages.info(r, 'Data akses Anda belum di tentukan.')        
+        return redirect('beranda')
+    
+@authorization(["*"])
+def absensi_tgl(r,sid,dr,sp):
+    iduser = r.session['user']['id']
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+        
+        today = datetime.today().date()
+        akses = dakses.akses
+           
+        dsid = dakses.sid_id     
+        today = date.today()
+        tdy = datetime.strftime(today,'%d-%m-%Y')
+        
+        # today = date.today()
+        # today_datetime = datetime.strptime(f'{today}','%Y-%m-%d')       
+        # tmin = today_datetime - timedelta(days=1)
+        dari = datetime.strptime(dr,'%d-%m-%Y').date()
+        sampai = datetime.strptime(sp,'%d-%m-%Y').date()
+        
+        dr = datetime.strftime(dari,'%d-%m-%Y')
+        sp = datetime.strftime(sampai,'%d-%m-%Y')
+        aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)]
+        statusid=[]
+        for p in pegawai_db.objects.using(r.session["ccabang"]).filter(divisi_id__in=aksesdivisi).distinct("status_id"):
+            statusid.append(p.status_id)
+            # 
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(id__in=statusid).order_by("id")
+        
+        mesin = []
+        for m in mesin_db.objects.using(r.session["ccabang"]).filter(status="Active"):
+            mesin.append({"id":m.pk,"ipaddress":m.ipaddress,"nama":m.nama})
+
+        sid_lembur = 0
+        jenis_ijin = jenis_ijin_db.objects.using(r.session["ccabang"]).all()  
+        tmin = dr
+        if dr == sp and dr == tdy and sp == tdy:
+            tmin = datetime.strftime(today - timedelta(days=1),'%d-%m-%Y')
+        print(tmin)
+        data = {
+            'akses' : akses,
+            "cabang":r.session["cabang"],
+            "ccabang":r.session["ccabang"],
+            "nama":r.session["user"]["nama"],
+            'status' : status,
+            'dsid': dsid,
+            'sid': sid,
+            'sil': sid_lembur,
+            "tmin": tmin,
             'dari': dari,
             'sampai': sampai,
             'dr' : dr,
@@ -700,13 +765,21 @@ def pabsen(req):
         t1 = req.POST.get('tgl1')
         t2 = req.POST.get('tgl2')
         sid = req.POST.get('sid')
-        
+        # today = date.today()
+        # tdy = datetime.strftime(today, "%d-%m-%Y")
         if t1 != "" and t2 != "":     
             dari = datetime.strptime(f'{t1} 00:00:00', "%d-%m-%Y %H:%M:%S")
             sampai = datetime.strptime(f'{t2} 23:59:59', "%d-%m-%Y %H:%M:%S")
             
             dr = datetime.strftime(dari, "%d-%m-%Y")
             sp = datetime.strftime(sampai, "%d-%m-%Y")
+            # if dr == sp and dr == tdy and sp == tdy:
+            #     tminus1 = date.today() + timedelta(days=-1)
+            #     tplus1 = date.today()
+            #     dari = datetime.strptime(f'{tminus1} 00:00:00', "%Y-%m-%d %H:%M:%S")
+            #     sampai = datetime.strptime(f'{tplus1} 23:59:59', "%Y-%m-%d %H:%M:%S")    
+            #     dr = datetime.strftime(dari, "%d-%m-%Y")
+            #     sp = datetime.strftime(sampai, "%d-%m-%Y")
         else:
             tminus1 = date.today() + timedelta(days=-1)
             tplus1 = date.today()
@@ -807,7 +880,7 @@ def pabsen(req):
         except Exception as e:
             print(e)
             messages.error(req,e)
-            return redirect("absensi",sid=sid)
+            return redirect("absensi_tgl",sid=sid,dr=dr,sp=sp)
 
         # with open("data.json") as f:
         #     dmesin = json.loads(f.read())
@@ -1675,10 +1748,10 @@ def pabsen(req):
         return redirect("absensi",sid=int(sid))
     
     # return render("test"
-    return redirect ('absensi',sid=int(sid))   
+    return redirect ('absensi_tgl',sid=int(sid),dr=dr,sp=sp)   
 
 @authorization(["*"])
-def detail_absensi(r,userid,tgl,sid):
+def detail_absensi(r,userid,tgl,sid,dr,sp):
     iduser = r.session['user']['id']
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
@@ -1745,6 +1818,8 @@ def detail_absensi(r,userid,tgl,sid):
                 'sil': sid_lembur,
                 "pegawai":pgw,
                 'userid':pgw.userid,
+                "dr":dr,
+                "sp":sp,
                 "nh":nh,
                 "nm":nm,
                 "day":frmt.day,
@@ -1847,7 +1922,7 @@ def ubah_absen(r):
     return JsonResponse({"ok":"ok"})
 
 @authorization(["*"])
-def pu(r,tgl,userid,sid):
+def pu(r,tgl,userid,sid,dr,sp):
     dt = data_trans_db.objects.using(r.session["ccabang"]).filter(jam_absen__date=tgl,userid=userid).order_by('jam_absen')
     id_user = r.session['user']['id']
     aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
@@ -2700,7 +2775,7 @@ def pu(r,tgl,userid,sid):
     # for s in red.scan_iter(f"absensi-*{abs.tgl_absen.strftime('%Y-%m-%d')}*-{sid}"):
     #     
     #     red.delete(s)
-    return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
+    return redirect("dabsen",userid=userid,tgl=tgl,sid=sid,dr=dr,sp=sp)
 
 @authorization(["*"])
 def edit_ijin(r):
