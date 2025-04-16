@@ -761,7 +761,6 @@ def absensi_json(r, dr, sp, sid):
 def pabsen(req):    
     try:
         print(datetime.now())
-        startglobal = time.perf_counter()
         t1 = req.POST.get('tgl1')
         t2 = req.POST.get('tgl2')
         sid = req.POST.get('sid')
