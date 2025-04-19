@@ -99,7 +99,7 @@
                         {% for ab in d.absensi %}
                         <tr class="body">
                             <td class="text-nowrap">
-                                {% if ab.lbr %}
+                                {% if ab.sln > 0 %}
                                     <span class="text-danger text-nowrap">{{ab.tgl_absen}}</span>
                                 {% else %}
                                     {{ab.tgl_absen}}
