@@ -1133,7 +1133,7 @@ def pabsen(req):
             for l in libur:
             # jika ada absen di hari libutart = time.perf_counter()r nasional
                 a["libur_nasional"] = None
-                if l["tgl_libur"] == a["tgl_libur"]:
+                if l["tgl_libur"] == a["tgl_absen"]:
                     a["libur_nasional"] = l["libur"]
                     
                 if a["pegawai_id"] in lsopg and l['tgl_libur'] == a["tgl_absen"]:                            
@@ -2193,7 +2193,7 @@ def pu(r,tgl,userid,sid,dr,sp):
     for l in libur:
     # jika ada absen di hari libur nasional
         abs["libur_nasional"] = None
-        if l["tgl_libur"] == abs["tgl_libur"]:
+        if l["tgl_libur"] == abs["tgl_absen"]:
                 abs["libur_nasional"] = l["libur"]
         if abs["pegawai_id"] in lsopg and l['tgl_libur'] == abs["tgl_absen"]:                            
             # if r.session["ccabang"] != 'tasik':
