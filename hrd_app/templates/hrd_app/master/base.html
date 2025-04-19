@@ -121,7 +121,14 @@
                         "X-CSRFToken":token
                     },
                     success:(e) => {
-                        window.location.href = "/hrd/"
+                        window.location.reload()
+                    },
+                    error:(err) => {
+                        if(err.responseJSON?.msg){
+                            alert(err.responseJSON.msg)
+                        }else{
+                            alert("Gagal ganti cabang")
+                        }
                     }
                 })
             }
