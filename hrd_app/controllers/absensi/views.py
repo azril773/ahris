@@ -880,6 +880,8 @@ def pabsen(req):
         except Exception as e:
             print(e)
             messages.error(req,e)
+            if req.session['ccabang'] == "tasik":
+                return redirect("absensi",sid=sid)
             return redirect("absensi_tgl",sid=sid,dr=dr,sp=sp)
 
         # with open("data.json") as f:
@@ -1131,8 +1133,10 @@ def pabsen(req):
             for l in libur:
             # jika ada absen di hari libutart = time.perf_counter()r nasional
                 a["libur_nasional"] = None
+                a["libur_nasional"] = l["libur"]
                 if a["pegawai_id"] in lsopg and l['tgl_libur'] == a["tgl_absen"]:                            
-                    a["libur_nasional"] = l['libur']
+                    # if req.session["ccabang"] != 'tasik':
+                    #     a["libur_nasional"] = l['libur']
                     
                     # Hari Minggu
                     if str(nh) == 'Minggu':                        
@@ -1748,6 +1752,8 @@ def pabsen(req):
         return redirect("absensi",sid=int(sid))
     
     # return render("test"
+    if req.session['ccabang'] == "tasik":
+        return redirect("absensi",sid=sid)
     return redirect ('absensi_tgl',sid=int(sid),dr=dr,sp=sp)   
 
 @authorization(["*"])
@@ -2185,9 +2191,11 @@ def pu(r,tgl,userid,sid,dr,sp):
     for l in libur:
     # jika ada absen di hari libur nasional
         abs["libur_nasional"] = None
+        abs["libur_nasional"] = l["libur"]
         if abs["pegawai_id"] in lsopg and l['tgl_libur'] == abs["tgl_absen"]:                            
-            abs["libur_nasional"] = l['libur']
-            
+            # if r.session["ccabang"] != 'tasik':
+            #     abs["libur_nasional"] = l['libur']
+                
             # Hari Minggu
             if str(nh) == 'Minggu':                        
                     # Staff

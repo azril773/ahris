@@ -637,7 +637,7 @@ class data_cabang_db(models.Model):
     alamat = models.CharField(max_length=100)
     tipe = models.CharField(max_length=100)
     phone = models.CharField(max_length=50)
-    fax = models.CharField(max_length=50)
+    fax = models.CharField(max_length=50,null=True)
     def __str__(self) -> str:
         return self.cabang
     
