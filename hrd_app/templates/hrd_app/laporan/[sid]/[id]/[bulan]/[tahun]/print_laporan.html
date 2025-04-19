@@ -154,7 +154,11 @@
                         </tbody>
                     </table>`)
                     e.data.map((el) => {
-                        str += `<td>${el.tgl}</td>`
+                        if(el.sln > 0){
+                            str += `<td class="text-danger">${el.tgl}</td>`
+                        }else{
+                            str += `<td>${el.tgl}</td>`
+                        }
                         str += `<td>${el.masuk}</td>`
                         str += `<td>${el.keluar}</td>`
     
