@@ -329,7 +329,7 @@ def tambah_lembur(r):
                                 # pengolahan lembur   
                                 if lebih == 0:
                                     # -------------------------------------------------
-                                    # pemotong jam masuk
+                                    # pemotong jam masuk    
                                     
                                     if awal > 0:
                                         mulai_msk = batas_masuk-timedelta(hours=awal)
@@ -539,12 +539,14 @@ def tambah_lembur(r):
                                     pemotong_plg = Decimal(pemotong_plg)
                                     awal = Decimal(awal)
                                     akhir = Decimal(akhir)
+                                    print(awal,akhir,pemotong_msk,pemotong_plg,pi)
                                     if awal > 0 and akhir > 0:
                                         lembur = Decimal((awal + akhir)) - (pemotong_msk + pi + pemotong_plg)
                                     elif awal > 0 and akhir == 0:     
                                         lembur = (awal) - (pemotong_msk + pi + pemotong_plg)
                                     elif awal == 0 and akhir > 0:
                                         lembur = (akhir) - (pemotong_msk + pi + pemotong_plg)
+                                    print(lembur)
                                     tambah_lembur = lembur_db(
                                         pegawai_id = int(idp),
                                         tgl_lembur = tgl,       
