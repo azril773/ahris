@@ -949,17 +949,12 @@ def print_laporan_pegawai(r):
                 else:
                     sln = 0          
 
-                if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur=ab.tgl_absen).exists():
-                    tgl_absen = True
-                else:
-                    tgl_absen = False
                 
                 absen = {
                     'id': ab.id,
                     'tgl': datetime.strftime(ab.tgl_absen,'%d-%m-%Y'),
                     'hari': hari_ini,
                     "tgl_absen":ab.tgl_absen,
-                    "lbr":tgl_absen,
                     'nama': ab.pegawai.nama,
                     'nik': ab.pegawai.nik,
                     'userid': ab.pegawai.userid,
@@ -1163,16 +1158,11 @@ def print_laporan_divisi(r):
                     else:
                         sln = 0          
 
-                    if libur_nasional_db.objects.using(r.session["ccabang"]).filter(tgl_libur=ab.tgl_absen).exists():
-                        tgl_absen = True
-                    else:
-                        tgl_absen = False
                     absen = {
                         'id': ab.id,
                         'tgl': datetime.strftime(ab.tgl_absen,'%d-%m-%Y'),
                         'hari': hari_ini,
                         "tgl_absen":ab.tgl_absen,
-                        "lbr":tgl_absen,
                         'nama': ab.pegawai.nama,
                         'nik': ab.pegawai.nik,
                         'userid': ab.pegawai.userid,
