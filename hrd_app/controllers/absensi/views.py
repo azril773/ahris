@@ -171,7 +171,13 @@ def cari_absensi(r):
                     msk = "-"
 
                 if a.pulang is not None:
-                    plg = f"{a.pulang}"
+                    if a.jam_pulang is not None:
+                        if a.pulang < a.jam_pulang:
+                            plg = f"<span class='text-danger'>{a.pulang}</span>"
+                        else:
+                            plg = f"{a.pulang}"
+                    else:
+                        plg = f"{a.pulang}"
                 else:
                     plg = "-"
 
@@ -504,9 +510,15 @@ def absensi_json(r, dr, sp, sid):
                     msk = '-'
 
                 if a.pulang is not None:
-                    plg = f"{a.pulang}"
+                    if a.jam_pulang is not None:
+                        if a.pulang < a.jam_pulang:
+                            plg = f"<span class='text-danger'>{a.pulang}</span>"
+                        else:
+                            plg = f"{a.pulang}"
+                    else:
+                        plg = f"{a.pulang}"
                 else:
-                    plg = '-'
+                    plg = "-"
 
                 if a.masuk_b is not None:
                     msk_b = f"{a.masuk_b}"
@@ -639,9 +651,15 @@ def absensi_json(r, dr, sp, sid):
                     msk = '-'
 
                 if a.pulang is not None:
-                    plg = f"{a.pulang}"
+                    if a.jam_pulang is not None:
+                        if a.pulang < a.jam_pulang:
+                            plg = f"<span class='text-danger'>{a.pulang}</span>"
+                        else:
+                            plg = f"{a.pulang}"
+                    else:
+                        plg = f"{a.pulang}"
                 else:
-                    plg = '-'
+                    plg = "-"
 
                 if a.masuk_b is not None:
                     msk_b = f"{a.masuk_b}"
