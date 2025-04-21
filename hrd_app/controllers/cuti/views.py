@@ -49,7 +49,7 @@ def cuti(r, sid):
         updatepgw = []
         id = []
         for p in pegawai_db.objects.using(r.session["ccabang"]).select_related("divisi").filter(aktif=1,divisi_id__in=aksesdivisi):
-            if r.session["ccabang"] == "cirebon":
+            if r.session["ccabang"] == "cirebon" or r.session["ccabang"] == "sumedang":
                 pgw = pegawai_cuti_lama.objects.using(r.session["ccabang"]).filter(pegawai_id=p.pk).last()
                 if pgw is not None:
                     obj = {
