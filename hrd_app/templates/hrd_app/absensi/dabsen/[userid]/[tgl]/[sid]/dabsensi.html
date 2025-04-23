@@ -37,7 +37,12 @@
             <input type="hidden" name="" id="now" value="{{tgl}}">
             <!-- Button Cari Data Absen -->
             <button data-target="#tambah_jam_absen" data-toggle="modal" class="btn btn-warning mg-b-6">TAMBAH JAM ABSEN</button>  &nbsp; &nbsp;
-            <a href="{% url 'pu' tgl pegawai.userid sid dr sp %}" class="btn btn-success mg-b-6">PROSES ULANG ABSENSI</a>  &nbsp; &nbsp;
+            {% if ccabang == 'tasik' %}
+                <a href="{% url 'pu_non' tgl pegawai.userid sid %}" class="btn btn-success mg-b-6">PROSES ULANG ABSENSI</a>  &nbsp; &nbsp;
+            {% else %}
+                <a href="{% url 'pu' tgl pegawai.userid sid dr sp %}" class="btn btn-success mg-b-6">PROSES ULANG ABSENSI</a>  &nbsp; &nbsp;
+
+            {% endif %}
 
             </div>
         </div>

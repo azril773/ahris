@@ -13,6 +13,7 @@ urlpatterns = [
 
 
     path('pu/<str:tgl>/<int:userid>/<int:sid>/<str:dr>/<str:sp>', views.pu, name='pu'),
+    path('pu/<str:tgl>/<int:userid>/<int:sid>', views.pu, name='pu_non'),
     path('edit_ijin', views.edit_ijin, name='edit_ijin'),
 
     path("absensi_id",views.absensi_id,name="absensi_id"),
