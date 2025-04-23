@@ -321,191 +321,97 @@
         sp = "{{sp}}"
         ccabang = "{{ccabang}}"
         console.log("OKOOK")
-        if(ccabang == "tasik"){
-            var table = $('#tabelku').DataTable({
-                ajax:{
-                    url:"{% url 'absensi_json' dr sp sid %}",
-                } ,
-    
-                columns: [
-    
-                    { data: 'tgl' },
-                    { 
-                        data: 'nama',
-                        "render": function(data, type, row, meta){    
-                            tgl_absen = ""+row.tgl_absen+"";
-                            userid = ""+row.userid+"";
-                            data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}'>${row.nama}</a>`;
-                            return data;
-                        }
-                    },
-                    { data: 'nik' },
-                    { data: 'userid' },
-                    { data: 'bagian' },
-                    {
-                        data: 'masuk',
-                    },
-                    { data: 'keluar' },
-                    {
-                        data: 'kembali',
-                    },
-                    { data: 'pulang'},
-                    { data: 'tj' },
-                    {
-                        data: 'ket',
-                    },
-                    
-                ],   
-    
-                "rowCallback": function (row, data) {
-                    if(data.sln == 1){
-                        $('td', row).eq(0).addClass('merah');
-                    } else{
-                        $('td', row).eq(0).addClass('hitam');
+        var table = $('#tabelku').DataTable({
+            ajax:{
+                url:"{% url 'absensi_json' dr sp sid %}",
+            } ,
+
+            columns: [
+
+                { data: 'tgl' },
+                { 
+                    data: 'nama',
+                    "render": function(data, type, row, meta){    
+                        tgl_absen = ""+row.tgl_absen+"";
+                        userid = ""+row.userid+"";
+                        data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}/${dr}/${sp}'>${row.nama}</a>`;
+                        return data;
                     }
-                    $('td', row).eq(1).addClass('hitam');
-                    $('td', row).eq(2).addClass('hitam');
-                    $('td', row).eq(3).addClass('hitam');
-                    $('td', row).eq(4).addClass('hitam');
-                    $('td', row).eq(5).addClass('hitam');
-                    $('td', row).eq(6).addClass('hitam');
-                    $('td', row).eq(7).addClass('hitam');
-                    $('td', row).eq(8).addClass('hitam');
-                    $('td', row).eq(9).addClass('hitam');
-                    $('td', row).eq(10).addClass('hitam');
+                },
+                { data: 'nik' },
+                { data: 'userid' },
+                { data: 'bagian' },
+                {
+                    data: 'masuk',
+                },
+                { data: 'keluar' },
+                {
+                    data: 'kembali',
+                },
+                { data: 'pulang'},
+                { data: 'tj' },
+                {
+                    data: 'ket',
                 },
                 
-    
-                paging: false,
-                scrollX:"100%",
-                scrollY: 300,
-                processing: true,
-                dom: 'Bfrtip',  
-                order:[[2,"asc"]],
-                buttons: [
-                    {
-                        extend: 'excel',
-                        text: 'Export Excel',
-                        title: 'Data Absensi',
-                        exportOptions: {
-                            columns: [0,1,2,3,4,5,6,7,8,9,10]
-                        }
-                    },
-                    {
-                        extend: 'csv',
-                        text: 'Export CSV',
-                        title: 'Data Absensi',
-                        exportOptions: {
-                            columns: [0,1,2,3,4,5,6,7,8,9,10]
-                        }
-                    },
-                ],    
-                "language": {
-                    searchPlaceholder: 'Cari...',
-                    sSearch: '',
-                    loadingRecords: '&nbsp;',
-                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
-                    emptyTable: "&nbsp;",
-    
-                    paginate: {
-                        previous: '<i class="cs-chevron-left"></i>',
-                        next: '<i class="cs-chevron-right"></i>',
-                    },
-                },
-            });   
-        }else{
-            var table = $('#tabelku').DataTable({
-                ajax:{
-                    url:"{% url 'absensi_json' dr sp sid %}",
-                } ,
-    
-                columns: [
-    
-                    { data: 'tgl' },
-                    { 
-                        data: 'nama',
-                        "render": function(data, type, row, meta){    
-                            tgl_absen = ""+row.tgl_absen+"";
-                            userid = ""+row.userid+"";
-                            data = `<a style="color:#0d6efd;" href='/hrd/dabsen/${userid}/${tgl_absen}/${sid}/${dr}/${sp}'>${row.nama}</a>`;
-                            return data;
-                        }
-                    },
-                    { data: 'nik' },
-                    { data: 'userid' },
-                    { data: 'bagian' },
-                    {
-                        data: 'masuk',
-                    },
-                    { data: 'keluar' },
-                    {
-                        data: 'kembali',
-                    },
-                    { data: 'pulang'},
-                    { data: 'tj' },
-                    {
-                        data: 'ket',
-                    },
-                    
-                ],   
-    
-                "rowCallback": function (row, data) {
-                    if(data.sln == 1){
-                        $('td', row).eq(0).addClass('merah');
-                    } else{
-                        $('td', row).eq(0).addClass('hitam');
+            ],   
+
+            "rowCallback": function (row, data) {
+                if(data.sln == 1){
+                    $('td', row).eq(0).addClass('merah');
+                } else{
+                    $('td', row).eq(0).addClass('hitam');
+                }
+                $('td', row).eq(1).addClass('hitam');
+                $('td', row).eq(2).addClass('hitam');
+                $('td', row).eq(3).addClass('hitam');
+                $('td', row).eq(4).addClass('hitam');
+                $('td', row).eq(5).addClass('hitam');
+                $('td', row).eq(6).addClass('hitam');
+                $('td', row).eq(7).addClass('hitam');
+                $('td', row).eq(8).addClass('hitam');
+                $('td', row).eq(9).addClass('hitam');
+                $('td', row).eq(10).addClass('hitam');
+            },
+            
+
+            paging: false,
+            scrollX:"100%",
+            scrollY: 300,
+            processing: true,
+            dom: 'Bfrtip',  
+            order:[[2,"asc"]],
+            buttons: [
+                {
+                    extend: 'excel',
+                    text: 'Export Excel',
+                    title: 'Data Absensi',
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5,6,7,8,9,10]
                     }
-                    $('td', row).eq(1).addClass('hitam');
-                    $('td', row).eq(2).addClass('hitam');
-                    $('td', row).eq(3).addClass('hitam');
-                    $('td', row).eq(4).addClass('hitam');
-                    $('td', row).eq(5).addClass('hitam');
-                    $('td', row).eq(6).addClass('hitam');
-                    $('td', row).eq(7).addClass('hitam');
-                    $('td', row).eq(8).addClass('hitam');
-                    $('td', row).eq(9).addClass('hitam');
-                    $('td', row).eq(10).addClass('hitam');
                 },
-                
-    
-                paging: false,
-                scrollX:"100%",
-                scrollY: 300,
-                processing: true,
-                dom: 'Bfrtip',  
-                order:[[2,"asc"]],
-                buttons: [
-                    {
-                        extend: 'excel',
-                        text: 'Export Excel',
-                        title: 'Data Absensi',
-                        exportOptions: {
-                            columns: [0,1,2,3,4,5,6,7,8,9,10]
-                        }
-                    },
-                    {
-                        extend: 'csv',
-                        text: 'Export CSV',
-                        title: 'Data Absensi',
-                        exportOptions: {
-                            columns: [0,1,2,3,4,5,6,7,8,9,10]
-                        }
-                    },
-                ],    
-                "language": {
-                    searchPlaceholder: 'Cari...',
-                    sSearch: '',
-                    loadingRecords: '&nbsp;',
-                    processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
-                    emptyTable: "&nbsp;",
-    
-                    paginate: {
-                        previous: '<i class="cs-chevron-left"></i>',
-                        next: '<i class="cs-chevron-right"></i>',
-                    },
+                {
+                    extend: 'csv',
+                    text: 'Export CSV',
+                    title: 'Data Absensi',
+                    exportOptions: {
+                        columns: [0,1,2,3,4,5,6,7,8,9,10]
+                    }
                 },
-            });   
-        }
+            ],    
+            "language": {
+                searchPlaceholder: 'Cari...',
+                sSearch: '',
+                loadingRecords: '&nbsp;',
+                processing: '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i><span class="sr-only">Loading...</span> ',
+                emptyTable: "&nbsp;",
+
+                paginate: {
+                    previous: '<i class="cs-chevron-left"></i>',
+                    next: '<i class="cs-chevron-right"></i>',
+                },
+            },
+        });   
         
 
     });
