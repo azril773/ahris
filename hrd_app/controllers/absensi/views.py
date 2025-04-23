@@ -2032,6 +2032,10 @@ def detail_absensi_non(r,userid,tgl,sid):
             }
             
         return render(r,'hrd_app/absensi/dabsen/[userid]/[tgl]/[sid]/dabsensi.html', data)
+    else:
+        print("OKOKOK")
+        messages.error(r,"Anda tidak memiliki akses")
+        return redirect("absensi_non",sid=dsid)
     
 @authorization(["*"])
 def get_trans_json(r):

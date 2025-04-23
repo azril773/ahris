@@ -298,6 +298,7 @@ def authorization(roles):
                 
                 if not "*" in roles:
                     if not akses.akses in roles:
+                        print("OOKOKOKOK")
                         messages.error(r,"Anda tidak memiliki akses")
                         return redirect("beranda")
             except Exception as e:

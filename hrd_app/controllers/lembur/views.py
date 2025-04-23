@@ -372,7 +372,7 @@ def tambah_lembur(r):
                                                 pemotong_plg = (b_plg.index(b) + 1) * 0.5
                                             else:
                                                 pass
-                                    if tutuptoko.jam_tutup == batas_pulang.time() and absen_pulang < (datetime.combine(ab.tgl_absen,batas_pulang) - timedelta(minutes=3)).time():
+                                    if tutuptoko.jam_tutup == batas_pulang.time() and absen_pulang.time() < (datetime.combine(ab.tgl_absen,batas_pulang.time()) - timedelta(minutes=3)).time():
                                         pemotong_plg += 0.5
                                     # -------------------------------------------------
                                     # pemotong jam istirahat
@@ -2518,17 +2518,23 @@ def get_jam_kerja(r):
         if not pegawai_db.objects.using(r.session['ccabang']).filter(pk=int(pegawai)).exists():
             return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
         try:
+            pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(pegawai)).last()
             date = datetime.strptime(datetime.strftime(datetime.strptime(tgl,"%d-%m-%Y"),"%Y-%m-%d"),"%Y-%m-%d")
             absen = absensi_db.objects.using(r.session["ccabang"]).filter(tgl_absen=date.date(),pegawai_id=pegawai).last()
             if not absen:
                 return JsonResponse({"status":"error","msg":"Tidak ada jadwal kerja. Silahkan cek absensi pegawai tersebut"},status=400)
             data = {
                 "html":f"{absen.jam_masuk} - {absen.jam_pulang} / Istirahat : {absen.lama_istirahat} Jam",
-                "id":absen.pk
+                "id":absen.pk,
+                "tgl":datetime.strftime(date,'%Y-%m-%d'),
+                "userid":pgw.userid,
             }
 
             return JsonResponse({"status":"success",'msg':"Berhasil","data":data},status=200)
         except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno)
             return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=400)
         
 
