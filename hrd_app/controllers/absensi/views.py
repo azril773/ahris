@@ -1137,14 +1137,28 @@ def pabsen(req):
                     if str(a["pegawai__hari_off__hari"]) == "On Off":
                         a["keterangan_absensi"] = None
                 else:
-                    if str(a["pegawai__hari_off__hari"]) == str(nh):
-                        a["keterangan_absensi"] = 'OFF'
-                    elif str(a["pegawai__hari_off__hari"]) == 'On Off':
-                        a["keterangan_absensi"] = 'OFF'
-                    if str(a["pegawai__hari_off2__hari"]) == str(nh):
-                        a["keterangan_absensi"] = 'OFF'
+                    if req.session["ccabang"] == "sumedang":
+                        # geser off, cuti, dinas luar, ijin, kompen, opg
+                        if len([g for g in geser if g["idp"] == a["pegawai_id"] and g["ke_tgl"] == a["tgl_absen"]]) > 0 or len([dl for dl in dl if dl["idp"] == a["pegawai_id"] and dl["tgl_dinas"] == a["tgl_absen"]]) > 0 or len([c for c in cuti if c["idp"]  == a["pegawai_id"] and c["tgl_cuti"] == a["tgl_absen"]]) > 0 or len([i for i in ijin if i["idp"] == a["pegawai_id"] and i["tgl_ijin"] == a["tgl_absen"]]) > 0 or len([k for k in kompen if k["idp"] == a["pegawai_id"] and k["tgl_kompen"] == a["tgl_absen"]]) > 0 or len([o for o in opg if o["idp"] == a["pegawai_id"] and o["diambil_tgl"] == a["tgl_absen"]]) > 0 :
+                            pass
+                        else:
+                            if str(a["pegawai__hari_off__hari"]) == str(nh):
+                                a["keterangan_absensi"] = 'OFF'
+                            elif str(a["pegawai__hari_off__hari"]) == 'On Off':
+                                a["keterangan_absensi"] = 'OFF'
+                            if str(a["pegawai__hari_off2__hari"]) == str(nh):
+                                a["keterangan_absensi"] = 'OFF'
+                            else:
+                                pass   
                     else:
-                        pass   
+                        if str(a["pegawai__hari_off__hari"]) == str(nh):
+                                a["keterangan_absensi"] = 'OFF'
+                        elif str(a["pegawai__hari_off__hari"]) == 'On Off':
+                            a["keterangan_absensi"] = 'OFF'
+                        if str(a["pegawai__hari_off2__hari"]) == str(nh):
+                            a["keterangan_absensi"] = 'OFF'
+                        else:
+                            pass 
                 # jika hari ini dia adalah off nya
             
             # libur nasional
@@ -1846,6 +1860,86 @@ def detail_absensi(r,userid,tgl,sid,dr,sp):
                 'userid':pgw.userid,
                 "dr":dr,
                 "sp":sp,
+                "nh":nh,
+                "nm":nm,
+                "day":frmt.day,
+                'tgl':str(frmt.date()),
+                "tahun":frmt.year,
+                "ab":ab,
+                "kk":dt_kk,
+                'modul_aktif' : 'Absensi'
+            }
+            
+        return render(r,'hrd_app/absensi/dabsen/[userid]/[tgl]/[sid]/dabsensi.html', data)
+    
+@authorization(["*"])
+def detail_absensi(r,userid,tgl,sid):
+    iduser = r.session['user']['id']
+        
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+        akses = dakses.akses
+
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)
+        divisi = [div.divisi for div in aksesdivisi]
+
+        dsid = dakses.sid_id  
+
+        pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid,divisi__in=divisi)
+        if not pgw.exists():
+            messages.error(r,"Anda tidak memiliki akses")
+            return redirect("pegawai",sid=dsid)
+        else:
+            pgw = pgw[0]
+        # get absensi
+        ab = absensi_db.objects.using(r.session["ccabang"]).get(pegawai__userid=userid,tgl_absen=tgl)
+
+        # get all jam kerja 
+
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('id')
+        
+
+        # get kk 
+        if pgw.kelompok_kerja is not None:
+            kk = jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=pgw.kelompok_kerja.pk)
+        else:
+            kk = []
+        dt_kk = []
+        for k in kk:
+            obj = {
+                "kk":k.kk.kelompok,
+                "jam_masuk":k.jam_masuk.strftime('%H:%M:%S'),
+                "jam_pulang": k.jam_pulang.strftime('%H:%M:%S'),
+                "lama_istirahat":k.lama_istirahat,
+                # "lama_istirahat2":k.lama_istirahat
+                "hari":k.hari
+            }
+            dt_kk.append(obj)
+
+        ###
+        sid_lembur = 0
+
+
+
+        frmt = datetime.strptime(tgl, '%Y-%m-%d')
+        nh = frmt.strftime('%A')
+        nh = list(nama_hari(nh))
+        nh = nh[0] + nh[1] + nh[2]
+        nm = list(nama_bulan(frmt.month))
+        nm = nm[0] + nm[1] + nm[2]
+
+
+        data = {
+                'akses' : akses,
+                "cabang":r.session["cabang"],
+                "ccabang":r.session["ccabang"],
+                'status' : status,
+                "nama":r.session["user"]["nama"],
+                'dsid': dsid,
+                'sid': sid,
+                'sil': sid_lembur,
+                "pegawai":pgw,
+                'userid':pgw.userid,
                 "nh":nh,
                 "nm":nm,
                 "day":frmt.day,

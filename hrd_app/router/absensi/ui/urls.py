@@ -10,5 +10,6 @@ urlpatterns = [
     path('absensi/<int:sid>', views.absensi, name='absensi'),
     path('absensi/<int:sid>/<str:dr>/<str:sp>', views.absensi_tgl, name='absensi_tgl'),
     path('dabsen/<str:userid>/<str:tgl>/<int:sid>/<str:dr>/<str:sp>', views.detail_absensi, name='dabsen'),
+    path('dabsen/<str:userid>/<str:tgl>/<int:sid>', views.detail_absensi, name='dabsen_non'),
     path('edit_jamkerja/<str:userid>/<str:tgl>/<int:sid>/<str:dr>/<str:sp>', views.edit_jamkerja, name='edit_jamkerja'),
 ] 

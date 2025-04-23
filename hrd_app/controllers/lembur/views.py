@@ -2522,7 +2522,11 @@ def get_jam_kerja(r):
             absen = absensi_db.objects.using(r.session["ccabang"]).filter(tgl_absen=date.date(),pegawai_id=pegawai).last()
             if not absen:
                 return JsonResponse({"status":"error","msg":"Tidak ada jadwal kerja. Silahkan cek absensi pegawai tersebut"},status=400)
-            data = f"{absen.jam_masuk} - {absen.jam_pulang} / Istirahat : {absen.lama_istirahat} Jam"
+            data = {
+                "html":f"{absen.jam_masuk} - {absen.jam_pulang} / Istirahat : {absen.lama_istirahat} Jam",
+                "id":absen.pk
+            }
+
             return JsonResponse({"status":"success",'msg':"Berhasil","data":data},status=200)
         except Exception as e:
             return JsonResponse({"status":"error","msg":"Terjadi kesalahan"},status=400)

@@ -1303,8 +1303,8 @@
       headers:{"X-CSRFToken":token},
       success:(e) => {
         $("#jam_kerja").html("")
-        if(e.data){
-          $("#jam_kerja").html(e.data)
+        if(e.data?.html){
+          $("#jam_kerja").html(e.data.html)
         }
       },
       error:(err) => {
