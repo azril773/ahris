@@ -10,11 +10,7 @@ urlpatterns = [
     path('absensi/<int:sid>', views.absensi, name='absensi'),
     path('absensi/<int:sid>/<str:dr>/<str:sp>', views.absensi_tgl, name='absensi_tgl'),
     path('dabsen/<str:userid>/<str:tgl>/<int:sid>/<str:dr>/<str:sp>', views.detail_absensi, name='dabsen'),
-<<<<<<< HEAD
-    path('dabsen/<str:userid>/<str:tgl>/<int:sid>', views.detail_absensi_non, name='dabsen_non'),
-=======
     path('dabsen_non/<str:userid>/<str:tgl>/<int:sid>', views.detail_absensi_non, name='dabsen_non'),
->>>>>>> 14c3216f (update)
     path('edit_jamkerja/<str:userid>/<str:tgl>/<int:sid>/<str:dr>/<str:sp>', views.edit_jamkerja, name='edit_jamkerja'),
     path('edit_jamkerja_non/<str:userid>/<str:tgl>/<int:sid>', views.edit_jamkerja_non, name='edit_jamkerja_non'),
 ] 
