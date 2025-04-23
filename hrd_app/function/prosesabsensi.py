@@ -1362,20 +1362,38 @@ def fn_pu(abs,dt,cabang,tgl,sid,username):
                 # Hari Minggu
                 if str(nh) == 'Minggu':                        
                         # Staff
-                    print(next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"]),True))
+                    print( str(nh) in [str(abs["pegawai__hari_off__hari"]), str(abs["pegawai__hari_off2__hari"])])
                     if abs["pegawai_id"] in status_ln: # regex
                         # jika hari off nya adalah hari minggu dan masuk maka hanya akan mendapatkan 1 opg
-                        if str(nh) in [str(abs["pegawai__hari_off__hari"]), str(abs["pegawai__hari_off2__hari"])] and ((abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None)) and next((False for gs in geserdr if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True) and False:
-                            opgdr.append({
-                                'id':0,
-                                'idp':abs["pegawai_id"],
-                                'opg_tgl':abs["tgl_absen"],
-                                'diambil_tgl':"",
-                                'keterangan':"OFF Pengganti Reguler"
-                            })
-                            insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Reguler",add_by="Program"))
+                        if str(nh) in [str(abs["pegawai__hari_off__hari"]), str(abs["pegawai__hari_off2__hari"])]:
+                            if ((abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None)) and next((False for gs in geserdr if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
+                                print("OKOKOK")
+                                opgdr.append({
+                                    'id':0,
+                                    'idp':abs["pegawai_id"],
+                                    'opg_tgl':abs["tgl_absen"],
+                                    'diambil_tgl':"",
+                                    'keterangan':"OFF Pengganti Reguler"
+                                })
+                                insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Reguler",add_by="Program"))
+                            else:
+                                pass        
                         else:
-                            pass                        
+                            if (abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None):
+                                if next((False for gs in geserdr if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),True):
+                                    if next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),True):
+                                        print("OOKKOKO")
+                                        opgdr.append({
+                                            'id':0,
+                                            'idp':abs["pegawai_id"],
+                                            'opg_tgl':abs["tgl_absen"],
+                                            'diambil_tgl':"",
+                                            'keterangan':"OFF Pengganti Tgl Merah"
+                                        })
+                                        insertopg.append(opg_db(pegawai_id=abs["pegawai_id"],opg_tgl=abs["tgl_absen"],keterangan="OFF Pengganti Tgl Merah",add_by="Program"))
+                            # TAPI JIKA TIDAK MASUK HANYA MENDAPATKAN 1 OPG
+                            else:
+                                pass                
                     # Karyawan
                     else:
                         pass         
@@ -1423,6 +1441,7 @@ def fn_pu(abs,dt,cabang,tgl,sid,username):
                             if (abs["masuk"] is not None and abs["pulang"] is not None) or (abs["masuk_b"] is not None and abs["pulang_b"] is not None):
                                 if next((False for gs in geserdr if gs["idp"] == abs["pegawai_id"] and gs["dari_tgl"] == abs["tgl_absen"]),True):
                                     if next((False for o in opgdr if o["idp"] == abs["pegawai_id"] and o["opg_tgl"] == abs["tgl_absen"] and o["keterangan"] == "OFF Pengganti Tgl Merah"),True):
+                                        print("OOKKOKO")
                                         opgdr.append({
                                             'id':0,
                                             'idp':abs["pegawai_id"],
