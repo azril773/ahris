@@ -1162,7 +1162,7 @@ def fn_pu(abs,dt,cabang,tgl,sid,username):
         
         # list status pegawai yang dapat opg
         for s in list_pegawai_opg_db.objects.using(cabang).all():
-            lsopg.append(s.pegawai_id)
+            lsopg.append(s.pegawai_id) 
         # data ijin
         for i in ijin_db.objects.using(cabang).select_related('ijin','pegawai').filter(tgl_ijin=tgl).values("ijin__jenis_ijin","tgl_ijin","pegawai_id","keterangan"):
             data = {
