@@ -1177,7 +1177,7 @@ def pabsen(req):
                             # Staff
                         if a["pegawai_id"] in status_ln: # regex
                             # jika hari off nya adalah hari minggu dan masuk maka hanya akan mendapatkan 1 opg
-                            if str(nh) in [str(a["pegawai__hari_off__hari"]), str(a["pegawai__hari_off2__hari"])] and (a["masuk"] is not None and a["pulang"] is not None) or (a["masuk_b"] is not None and a["pulang_b"] is not None) and next((False for gs in geserdr if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
+                            if str(nh) in [str(a["pegawai__hari_off__hari"]), str(a["pegawai__hari_off2__hari"])] and ((a["masuk"] is not None and a["pulang"] is not None) or (a["masuk_b"] is not None and a["pulang_b"] is not None)) and next((False for gs in geserdr if gs["idp"] == a["pegawai_id"] and gs["dari_tgl"] == a["tgl_absen"]),True) and next((False for o in opgdr if o["idp"] == a["pegawai_id"] and o["opg_tgl"] == a["tgl_absen"] and o["keterangan"] == "OFF Pengganti Reguler"),True):
                                 opgdr.append({
                                     'id':0,
                                     'idp':a["pegawai_id"],
@@ -1872,6 +1872,87 @@ def detail_absensi(r,userid,tgl,sid,dr,sp):
             
         return render(r,'hrd_app/absensi/dabsen/[userid]/[tgl]/[sid]/dabsensi.html', data)
     
+
+@authorization(["*"])
+def detail_absensi_non(r,userid,tgl,sid):
+    iduser = r.session['user']['id']
+        
+    if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
+        dakses = akses_db.objects.using(r.session["ccabang"]).get(user_id=iduser)
+        akses = dakses.akses
+
+        aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=iduser)
+        divisi = [div.divisi for div in aksesdivisi]
+
+        dsid = dakses.sid_id  
+
+        pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(userid=userid,divisi__in=divisi)
+        if not pgw.exists():
+            messages.error(r,"Anda tidak memiliki akses")
+            return redirect("pegawai",sid=dsid)
+        else:
+            pgw = pgw[0]
+        # get absensi
+        ab = absensi_db.objects.using(r.session["ccabang"]).get(pegawai__userid=userid,tgl_absen=tgl)
+
+        # get all jam kerja 
+
+        status = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).all().order_by('id')
+        
+
+        # get kk 
+        if pgw.kelompok_kerja is not None:
+            kk = jamkerja_db.objects.using(r.session["ccabang"]).filter(kk_id=pgw.kelompok_kerja.pk)
+        else:
+            kk = []
+        dt_kk = []
+        for k in kk:
+            obj = {
+                "kk":k.kk.kelompok,
+                "jam_masuk":k.jam_masuk.strftime('%H:%M:%S'),
+                "jam_pulang": k.jam_pulang.strftime('%H:%M:%S'),
+                "lama_istirahat":k.lama_istirahat,
+                # "lama_istirahat2":k.lama_istirahat
+                "hari":k.hari
+            }
+            dt_kk.append(obj)
+
+        ###
+        sid_lembur = 0
+
+
+
+        frmt = datetime.strptime(tgl, '%Y-%m-%d')
+        nh = frmt.strftime('%A')
+        nh = list(nama_hari(nh))
+        nh = nh[0] + nh[1] + nh[2]
+        nm = list(nama_bulan(frmt.month))
+        nm = nm[0] + nm[1] + nm[2]
+
+
+        data = {
+                'akses' : akses,
+                "cabang":r.session["cabang"],
+                "ccabang":r.session["ccabang"],
+                'status' : status,
+                "nama":r.session["user"]["nama"],
+                'dsid': dsid,
+                'sid': sid,
+                'sil': sid_lembur,
+                "pegawai":pgw,
+                'userid':pgw.userid,
+                "nh":nh,
+                "nm":nm,
+                "day":frmt.day,
+                'tgl':str(frmt.date()),
+                "tahun":frmt.year,
+                "ab":ab,
+                "kk":dt_kk,
+                'modul_aktif' : 'Absensi'
+            }
+            
+        return render(r,'hrd_app/absensi/dabsen/[userid]/[tgl]/[sid]/dabsensi.html', data)
+    
 @authorization(["*"])
 def detail_absensi_non(r,userid,tgl,sid):
     iduser = r.session['user']['id']
@@ -2051,6 +2132,7 @@ def pu(r,tgl,userid,sid,dr,sp):
     if not abs:
         messages.error(r,"Anda tidak memiliki akses")
         return redirect("absensi",sid=sid)
+<<<<<<< HEAD
     else:
         pass
     print(abs)
@@ -2894,11 +2976,32 @@ def pu(r,tgl,userid,sid,dr,sp):
     abs["total_jam_istirahat2"] = tji2 + tji2_b
     absensi_db.objects.using(cabang).bulk_update([absensi_db(id=abs["id"],pegawai_id=abs["pegawai_id"],tgl_absen=abs["tgl_absen"],masuk=abs["masuk"],istirahat=abs['istirahat'],kembali=abs["kembali"],istirahat2=abs["istirahat2"],kembali2=abs["kembali2"],pulang=abs["pulang"],masuk_b=abs["masuk_b"],istirahat_b=abs["istirahat_b"],kembali_b=abs["kembali_b"],istirahat2_b=abs["istirahat2_b"],kembali2_b=abs["kembali2_b"],pulang_b=abs["pulang_b"],keterangan_absensi=abs["keterangan_absensi"],keterangan_ijin=abs["keterangan_ijin"],keterangan_lain=abs["keterangan_lain"],libur_nasional=abs["libur_nasional"],insentif=abs["insentif"],jam_masuk=abs["jam_masuk"],jam_pulang=abs["jam_pulang"],lama_istirahat=abs["lama_istirahat"],shift=abs["shift"],total_jam_kerja=abs["total_jam_kerja"],total_jam_istirahat=abs["total_jam_istirahat"],total_jam_istirahat2=abs["total_jam_istirahat2"],edit_by=abs["edit_by"])],["pegawai_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","keterangan_absensi","keterangan_ijin","keterangan_lain","libur_nasional","insentif","jam_masuk","jam_pulang","lama_istirahat","total_jam_kerja","total_jam_istirahat","total_jam_istirahat2","edit_by","shift"]) 
     opg_db.objects.using(cabang).bulk_create(insertopg)
+=======
+    prosesabsensi.fn_pu(abs,dt,r.session["ccabang"],tgl,sid,r.session["user"]["nama"])
+>>>>>>> 14c3216f (update)
     # red = redis.Redis(host="15.63.254.114", port="6370", decode_responses=True, username="azril", password=132)
     # for s in red.scan_iter(f"absensi-*{abs.tgl_absen.strftime('%Y-%m-%d')}*-{sid}"):
     #     
     #     red.delete(s)
     return redirect("dabsen",userid=userid,tgl=tgl,sid=sid,dr=dr,sp=sp)
+
+@authorization(["*"])
+def pu_non(r,tgl,userid,sid):
+    dt = data_trans_db.objects.using(r.session["ccabang"]).filter(jam_absen__date=tgl,userid=userid).order_by('jam_absen')
+    id_user = r.session['user']['id']
+    aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+    divisi = [div.divisi for div in aksesdivisi]
+    abs = absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").filter(tgl_absen=tgl,pegawai__userid=userid,pegawai__divisi__in=divisi).values("id","pegawai_id","pegawai__userid","pegawai__kelompok_kerja_id","pegawai__hari_off__hari","pegawai__hari_off2__hari","pegawai__status_id","pegawai__status__status","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","keterangan_absensi","keterangan_ijin","keterangan_lain","libur_nasional","insentif","jam_masuk","jam_pulang","lama_istirahat","total_jam_kerja","total_jam_istirahat","total_jam_istirahat2","edit_by","shift").last()
+    if not abs:
+        messages.error(r,"Anda tidak memiliki akses")
+        return redirect("absensi",sid=sid)
+    print(r.session["user"],"MKMMSOSKDO")
+    prosesabsensi.fn_pu(abs,dt,r.session["ccabang"],tgl,sid,r.session["user"]["nama"])
+    # red = redis.Redis(host="15.63.254.114", port="6370", decode_responses=True, username="azril", password=132)
+    # for s in red.scan_iter(f"absensi-*{abs.tgl_absen.strftime('%Y-%m-%d')}*-{sid}"):
+    #     
+    #     red.delete(s)
+    return redirect("dabsen_non",userid=userid,tgl=tgl,sid=sid)
 
 @authorization(["*"])
 def edit_ijin(r):
@@ -2949,6 +3052,29 @@ def edit_jamkerja(r,userid,tgl,sid,dr,sp):
         messages.error(r,"Anda tidak memiliki akses")
         return redirect("absensi",sid=sid)
     return redirect("dabsen",userid=userid,tgl=tgl,sid=sid,dr=dr,sp=sp)
+
+@authorization(["*"])
+def edit_jamkerja_non(r,userid,tgl,sid):
+    masuk = r.POST.get("jam_masuk")
+    keluar = r.POST.get("jam_keluar")
+    lama_ist = r.POST.get("lama_istirahat")
+    id = r.POST.get("id")
+    if masuk == '' or keluar == "" or lama_ist == "":
+        messages.add_message(r,messages.ERROR,"Form harus lengkap")
+        return redirect("dabsen",userid=userid,tgl=tgl,sid=sid)
+    id_user = r.session['user']['id']
+    aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
+    divisi = [div.divisi for div in aksesdivisi]
+    if absensi_db.objects.using(r.session["ccabang"]).select_related("pegawai__divisi").filter(pk=int(id),pegawai__divisi__in=divisi).exists():
+        ab = absensi_db.objects.using(r.session["ccabang"]).get(pk=int(id))
+        ab.jam_masuk = masuk
+        ab.jam_pulang = keluar
+        ab.lama_istirahat = lama_ist
+        ab.save(using=r.session["ccabang"])
+    else:
+        messages.error(r,"Anda tidak memiliki akses")
+        return redirect("absensi",sid=sid)
+    return redirect("dabsen_non",userid=userid,tgl=tgl,sid=sid)
 
 @authorization(["*"])
 def absensi_id(r):

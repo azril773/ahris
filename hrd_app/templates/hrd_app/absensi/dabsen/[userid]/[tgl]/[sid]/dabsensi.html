@@ -28,11 +28,19 @@
                     </table>
                 </div>
                 <!-- Button Proses Data -->
+<<<<<<< HEAD
             {% if ccabang == "tasik" %}
                 <a href="{% url 'absensi' sid %}" class="btn btn-info mg-b-6">KEMBALI</a>&nbsp; &nbsp;
             {% else %}
                 <a href="{% url 'absensi_tgl' sid dr sp %}" class="btn btn-info mg-b-6">KEMBALI</a>&nbsp; &nbsp;
 
+=======
+            {% if ccabang == 'tasik' %}
+                <a href="{% url 'absensi' sid %}" class="btn btn-info mg-b-6">KEMBALI</a>&nbsp; &nbsp;
+            {% else %}
+                <a href="{% url 'absensi_tgl' sid dr sp %}" class="btn btn-info mg-b-6">KEMBALI</a>&nbsp; &nbsp;
+            
+>>>>>>> 14c3216f (update)
             {% endif %}
             <input type="hidden" name="" id="now" value="{{tgl}}">
             <!-- Button Cari Data Absen -->
@@ -41,7 +49,10 @@
                 <a href="{% url 'pu_non' tgl pegawai.userid sid %}" class="btn btn-success mg-b-6">PROSES ULANG ABSENSI</a>  &nbsp; &nbsp;
             {% else %}
                 <a href="{% url 'pu' tgl pegawai.userid sid dr sp %}" class="btn btn-success mg-b-6">PROSES ULANG ABSENSI</a>  &nbsp; &nbsp;
+<<<<<<< HEAD
 
+=======
+>>>>>>> 14c3216f (update)
             {% endif %}
 
             </div>
@@ -142,7 +153,11 @@
                 <span aria-hidden="true">&times;</span>
             </button>          
         </div>
-        <form id="editJForm" action="{% url "edit_jamkerja" userid tgl sid dr sp %}" method="post">
+        {% if ccabang == 'tasik' %}
+            <form id="editJForm" action="{% url "edit_jamkerja_non" userid tgl sid %}" method="post">
+        {% else %}
+            <form id="editJForm" action="{% url "edit_jamkerja" userid tgl sid dr sp %}" method="post">
+        {% endif %}
             {% csrf_token %}
             <div class="modal-body">
                     <div class="mx-5">
