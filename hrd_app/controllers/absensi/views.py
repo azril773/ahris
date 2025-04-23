@@ -1873,7 +1873,7 @@ def detail_absensi(r,userid,tgl,sid,dr,sp):
         return render(r,'hrd_app/absensi/dabsen/[userid]/[tgl]/[sid]/dabsensi.html', data)
     
 @authorization(["*"])
-def detail_absensi(r,userid,tgl,sid):
+def detail_absensi_non(r,userid,tgl,sid):
     iduser = r.session['user']['id']
         
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
