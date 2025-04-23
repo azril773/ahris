@@ -53,6 +53,13 @@
                                             <td>&nbsp; :</td>
                                             <td>&nbsp; {{d.divisi}}</td>
                                         </tr>
+                                        {% if d.counter != "None" %}
+                                            <tr style="line-height: 14px;">
+                                                <td>Counter</td>
+                                                <td>&nbsp; :</td>
+                                                <td>&nbsp; {{d.counter}}</td>
+                                            </tr>
+                                        {% endif %}
                                     </tbody>
                                 </table>
                             </div>
