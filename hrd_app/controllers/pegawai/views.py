@@ -294,12 +294,10 @@ def epegawai(r,idp):
                 id_user = r.session["user"]["id"]
                 aksesdivisi = akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=id_user)
                 divisi = [div.divisi for div in aksesdivisi]
-                print("COBA COBA")
                 pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=int(id),divisi__in=divisi).last()
                 if not pgw:
                     return JsonResponse({"status":"error","msg":"Anda tidak memiliki akses ke pegawai ini"},status=400)
                 status_pegawai = status_pegawai_db.objects.using(r.session["ccabang"]).using(r.session["ccabang"]).get(pk=status)
-                print(email != "", email is not None)
                 if email.strip() != "":
                     if pribadi_db.objects.using(r.session["ccabang"]).filter(~Q(pegawai__userid=userid), ~Q(pegawai__userid=pgw.userid),email=email).exists():
                         return JsonResponse({"status":"error","msg":"Email sudah ada"},status=400)
@@ -336,7 +334,6 @@ def epegawai(r,idp):
                     seri = json.loads(seri)
                     seri[0]["fields"]["pegawai"] = pgw
                     seri[0]["fields"]["edit_by"] = r.session["user"]["nama"]
-                    print(seri)
                     history_pegawai_db(**seri[0]["fields"]).save(using=r.session["ccabang"])
                     history = history_pegawai_db.objects.using(r.session["ccabang"]).filter().last()
                     pegawai_db.objects.using(r.session["ccabang"]).filter(id=int(pgw.pk)).update(
@@ -398,8 +395,8 @@ def epegawai(r,idp):
                     pdkdb = pendidikan_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","pendidikan","nama","kota","dari_tahun","sampai_tahun","jurusan","gelar")
                     dpdk = []
                     for hpdk in pdkdb:
-                        hpdk["fields"]["history"] = history
-                        dpdk.append(hpdk["fields"])
+                        hpdk["history"] = history
+                        dpdk.append(hpdk)
                     if len(dpdk) > 0:
                         [history_pendidikan_db(**dpd).save(using=r.session["ccabang"]) for dpd in dpdk]
                     pendidikan_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).delete()
@@ -440,7 +437,6 @@ def epegawai(r,idp):
                     # Tambah Keluarga
                     klgdb = keluarga_db.objects.using(r.session["ccabang"]).filter(pegawai_id=int(pgw.pk)).values("pegawai","hubungan","nama","tgl_lahir","gender","gol_darah")
                     dkeluarga = []
-                    print(klgdb)
                     for hklg in klgdb:
                         hklg["history"] = history
                         dkeluarga.append(hklg)
@@ -505,7 +501,9 @@ def epegawai(r,idp):
 
                     status= 'OK'
             except Exception as e:
-                print(e,"OSKOKDS")
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                print(exc_type, fname, exc_tb.tb_lineno)
                 transaction.set_rollback(True,using=r.session['ccabang'])
                 return JsonResponse({"status":"error","msg":"Terjadi kesalahan hubungi IT"},status=500)
         return JsonResponse({'status':status,"sid":sid},status=200,safe=False)

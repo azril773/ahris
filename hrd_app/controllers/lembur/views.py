@@ -2527,6 +2527,7 @@ def get_jam_kerja(r):
                 "html":f"{absen.jam_masuk} - {absen.jam_pulang} / Istirahat : {absen.lama_istirahat} Jam",
                 "id":absen.pk,
                 "tgl":datetime.strftime(date,'%Y-%m-%d'),
+                "tgl2":datetime.strftime(date,'%d-%m-%Y'),
                 "userid":pgw.userid,
             }
 
