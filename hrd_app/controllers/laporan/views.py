@@ -129,7 +129,9 @@ def laporan_json(r):
                             urh += 1
                         elif re.search("(bs)",a.keterangan_ijin,re.I):
                             bs += 1
-                        elif re.search("terlambat",a.keterangan_ijin,re.I):
+                        elif re.search("(?=.*terlambat)(?=.*tanpa)(?=.*ijin).*",a.keterangan_ijin,re.I):
+                            terlambat += 1
+                        elif re.search("(?=.*terlambat)(?=.*ijin).*",a.keterangan_ijin,re.I):
                             terlambat_ijin += 1
                         elif re.search("(ijin|izin)",a.keterangan_ijin,re.I):
                             ijin += 1
@@ -252,7 +254,9 @@ def laporan_json(r):
                             urh += 1
                         elif re.search("(bs)",a.keterangan_ijin,re.I):
                             bs += 1
-                        elif re.search("terlambat",a.keterangan_ijin,re.I):
+                        elif re.search("(?=.*terlambat)(?=.*tanpa)(?=.*ijin).*",a.keterangan_ijin,re.I):
+                            terlambat += 1
+                        elif re.search("(?=.*terlambat)(?=.*ijin).*",a.keterangan_ijin,re.I):
                             terlambat_ijin += 1
                         elif re.search("(ijin|izin)",a.keterangan_ijin,re.I):
                             ijin += 1
