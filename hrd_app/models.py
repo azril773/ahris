@@ -586,6 +586,17 @@ class awal_cuti_db(models.Model):
         verbose_name = 'Awal Cuti'
         verbose_name_plural = 'Awal Cuti'
 
+class awal_cuti_bod_db(models.Model):
+    tgl = models.DateField(null=True)
+
+    def __date__(self):
+        return self.tgl
+    
+    class Meta:
+        verbose_name = 'Awal Cuti BOD'
+        verbose_name_plural = 'Awal Cuti BOD'
+
+
  
 class list_pegawai_lembur_db(models.Model):
     pegawai = models.ForeignKey(pegawai_db, on_delete=models.CASCADE, null=True)

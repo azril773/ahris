@@ -181,6 +181,17 @@ def detail_cuti(r, sid, idp):
                 tac = ac.tgl       
             else:
                 tac = pg.tgl_cuti
+        elif r.session["ccabang"] == "tasik":
+            status = status_pegawai_db.objects.using(r.session["ccabang"]).filter(pk=sid).last()
+            if not status:
+                messages.error(r,"Status tidak ada")
+                return redirect("cuti",sid=sid)
+            if re.search("bod",status.status,re.IGNORECASE) is not None:
+                bac = awal_cuti_bod_db.objects.using(r.session['ccabang']).last()
+                tac = bac.tgl
+            else:
+                tac = ac.tgl
+
         else:
             tac = ac.tgl       
         
@@ -342,7 +353,16 @@ def dcuti_json(r, idp):
             ac = awal_cuti_db.objects.using(r.session["ccabang"]).filter().last()
             if not ac:
                 return JsonResponse({'status':'error',"msg":"Awal cuti tidak ada "})
-            tac = ac.tgl
+            if r.session["ccabang"] == "tasik":
+                pgw = pegawai_db.objects.using(r.session["ccabang"]).filter(pk=idp).last()
+                if not pgw:
+                    return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
+                if re.search("bod",pgw.status.status,re.IGNORECASE) is not None:
+                    tac = awal_cuti_bod_db.objects.using(r.session["ccabang"]).last().tgl
+                else:
+                    tac = ac.tgl
+            else:
+                tac = ac.tgl
             aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
             for i in cuti_db.objects.using(r.session["ccabang"]).select_related('pegawai',"pegawai__divisi").filter(tgl_cuti__gte=tac, pegawai_id=int(idp),pegawai__divisi_id__in=aksesdivisi):                
                 ct = {
@@ -367,10 +387,21 @@ def tambah_cuti(r):
     dket = r.POST.get('ket')
     aksesdivisi = [d.divisi.pk for d in akses_divisi_db.objects.using(r.session["ccabang"]).filter(user_id=r.session["user"]["id"])]
     ltgl = dtgl.split(', ')   
+
     ac = awal_cuti_db.objects.using(r.session["ccabang"]).last()
     if ac is None:
         return JsonResponse({"status":"error","msg":"Awal cuti tidak ada"})
-    tac = ac.tgl
+    if r.session["ccabang"] == 'tasik':
+        pgw = pegawai_db.objects.using(r.session['ccabang']).filter(pk=idp).last()
+        if not pgw:
+            return JsonResponse({"status":"error","msg":"Pegawai tidak ada"},status=400)
+
+        if re.search("bod",pgw.status.status,re.IGNORECASE) is not None:
+            tac = awal_cuti_bod_db.objects.using(r.session["ccabang"]).last().tgl
+        else:
+            tac = ac.tgl
+    else:
+        tac = ac.tgl
         
     for t in ltgl:
         with transaction.atomic(using=r.session["ccabang"]):
