@@ -1,0 +1,23 @@
+name: Deploy AHRIS With CI/CD
+
+on:
+  push:
+    branches:
+      - main
+jobs:
+  deploy_ahris:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_AHRIS }}" > ~/.ssh/id_rsa
+          chmod 600 $HOME/.ssh/id_rsa
+          chmod 700 $HOME/.ssh
+          
+      - name: Deploy to Server
+        run: |
+          rsync -avz --delete ./ itguy@192.168.250.151:/home/itguy/apps/ahris_cicd
