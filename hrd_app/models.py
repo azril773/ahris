@@ -70,7 +70,7 @@ class status_pegawai_db(models.Model):
         verbose_name = 'Status Pegawai'
         verbose_name_plural = 'Status Pegawai'
         
-        
+         
 class divisi_db(models.Model):
     divisi = models.CharField(max_length=100, unique=True)
     alias = models.CharField(max_length=50, null=True, blank=True)
