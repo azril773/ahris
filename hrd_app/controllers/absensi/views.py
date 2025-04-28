@@ -11,7 +11,7 @@ import cProfile
  
 # ++++++++++++++++++++++++++++ ++++++++++++++++++++++++++++++++
 # Absensi 
-@authorization(["*"])
+@authorization(["*"]) 
 def absensi(r,sid):
     iduser = r.session['user']['id']
     if akses_db.objects.using(r.session["ccabang"]).filter(user_id=iduser).exists():
