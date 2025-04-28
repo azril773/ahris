@@ -12,7 +12,7 @@ def pegawai(r,sid):
         akses = dakses.akses            
 
         dsid = dakses.sid_id     
-        lastuserid = 0
+        lastuserid = 0 
         if sid != 0:
             pegawai = pegawai_db.objects.using(r.session["ccabang"]).filter(status_id=sid)
             pegawaiarsip = pegawai_db_arsip.objects.using(r.session["ccabang"]).filter(status_id=sid)
