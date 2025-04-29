@@ -936,10 +936,10 @@ def pabsen(req):
         # # obj 
         jamkerja = jamkerja_db.objects.using(req.session["ccabang"]).select_related("shift").all().values("id","kk_id","jam_masuk","jam_pulang",'lama_istirahat',"hari","shift__shift")
         absensi =  absensi_db.objects.using(req.session["ccabang"]).select_related("pegawai","pegawai__divisi").filter(tgl_absen__range=[(dari - timedelta(days=1)),(sampai + timedelta(days=1))],pegawai__userid__in=luserid).order_by("tgl_absen").values("id","pegawai_id","pegawai__userid","pegawai__kelompok_kerja_id","tgl_absen","masuk","istirahat","kembali","istirahat2","kembali2","pulang","masuk_b","istirahat_b","kembali_b","istirahat2_b","kembali2_b","pulang_b","jam_masuk","jam_pulang","lama_istirahat","shift")
-        if req.session["ccabang"] != "tasik":
-            prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,req.session["ccabang"],ddt,ddtor,absensi)
-        else:
+        if req.session["ccabang"] == "tasik" or req.session["ccabang"] == "garut":
             prosesabsensi.nlh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,req.session["ccabang"],ddt,ddtor,absensi)    
+        else:
+            prosesabsensi.lh(att,luserid,ddr,rangetgl,pegawai,jamkerja,status_lh,req.session["ccabang"],ddt,ddtor,absensi)
         print("SELESAI")
 
         startsec = time.perf_counter()
